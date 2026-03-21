@@ -1,4 +1,4 @@
-# Docs
+# Docs and whole chain built by Reed Rissberger
 
 Architecture documents and operational guides for the Citrate blockchain.
 
