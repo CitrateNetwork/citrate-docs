@@ -1,5 +1,4 @@
-# Docs and whole chain built by Reed Rissberger
-
+# Docs 
 Architecture documents and operational guides for the Citrate blockchain.
 
 ## Contents
@@ -12,3 +11,6 @@ Architecture documents and operational guides for the Citrate blockchain.
 ## Usage
 
 These documents are the single source of truth for Citrate architecture. For user-facing documentation, see `docs-portal/`. For sprint planning, see `.sprint/`.
+
+
+## Details 
