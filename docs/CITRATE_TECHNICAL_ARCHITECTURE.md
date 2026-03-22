@@ -1,6 +1,6 @@
 # Citrate Technical Architecture Reference
 
-**Version:** 0.2.0-beta | **Date:** February 2026 | **Audience:** Core engineers, protocol developers, SREs, auditors
+**Version:** 0.3.0 | **Date:** March 2026 | **Audience:** Core engineers, protocol developers, SREs, auditors
 
 ---
 
@@ -34,7 +34,7 @@
 
 ### Workspace Structure
 
-Citrate is a Rust workspace (`citrate_v0.01.1/`) with 12 core crates, 3 application crates, and polyglot client tooling:
+Citrate is a Rust workspace (`citrate_v0.01.1/`) with 15 core crates, 4 application crates, and polyglot client tooling:
 
 ```
 Cargo.toml (workspace root)
@@ -48,6 +48,9 @@ Cargo.toml (workspace root)
 │   ├── mcp/             citrate-mcp
 │   ├── economics/       citrate-economics
 │   ├── marketplace/     citrate-marketplace
+│   ├── bridge/          citrate-bridge
+│   ├── learning/        citrate-learning
+│   ├── genesis/         citrate-genesis
 │   └── primitives/      citrate-primitives
 ├── node/                citrate-node (main binary)
 ├── wallet/              citrate-wallet
@@ -1016,12 +1019,93 @@ stakeForAccess(modelId) payable / unstake(modelId, amount)
 // rank, alpha, dropout, epochs, batchSize, learningRate, datasetCID
 ```
 
+#### Compute Marketplace Contracts (NEW — Sprint COMPUTE-1)
+
+```solidity
+// ComputeMarketplace.sol — Job listing, matching, escrow
+createJob(modelId, inputCID, maxPrice, deadline) payable → uint256
+acceptJob(jobId) → bool
+completeJob(jobId, outputCID, proofHash)
+cancelJob(jobId)
+
+// ComputeVerifier.sol — Challenge-response verification
+submitResult(jobId, outputHash, proof)
+challengeResult(jobId) payable
+resolveChallenge(jobId, evidence)
+
+// ComputePool.sol — Pooled compute with worker management
+createPool(name, minStake, maxWorkers)
+joinPool(poolId) payable
+leavePool(poolId)
+submitWork(poolId, jobId, result)
+
+// HeartbeatMonitor.sol — Provider liveness
+registerProvider(endpoint, stake) payable
+sendHeartbeat()
+checkLiveness(provider) → bool
+slashInactive(provider)  // Auto-slash after missed heartbeats
+
+// DisputeResolution.sol — On-chain arbitration
+openDispute(jobId, reason) payable
+submitEvidence(disputeId, evidence)
+resolveDispute(disputeId, ruling)
+```
+
+#### Learning Center Contracts (NEW — Sprint LEARN-1)
+
+```solidity
+// LearningPool.sol — Paraconsistent learning pools (Belnap lattice)
+createPool(name, config) → uint256
+contribute(poolId, data, belnapValue)  // T, F, Both, Neither
+aggregate(poolId) → AggregationResult
+
+// LearningCycleManager.sol — OODA-based learning cycles
+startCycle(poolId) → uint256
+observe(cycleId, data)
+orient(cycleId, analysis)
+decide(cycleId, decision)
+act(cycleId, action)
+completeCycle(cycleId)
+
+// ClassroomRegistry.sol — Classroom management
+createClassroom(name, curriculum, maxStudents)
+enroll(classroomId) payable
+assignMentor(classroomId, mentor)
+graduate(classroomId, student)
+
+// ContributionAccounting.sol — Contribution tracking
+recordContribution(poolId, contributor, amount, quality)
+claimRewards(poolId)
+getContributions(poolId, contributor) → ContributionDetail[]
+
+// NematocystSlashing.sol — Biologically-inspired slashing
+reportViolation(validator, evidence)
+slash(validator, amount, reason)
+appeal(slashId) payable
+```
+
+#### Staking & Infrastructure Contracts
+
+```solidity
+// LiquidStakingPool.sol — Liquid staking with stSALT
+stake() payable → uint256 stSALT
+unstake(amount)
+claimRewards()
+
+// WrappedSALT.sol — ERC-20 wrapped SALT
+wrap() payable
+unwrap(amount)
+```
+
 #### Supporting Contracts
 
 | Contract | Purpose |
 |----------|---------|
 | **IPFSIncentives** | Reward IPFS storage providers for hosting model weights |
 | **ColorCirclesNFT** | ERC721 NFTs for model ownership and achievement badges |
+| **AgentDecisionRegistry** | On-chain audit trail for agent decisions |
+| **SpecRegistry** | Specification registration and versioning |
+| **X402Paywall** / **X402Facilitator** | HTTP 402 paywall for model access |
 | **Counter** | Simple demo/test contract |
 
 ### 12.2 Foundry Configuration
@@ -1232,7 +1316,7 @@ Security: High-risk tools require explicit user approval
 
 ## 15. SDKs
 
-### 15.1 TypeScript SDK (`@citrate/sdk` v0.2.0)
+### 15.1 TypeScript SDK (`@citrate/sdk` v0.3.0)
 
 ```typescript
 // Core classes:
@@ -1240,6 +1324,10 @@ class CitrateSDK {
     models: ModelRegistry;
     contracts: ContractManager;
     accounts: AccountManager;
+    learning: LearningManager;     // NEW: Learning Center
+    staking: StakingManager;       // NEW: Liquid staking
+    classrooms: ClassroomManager;  // NEW: Classroom registry
+    compute: ComputeManager;       // NEW: Compute marketplace
 
     deployModel(data, metadata): Promise<string>;
     runInference(modelId, input, opts?): Promise<InferenceResult>;

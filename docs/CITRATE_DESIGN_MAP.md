@@ -1,6 +1,6 @@
 # Citrate Blockchain: Design Map & Product Overview
 
-**Version:** 0.2.0-beta | **Date:** February 2026 | **Audience:** Frontend team, designers, product managers, and external partners
+**Version:** 0.3.0 | **Date:** March 2026 | **Audience:** Frontend team, designers, product managers, and external partners
 
 ---
 
@@ -10,12 +10,13 @@ Citrate is an **AI-native Layer-1 blockchain** that makes AI models first-class 
 
 ### Core Value Proposition
 
-| For Users | For Developers | For Model Creators |
-|-----------|---------------|-------------------|
-| Run AI models trustlessly | EVM-compatible smart contracts | On-chain model registry with provenance |
-| Desktop wallet with embedded node | TypeScript, Python, & CLI SDKs | Monetization via marketplace |
-| Visual DAG explorer | Foundry toolchain for contracts | Verifiable inference with ZK proofs |
-| Conversational AI agent built in | OpenAI/Anthropic-compatible API | IPFS-backed weight storage |
+| For Users | For Developers | For Model Creators | For Compute Providers |
+|-----------|---------------|-------------------|----------------------|
+| Run AI models trustlessly | EVM-compatible smart contracts | On-chain model registry with provenance | Earn SALT by providing GPU/CPU |
+| Desktop wallet with embedded node | TypeScript, Python, & CLI SDKs | Monetization via marketplace | Heartbeat-monitored liveness |
+| Visual DAG explorer | Foundry toolchain for contracts | Verifiable inference with ZK proofs | Dispute resolution on-chain |
+| Conversational AI agent built in | OpenAI/Anthropic-compatible API | IPFS-backed weight storage | Pooled compute via ComputePool |
+| Learning Center for education | 36 TLA+ formal specs | Learning cycles with Belnap logic | Verified execution via ComputeVerifier |
 
 ### The Token: SALT
 
@@ -99,7 +100,8 @@ Sidebar
 | Terminal | Complete | Full PTY terminal via xterm.js |
 | Settings | Complete | Node start/stop, environment switching, AI config, factory reset |
 | Onboarding | Complete | 12-step guided setup flow |
-| GPU Compute | Partial | UI skeleton, backend pending |
+| GPU Compute | Complete | ComputeMarketplace, ComputeVerifier, HeartbeatMonitor, DisputeResolution, ComputePool |
+| Learning Center | Complete | LearningPool, ClassroomRegistry, LearningCycleManager, ContributionAccounting |
 | IPFS Storage | Partial | Basic daemon control, file upload/pin |
 
 #### Embedded Node
@@ -142,15 +144,47 @@ Web-based blockchain explorer for browsing blocks, transactions, and accounts.
 
 ### 3.3 Smart Contracts (On-Chain)
 
-Eight Solidity contracts deployed on-chain via Foundry:
+24 Solidity contracts deployed on-chain via Foundry, organized into four domains:
+
+#### AI & Marketplace (8 contracts)
 
 | Contract | Purpose |
 |----------|---------|
 | **ModelRegistry** | Core model registration, ownership, versioning |
 | **ModelMarketplace** | Buy/sell model access, 2.5% fee, reviews |
-| **InferenceRouter** | Route inference requests to models, pricing |
 | **ModelAccessControl** | Granular permissions (owner, delegate, whitelist) |
+| **InferenceRouter** | Route inference requests to models, pricing |
 | **LoRAFactory** | Create fine-tuned model variants |
+| **AgentDecisionRegistry** | On-chain agent decision audit trail |
+| **SpecRegistry** | Specification registration and versioning |
+| **X402Paywall** / **X402Facilitator** | HTTP 402 paywall for model access |
+
+#### Compute Marketplace (5 contracts)
+
+| Contract | Purpose |
+|----------|---------|
+| **ComputeMarketplace** | Job listing, matching, escrow-based payments |
+| **ComputeVerifier** | Verified compute execution (challenge-response) |
+| **ComputePool** | Pooled compute resources with worker management |
+| **HeartbeatMonitor** | Provider liveness monitoring and auto-slashing |
+| **DisputeResolution** | On-chain dispute arbitration for compute jobs |
+
+#### Learning Center (5 contracts)
+
+| Contract | Purpose |
+|----------|---------|
+| **LearningPool** | Paraconsistent learning pools with Belnap lattice |
+| **LearningCycleManager** | OODA-based learning cycle orchestration |
+| **ClassroomRegistry** | Classroom creation, enrollment, mentor assignment |
+| **ContributionAccounting** | Contribution tracking and reward distribution |
+| **NematocystSlashing** | Biologically-inspired slashing for bad actors |
+
+#### Staking & Infrastructure (6 contracts)
+
+| Contract | Purpose |
+|----------|---------|
+| **LiquidStakingPool** | Liquid staking with stSALT token |
+| **WrappedSALT** | ERC-20 wrapped SALT for DeFi compatibility |
 | **IPFSIncentives** | Reward IPFS nodes for hosting model weights |
 | **ColorCirclesNFT** | Achievement/ownership NFTs |
 | **Counter** | Simple demo/test contract |
@@ -159,7 +193,7 @@ Eight Solidity contracts deployed on-chain via Foundry:
 
 Three SDKs for building on Citrate:
 
-#### Official TypeScript SDK (`@citrate/sdk` v0.2.0)
+#### Official TypeScript SDK (`@citrate/sdk` v0.3.0)
 ```
 npm install @citrate/sdk
 ```
@@ -168,6 +202,10 @@ npm install @citrate/sdk
 - Smart contract interaction (deploy, call, read)
 - DAG statistics & block queries
 - IPFS artifact pinning
+- **Learning Center** — `sdk.learning` (pools, cycles, contributions)
+- **Staking** — `sdk.staking` (stake, unstake, pending withdrawals)
+- **Classrooms** — `sdk.classrooms` (create, enroll, manage)
+- **Compute Marketplace** — `sdk.compute` (jobs, providers, pools, disputes)
 - 248 integration tests passing
 
 #### Alternative JavaScript SDK (`citrate-js` v0.1.3)
@@ -275,7 +313,35 @@ Build dApp that calls both contracts + AI
 Test on testnet → Deploy to mainnet
 ```
 
-### Journey 4: AI Consumer
+### Journey 4: Compute Provider
+
+```
+Register as provider → Stake SALT collateral
+  ↓
+Join ComputePool → HeartbeatMonitor tracks liveness
+  ↓
+Accept compute jobs → Execute verified workloads
+  ↓
+ComputeVerifier validates results → Earn SALT rewards
+  ↓
+If disputed → DisputeResolution arbitrates on-chain
+```
+
+### Journey 5: Learner / Educator
+
+```
+Create classroom → Set curriculum, invite learners
+  ↓
+LearningPool manages knowledge aggregation (Belnap lattice)
+  ↓
+OODA-based learning cycles → Observe, Orient, Decide, Act
+  ↓
+ContributionAccounting tracks participation → Earn rewards
+  ↓
+MentorSelection assigns qualified mentors based on trust scores
+```
+
+### Journey 6: AI Consumer
 
 ```
 Browse Model Marketplace → Find model by category/rating
@@ -395,9 +461,13 @@ Verify proof of inference → Use result in dApp
 │  └─────────────┘  └──────────────┘  └──────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │                 SMART CONTRACTS (EVM)                      │  │
-│  │  ModelRegistry │ Marketplace │ InferenceRouter │ LoRA     │  │
-│  │  AccessControl │ IPFSIncentives │ NFTs │ Counter          │  │
+│  │                 SMART CONTRACTS (EVM) — 24 contracts         │  │
+│  │  ModelRegistry │ Marketplace │ InferenceRouter │ LoRA      │  │
+│  │  AccessControl │ IPFSIncentives │ NFTs │ WrappedSALT       │  │
+│  │  ComputeMarketplace │ ComputeVerifier │ ComputePool        │  │
+│  │  HeartbeatMonitor │ DisputeResolution │ LiquidStaking      │  │
+│  │  LearningPool │ ClassroomRegistry │ LearningCycleManager   │  │
+│  │  ContributionAccounting │ NematocystSlashing │ SpecRegistry │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
@@ -422,8 +492,12 @@ Verify proof of inference → Use result in dApp
 | Finality | ~12 seconds | ~12 minutes | ~0.4s | ~12s |
 | Desktop App | Full-featured | None official | None official | Basic CLI |
 | Model Marketplace | Built-in | Third-party | Third-party | TAO marketplace |
-| ZK Inference Proofs | Native precompile | Via contracts | N/A | N/A |
+| Compute Marketplace | Built-in (5 contracts) | Third-party | N/A | Subnet-based |
+| Learning Center | Built-in (Belnap lattice) | N/A | N/A | N/A |
+| ZK Inference Proofs | Native precompile (Poseidon, MiMC) | Via contracts | N/A | N/A |
+| Formal Verification | 36 TLA+ specs | Partial | None | None |
 | Developer SDKs | TS, Python, CLI | Many | Many | Python only |
+| Smart Contracts | 24 contracts | N/A | N/A | N/A |
 
 ---
 
@@ -448,14 +522,17 @@ Based on the product surface, the website should cover:
 
 | Metric | Target | Current Status |
 |--------|--------|---------------|
-| Throughput | 10,000+ TPS | In progress |
-| Finality | 12 seconds | Implemented |
+| Throughput | 10,000+ TPS | 5,000 sustained, 10,000 ceiling |
+| Finality | 12 seconds | Implemented (BFT + depth-based) |
 | Block Time | 1-2 seconds | 2 seconds |
 | DAG Width | 100+ parallel blocks | Supported |
-| SDK Tests | 248/248 passing | Complete |
-| GUI Tests | 419 passing | Complete |
+| Rust Tests | 2,484+ | Complete |
+| GUI Tests | 596 passing | Complete |
+| Forge Tests | 133+ (66 base + 67 compute) | Complete |
+| TLA+ Specs | 36 specs, 200+ invariants | Complete |
 | Precompiles | 9 EVM + 7 AI | Implemented |
-| Smart Contracts | 8 deployed | Complete |
+| Smart Contracts | 24 deployed | Complete |
+| SDK Modules | 7 (models, contracts, accounts, AI, learning, staking, compute) | Complete |
 
 ---
 
@@ -477,3 +554,13 @@ Based on the product surface, the website should cover:
 | **REVM** | Rust EVM — the battle-tested EVM implementation used by Foundry/Anvil |
 | **Precompile** | Built-in contract at a fixed address for efficient operations |
 | **VRF** | Verifiable Random Function — used for fair block proposer selection |
+| **Compute Marketplace** | On-chain marketplace matching compute jobs to GPU/CPU providers |
+| **ComputeVerifier** | Challenge-response system for verifying compute job results |
+| **HeartbeatMonitor** | Liveness monitoring for compute providers with auto-slashing |
+| **Learning Center** | Educational framework using paraconsistent logic for knowledge aggregation |
+| **Belnap Lattice** | Four-valued logic (True, False, Both, Neither) used in learning pools |
+| **OODA Cycle** | Observe-Orient-Decide-Act learning loop used in LearningCycleManager |
+| **Nematocyst Slashing** | Biologically-inspired penalty mechanism for malicious validators |
+| **Poseidon Hash** | ZK-friendly hash function used in proof systems |
+| **MiMC** | Minimal Multiplicative Complexity hash for ZK circuits |
+| **stSALT** | Liquid staking token representing staked SALT |
