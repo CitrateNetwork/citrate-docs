@@ -16,7 +16,7 @@ Citrate is an **AI-native Layer-1 blockchain** that makes AI models first-class 
 | Desktop wallet with embedded node | TypeScript, Python, & CLI SDKs | Monetization via marketplace | Heartbeat-monitored liveness |
 | Visual DAG explorer | Foundry toolchain for contracts | Verifiable inference with ZK proofs | Dispute resolution on-chain |
 | Conversational AI agent built in | OpenAI/Anthropic-compatible API | IPFS-backed weight storage | Pooled compute via ComputePool |
-| Learning Center for education | 36 TLA+ formal specs | Learning cycles with Belnap logic | Verified execution via ComputeVerifier |
+| Learning Center for education | 41 TLA+ formal specs | Learning cycles with Belnap logic | Verified execution via ComputeVerifier |
 
 ### The Token: SALT
 
@@ -144,7 +144,7 @@ Web-based blockchain explorer for browsing blocks, transactions, and accounts.
 
 ### 3.3 Smart Contracts (On-Chain)
 
-24 Solidity contracts deployed on-chain via Foundry, organized into four domains:
+31 Solidity contracts deployed on-chain via Foundry, organized into four domains:
 
 #### AI & Marketplace (8 contracts)
 
@@ -461,7 +461,7 @@ Verify proof of inference → Use result in dApp
 │  └─────────────┘  └──────────────┘  └──────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │                 SMART CONTRACTS (EVM) — 24 contracts         │  │
+│  │                 SMART CONTRACTS (EVM) — 31 contracts         │  │
 │  │  ModelRegistry │ Marketplace │ InferenceRouter │ LoRA      │  │
 │  │  AccessControl │ IPFSIncentives │ NFTs │ WrappedSALT       │  │
 │  │  ComputeMarketplace │ ComputeVerifier │ ComputePool        │  │
@@ -495,9 +495,9 @@ Verify proof of inference → Use result in dApp
 | Compute Marketplace | Built-in (5 contracts) | Third-party | N/A | Subnet-based |
 | Learning Center | Built-in (Belnap lattice) | N/A | N/A | N/A |
 | ZK Inference Proofs | Native precompile (Poseidon, MiMC) | Via contracts | N/A | N/A |
-| Formal Verification | 36 TLA+ specs | Partial | None | None |
+| Formal Verification | 41 TLA+ specs | Partial | None | None |
 | Developer SDKs | TS, Python, CLI | Many | Many | Python only |
-| Smart Contracts | 24 contracts | N/A | N/A | N/A |
+| Smart Contracts | 31 contracts | N/A | N/A | N/A |
 
 ---
 
@@ -527,11 +527,11 @@ Based on the product surface, the website should cover:
 | Block Time | 1-2 seconds | 2 seconds |
 | DAG Width | 100+ parallel blocks | Supported |
 | Rust Tests | 2,484+ | Complete |
-| GUI Tests | 596 passing | Complete |
-| Forge Tests | 133+ (66 base + 67 compute) | Complete |
-| TLA+ Specs | 36 specs, 200+ invariants | Complete |
+| GUI Tests | 1,018 passing | Complete |
+| Forge Tests | 873 | Complete |
+| TLA+ Specs | 41 specs, 306+ invariants | Complete |
 | Precompiles | 9 EVM + 7 AI | Implemented |
-| Smart Contracts | 24 deployed | Complete |
+| Smart Contracts | 31 deployed | Complete |
 | SDK Modules | 7 (models, contracts, accounts, AI, learning, staking, compute) | Complete |
 
 ---
