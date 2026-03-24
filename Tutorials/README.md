@@ -8,6 +8,7 @@ Tutorial projects and reference dApps demonstrating how to build on the Citrate 
 - `ChatVault/` -- Chat-based vault interaction tutorial
 - `LoRAForge/` -- LoRA model fine-tuning and on-chain registration tutorial
 - `MogSynth/` -- Model orchestration and synthesis tutorial
+- `CrossChainDataBridge/` -- Cross-chain inference request protocol + relayer
 
 ## Usage
 
