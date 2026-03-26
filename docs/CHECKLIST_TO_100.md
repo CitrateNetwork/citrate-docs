@@ -31,7 +31,7 @@
 
 ### Week 1: Verification
 
-- [ ] **Multi-node sync test** — Saul + partner, different states
+- [ ] **Multi-node sync test** — Larry + partner, different states
   - Add bootnode in both GUIs
   - Verify both nodes see same block height
   - Verify block sync logs show "SYNC: Received X blocks"

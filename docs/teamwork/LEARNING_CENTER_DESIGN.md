@@ -1,6 +1,6 @@
 # Learning Center — End-to-End Design Document
 
-**Author:** Claude + Saul
+**Author:** Claude + Larry
 **Date:** 2026-03-21
 **Status:** DESIGN PHASE — Not yet implemented
 
