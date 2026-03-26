@@ -19,13 +19,22 @@ This is called **syncing**. After sync, both nodes see the same blockchain.
 
 ---
 
+## How It Works (The Simple Version)
+
+All Citrate nodes connect to a **bootnode** — a public relay server that everybody can reach. You don't connect directly to other people's computers. You connect to the bootnode, and the bootnode shares blocks between everyone.
+
+```
+[Your Computer] ──connects out──> [Bootnode] <──connects out── [Partner's Computer]
+```
+
+Both sides connect **outbound** (like opening a website). No special router configuration. No port forwarding. It just works, the same way your browser connects to Google without any setup.
+
 ## What You'll Need
 
 - **Two computers** running Citrate (can be in different locations)
 - **Internet connection** on both
-- **About 15 minutes**
-
-Each person follows this guide on their own computer. You'll exchange one piece of information with each other (your "peer address").
+- **A bootnode address** (provided by the Citrate team, or you run your own on a $5/month VPS)
+- **About 10 minutes**
 
 ---
 
@@ -68,126 +77,35 @@ Open your applications menu and look for "Citrate." If you see it, you're good.
 
 ---
 
-## Step 3: Find Your Peer Address
+## Step 3: Get the Bootnode Address
 
-Your peer address is how other nodes find you on the internet. It looks like this:
+The Citrate team runs public bootnodes that everyone connects to. You'll be given an address that looks like this:
 
 ```
-noise_9bed2de5cbf2de947e104d8784b53ef7a534338acb08f71855ec1334f027570a@73.162.45.89:30304
+noise_a1b2c3d4e5f6...@boot1.citrate.ai:30303
 ```
 
-It has three parts:
-- `noise_` followed by a long string of letters and numbers (your node's identity)
-- `@` followed by your IP address
-- `:30304` (the port your node listens on)
+**If you're on the Citrate team** and setting up the first bootnode, see the "Running Your Own Bootnode" section at the bottom.
 
-### How to find your node identity:
-
-**Option A: From the app logs (easiest)**
-
-When Citrate starts, it prints a line like this in the terminal or log:
-```
-Noise identity: 9bed2de5cbf2de94... (peer_id=noise_9bed2de5cbf2de94...)
-```
-
-If you launched from a terminal, scroll up to find this line.
-
-If you launched from the app menu, check the log file:
-- **Linux:** `~/.local/share/citrate/citrate.log` (or check system logs)
-- **macOS:** `~/Library/Logs/Citrate/citrate.log`
-- **Windows:** `%APPDATA%\Citrate\logs\citrate.log`
-
-**Option B: From the Settings panel**
-
-1. Click **Settings** in the sidebar
-2. Look for **Node Control** section
-3. Your peer ID may be displayed there
-
-### How to find your public IP address:
-
-1. Open a web browser
-2. Go to: **https://whatismyipaddress.com**
-3. Write down the number shown under "IPv4" (example: `73.162.45.89`)
-
-### Put them together:
-
-Your full peer address is:
-```
-noise_YOUR_PEER_ID@YOUR_IP_ADDRESS:30304
-```
-
-**Example:**
-```
-noise_9bed2de5cbf2de947e104d8784b53ef7a534338acb08f71855ec1334f027570a@73.162.45.89:30304
-```
-
-**Send this address to the person you're syncing with.** Text message, email, Slack — whatever works. They will send you theirs.
+**If you're a regular user**, the bootnode address will be provided to you (in Discord, documentation, or pre-configured in the app).
 
 ---
 
-## Step 4: Open Your Network Port
+## Step 4: Add the Bootnode
 
-Your computer's firewall blocks incoming connections by default. You need to open port 30304 so the other node can reach you.
-
-### Linux (Ubuntu/Debian):
-
-Open a terminal and run:
-```bash
-sudo ufw allow 30304/tcp
-```
-
-If it says "Rules updated" — you're done.
-
-### macOS:
-
-macOS doesn't block incoming connections by default in most cases. If you have a firewall enabled:
-1. Open **System Preferences** → **Security & Privacy** → **Firewall**
-2. Click **Firewall Options**
-3. Make sure "Block all incoming connections" is **unchecked**
-
-### Windows:
-
-1. Open **Windows Defender Firewall** (search for it in the Start menu)
-2. Click **Advanced settings** on the left
-3. Click **Inbound Rules** → **New Rule**
-4. Select **Port** → Next
-5. Select **TCP** and enter **30304** → Next
-6. Select **Allow the connection** → Next
-7. Check all three boxes (Domain, Private, Public) → Next
-8. Name it "Citrate P2P" → Finish
-
-### Router port forwarding (if you're behind a home router):
-
-If both computers are behind home routers (most people are), you also need to forward port 30304 on your router:
-
-1. Open your router's admin page (usually `192.168.1.1` or `192.168.0.1` in a browser)
-2. Find "Port Forwarding" (might be under "Advanced" or "NAT")
-3. Add a rule:
-   - **External port:** 30304
-   - **Internal port:** 30304
-   - **Protocol:** TCP
-   - **Internal IP:** Your computer's local IP (find it with `hostname -I` on Linux or `ipconfig` on Windows)
-4. Save
-
-**If this is confusing**, don't worry — port forwarding is the hardest part. If you get stuck, try having one person add the other as a peer (instead of both adding each other). Sometimes one direction works even without port forwarding.
-
----
-
-## Step 5: Add the Other Node as a Peer
-
-Now you have the other person's peer address. Time to connect.
-
-1. **Open Citrate** (it should already be running)
+1. **Open Citrate** (it should already be running from Step 2)
 2. Click **Settings** in the sidebar
 3. Scroll down to **Peer Connections**
-4. In the text field, paste the other person's peer address:
+4. Paste the bootnode address in the text field:
    ```
-   noise_THEIR_PEER_ID@THEIR_IP:30304
+   noise_a1b2c3d4e5f6...@boot1.citrate.ai:30303
    ```
 5. Click **Add**
 6. You should see the address appear in the list below
 
-**The other person does the same thing with YOUR peer address.**
+**That's it.** No port forwarding. No router configuration. No firewall changes. Your computer connects outbound to the bootnode (just like opening a website), and the bootnode shares blocks with everyone.
+
+**Both people add the SAME bootnode address.** You don't need to exchange addresses with each other.
 
 ---
 
@@ -243,54 +161,31 @@ When two nodes connect, here's what happens:
 ### "Peers shows 0"
 
 **Possible causes:**
-- The other person hasn't added your address yet → Ask them to check
-- Port 30304 is blocked → Re-check the firewall/router steps
-- IP address is wrong → Re-check at whatismyipaddress.com
-- Your router hasn't forwarded the port → Check router admin page
+- The bootnode isn't running → Ask the team to verify
+- The bootnode address was typed wrong → Double-check it in Settings
+- Your internet is blocking the connection → Try a different network (phone hotspot)
 
-**Try this:** Have only ONE person add the other as a peer (not both). If the connection works one-way, the issue is with the other person's port forwarding.
+**Try this:** Close Citrate, reopen it, and check Peers again after 15 seconds.
 
 ### "Block heights are very different"
 
-If one node shows height 500 and the other shows height 50, the sync might be slow. Wait a few minutes. The sync processes blocks one at a time to avoid overwhelming your computer.
-
-### "Connection drops after a few minutes"
-
-The P2P connection may be unstable. This can happen with NAT traversal issues. Try:
-- Both people restart Citrate
-- Re-add each other as peers
-- If you're on the same local network, use the local IP (like 192.168.1.x) instead of the public IP
+If one node shows height 500 and the other shows height 50, the sync is catching up. Wait a few minutes. The sync processes blocks one at a time.
 
 ### "Genesis hash mismatch"
 
-If you see this error in the logs:
+If you see this in the logs:
 ```
 Rejecting peer: genesis hash mismatch (different chain)
 ```
 
-It means the two nodes started from different genesis blocks. This happens if one node was created with a different version of the software. Solution: both people need to:
-1. Close Citrate
-2. Delete chain data:
+Both people are running different versions. Solution:
+1. **Everyone** installs the same version of Citrate
+2. **Everyone** deletes their old chain data:
    - Linux: `rm -rf ~/.local/share/citrate-gui/chain/`
    - macOS: `rm -rf ~/Library/Application Support/citrate-gui/chain/`
    - Windows: Delete `%APPDATA%\citrate-gui\chain\`
-3. Reopen Citrate (it will create a fresh genesis)
-4. Re-add each other as peers
-
-### "I can't find my peer ID"
-
-Run Citrate from a terminal to see the logs:
-- **Linux:** Open terminal, run `citrate-core`
-- **macOS:** Open Terminal, run `/Applications/Citrate.app/Contents/MacOS/Citrate`
-- **Windows:** Open Command Prompt, run `"C:\Program Files\Citrate\Citrate.exe"`
-
-Look for the line starting with `Noise identity:`.
-
-### "My IP address starts with 192.168 or 10.0"
-
-That's your **local** IP, not your **public** IP. Go to https://whatismyipaddress.com to find your public IP. You need the public IP if the other person is on a different network.
-
-If you're both on the same WiFi network, you CAN use the 192.168.x.x address — it'll be faster too.
+3. Reopen Citrate (it creates a fresh genesis)
+4. Re-add the bootnode
 
 ---
 
@@ -298,15 +193,145 @@ If you're both on the same WiFi network, you CAN use the 192.168.x.x address —
 
 | What | Where |
 |------|-------|
-| Your peer ID | Logs at startup: `Noise identity: ...` |
-| Your public IP | https://whatismyipaddress.com |
-| P2P port | 30304 (TCP) |
-| Peer address format | `noise_<id>@<ip>:30304` |
-| Add a peer | Settings → Peer Connections → paste → Add |
+| P2P port | 30303 (TCP, outbound only — no firewall changes needed) |
+| Bootnode format | `noise_<id>@<hostname>:30303` |
+| Add a bootnode | Settings → Peer Connections → paste → Add |
 | Check connection | Dashboard → Peers count |
-| Chain data location (Linux) | `~/.local/share/citrate-gui/chain/` |
-| Chain data location (macOS) | `~/Library/Application Support/citrate-gui/chain/` |
-| Chain data location (Windows) | `%APPDATA%\citrate-gui\chain\` |
+| Chain data (Linux) | `~/.local/share/citrate-gui/chain/` |
+| Chain data (macOS) | `~/Library/Application Support/citrate-gui/chain/` |
+| Chain data (Windows) | `%APPDATA%\citrate-gui\chain\` |
+
+---
+
+## Running Your Own Bootnode (Team/Advanced)
+
+If you're setting up the network's first bootnode, you need a VPS (virtual private server) with a public IP. This is the only machine that needs to be publicly reachable. Everyone else just connects out to it.
+
+### Step 1: Get a VPS
+
+Any Linux VPS works. Cheapest options:
+- **Hetzner Cloud**: $5/month (CX22, 2 vCPU, 4GB RAM)
+- **DigitalOcean**: $6/month (Basic Droplet, 1GB RAM)
+- **Vultr**: $5/month (Cloud Compute)
+
+Pick Ubuntu 22.04 or newer.
+
+### Step 2: Build or copy the node binary
+
+**Option A: Copy from your machine** (if same architecture):
+```bash
+scp target/release/citrate user@YOUR_VPS_IP:/usr/local/bin/citrate
+```
+
+**Option B: Build on the VPS:**
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source ~/.cargo/env
+
+# Install build deps
+sudo apt update && sudo apt install -y build-essential libssl-dev pkg-config libclang-dev cmake
+
+# Clone and build
+git clone YOUR_REPO_URL
+cd citrate/citrate_v0.01.1
+cargo build --release -p citrate-node
+sudo cp target/release/citrate /usr/local/bin/
+```
+
+### Step 3: Start the bootnode
+
+```bash
+# Create data directory
+sudo mkdir -p /var/lib/citrate
+sudo chown $USER /var/lib/citrate
+
+# Start the bootnode (relay-only, no mining)
+citrate \
+  --bootstrap \
+  --data-dir /var/lib/citrate \
+  --chain-id 40204 \
+  --max-peers 500
+```
+
+Look for this line in the output:
+```
+Noise identity: a1b2c3d4... (peer_id=noise_a1b2c3d4e5f6...)
+```
+
+### Step 4: Note your bootnode address
+
+Your bootnode address is:
+```
+noise_YOUR_PEER_ID@YOUR_VPS_IP:30303
+```
+
+Example:
+```
+noise_a1b2c3d4e5f6789012345678abcdef0123456789abcdef0123456789abcdef01@143.198.45.67:30303
+```
+
+**Share this address with your team.** Everyone adds it in Settings → Peer Connections.
+
+### Step 5: Keep it running
+
+To keep the bootnode running after you disconnect from SSH:
+
+```bash
+# Option A: Use screen
+screen -S citrate
+citrate --bootstrap --data-dir /var/lib/citrate --chain-id 40204 --max-peers 500
+# Press Ctrl+A, then D to detach. Reconnect with: screen -r citrate
+
+# Option B: Use systemd (production)
+sudo tee /etc/systemd/system/citrate-bootnode.service > /dev/null << 'UNIT'
+[Unit]
+Description=Citrate Bootnode
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/citrate --bootstrap --data-dir /var/lib/citrate --chain-id 40204 --max-peers 500
+Restart=always
+RestartSec=10
+User=root
+Environment="RUST_LOG=info"
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+sudo systemctl daemon-reload
+sudo systemctl enable citrate-bootnode
+sudo systemctl start citrate-bootnode
+
+# Check logs:
+sudo journalctl -u citrate-bootnode -f
+```
+
+### Step 6: Verify it works
+
+From any other machine:
+```bash
+# The bootnode should be listening
+nc -zv YOUR_VPS_IP 30303
+# Should show: Connection to YOUR_VPS_IP 30303 port [tcp/*] succeeded!
+```
+
+Then open Citrate on your desktop, add the bootnode address, and check that Peers shows 1.
+
+---
+
+## Why No Port Forwarding?
+
+You might wonder: how does this work without opening ports on my home router?
+
+**Outbound connections go through NAT without configuration.** When your Citrate app connects to the bootnode, it's an outbound connection — exactly like your browser connecting to Google. Your router allows this automatically.
+
+The bootnode is on a VPS with a public IP address. VPS machines don't have NAT — they're directly on the internet. So the bootnode doesn't need port forwarding either.
+
+The only scenario where port forwarding matters is if you want your home computer to accept incoming connections directly from other home computers (without a bootnode). That's the hard way. The bootnode is the easy way.
+
+**Think of the bootnode like a phone operator.** You call the operator (outbound, no setup needed). Your friend calls the operator (outbound, no setup needed). The operator connects your calls. Neither of you needed to install a phone line — you just used the one you already have.
 
 ---
 
