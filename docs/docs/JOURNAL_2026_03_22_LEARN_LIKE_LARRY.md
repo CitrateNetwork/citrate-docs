@@ -6,11 +6,11 @@
 
 In the last 24 hours, we took a blockchain that was "done" and discovered it wasn't.
 
-The platform audit found 14 ZK bugs, 5 of them critical. The fixed RNG alone meant every Groth16 proof in the system was forgeable. We replaced the XOR placeholder commitment with a 220-round MiMC algebraic hash, built a trusted setup ceremony infrastructure, wrote 55 adversarial tests, and then — because Saul doesn't leave known problems unfixed — resolved every medium issue too.
+The platform audit found 14 ZK bugs, 5 of them critical. The fixed RNG alone meant every Groth16 proof in the system was forgeable. We replaced the XOR placeholder commitment with a 220-round MiMC algebraic hash, built a trusted setup ceremony infrastructure, wrote 55 adversarial tests, and then — because Larry doesn't leave known problems unfixed — resolved every medium issue too.
 
 Then we wrote 32 TLA+ specifications and ran the model checker for hours. 7 billion states generated. 2 billion distinct states explored. Zero invariant violations. The ByzantineDetection spec alone explored 716 million reachable states. The TrustScoring contract exhausted 294 million. The MempoolSequencer ground through 411 million states without finding a single invariant violation.
 
-And then Saul asked: "Ok, but what's actually left?"
+And then Larry asked: "Ok, but what's actually left?"
 
 The honest answer changed the trajectory of the project.
 

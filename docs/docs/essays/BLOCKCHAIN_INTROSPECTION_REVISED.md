@@ -14,13 +14,13 @@ The critics had a field day. A billionaire discovered Nietzsche like a 17-year-o
 
 They missed the deeper irony.
 
-While Andreessen was using Claude to argue against introspection, Saul Loveman was using Claude to practice it. Not as philosophy — as engineering methodology. And it produced the most formally verified blockchain in the industry.
+While Andreessen was using Claude to argue against introspection, Larry Klosowski was using Claude to practice it. Not as philosophy — as engineering methodology. And it produced the most formally verified blockchain in the industry.
 
 ---
 
 ## The Story of Citrate
 
-This project didn't start four days ago. It started 2.5 years ago, as something else entirely — an Objective-C application aimed at a different market. Saul was noodling. Building. Iterating. The kind of unfocused creative work that looks like wasted time from the outside but is actually the subsoil that ideas grow from.
+This project didn't start four days ago. It started 2.5 years ago, as something else entirely — an Objective-C application aimed at a different market. Larry was noodling. Building. Iterating. The kind of unfocused creative work that looks like wasted time from the outside but is actually the subsoil that ideas grow from.
 
 Six and a half months ago, it crystallized into Citrate: an AI-native Layer-1 blockchain using GhostDAG consensus with a federated learning layer. The thesis, from Gradient Papers No. I: "Models are smarter together than apart, consensus and learning are the same process."
 
@@ -73,7 +73,7 @@ This is the opposite of "move forward, go." It's "stop, look at what's real, the
 
 Andreessen's "zero introspection" stance has a specific, measurable irony: he used Claude to argue against the practice that Claude was simultaneously being used to execute.
 
-While he was posting "The Nietzschean Demolition of Introspection," Claude was helping Saul:
+While he was posting "The Nietzschean Demolition of Introspection," Claude was helping Larry:
 - Diagnose why AI agents produce mocks despite explicit rules (The Rule Follower's Paradox)
 - Research Knight Capital's $440M test code disaster (Mock Persistence case study)
 - Formalize Belnap FOUR lattice axioms and verify them exhaustively
@@ -94,7 +94,7 @@ The question isn't whether to introspect. It's whether introspection produces ac
 
 ## What 6.5 Months and 2.5 Years Teach
 
-Saul's journey from Objective-C noodling to Citrate wasn't efficient. It wasn't the shortest path from A to B. It was 2.5 years of exploration followed by 6.5 months of crystallization followed by 4 days of intensive hardening.
+Larry's journey from Objective-C noodling to Citrate wasn't efficient. It wasn't the shortest path from A to B. It was 2.5 years of exploration followed by 6.5 months of crystallization followed by 4 days of intensive hardening.
 
 Andreessen would call the 2.5 years wasted. Move forward. Ship. Don't look back.
 
@@ -106,7 +106,7 @@ And the 4-day hardening session worked because the 6.5-month build was sound eno
 
 ## The Deeper Point
 
-Marc Andreessen and Saul Loveman are both builders. Both ship. Both use AI. Both have strong opinions about how to create value.
+Marc Andreessen and Larry Klosowski are both builders. Both ship. Both use AI. Both have strong opinions about how to create value.
 
 The difference is in what they believe about the relationship between understanding and action.
 
@@ -142,7 +142,7 @@ We regret the 15 mocks we created in Sprint LC-3. And because we do, we created 
 
 Regret is a signal. Introspection is the receiver. Action is the response.
 
-Zero is the goal — but zero mocks, zero warnings, zero unwraps, zero violations. Not zero introspection... *we want a lot of introspection -Saul
+Zero is the goal — but zero mocks, zero warnings, zero unwraps, zero violations. Not zero introspection... *we want a lot of introspection -Larry
 
 ---
 

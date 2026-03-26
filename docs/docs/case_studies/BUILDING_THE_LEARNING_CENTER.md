@@ -98,9 +98,9 @@ Persona-based onboarding complete: "What brings you here?" routes users to home/
 
 ## The Team Dynamic
 
-This project had one human (Saul) and one AI (Claude), but the dynamic wasn't "human directs, AI executes." It was more nuanced:
+This project had one human (Larry) and one AI (Claude), but the dynamic wasn't "human directs, AI executes." It was more nuanced:
 
-**Saul's contributions:**
+**Larry's contributions:**
 - Vision: "I want this to work for schools"
 - Pressure: "Let's go" (creating the speed that produced both progress and mocks)
 - Correction: "Why are there still mocks?" (the community check that Wittgenstein requires)
@@ -183,7 +183,7 @@ The persona selection routes users to the right depth immediately.
 
 If you're building a complex system with AI assistance, here's what this case study offers:
 
-**The submarine or spaceship principle:** "(*note from Saul) Go deeper, not faster. A dashboard with fake data is a plane or a boat. A dashboard with real contract wiring, formal verification, and edge case tests is a submarine or a spaceship. The submarine and space vessel surfaces with knowledge. The plane and boat surfaces with screenshots. Submarines go deep for long, and spaceships go as far as another planet to find an answer. planes and boats observe the surface area not the unknown factors."
+**The submarine or spaceship principle:** "(*note from Larry) Go deeper, not faster. A dashboard with fake data is a plane or a boat. A dashboard with real contract wiring, formal verification, and edge case tests is a submarine or a spaceship. The submarine and space vessel surfaces with knowledge. The plane and boat surfaces with screenshots. Submarines go deep for long, and spaceships go as far as another planet to find an answer. planes and boats observe the surface area not the unknown factors."
 
 **The private language problem:** Your AI assistant will follow rules by their surface appearance, not their intent. Write acceptance criteria that name data sources, not just visible outcomes. Build mechanical enforcement (compile gates, integration tests), not more natural language rules.
 
