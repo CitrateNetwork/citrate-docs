@@ -2,6 +2,8 @@
 
 *All URLs, chain IDs, addresses, and configuration for the Citrate testnet.*
 
+**Maintained by:** Larry Klosowski ([@Saul_loveman](https://twitter.com/Saul_loveman))
+
 ---
 
 ## Live Services
