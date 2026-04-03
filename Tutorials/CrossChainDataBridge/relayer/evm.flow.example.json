@@ -1,0 +1,14 @@
+{
+  "sourceRpcUrl": "http://localhost:8545",
+  "sourceGatewayAddress": "0x0000000000000000000000000000000000000000",
+  "requesterPrivateKey": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "modelHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "inputData": "0x48656c6c6f2c204369747261746521",
+  "maxPrice": "0",
+  "deadlineSecondsFromNow": 600,
+  "callbackTarget": "0x0000000000000000000000000000000000000000",
+  "callbackSelector": "0x00000000",
+  "readAfterSubmit": true,
+  "readPollIntervalMs": 2000,
+  "readPollMaxAttempts": 10
+}

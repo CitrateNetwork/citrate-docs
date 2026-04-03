@@ -1,0 +1,14 @@
+{
+  "solanaRpcUrl": "https://api.devnet.solana.com",
+  "solanaProgramId": "11111111111111111111111111111111",
+  "solanaRelayerKeypairs": [
+    "C:/Users/you/.config/solana/id.json"
+  ],
+  "solanaQuorum": 1,
+  "citrateChainId": 40204,
+  "citrateRpcUrl": "https://citrate-rpc.example.com",
+  "citrateRouterAddress": "0xc6556720e7f08c63da9f4ff3db8a585cdbe16610",
+  "citratePrivateKey": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "pollIntervalMs": 2000,
+  "confirmationDepth": 12
+}

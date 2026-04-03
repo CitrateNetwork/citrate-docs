@@ -1,0 +1,13 @@
+{
+  "solanaRpcUrl": "https://api.devnet.solana.com",
+  "solanaProgramId": "11111111111111111111111111111111",
+  "solanaRequesterKeypair": "C:/Users/you/.config/solana/id.json",
+  "modelHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "inputData": "0x48656c6c6f2c204369747261746521",
+  "nonce": 1,
+  "deterministicRequestId": true,
+  "maxPrice": "1000000000000000000",
+  "deadlineSecondsFromNow": 600,
+  "readAfterSubmit": true,
+  "readDelayMs": 2000
+}

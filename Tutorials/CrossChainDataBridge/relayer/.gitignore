@@ -1,0 +1,9 @@
+node_modules/
+config.json
+solana.config.json
+evm.flow.json
+*.env
+.env
+*.key
+*.pem
+*.p12

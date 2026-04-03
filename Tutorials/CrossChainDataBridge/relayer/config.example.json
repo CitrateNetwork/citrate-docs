@@ -1,0 +1,12 @@
+{
+  "sourceRpcUrl": "http://localhost:8545",
+  "citrateRpcUrl": "http://localhost:8545",
+  "sourceGatewayAddress": "0x0000000000000000000000000000000000000000",
+  "citrateRouterAddress": "0x0000000000000000000000000000000000000000",
+  "relayerPrivateKeys": [
+    "0x0000000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "citratePrivateKey": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "confirmationDepth": 12,
+  "pollIntervalMs": 2000
+}
