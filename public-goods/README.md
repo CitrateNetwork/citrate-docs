@@ -31,7 +31,7 @@ If any conflict appears, defer in this order:
 
 1. `.agentile/CONFIG.md`
 2. deployed-address and source files under `citrate_v0.01.1/`
-3. current audited material under `.agentile/audit/` and `.agentile/compliance/`
+3. current audited material under `.agentile/audits/` and `.agentile/compliance/`
 4. these public-goods documents
 
 ## Editorial posture
@@ -43,4 +43,3 @@ The goal here is practical public value:
 - budget discipline before new spending
 - strong security and auditability without ideological grandstanding
 - honest distinction between "available now", "under construction", and "target state"
-
