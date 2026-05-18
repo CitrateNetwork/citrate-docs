@@ -1,0 +1,25 @@
+name: Structure check
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify README and at least one content file
+        run: |
+          test -f README.md || { echo "README.md missing"; exit 1; }
+          count=$(find . -type f -name '*.md' | wc -l)
+          echo "Markdown files: $count"
+          if [[ $count -lt 2 ]]; then
+            echo "Too few content files — repo may be empty"
+            exit 1
+          fi
