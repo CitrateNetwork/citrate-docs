@@ -37,6 +37,20 @@ Say:
 - security posture can be mapped to NIST and CISA guidance
 - roadmap includes FIPS, identity federation, accessibility, and assessment evidence
 
+<!--
+Disclaimer (required by REM-03 disclaimer-check):
+This document describes general government-program requirements
+including references to FIPS 140-3 validated modules. Citrate's
+actual posture on FIPS 140-3 is in active remediation — the
+aws-lc-rs migration is documented, but CMVP certification is in
+the public queue (18–24 months). We make no claim of FIPS 140-3
+validation today. Our compliance posture is "in progress / not yet
+certified" across CMMC L2 (phase-1 remediation, self-attestation
+at L1) and FedRAMP (outline SSP, sponsor not yet identified).
+See citrate-agentile-archive/audits/2026-05/2026-05-19-federation-split-audit/
+for full status.
+-->
+
 Do not say:
 
 - already FedRAMP
