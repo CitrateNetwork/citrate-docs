@@ -1,0 +1,24 @@
+name: Disclaimer check
+
+# REM-03 — Enforce that any compliance-framework claim on a public
+# surface (CMMC L2, FedRAMP, FIPS 140-3) is accompanied by a
+# disclaimer in the same file. The 2026-05-19 federation-split audit
+# (F-03) found content was clean at scan time but called for an
+# automated gate; this is that gate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run disclaimer check
+        run: bash .github/scripts/disclaimer-check.sh
