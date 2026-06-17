@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # CitrateScan Explorer
 
-> The AI-native BlockDAG explorer for the Citrate Network — a better, agentic Etherscan that you can read with your eyes, ask in plain English, or drive from an agent.
+> The AI-native BlockDAG explorer for the Citrate Network, a better, agentic Etherscan that you can read with your eyes, ask in plain English, or drive from an agent.
 
 ## Overview
 
@@ -37,7 +37,7 @@ the index is unavailable, so it degrades honestly rather than breaking.
 
 ## Who it's for
 
-- **Anyone** checking a transaction, address, block, or token on Citrate — no login required.
+- **Anyone** checking a transaction, address, block, or token on Citrate, no login required.
 - **Developers** who want an Etherscan-compatible REST API for scripts and dashboards.
 - **Agents** (Claude, ChatGPT, Cursor) that should treat CitrateScan as their on-chain read tool via MCP.
 
@@ -55,7 +55,7 @@ The app is a single SPA whose hash router swaps between these screens (code in
 | **Token** | Token overview and transfers. | `screens/entity.tsx` (`TokenScreen`) |
 | **Contract** | Contract code, ABI, and read surface (an address is treated as a contract only after `eth_getCode` confirms code). | `screens/contract.tsx` |
 | **Verify** | Submit source for multi-version `solc` recompile-and-diff verification (runs in a Vercel Sandbox microVM). | `screens/verify.tsx` |
-| **Live DAG** | A real-time visualization of the BlockDAG — multiple tips, selected/merge parents, blue ordering. | `screens/dag.tsx` |
+| **Live DAG** | A real-time visualization of the BlockDAG, multiple tips, selected/merge parents, blue ordering. | `screens/dag.tsx` |
 | **Ask CitrateScan** | A persistent agent drawer that answers questions with read-only chain tool calls and links its evidence. | `screens/agent.tsx` |
 | **Settings / Developer hub** | Theme/verbosity settings, plus a developer hub for API keys and endpoint reference. | `screens/settings.tsx` |
 
@@ -77,7 +77,7 @@ There are also dedicated read endpoints under `/api/` (e.g. `blocks`, `tx/[hash]
 
 `/api/mcp` is a read-only **Model Context Protocol** server (JSON-RPC 2.0 over HTTP
 POST; `GET` returns a discovery manifest). It exposes the *same* tools the in-app
-agent uses — generated from one source so they can't drift — including `getBlock`,
+agent uses, generated from one source so they can't drift, including `getBlock`,
 `getAddress`, `searchTransactions`, `getContractCode`, `findTransfers`, and `ledger`.
 Server info advertises `readOnly: true` and dual-unit amounts (SALT + raw grains).
 Calls are rate-limited per IP (or per API key) and audited under the caller's key
@@ -89,7 +89,7 @@ identity. (Source: `citrate-explorer/src/app/api/mcp/route.ts`,
 1. Open the explorer and type into the omni-search: an address, tx hash, block id,
    token, or a plain-English question. Press Enter (or `⌘K` for the palette).
 2. For an entity, read the plain-English summary first, then drill into the detail.
-3. To ask a follow-up, open **Ask CitrateScan** and type your question — answers cite
+3. To ask a follow-up, open **Ask CitrateScan** and type your question, answers cite
    the on-chain reads behind them.
 4. To verify a contract, open the contract's page and use **Verify** to submit source.
 5. To use it programmatically, get an API key from the Developer hub and call
@@ -97,12 +97,12 @@ identity. (Source: `citrate-explorer/src/app/api/mcp/route.ts`,
 
 ## Tutorials
 
-- [Explore a transaction](/apps/tutorials/explore-a-transaction) — find a tx, read its
+- [Explore a transaction](/apps/tutorials/explore-a-transaction), find a tx, read its
   summary, and confirm finality the DAG-native way.
 
 ## Security & access
 
-**Tier: public.** CitrateScan is foundation infrastructure — open, self-hostable, and
+**Tier: public.** CitrateScan is foundation infrastructure, open, self-hostable, and
 public-good. It is the canonical example of a doc/app that stays public: a developer
 needs it to build, and it exposes only **read-only** surfaces.
 
@@ -123,4 +123,4 @@ needs it to build, and it exposes only **read-only** surfaces.
 - **Status:** Per the repo, S-0 (bootstrap) complete and S-1 (indexer + AI foundation)
   in progress. Treat indexed/AI features as **pre-GA**: they read through to live RPC
   and skip persistence until a database is provisioned. This page mirrors code at the
-  pinned SHA (Rule 9 — link, don't copy).
+  pinned SHA (Rule 9, link, don't copy).

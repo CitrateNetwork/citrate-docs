@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Citrate Wallet (browser extension)
 
-> A Manifest V3 browser wallet for the Citrate testnet — create an account, sign transactions and
+> A Manifest V3 browser wallet for the Citrate testnet, create an account, sign transactions and
 > messages with explicit per-action approval, and connect to dApps through an EIP-1193 provider.
 
 ## Overview
@@ -22,11 +22,11 @@ author: Claude Opus 4.8 (1M context)
 Citrate Wallet is a Chrome/Edge/Brave extension (Manifest V3) that holds a key, signs, and exposes a
 standard `window.ethereum` provider so web dApps can talk to it. Keys are generated in the background
 service worker and encrypted at rest; **every transaction and signature requires an explicit approval
-popup — there is no silent signing.**
+popup, there is no silent signing.**
 
 Mental model: the same role MetaMask plays, scoped to the Citrate SALT testnet (chain id `40204`).
 
-> **Status — prerelease (v0.2.0), audit pending.** This is **Tier-1** software that requires a full
+> **Status, prerelease (v0.2.0), audit pending.** This is **Tier-1** software that requires a full
 > external audit before v1.0.0. Use small values only on the testnet. The ERC-4337 smart-wallet path is
 > explicitly marked pre-audit.
 
@@ -57,7 +57,7 @@ Source: `manifest.json`, `js/`, `popup/`.
   in `chrome.storage.local` (`js/background.js`, `js/crypto.js`).
 - **Unlock:** your password is verified by trial-decrypting an account; on success a short-lived session
   ticket is kept in memory so you stay unlocked until the worker is killed or you lock.
-- **Import:** mnemonic/seed-phrase import is **not supported** in this version — you can only create new
+- **Import:** mnemonic/seed-phrase import is **not supported** in this version, you can only create new
   accounts in the extension. Keep your password safe; there is no seed-phrase recovery UI.
 
 ### Signing
@@ -77,12 +77,12 @@ chain-switch calls are no-ops.
 
 ## Tutorials
 
-- **[Install the wallet extension](/apps/tutorials/install-the-wallet-extension)** — runnable, step-by-step
+- **[Install the wallet extension](/apps/tutorials/install-the-wallet-extension)**, runnable, step-by-step
   download/verify/load-unpacked.
 
 ## Security & access
 
-**Tier: public.** A wallet a developer or user needs to interact with the network — open by design.
+**Tier: public.** A wallet a developer or user needs to interact with the network, open by design.
 
 **No secrets in this doc or repo.** There are no `.env` files or committed keys; the only sensitive
 values (your password, your private key) are runtime-only and stored encrypted. Public RPC endpoints in

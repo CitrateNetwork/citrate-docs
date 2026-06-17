@@ -22,19 +22,19 @@ author: Claude Opus 4.8 (1M context)
 ## Overview
 
 Where the [rules](/methodology/rules) constrain *what* can ship, the workflow
-constrains *when* and *how*. The unit of work is a **sprint file** — a dated
+constrains *when* and *how*. The unit of work is a **sprint file**, a dated
 Markdown doc with Rule-12 frontmatter that is the single source of truth for a
 workstream's status (Rule 4). A **federation sprint** spans repos and lives in
 `citrate-federation/agentile/sprints/`; a **repo sprint** affects one repo and
 lives in `citrate-federation/repos/<repo>/sprints/`. Same format, same lifecycle.
 
-## Reference — the lifecycle
+## Reference, the lifecycle
 
 1. **Kickoff.** Create `sprints/active/<slug>.md` with Rule-12 frontmatter; fill
    in goal, scope, out-of-scope, and the plan table. Update `CURRENT.md` so
    observers see it's active.
 2. **Daily updates.** Each session that advances the sprint appends one dated
-   line to the **Daily updates** section (Rule 4 — not Slack).
+   line to the **Daily updates** section (Rule 4, not Slack).
 3. **Decisions become ADRs.** Architectural choices/trade-offs get a short ADR
    (`adrs/ADR-YYYY-MM-DD-<slug>.md`) with Rule-12 frontmatter, linked from the
    sprint's "Decisions made".
@@ -45,7 +45,7 @@ lives in `citrate-federation/repos/<repo>/sprints/`. Same format, same lifecycle
    `completed/<YYYY-MM>/<slug>.md`, set `status: archived`, write the close note
    (noting any delta from the plan), and remove it from `CURRENT.md`.
 6. **Audit hand-off.** Completed sprints are immutable (Rule 3) and form the
-   audit-evidence chain — auditors grep `created:` dates and cross-reference ADRs,
+   audit-evidence chain, auditors grep `created:` dates and cross-reference ADRs,
    `audits/`, and the manifest.
 
 ### Where work goes
@@ -65,12 +65,12 @@ no manifest entry (Rules 11–12) · force-pushing without asking (Rule 10).
 
 ## Tutorials
 
-- [Agentile primer](/start/agentile) — overview and benefits.
-- [The 13 rules](/methodology/rules) — what the workflow enforces.
+- [Agentile primer](/start/agentile), overview and benefits.
+- [The 13 rules](/methodology/rules), what the workflow enforces.
 
 > Convenience skills (`/sprint kickoff|daily|close|status`, `/journal`,
 > `/case-study`, `/essay`, `/audit-drive`, `/claim-grade`) automate the
-> file-shuffling — but the methodology works with just `git` and an editor.
+> file-shuffling, but the methodology works with just `git` and an editor.
 
 ## Security & access
 

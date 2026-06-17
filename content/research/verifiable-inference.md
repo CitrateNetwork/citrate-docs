@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # The Substrate of Verifiable Inference
 
-> How Citrate mechanizes on-chain verification of off-chain AI work — Q16.16
+> How Citrate mechanizes on-chain verification of off-chain AI work, Q16.16
 > fixed-point arithmetic, Halo2-KZG proofs, and TEE attestation gates. Summary +
 > link to Gradient Paper X.
 
@@ -24,13 +24,13 @@ Papers I–IX describe *what* Citrate does; Paper X describes *how the on-chain
 verification of off-chain AI work is actually mechanized*. The goal is to certify
 off-chain AI **without trusted custodians**. The substrate has four layers:
 
-1. **Q16.16 fixed-point arithmetic** — bit-deterministic numeric primitives,
+1. **Q16.16 fixed-point arithmetic**, bit-deterministic numeric primitives,
    identical across every CPU.
-2. **Tensor canonical wire format** — one byte layout that crosses the
+2. **Tensor canonical wire format**, one byte layout that crosses the
    contract/precompile boundary.
-3. **Halo2-KZG ZK verifier** — a proving system whose SRS is the public
+3. **Halo2-KZG ZK verifier**, a proving system whose SRS is the public
    Powers-of-Tau k=18 ceremony.
-4. **TEE attestation gates** — for operations that can't be ZK-proven (e.g. a
+4. **TEE attestation gates**, for operations that can't be ZK-proven (e.g. a
    70B-param LLM), an attestation contract gates precompile dispatch on signed
    evidence.
 
@@ -56,7 +56,7 @@ the hash than to the computation.
 `AttestationGate` trait. Today the production default is `AlwaysReject` (Phase 1):
 non-deterministic precompiles reject under strict mode. The gate is
 *pre-deployed* so that when the MAA + NVIDIA NRAS implementation ships it is a
-swap-in, not a redeploy — the chain keeps running while attestation is upgraded.
+swap-in, not a redeploy, the chain keeps running while attestation is upgraded.
 
 ## How it maps to the network
 
@@ -82,8 +82,7 @@ precompiles, the tensor wire format, the Halo2-KZG verifier, `InferenceCircuit`
 v1 (`out_dim=1, in_dim=2`), the PPoT k=18 SRS loader, and the `AttestationGate`
 trait + `AlwaysReject` are **implemented and on testnet 40204**. **Specified, not
 yet shipped:** the MAA+NRAS attestation implementation (target sprint CM-08), the
-RM-M2b in-circuit Q16 saturation lookup tables (a known v1 soundness limitation —
-input ranges are an off-chain witness contract today), and larger circuit
+RM-M2b in-circuit Q16 saturation lookup tables (a known v1 soundness limitation, input ranges are an off-chain witness contract today), and larger circuit
 dimensions (a config change, not new circuit logic). The TLA+ specs for verifier
 version monotonicity, Q16 determinism, dispatch injectivity, and the attestation
 gate are checked.

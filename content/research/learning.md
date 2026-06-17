@@ -14,8 +14,8 @@ author: Claude Opus 4.8 (1M context)
 
 # Federated Learning Cycles
 
-> How Citrate runs a learning round — propose → train → aggregate → verify →
-> checkpoint — on top of GhostDAG consensus, without ever touching consensus
+> How Citrate runs a learning round, propose → train → aggregate → verify →
+> checkpoint, on top of GhostDAG consensus, without ever touching consensus
 > state. For researchers and protocol engineers.
 
 ## Overview
@@ -26,7 +26,7 @@ that realizes this is the `citrate-learning` crate: a checkpoint-synchronized
 federated learning layer that rides *alongside* the chain. Nodes contribute
 embedding vectors with per-dimension confidence; at each BFT checkpoint these
 are aggregated using **paraconsistent (Belnap four-valued) aggregation**, routed
-through a small MLP, and — once the network reaches its full phase — distilled
+through a small MLP, and, once the network reaches its full phase, distilled
 into LoRA adapters with on-chain provenance.
 
 The single most important property is the **safety invariant** (Theorem 3): for
@@ -37,7 +37,7 @@ consensus (blue scores, finality checkpoints, finalized embeddings) and never
 learning output is committed as a separate `learning_root` hash that is
 provably independent of the state root.
 
-## Concept — the learning cycle
+## Concept, the learning cycle
 
 A learning round is a five-stage pipeline aligned to consensus checkpoints
 (default interval ~10 blocks). The crate models two nested loops:
@@ -56,12 +56,12 @@ The five conceptual stages map onto the OODA cycle and the checkpoint barrier:
 | **Train** | The MLP router takes a `train_step` against routing targets; the aggregated embedding seeds adapter creation. | `routing.rs::Router::train_step`, `phases.rs::LearningPipeline` |
 | **Aggregate** | Embeddings are combined by the **dual-output** paraconsistent aggregator → `(aggregated_embedding, Belnap state_vector, confidence)`. The **Orient** phase. | `aggregation.rs::ParaconsistentAggregator`, `belnap.rs::classify_belnap` |
 | **Verify** | Byzantine detection flags statistical outliers and Belnap-inconsistent contributors before they pollute the aggregate. | `verification.rs::ByzantineDetector` |
-| **Checkpoint** | At the BFT boundary, a deterministic `learning_root = SHA3-256(embedding ‖ state_vector ‖ height)` is computed for the block header — provably independent of `state_root`. The **Act** phase optionally emits a LoRA adapter. | `orchestration.rs::LearningOrchestrator::run_checkpoint_aggregation`, `checkpoint.rs::LearningCheckpoint` |
+| **Checkpoint** | At the BFT boundary, a deterministic `learning_root = SHA3-256(embedding ‖ state_vector ‖ height)` is computed for the block header, provably independent of `state_root`. The **Act** phase optionally emits a LoRA adapter. | `orchestration.rs::LearningOrchestrator::run_checkpoint_aggregation`, `checkpoint.rs::LearningCheckpoint` |
 
 ## How it maps to the network
 
 - **Trust weights come from consensus.** Blue scores from GhostDAG are folded
-  into aggregation as `softmax(blue_score / τ)` trust weights — a node that
+  into aggregation as `softmax(blue_score / τ)` trust weights, a node that
   cannot keep up with consensus carries little weight in learning
   (`belnap.rs::blue_scores_to_trust_weights`).
 - **Disagreement is preserved, not averaged away.** The aggregator emits a
@@ -117,5 +117,5 @@ contribution and the orchestration is not yet a finished product surface.
 - **Formal specs referenced in code:** `specs/tla/StrobilationCheckpoint.tla`
   (INV-2 learning-root determinism, INV-4 state-root independence, INV-5
   embedding quorum).
-- **Paper:** [Gradient Paper II — Paraconsistent Consensus](/research/paraconsistent).
+- **Paper:** [Gradient Paper II, Paraconsistent Consensus](/research/paraconsistent).
 - **No secrets on this page.** No keys, endpoints, or credentials.

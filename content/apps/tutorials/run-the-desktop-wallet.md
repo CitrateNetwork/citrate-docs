@@ -82,12 +82,12 @@ cargo run --release -p citrate-native
 
 The onboarding flow opens (`gui/citrate_native/ui/onboarding/onboarding.slint`):
 
-1. **Welcome** — continue past the intro.
-2. **Create a password** — at least 8 characters. This encrypts your wallet
+1. **Welcome**, continue past the intro.
+2. **Create a password**, at least 8 characters. This encrypts your wallet
    locally and **never leaves your device**.
-3. **Wallet provisioning** — the app generates and displays your recovery
+3. **Wallet provisioning**, the app generates and displays your recovery
    mnemonic. Write it down and store it offline.
-4. **Security confirmation** — acknowledge that you have backed up the phrase.
+4. **Security confirmation**, acknowledge that you have backed up the phrase.
 
 (Already have a wallet? Use the import option to restore from a mnemonic or
 private key instead.)
@@ -97,8 +97,8 @@ private key instead.)
 You'll land in the app shell with the sidebar
 (`ui/shell/sidebar.slint`). Try:
 
-- **Wallet** — your balance and transactions.
-- **DAG Explorer** — browse the BlockDAG and inspect a transaction.
+- **Wallet**, your balance and transactions.
+- **DAG Explorer**, browse the BlockDAG and inspect a transaction.
 
 When you re-open the app it will be locked; unlock with the password from step 4.
 
@@ -111,14 +111,14 @@ When you re-open the app it will be locked; unlock with the password from step 4
 ## Security notes
 
 - **No secrets in this tutorial.** Your password and mnemonic are created on
-  your machine — never paste your mnemonic into any website, chat, or file you
+  your machine, never paste your mnemonic into any website, chat, or file you
   don't control.
 - Building requires *your own* GitHub SSH access; no shared credential is needed
   or embedded here.
 
 ## Source & verification
 
-- **Source repo:** `citrate-native` — `README.md` "Quick start" (the build/run
+- **Source repo:** `citrate-native`, `README.md` "Quick start" (the build/run
   commands), `Cargo.toml` (default member), `rust-toolchain.toml` (toolchain),
   `gui/citrate_native/ui/onboarding/onboarding.slint` (onboarding steps).
 - **Audited against SHA:** `6416447`

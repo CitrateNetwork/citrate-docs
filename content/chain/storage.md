@@ -1,5 +1,5 @@
 ---
-title: Citrate Storage — State, RocksDB, Pruning, IPFS Pinning
+title: Citrate Storage, State, RocksDB, Pruning, IPFS Pinning
 codex_slug: /chain/storage
 tier: public
 org_scope: ~
@@ -12,12 +12,12 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Citrate Storage — State, RocksDB, Pruning, IPFS Pinning
+# Citrate Storage, State, RocksDB, Pruning, IPFS Pinning
 
 > How Citrate persists the BlockDAG, account/AI state, and model artifacts.
 > This page gives developers and operators the mental model first, then an
 > audited reference. The state-commitment and at-rest-encryption internals are
-> deeper (academic-tier) subsections — present because they are research-depth,
+> deeper (academic-tier) subsections, present because they are research-depth,
 > not because they are secret.
 
 ## Overview
@@ -34,7 +34,7 @@ The top-level coordinator is `StorageManager` (`src/lib.rs`), constructed via
 at-rest encryption). It owns the block store, transaction store, state stores,
 LRU caches, the pruner, and the optional IPFS service.
 
-> **Design note — flat KV state, not a Patricia trie.** Citrate does **not**
+> **Design note, flat KV state, not a Patricia trie.** Citrate does **not**
 > use a traditional Merkle Patricia Trie for the world state. State lives in
 > flat RocksDB column families, and the **state root is computed** as a
 > deterministic hash over the sorted state (see `#state-commitment`). This
@@ -51,7 +51,7 @@ LRU caches, the pruner, and the optional IPFS service.
 
 ## Reference
 
-### RocksDB backend — `src/db/`
+### RocksDB backend, `src/db/`
 
 - `RocksDB::open(path)` (`src/db/rocks_db.rs`) wraps `rocksdb::DB` and opens all
   column families with tuned options. Compression is **LZ4** in production (None
@@ -73,21 +73,21 @@ LRU caches, the pruner, and the optional IPFS service.
   buffers, bloom filters, an LRU block cache for metadata CFs, and parallelism
   scaled to CPU count.
 
-### Chain store — `src/chain/`
+### Chain store, `src/chain/`
 
-- `BlockStore` (`src/chain/block_store.rs`) — `put_block` writes a block plus its
+- `BlockStore` (`src/chain/block_store.rs`), `put_block` writes a block plus its
   parent→child DAG relations, height index, and blue set in one atomic batch.
   Latest height is cached for O(1) `get_latest_height()` (`RM-B1 / WP-C3.2`,
   audit L-STORE-01); read-modify-write of child links/height is serialized
   (`FUA-CHAIN-01`); truncated/corrupt values are treated as missing
   (`SECREM-01 CONS-6`). DAG queries: `get_children`, `get_blue_set`, `get_tips`,
   `put_tip` / `remove_tip`.
-- `TransactionStore` (`src/chain/transaction_store.rs`) — `put_transaction` /
+- `TransactionStore` (`src/chain/transaction_store.rs`), `put_transaction` /
   `put_transactions` (batched, fsync) with a sender-nonce index
   (`get_by_sender`), plus `put_receipt` / `get_receipt`. Producer-path commits
   use `write_batch_sync` (`REM-2 / WP-H1.3`).
 
-### State — `src/state/`, `src/state_manager.rs`
+### State, `src/state/`, `src/state_manager.rs`
 
 - `StateStore` (`src/state/state_store.rs`) over RocksDB: `get/put_account`,
   `get/put_storage`, `delete_storage`, `get/put_code`, `get_all_accounts`, and
@@ -95,10 +95,10 @@ LRU caches, the pruner, and the optional IPFS service.
   `get/put_model`, `get/put_training_job`. MVCC version tracking
   (`Sprint P950-A-4 WP-A.4.3`) lives in `CF_ACCOUNT_VERSIONS`:
   `put_account_version`, `get_all_account_versions`, `get_global_version`.
-- `AIStateTree` (`src/state/ai_state.rs`) — in-memory map of models, training
+- `AIStateTree` (`src/state/ai_state.rs`), in-memory map of models, training
   jobs, model-weight CIDs, an inference cache, and LoRA adapters, with
   `calculate_root()` over the AI sub-state.
-- `StateManager` (`src/state_manager.rs`) — composes `StateStore` + `AIStateTree`.
+- `StateManager` (`src/state_manager.rs`), composes `StateStore` + `AIStateTree`.
 
 #### {#state-commitment} State commitment
 
@@ -109,10 +109,10 @@ LRU caches, the pruner, and the optional IPFS service.
 deterministically: an account root (accounts sorted by address), a storage root
 (storage sorted by address), and an AI root (`AIStateTree::calculate_root()`),
 combined as `SHA3-256(account_root || storage_root || ai_root)`. The root is a
-function of the sorted state, not of a trie — every honest node with the same
+function of the sorted state, not of a trie, every honest node with the same
 state computes the same root.
 
-### Pruning — `src/pruning/`
+### Pruning, `src/pruning/`
 
 `Pruner` (`src/pruning/pruner.rs`) with `PruningConfig` (`keep_blocks`,
 `keep_states`, `interval`, `batch_size`, `auto_prune`) and `PruningStats`.
@@ -122,9 +122,9 @@ below a threshold; `compact()` triggers RocksDB compaction afterwards.
 `start_auto_pruning` runs the loop on the configured interval. Auto-pruning is
 spawned by `StorageManager::start_services()`.
 
-### IPFS model storage & pinning — `src/ipfs/`
+### IPFS model storage & pinning, `src/ipfs/`
 
-- `IPFSService` (`src/ipfs/mod.rs`) — HTTP client to an IPFS daemon:
+- `IPFSService` (`src/ipfs/mod.rs`), HTTP client to an IPFS daemon:
   `store_model` / `retrieve_model`, `list_pinned_models`, `get_model_metadata`,
   `fetch_raw`. `IpfsDaemon` (`src/ipfs/daemon.rs`) manages a local kubo daemon
   lifecycle (`install`/`start`/`stop`/`health_check`).
@@ -136,11 +136,11 @@ spawned by `StorageManager::start_services()`.
   replica counts and accrued `PinReward`s per CID and per pinner;
   `record_external_pin` registers a pin; rewards scale by pinned bytes, model
   type, and duration. `PersistentPinRegistry` (`WP-R.4`) persists the registry.
-- `EncryptedIPFSStore` (`src/ipfs/encrypted_store.rs`) — optional client-side
+- `EncryptedIPFSStore` (`src/ipfs/encrypted_store.rs`), optional client-side
   encryption (AES-256-GCM, per-chunk nonce/tag) with an address-based access
   control list for authorized recipients; public metadata stays in the clear.
 
-### Caching — `src/cache/`
+### Caching, `src/cache/`
 
 `Cache<K, V>` (`src/cache/lru_cache.rs`) is a thread-safe LRU
 (`get`/`put`/`remove`/`contains`/`clear`). `StorageManager` keeps a hot
@@ -152,7 +152,7 @@ spawned by `StorageManager::start_services()`.
 > operators evaluating at-rest protection; the cryptographic argument is
 > research-depth.
 
-When enabled via `StorageConfig`, the storage layer applies **QSSP** — a
+When enabled via `StorageConfig`, the storage layer applies **QSSP**, a
 crypto-agile, post-quantum hybrid envelope (`src/crypto/`): a hybrid KEM
 combining **ML-KEM (CRYSTALS-Kyber)** with **X25519**, feeding **AES-256-GCM**
 data encryption, to resist "harvest now, decrypt later". Per-column-family keys
@@ -183,7 +183,7 @@ storage.initialize_encryption("…operator-supplied passphrase…")?;
 
 ## Security & access
 
-- **Tier: public** for the storage model and reference — this is what a
+- **Tier: public** for the storage model and reference, this is what a
   developer/operator needs to reason about persistence and pruning. The
   `#state-commitment` and `#at-rest` subsections are marked **academic** because
   the cryptographic constructions are research-depth, not secret.
@@ -195,9 +195,9 @@ storage.initialize_encryption("…operator-supplied passphrase…")?;
 ## Source & verification
 
 - **Source repo / path:** `citrate-chain/core/storage/`
-- **Truth document (Rule 9):** `core/storage/README.md` — this page summarizes
+- **Truth document (Rule 9):** `core/storage/README.md`, this page summarizes
   and links; it does not duplicate the README.
 - **Audited against SHA:** `03d7851`
   (`git -C citrate-chain rev-parse --short HEAD`).
 - **Honest status:** internally tested (durability/fsync suite + coverage
-  targets); **pre external audit** — not certified.
+  targets); **pre external audit**, not certified.

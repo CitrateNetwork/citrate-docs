@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Learning Center (edu) Contracts
 
-> The on-chain contracts behind the Citrate **Learning Center** — the K-12 /
+> The on-chain contracts behind the Citrate **Learning Center**, the K-12 /
 > institutional stack: classrooms, role trees, per-classroom budgets, teacher
 > cashouts, mentor matching, the school treasury vault, and the testnet
 > contribution payout. For developers and institution integrators building on
@@ -24,7 +24,7 @@ author: Claude Opus 4.8 (1M context)
 
 This page is **transcluded**: the truth lives in `citrate-chain` at the pinned
 SHA (`03d7851`). Every function and event below is audited against the `.sol`
-source cited per section — if a symbol is not listed here, it does not exist in
+source cited per section, if a symbol is not listed here, it does not exist in
 the contract at this SHA. The ABI is summarized, not reproduced (Rule 9); link
 to the source for the full interface.
 
@@ -34,7 +34,7 @@ to the source for the full interface.
 > third-party audit. The pilot deployment is testnet-beta. Treat as
 > experimental; do not custody material value. The deployed `InstitutionalVault`
 > in particular ships with a **non-operational 2-of-3 multisig** on testnet
-> (signers not yet rotated — see Security & access).
+> (signers not yet rotated, see Security & access).
 
 ### Contract map
 
@@ -98,9 +98,9 @@ Source: `contracts/src/edu/ClassroomClusterV1.sol` (license BUSL-1.1),
 `is IClassroomCluster`. Implements `ScopedRoleTree.tla` (Q-005), 8 invariants.
 
 **Purpose.** Versioned replacement for `ClassroomRegistry` (LC-8): scoped
-multi-role RBAC for an institution. Two role planes — **org roles**
+multi-role RBAC for an institution. Two role planes, **org roles**
 (`None / IT / Admin / SuperAdmin`) and per-classroom roles
-(`None / Student / TA / Teacher`) — plus a FERPA-aligned **account status** state
+(`None / Student / TA / Teacher`), plus a FERPA-aligned **account status** state
 machine (`Active / Inactive / Suspended / Withdrawn / Transferred / Graduated /
 Expelled`) replacing the old binary revoke flag. Governance uses a two-step
 transfer (`transferGovernance` → `acceptGovernance`) so a lost or mistyped
@@ -119,7 +119,7 @@ governance key cannot permanently lock the institution.
 | `transferStudent(address student, uint256 from, uint256 to)` | source teacher or Admin+ | Atomic move between classrooms. |
 | `registerDevice(bytes32 deviceCertHash, address)` / `revokeDevice(bytes32)` | `onlyIT` | Device cert registry. |
 | `getOrgRole`, `getClassroomRole`, `getAccountStatus`, `isActiveMember`, `isDeviceActive`, `getDeviceUser`, `getClassroomInfo`, `getClassroomName`, `getClassroomTeacher`, `getStudentCount` | view | Read accessors. |
-| `claimClassroom(address, uint256)` | pure | Migration placeholder — returns `0` (not yet implemented at this SHA). |
+| `claimClassroom(address, uint256)` | pure | Migration placeholder, returns `0` (not yet implemented at this SHA). |
 
 ### Events
 
@@ -174,7 +174,7 @@ or rejects; a teacher cannot approve their own request. Tracks a SALT↔USD rate
 | Function | Access | Purpose |
 |---|---|---|
 | `requestCashout(uint256 classroomId, uint256 saltAmount, bytes32 reasonHash)` → `uint256` | any (becomes requester) | File a cashout request, returns its id. |
-| `approveCashout(uint256 requestId)` | `onlyGovernance` | Approve a pending request (not the requester — `SelfApproval` revert). |
+| `approveCashout(uint256 requestId)` | `onlyGovernance` | Approve a pending request (not the requester, `SelfApproval` revert). |
 | `rejectCashout(uint256 requestId, bytes32 rejectionReasonHash)` | `onlyGovernance` | Reject a pending request. |
 | `setSaltUsdRate(uint256 rateBasisPoints)` | `onlyGovernance` | Update the displayed SALT/USD rate. |
 | `proposeGovernance(address)` / `acceptGovernance()` | `onlyGovernance` / pending | Two-step governance transfer. |
@@ -228,7 +228,7 @@ Defaults: `mentorCap = 3`, `trustFloor = 19661` (≈0.30), `minAccuracyGap = 327
 Source: `contracts/src/edu/InstitutionalVault.sol` (BUSL-1.1),
 `is IInstitutionalVault`. Q-004 `InstitutionalVaultSafety.tla`, 9 invariants.
 
-**Tier: commercial.** Multi-sig treasury for school-controlled SALT — operator
+**Tier: commercial.** Multi-sig treasury for school-controlled SALT, operator
 depth surfaced to contracted institutions, not anonymous developers. No secrets
 appear on this page.
 
@@ -294,14 +294,13 @@ locked before distribution; each participant claims exactly once.
 
 ## Tutorials
 
-- [Read a verified contract](/contracts/tutorials/read-a-contract) — query any of
+- [Read a verified contract](/contracts/tutorials/read-a-contract), query any of
   these contracts over `eth_call` / an SDK without sending a transaction.
 
 ## Security & access
 
 - **Tier rationale.** ClassroomRegistry, ClassroomClusterV1, BudgetAllocation,
-  CashoutRequest, MentorMatcher and TestnetFarmingAccounting are **public** —
-  they are the open building blocks an institution integrator needs, and their
+  CashoutRequest, MentorMatcher and TestnetFarmingAccounting are **public**, they are the open building blocks an institution integrator needs, and their
   ABIs are inherently public on-chain. **InstitutionalVault is commercial**: it
   is the treasury operator surface for contracted institutions; gating the
   narrative (not the bytecode, which is public) honors the paid relationship.

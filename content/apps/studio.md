@@ -1,5 +1,5 @@
 ---
-title: Citrate Studio — Native Agent-Harness Interface (Overview)
+title: Citrate Studio, Native Agent-Harness Interface (Overview)
 codex_slug: /apps/studio
 tier: public
 org_scope: ~
@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Citrate Studio
 
-> The native agent-harness interface for the Citrate runtime — a creative tool for driving a
+> The native agent-harness interface for the Citrate runtime, a creative tool for driving a
 > compliance-first agent. For operators and builders who want the runtime's safety machinery to be
 > visible and usable rather than buried.
 
@@ -22,8 +22,8 @@ author: Claude Opus 4.8 (1M context)
 
 Citrate Studio is the native UI for driving the Citrate agent runtime. It hides the transformer at the
 top (chat) and reveals the calldata at the bottom (code), so each layer down trades one abstraction for
-one truth. The compliance the runtime enforces — hash-pinned approvals, the quorum lattice, the doctor
-checks, the tripwires, and frame-accurate audit replay — is surfaced as the primary interface rather
+one truth. The compliance the runtime enforces, hash-pinned approvals, the quorum lattice, the doctor
+checks, the tripwires, and frame-accurate audit replay, is surfaced as the primary interface rather
 than hidden plumbing.
 
 It is built in Slint, descends from the Citrate Marketplace design system, and renders
@@ -37,9 +37,9 @@ want a consistent agent-control surface.
 
 Tier: **public** for this overview only.
 
-> **The implementation docs are Confidential and gated.** Citrate Studio's internals — the design spec,
+> **The implementation docs are Confidential and gated.** Citrate Studio's internals, the design spec,
 > the real-vs-modeled-vs-gated completion map, the policy/signer-roster/approval-queue/capsule-dispatch
-> implementation, packaging and release detail — are **not** authored into Codex. They live in the
+> implementation, packaging and release detail, are **not** authored into Codex. They live in the
 > private `citrate-studio` repo and are served at request time (S3 runtime gating) to authorized
 > principals only. This page is a public-safe overview that points to that gated material; it
 > deliberately does not reproduce competitive implementation depth, and it contains **no secrets**.

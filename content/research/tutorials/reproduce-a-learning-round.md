@@ -14,23 +14,23 @@ author: Claude Opus 4.8 (1M context)
 
 # Tutorial: Reproduce a Learning Round
 
-> Run a complete federated learning round — propose → aggregate → verify →
-> route → checkpoint — locally against the `citrate-learning` crate, and read
+> Run a complete federated learning round, propose → aggregate → verify →
+> route → checkpoint, locally against the `citrate-learning` crate, and read
 > the Belnap state vector and LoRA adapter it produces. For researchers.
 
 This tutorial runs the **real** learning engine that ships in `citrate-chain`.
-It does not require a running node — the engine is exercised by the crate's own
+It does not require a running node, the engine is exercised by the crate's own
 end-to-end tests and by a short program you can paste into a test. Everything
 below maps 1:1 to the concepts in [Federated learning cycles](/research/learning)
 and [Paraconsistent consensus](/research/paraconsistent).
 
 ## Prerequisites
 
-- A Rust toolchain (`rustup`, stable) — `cargo --version` should work.
+- A Rust toolchain (`rustup`, stable), `cargo --version` should work.
 - A local checkout of `citrate-chain` at SHA `03d7851` (or later).
 - ~5 minutes.
 
-## Step 1 — Build and run the learning test suite
+## Step 1, Build and run the learning test suite
 
 The crate already contains the full pipeline as tests. Confirm it builds and the
 propose→aggregate→route→adapt path passes:
@@ -43,11 +43,11 @@ cargo test -p citrate-learning
 You should see the unit + integration suite pass (the crate README reports 272
 tests). The ones that matter for a learning round live in:
 
-- `core/learning/tests/e2e_ooda_pipeline.rs` — full OODA cycle across 3
+- `core/learning/tests/e2e_ooda_pipeline.rs`, full OODA cycle across 3
   participants (aggregation, Belnap classification, routing, LoRA, safety,
   Byzantine detection, persistence).
-- `core/learning/tests/belnap_adversarial.rs` — disagreement handling.
-- `core/learning/tests/lora_provenance.rs` — adapter provenance chain.
+- `core/learning/tests/belnap_adversarial.rs`, disagreement handling.
+- `core/learning/tests/lora_provenance.rs`, adapter provenance chain.
 
 To run just the end-to-end pipeline:
 
@@ -55,7 +55,7 @@ To run just the end-to-end pipeline:
 cargo test -p citrate-learning --test e2e_ooda_pipeline
 ```
 
-## Step 2 — Run one round yourself
+## Step 2, Run one round yourself
 
 Add this as a test (e.g. `core/learning/tests/my_round.rs`) and run it. It walks
 the five stages explicitly. The API is taken directly from
@@ -77,8 +77,7 @@ fn reproduce_a_learning_round() {
         lora_rank: 2,
         macro_confidence_threshold: 0.5,
         macro_loss_threshold: 0.5,
-        macro_consecutive_checkpoints: 1,
-        ..LearningConfig::default()
+        macro_consecutive_checkpoints: 1..LearningConfig::default()
     };
 
     let mut pipeline = LearningPipeline::new(&config);
@@ -128,20 +127,20 @@ Run it:
 cargo test -p citrate-learning --test my_round -- --nocapture
 ```
 
-## Step 3 — Read what happened
+## Step 3, Read what happened
 
 - **Dimension 0** had one strongly-negative contributor and two positive ones, so
-  its Belnap state should resolve to **B (Both)** — the network *records the
+  its Belnap state should resolve to **B (Both)**, the network *records the
   disagreement* instead of averaging it to a misleading near-zero. This is the
   whole point of [paraconsistent aggregation](/research/paraconsistent).
-- The **router** received `(query, aggregated_embedding, state_vector)` — it can
+- The **router** received `(query, aggregated_embedding, state_vector)`, it can
   route B-state dimensions to multiple downstream destinations rather than
   trusting a fictional mean.
 - The **adapter** is only produced once `macro_mgr.can_adapt()` is true (the
   `FullSystem` macro-phase). In `Collection`/`RoutingActive` the `Act` stage
-  produces no adapter — verify by passing `false` to `execute_cycle`.
+  produces no adapter, verify by passing `false` to `execute_cycle`.
 
-## Step 4 — (Optional) See the safety invariant
+## Step 4, (Optional) See the safety invariant
 
 The learning round must never change execution state. The `SafetyGuard`
 (`core/learning/src/safety.rs`) enforces that the state root is identical whether
@@ -153,12 +152,12 @@ cargo test -p citrate-learning safety
 
 ## What you reproduced
 
-You ran the same five stages a live checkpoint runs — propose, aggregate
+You ran the same five stages a live checkpoint runs, propose, aggregate
 (paraconsistent dual output), verify (Byzantine detection in the e2e test),
 route, and the deterministic checkpoint `learning_root`
 (`core/learning/src/orchestration.rs`). The difference from a live network is
 the source of embeddings (here, hand-written; on-chain, gossiped from finalized
-blocks) and the wiring into the node binary — which is the
+blocks) and the wiring into the node binary, which is the
 [current integration frontier](/research/learning#honest-status).
 
 ## Source & verification

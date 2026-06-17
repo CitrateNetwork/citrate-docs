@@ -37,7 +37,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [viewerId, setViewerIdState] = useState(DEFAULT_VIEWER.id);
   const [oidcSession, setOidcSession] = useState<AuthSession>(ANON);
   const [loading, setLoading] = useState(AUTH_MODE === "oidc");
-  const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
     const v = localStorage.getItem("codex.viewer");
@@ -59,7 +59,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.dataset.theme = theme;
     localStorage.setItem("codex.theme", theme);
   }, [theme]);
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Disclosure } from "@/prototype/fixtures";
+import { Icon } from "./icons";
 
 /** Disclosure gate before a Confidential doc renders (DESIGN_BRIEF §5.4). */
 export function DisclosureModal({
@@ -18,7 +19,7 @@ export function DisclosureModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div role="dialog" aria-modal className="w-full max-w-lg rounded-2xl border bg-[var(--color-elevated)] p-6">
         <div className="mb-2 flex items-center gap-2">
-          <span aria-hidden>🔒</span>
+          <Icon name="lock" size={16} />
           <h2 className="text-lg font-semibold">{disclosure.title}</h2>
         </div>
         <p className="mb-4 text-sm leading-relaxed text-[var(--color-muted)]">{disclosure.body}</p>

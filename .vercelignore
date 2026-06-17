@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+out
+build
+sbom.cyclonedx.json
+*.tsbuildinfo
+.env*.local
+.DS_Store
+# large content sources not needed by the app build (transcluded/linked, not imported)
+citrate-agentile-archive

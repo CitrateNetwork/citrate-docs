@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Run a Citrate Node
 
-> How to run a Citrate node — devnet (local), testnet, or via Docker — on chainId
+> How to run a Citrate node, devnet (local), testnet, or via Docker, on chainId
 > **40204**. For anyone who wants to operate a node; no login required.
 
 ## Overview
@@ -36,7 +36,7 @@ Network facts (audited against `README.md` and the `config/` TOML at SHA `03d785
 | Default P2P | `:30303` |
 | Default metrics | `:9100` |
 
-This page is **transcluded** — the canonical run instructions live in
+This page is **transcluded**, the canonical run instructions live in
 `citrate-chain` README + `docs/OPERATIONS.md`. See those at the pinned SHA.
 
 ## Install / Setup
@@ -112,7 +112,7 @@ ps -o rss= -p "$(pgrep -f citrate-node | head -1)"
 ```
 
 Memory health (`docs/OPERATIONS.md`): healthy ≤ 1.2 GB; watch 1.2–2 GB; >2 GB is
-leak-class — trip the `mining = false` circuit breaker (node still serves RPC
+leak-class, trip the `mining = false` circuit breaker (node still serves RPC
 reads at ~1 GB, only writes stop); alert fires at >3 GB.
 
 ## Examples
@@ -126,17 +126,17 @@ curl http://127.0.0.1:8545
 
 ## Tutorials
 
-- [Sell compute (operator SOP)](/operators/sell-compute) — once your node is up.
+- [Sell compute (operator SOP)](/operators/sell-compute), once your node is up.
 
 ## Security & access
 
 Tier **public**: running a node is public-good developer/operator material.
 
-**Security notes — no secrets on this page.** RPC ships with **no TLS and no
+**Security notes, no secrets on this page.** RPC ships with **no TLS and no
 auth** (SECREM-01 CFG-2). On bare metal it defaults to loopback; if you bind to
 `0.0.0.0`, you must set `CITRATE_OPERATOR_TOKEN` and front the endpoint with a
 TLS-terminating reverse proxy with an explicit CORS allow-list. The devnet
-coinbase (`f39Fd6e…`) is a well-known Hardhat test account — **never use it on
+coinbase (`f39Fd6e…`) is a well-known Hardhat test account, **never use it on
 testnet or production**, and never reuse the example dev keys. The dev-only
 `CITRATE_REQUIRE_VALID_SIGNATURE=false` and `CITRATE_ALLOW_PLAINTEXT_P2P=1`
 switches must stay off outside local development.

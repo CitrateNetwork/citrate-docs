@@ -48,7 +48,7 @@ per-command with `--rpc <URL>` or the `CITRATE_RPC` env var.
 ```bash
 citrate account create
 # Enter a keystore password when prompted.
-# Prints: Address: 0x…   (note this — it's your deployer)
+# Prints: Address: 0x…   (note this, it's your deployer)
 ```
 
 List it back any time:

@@ -44,21 +44,19 @@ wallet-extension, passkey) installs its own validator module.
 
 ### CitrateWalletFactory
 `contracts/src/aa/factory/CitrateWalletFactory.sol`. Per
-`ADR-2026-06-05-ew-surface-interop`, salt = `keccak256(abi.encodePacked(userId))`
-— **init data is deliberately not mixed into the salt** so the address is stable.
+`ADR-2026-06-05-ew-surface-interop`, salt = `keccak256(abi.encodePacked(userId))`, **init data is deliberately not mixed into the salt** so the address is stable.
 To stop a third party deploying someone else's `userId` with hostile init data,
 every deploy requires an EIP-191 signature from a configured `identitySigner`
 (operated by `auth.citrate.ai`) committing to `(this, chainId, userId,
 keccak256(initData), expiresAt)`.
 
 Functions:
-- `predictAddress(userId)` — view; offline-computable deterministic address
-- `deployFor(userId, initialValidator, initData, expiresAt, signature)` —
-  `payable`; permit-gated, idempotent (returns existing account if already
+- `predictAddress(userId)`, view; offline-computable deterministic address
+- `deployFor(userId, initialValidator, initData, expiresAt, signature)`, `payable`; permit-gated, idempotent (returns existing account if already
   deployed). `initialValidator` is informational (for the event), not the source
-  of truth — `initData` instructs the Kernel which validator to install
-- `permitDigest(userId, initData, expiresAt)` — view; the digest the signer signs
-- `setIdentitySigner(newSigner)` / `transferOwnership(newOwner)` — `owner` only
+  of truth, `initData` instructs the Kernel which validator to install
+- `permitDigest(userId, initData, expiresAt)`, view; the digest the signer signs
+- `setIdentitySigner(newSigner)` / `transferOwnership(newOwner)`, `owner` only
 
 Public state: `implementation` (immutable Kernel v3), `identitySigner`, `owner`.
 Events: `AccountDeployed`, `IdentitySignerRotated`, `OwnerTransferred`.
@@ -66,7 +64,7 @@ Errors: `ImplementationNotDeployed`, `PermitExpired`, `InvalidSigner`,
 `InitializeFailed`, `ZeroAddress`, `NotOwner`.
 
 ### CitratePaymaster
-`contracts/src/aa/paymaster/CitratePaymaster.sol` — extends `@account-abstraction`
+`contracts/src/aa/paymaster/CitratePaymaster.sol`, extends `@account-abstraction`
 `BasePaymaster`. Three sponsorship categories selected by a 1-byte tag at offset
 52 of `paymasterAndData` (after the ERC-4337 v0.7 prefix): `0x00` standard,
 `0x01` recovery, `0x02` first-op. Only `registrar`-registered wallets are
@@ -88,7 +86,7 @@ Events: `WalletRegistered`, `WalletUnregistered`, `RegistrarSet`,
 `FirstOpCapSet`. (See `/aa/paymaster` for the full policy + bundler topology.)
 
 ### CitrateECDSAValidator
-`contracts/src/aa/validators/CitrateECDSAValidator.sol` — `IValidator` + `IHook`
+`contracts/src/aa/validators/CitrateECDSAValidator.sol`, `IValidator` + `IHook`
 module binding ONE owner EOA per install. Install data is `address owner | uint8
 source` (21 bytes); `Source` is metadata only (`GuiNative`, `WalletExtension`,
 `Other`). `validateUserOp` accepts a raw 65-byte ECDSA sig over `userOpHash` or
@@ -100,7 +98,7 @@ Events: `OwnerRegistered`, `OwnerUninstalled`. Errors: `AlreadyInstalled`,
 `InvalidInstallData`, `InvalidOwner`.
 
 ### WebAuthnP256Validator
-`contracts/src/aa/validators/WebAuthnP256Validator.sol` — `IValidator` + `IHook`
+`contracts/src/aa/validators/WebAuthnP256Validator.sol`, `IValidator` + `IHook`
 passkey module; one P-256 passkey `(x, y)` + `credentialIdHash` per install
 (install data 97 bytes: `credentialIdHash | x | y | uint8 requireUV`).
 `validateUserOp` ABI-decodes `(authenticatorData, clientDataJSON,
@@ -114,7 +112,7 @@ Public `passkeyOf(smartAccount)`. Events: `PasskeyRegistered`,
 `PreCheckSenderMismatch`. (See `/aa/passkeys`.)
 
 ### GuardianRecoveryModule
-`contracts/src/aa/recovery/GuardianRecoveryModule.sol` — `IValidator` + `IHook`
+`contracts/src/aa/recovery/GuardianRecoveryModule.sol`, `IValidator` + `IHook`
 M-of-N social recovery. Guardians: min 2, max 7. Install data is
 `uint8 threshold | uint8 count | address[count]` (2 + 20×count bytes); duplicate
 or zero guardians revert. Citrate is never a guardian.
@@ -132,7 +130,7 @@ Errors: `AlreadyInstalled`, `InvalidInstallData`, `InvalidGuardianCount`,
 (See `/aa/guardians`.)
 
 ### Forwarder (EIP-2771)
-`contracts/src/edu/Forwarder.sol` — EIP-2771 meta-transaction forwarder for
+`contracts/src/edu/Forwarder.sol`, EIP-2771 meta-transaction forwarder for
 sponsored student actions (the edu/classroom surface; implements the 8 invariants
 of `Q-006 ForwarderReplaySafety.tla`). EIP-712 domain `"CitrateEduForwarder"` v1.
 
@@ -141,7 +139,7 @@ of `Q-006 ForwarderReplaySafety.tla`). EIP-712 domain `"CitrateEduForwarder"` v1
 > `contracts/src/edu/Forwarder.sol`. See registry corrections below.
 
 Functions:
-- `execute(ForwardRequest request, bytes signature)` — `onlyRelayer`; enforces
+- `execute(ForwardRequest request, bytes signature)`, `onlyRelayer`; enforces
   nonce monotonicity, no-replay (consumed tx-hash set), device binding +
   principal-not-revoked (via `IClassroomCluster`), session expiry, and
   "relayer cannot call the vault" (CEI ordering)
@@ -180,7 +178,7 @@ See `/aa/tutorials` for the embedded-wallet onboarding and recovery walkthroughs
 **Tier: commercial.** This is the embedded-wallet implementation depth a
 competitor would want to clone (identity-keyed deploy, fail-closed sponsorship,
 per-surface validators, social recovery), gated to contracted builders. **No
-secrets here** — `identitySigner` and the `registrar`/`owner` are roles, not
+secrets here**, `identitySigner` and the `registrar`/`owner` are roles, not
 keys; no private keys, mnemonics, or internal endpoints are present.
 `auth.citrate.ai` is named as the operator role, not a credential. **Pre-audit:**
 the `CitrateWalletFactory` salt-without-initData design is mitigated by the

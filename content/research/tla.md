@@ -34,14 +34,14 @@ A TLA+ spec is the source of truth for a state machine: it declares the legal
 states and transitions, then asserts invariants (e.g. "no finalize without a
 valid quorum"). TLC explores the reachable state space and reports any
 invariant violation as a counterexample trace. This catches design bugs before
-they reach code — and the spec→code mapping is recorded in
+they reach code, and the spec→code mapping is recorded in
 [`formal/mapping/`](../../../citrate-agentile-archive/formal/mapping/)
 (`tla_to_solidity.md`, `tla_to_slint.md`).
 
 > **Honest count.** Legacy summary files cite varying totals (101 vs 121) as
 > the corpus grew. Always take current spec counts, invariant totals, and TLC
 > outcomes from the canonical `formal/specs/INDEX.md` and the per-repo
-> `VERIFICATION_REPORT.txt` — not from older summaries.
+> `VERIFICATION_REPORT.txt`, not from older summaries.
 
 ## Domains
 
@@ -54,9 +54,9 @@ The corpus is organized by domain. The canonical `INDEX.md` groups specs as:
 | **learning** | OODA cycle phases, adapter provenance, paraconsistent aggregation, mentor selection | `OODACycle`, `AdapterProvenance`, `ParaconsistentAggregation`, `MentorSelection` |
 | **contracts** | Trust scoring, spec-registry lifecycle, inference-request lifecycle | `TrustScoring`, `SpecRegistryLifecycle`, `InferenceRequestLifecycle` |
 | **compute** | x402 server-side settlement, batch-inference gateway escrow | `X402FacilitatorSettle`, `GatewayBatchLifecycle` |
-| **gui** | Desktop/Slint state machines — auth, wallet session, navigation, send/deploy flows | `AuthStateMachine`, `WalletSessionLifecycle`, `SendTransactionFlow`, `ContractDeploymentFlow` |
+| **gui** | Desktop/Slint state machines, auth, wallet session, navigation, send/deploy flows | `AuthStateMachine`, `WalletSessionLifecycle`, `SendTransactionFlow`, `ContractDeploymentFlow` |
 | **network** | P2P/transport state machines | network domain specs |
-| **agent** | Agent-harness safety — approval, grants, trails, sidecars, e-stop (Belnap lattice, Byzantine detection) | `BelnapLattice`, `ByzantineDetection`, `SafetyInvariant` |
+| **agent** | Agent-harness safety, approval, grants, trails, sidecars, e-stop (Belnap lattice, Byzantine detection) | `BelnapLattice`, `ByzantineDetection`, `SafetyInvariant` |
 
 Additional domains in the canonical tree: **iot** (inter-organizational
 transfer), **halo2**, **wallet**, plus **legacy-gui** and **audit-archive**
@@ -73,7 +73,7 @@ Specs are checked with TLC (the TLA+ model checker; Java 11+ and
 # Run the local runnable subset (single category sweep, 4 workers)
 cd specs/tla && bash run_all.sh
 
-# Deep verification (more workers, long timeout) — run on demand
+# Deep verification (more workers, long timeout), run on demand
 cd specs/tla && bash run_deep.sh
 
 # A single spec
@@ -93,8 +93,7 @@ or UI-state invariants.
 
 ## Where specs live (per repo)
 
-- **Canonical corpus:** `citrate-agentile-archive/formal/specs/<domain>/` —
-  authoritative for counts and coverage. Index: `formal/specs/INDEX.md`.
+- **Canonical corpus:** `citrate-agentile-archive/formal/specs/<domain>/`, authoritative for counts and coverage. Index: `formal/specs/INDEX.md`.
 - **citrate-chain:** `specs/tla/{consensus,zk,learning,contracts,compute,gui}/`
   with `run_all.sh`, `run_deep.sh`, and `VERIFICATION_REPORT.txt`. The chain
   README notes this is a runnable subset and is not authoritative for counts.

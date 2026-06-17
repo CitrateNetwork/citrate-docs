@@ -22,7 +22,7 @@ author: Claude Opus 4.8 (1M context)
 ## Overview
 
 Citrate is a BlockDAG (GhostDAG ordering, ECVRF proposer election, committee BFT
-checkpoints — see [Consensus](/chain/consensus)). It ships several networks that
+checkpoints, see [Consensus](/chain/consensus)). It ships several networks that
 share the same chain ID and consensus constants but differ in block cadence and
 committee sizing. Genesis is **deterministic**: the same config produces the
 same state root and the same genesis block hash on every node
@@ -63,10 +63,10 @@ differ. From `node/config/*.toml`:
 | Checkpoint `interval` | 50 blocks | 50 blocks | 50 blocks | TBD |
 | Committee `committee_size` | 100 | 100 | 10 | TBD |
 | `quorum_threshold` | 67 | 67 | 7 | TBD |
-| `strict_vrf` | false | true | true | — |
+| `strict_vrf` | false | true | true |, |
 
 The committee BFT checkpoint layer finalizes every 50 blocks once a quorum of
-the committee votes (2/3 + 1 — i.e. 67/100 on testnet, 7/10 on team testnet);
+the committee votes (2/3 + 1, i.e. 67/100 on testnet, 7/10 on team testnet);
 see [Consensus → finality](/chain/consensus#finality). GhostDAG `k = 18` and a
 max of 10 parents per block are the global consensus constants. The network
 targets ≤ 12 s finality.
@@ -108,7 +108,7 @@ Each network config lists its `bootstrap_nodes` / listen addresses in its
 `node/config/*.toml`, with `config/bootstrap-nodes.json` as a seed list. Testnet
 beta exposes JSON-RPC and WebSocket; mainnet's bootstrap list is an empty
 placeholder pending launch. For current connection endpoints use the public
-testnet docs / faucet rather than copying values from config — addresses change
+testnet docs / faucet rather than copying values from config, addresses change
 and some are operational.
 
 ## Examples
@@ -131,7 +131,7 @@ citrate-node --config node/config/testnet.toml
 
 ## Tutorials
 
-- [Run a node](/operators/run-a-node) — pick a network config and join. **Tier:
+- [Run a node](/operators/run-a-node), pick a network config and join. **Tier:
   public.**
 
 ## Security & access
@@ -139,11 +139,11 @@ citrate-node --config node/config/testnet.toml
 - **Tier: public.** Chain ID, consensus constants, block cadence, finality
   committee sizing, and genesis block parameters are exactly what a developer or
   operator needs to connect and reason about the network.
-- **No secrets here.** **No genesis private keys or mnemonics** — none exist in
+- **No secrets here.** **No genesis private keys or mnemonics**, none exist in
   the repository; the code carries only public addresses, and key material is
   held out-of-band. We **do not enumerate genesis account addresses** in public
   docs (allocation *structure* is on [Economics](/chain/economics)), and we do
-  not paste live bootstrap multiaddrs/IPs here — fetch operational endpoints from
+  not paste live bootstrap multiaddrs/IPs here, fetch operational endpoints from
   the public testnet docs/faucet.
 
 ## Source & verification
@@ -152,7 +152,7 @@ citrate-node --config node/config/testnet.toml
   `citrate-chain/node/config/*.toml`, `citrate-chain/node/src/genesis.rs`,
   `citrate-chain/core/economics/src/genesis.rs`.
 - **Truth documents (Rule 9):** the per-network `node/config/*.toml` and the
-  shared genesis module — this page summarizes and links.
+  shared genesis module, this page summarizes and links.
 - **Audited against SHA:** `03d7851`
   (`git -C citrate-chain rev-parse --short HEAD`).
 - **Honest status:** testnet beta is the active public network; **mainnet is

@@ -15,7 +15,7 @@ author: Claude Opus 4.8 (1M context)
 # Guardians & Social Recovery
 
 > How a Citrate embedded-wallet user nominates guardians and recovers their
-> account with M-of-N approval — without a seed phrase, and **without Citrate
+> account with M-of-N approval, without a seed phrase, and **without Citrate
 > ever being a guardian**. For integrators building recovery UX.
 
 > **Status: pre-audit.** The guardian nomination service, the recovery module,
@@ -24,7 +24,7 @@ author: Claude Opus 4.8 (1M context)
 > `citrate-chain/test/aa/GuardianRecoveryE2E.t.sol` but treat the stack as
 > experimental.
 
-> **Transclusion note.** This is a draft of a `transcluded` reference — the truth
+> **Transclusion note.** This is a draft of a `transcluded` reference, the truth
 > lives in `citrate-identity/src/aa/guardians.ts` + `guardian-routes.ts` (and the
 > on-chain `GuardianRecoveryModule`). Final wiring (S6) points Codex at the source
 > repo at its SHA. Summarized + linked per Rule 9, not copied.
@@ -51,21 +51,21 @@ Source: `citrate-identity/src/aa/guardians.ts` + `aa/guardian-routes.ts` @
   normalized to lowercase.
 - **Threshold M** an integer in `[1, N]` where N = guardian count.
 - The **forbidden set** (the authority's identity-signer address) is refused with
-  a clear error — mirrors the contract's bounds so the user sees the failure at
+  a clear error, mirrors the contract's bounds so the user sees the failure at
   nomination time, not as a revert at deploy.
 
 ### How it gets on-chain (install at first deploy)
 
-1. **`POST /auth/guardians`** — from the post-sign-in page, gated by the live OIDC
+1. **`POST /auth/guardians`**, from the post-sign-in page, gated by the live OIDC
    interaction cookie (same posture as password/WebAuthn routes). Stores the
    nomination bound to the authenticated account.
-2. **`GET /aa/guardians`** — Bearer-gated to the caller's own `sub`. Returns the
+2. **`GET /aa/guardians`**, Bearer-gated to the caller's own `sub`. Returns the
    stored nomination and, when the recovery-module address is configured, a
    ready-to-append Kernel **`initConfig`** entry (an `installModule` self-call for
    the `GuardianRecoveryModule`, including the `execute`-selector grant non-root
    validators require).
 3. The SDK appends that `initConfig` entry to the wallet's `initialize()` calldata
-   so guardians are installed at the wallet's **first deploy** — no extra
+   so guardians are installed at the wallet's **first deploy**, no extra
    transaction. The exact wire shape is proven in
    `citrate-chain/test/aa/GuardianRecoveryE2E.t.sol`.
 

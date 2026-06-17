@@ -39,7 +39,7 @@ mistyped successor can never lock governance.
 ## Reference
 
 ### TreasuryGovernor
-`contracts/src/TreasuryGovernor.sol` — full on-chain governor. Voting power =
+`contracts/src/TreasuryGovernor.sol`, full on-chain governor. Voting power =
 native SALT balance + stSALT shares × share price (from `LiquidStakingPool`).
 Lifecycle: propose → vote → queue (timelock) → execute.
 
@@ -52,17 +52,17 @@ Proposal creation (all `payable`, return `proposalId`):
 - `proposeTreasurySpend(title, description, stablecoin, recipients[], amounts[])`
 - `proposeParameterChange(title, description, parameterKey, parameterValue)`
 - `proposeOracleUpdate(title, description, target, newOracle)`
-- `proposeEmergency(title, description)` — requires 3× threshold
+- `proposeEmergency(title, description)`, requires 3× threshold
 
 Voting / lifecycle:
-- `castVote(proposalId, support)` — `VoteType` is `For(0)`, `Against(1)`, `Abstain(2)`
-- `queue(proposalId)` — only from `Succeeded` state
-- `execute(proposalId)` — `nonReentrant`; re-checks quorum + approval; only
+- `castVote(proposalId, support)`, `VoteType` is `For(0)`, `Against(1)`, `Abstain(2)`
+- `queue(proposalId)`, only from `Succeeded` state
+- `execute(proposalId)`, `nonReentrant`; re-checks quorum + approval; only
   `TreasurySpend` executes on-chain (calls `treasury.distribute()`); other types
   emit events for off-chain/multisig execution
-- `cancel(proposalId)` — proposer or guardian
-- `acceptGovernanceOf(target)` — permissionless completion of a Governable handover
-- `transferGuardian(newGuardian)` — `onlyGuardian`
+- `cancel(proposalId)`, proposer or guardian
+- `acceptGovernanceOf(target)`, permissionless completion of a Governable handover
+- `transferGuardian(newGuardian)`, `onlyGuardian`
 
 Views: `state(proposalId)` → `ProposalState`, `getVotingPower(voter)`,
 `getProposal(proposalId)`, `quorumThreshold()`, `getSpendDetails(proposalId)`.
@@ -71,19 +71,19 @@ Events: `ProposalCreated`, `VoteCast`, `ProposalQueued`, `ProposalExecuted`,
 `ProposalCanceled`, `GuardianTransferred`.
 
 ### DisputeResolution
-`contracts/src/DisputeResolution.sol` — bisection dispute protocol
+`contracts/src/DisputeResolution.sol`, bisection dispute protocol
 (`DisputeResolution.tla`) for challenged compute jobs. Inherits `Governable` +
 `ReentrancyGuard`. Constructor takes `(disputeBond, maxBisectionRounds)`.
 
 Flow:
-- `initiateDispute(jobId, defender, rangeStart, rangeEnd)` — `payable`,
+- `initiateDispute(jobId, defender, rangeStart, rangeEnd)`, `payable`,
   `nonReentrant`; challenger posts bond
-- `acknowledgeDispute(disputeId)` — `payable`; defender posts matching bond
-- `bisect(disputeId, claimFaulty)` — challenger narrows range (halves each round)
-- `respond(disputeId, stepResultHash)` — defender commits a step result
-- `resolve(disputeId, challengerWins)` — `onlyGovernance` referee; pays winner,
+- `acknowledgeDispute(disputeId)`, `payable`; defender posts matching bond
+- `bisect(disputeId, claimFaulty)`, challenger narrows range (halves each round)
+- `respond(disputeId, stepResultHash)`, defender commits a step result
+- `resolve(disputeId, challengerWins)`, `onlyGovernance` referee; pays winner,
   slashes defender via `INematocystSlashing` if challenger wins
-- `timeoutDispute(disputeId)` — anyone, after deadline; challenger wins
+- `timeoutDispute(disputeId)`, anyone, after deadline; challenger wins
 
 Admin (`onlyGovernance`): `setDisputeBond`, `setMaxBisectionRounds`,
 `setSlashingContract`, `setRoundDeadline`. Constant `DEFAULT_ROUND_DEADLINE`
@@ -98,17 +98,16 @@ Events: `DisputeInitiated`, `BisectionStarted`, `BisectionRound`,
 `SlashingContractUpdated`.
 
 ### AgentDecisionRegistry
-`contracts/src/AgentDecisionRegistry.sol` — on-chain audit trail of high-risk
+`contracts/src/AgentDecisionRegistry.sol`, on-chain audit trail of high-risk
 agent tool executions. Inherits `Governable`. Records `(agentId, toolName,
-paramsHash, blockNumber, ...)` per decision; disputes can be filed; a trust score
+paramsHash, blockNumber...)` per decision; disputes can be filed; a trust score
 and tier (`Untrusted` < 100 ≤ `Standard` < 500 ≤ `Trusted`) are derived.
 
 Functions:
-- `registerDecision(agentId, toolName, paramsHash)` — `onlyAuthorizedRecorder`
-- `disputeDecision(decisionId, evidence)` — `onlyAuthorizedDisputer`
-- `resolveDispute(decisionId, upheld)` — `onlyGovernance`
-- `registerDecisionWithTierCheck(...)` / `disputeDecisionWithTierCheck(...)` —
-  same as above plus a `TrustTierChanged` emit on tier transition
+- `registerDecision(agentId, toolName, paramsHash)`, `onlyAuthorizedRecorder`
+- `disputeDecision(decisionId, evidence)`, `onlyAuthorizedDisputer`
+- `resolveDispute(decisionId, upheld)`, `onlyGovernance`
+- `registerDecisionWithTierCheck(...)` / `disputeDecisionWithTierCheck(...)`, same as above plus a `TrustTierChanged` emit on tier transition
 - Authorization (`onlyGovernance`): `setAuthorizedRecorder(recorder, allowed)`,
   `setAuthorizedDisputer(disputer, allowed)`
 
@@ -122,7 +121,7 @@ Events: `DecisionRecorded`, `DecisionDisputed`, `DisputeResolved`,
 Errors: `NotAuthorizedRecorder`, `NotAuthorizedDisputer`, `ZeroAddress`.
 
 ### SpecRegistry  *(academic tier)*
-`contracts/src/SpecRegistry.sol` — maps an operation domain (e.g.
+`contracts/src/SpecRegistry.sol`, maps an operation domain (e.g.
 `"contract_deploy"`) to the IPFS CID of a Gherkin `.feature` behavioral spec
 agents must check before critical operations. Inherits `Governable` (migrated
 from the legacy atomic `transferGovernor` to the two-step mixin per RM-L/WP-L1.1).
@@ -160,7 +159,7 @@ See `/contracts/tutorials` (governance walkthroughs) once published.
 protocol-governance contracts whose anonymous copy would materially help a
 competitor clone the network's economic/dispute machinery, but any contracted
 builder should have them. SpecRegistry is part of the formal-methods/agent-safety
-research surface, hence academic. **No secrets here** — no keys, no private
+research surface, hence academic. **No secrets here**, no keys, no private
 endpoints; addresses are not yet listed (pre-audit, pre-deployment).
 
 ## Source & verification

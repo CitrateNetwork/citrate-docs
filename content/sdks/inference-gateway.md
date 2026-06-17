@@ -27,17 +27,17 @@ meters tokens, and settles payment.
 
 Two documented surfaces:
 
-- **`API-GW-rest`** (tier `public`) — the OpenAI-compatible REST routes and their request/response
+- **`API-GW-rest`** (tier `public`), the OpenAI-compatible REST routes and their request/response
   shapes. What a developer needs to call it.
-- **`API-GW-x402`** (tier `commercial`) — the x402 payment handshake that gates the paid routes
+- **`API-GW-x402`** (tier `commercial`), the x402 payment handshake that gates the paid routes
   (`crates/x402-axum`). Integration depth shared with the [Marketplace SDK](/sdks/marketplace#x402).
 
-> **Status — pre-1.0 / pre-audit.** Live chain queries (`gateway/src/queries.rs`) are stubbed in this
+> **Status, pre-1.0 / pre-audit.** Live chain queries (`gateway/src/queries.rs`) are stubbed in this
 > slice (`HttpChainQueries` returns `ChainUnavailable`); wiring to the real registry/oracle/router is
 > tracked as WP-03.2. Batch/usage durability (RocksDB) and on-chain `postJob` per request are slice-2.
-> Numerous inline audit guards (SECREM-01/02, FUA-GATEWAY-01/02/04) are present — treat as evolving.
+> Numerous inline audit guards (SECREM-01/02, FUA-GATEWAY-01/02/04) are present, treat as evolving.
 
-## Reference — REST routes (`API-GW-rest`)
+## Reference, REST routes (`API-GW-rest`)
 
 Handlers live under `gateway/src/`. The gateway listens on `127.0.0.1:9800` by default
 (`CITRATE_GATEWAY_LISTEN_ADDR`); production runs behind a TLS reverse proxy.
@@ -53,21 +53,21 @@ Handlers live under `gateway/src/`. The gateway listens on `127.0.0.1:9800` by d
 | `/health` | GET | `gateway/src/health.rs` | free (liveness) |
 | `/metrics` | GET | `gateway/src/metrics.rs` | Prometheus exposition |
 
-**`POST /v1/chat/completions`** — OpenAI-compatible (`gateway/src/openai.rs`).
+**`POST /v1/chat/completions`**, OpenAI-compatible (`gateway/src/openai.rs`).
 Request `ChatCompletionRequest`: `{ model, messages: [{ role, content }], max_tokens?, stream? }`.
 Response `ChatCompletionResponse`: `{ id, object: "chat.completion", created, model, choices: [{ index,
 message: { role, content }, finish_reason }], usage: { prompt_tokens, completion_tokens, total_tokens } }`.
 SSE streaming when `stream: true`. `max_tokens` is clamped to `CITRATE_GATEWAY_MAX_TOKENS`
 (default `8192`, FUA-GATEWAY-04).
 
-**`POST /v1/batch`** — request `{ requests: [ChatCompletionRequest, ...] }` (max `MAX_BATCH_SIZE = 1000`).
+**`POST /v1/batch`**, request `{ requests: [ChatCompletionRequest...] }` (max `MAX_BATCH_SIZE = 1000`).
 Response `{ object: "batch", batch_id, status, request_count, completed_count, errored_count, created_at }`
 where `status ∈ submitted|running|completed|partial_failure|failed`.
 
-**`GET /v1/models`** — `{ object: "list", data: [{ id, object: "model", owned_by, created }] }`. Includes
+**`GET /v1/models`**, `{ object: "list", data: [{ id, object: "model", owned_by, created }] }`. Includes
 individual registered models and pools (ids prefixed `pool-`). The `id` is what callers pass as `model`.
 
-**`GET /v1/usage`** — `{ total_requests, total_input_tokens, total_output_tokens, salt_spent_grains
+**`GET /v1/usage`**, `{ total_requests, total_input_tokens, total_output_tokens, salt_spent_grains
 (string), salt_spent_display, daily: [...] }`.
 
 ### OpenAI-compatible client pattern
@@ -79,7 +79,7 @@ routes you still need an x402 payment (below); `/v1/models` is unauthenticated.
 from openai import OpenAI
 
 client = OpenAI(base_url="https://<gateway-host>/v1", api_key="not-used-for-x402")
-print(client.models.list())   # GET /v1/models — free, no payment
+print(client.models.list())   # GET /v1/models, free, no payment
 ```
 
 ```ts
@@ -89,10 +89,10 @@ await client.models.list();   // GET /v1/models
 ```
 
 > Paid routes (`/v1/chat/completions`, `/v1/batch`) require an x402 payment header. The plain OpenAI
-> client does not produce one — use the [Marketplace SDK `X402Client`](/sdks/marketplace#x402), which
+> client does not produce one, use the [Marketplace SDK `X402Client`](/sdks/marketplace#x402), which
 > sends the request, catches the `402`, signs, and retries automatically.
 
-## Reference — x402 payment (`API-GW-x402`)
+## Reference, x402 payment (`API-GW-x402`)
 
 Paid routes sit behind the `X402Layer` middleware (`crates/x402-axum/src/layer.rs`). The handshake:
 
@@ -138,12 +138,12 @@ curl -s -X POST https://<gateway-host>/v1/chat/completions \
 
 ## Tutorials
 
-- [Post a marketplace job](/sdks/tutorials/post-a-marketplace-job) — includes calling a paid gateway
+- [Post a marketplace job](/sdks/tutorials/post-a-marketplace-job), includes calling a paid gateway
   route end-to-end with x402.
 
 ## Security & access
 
-The REST surface (`API-GW-rest`) is **public** — it is the open API a developer needs to integrate, and
+The REST surface (`API-GW-rest`) is **public**, it is the open API a developer needs to integrate, and
 the OpenAI compatibility is a deliberate public good. The x402 handshake surface (`API-GW-x402`) is
 **commercial**: payment-integration depth shared with contracted builders, gated from anonymous scraping
 per `00_SCHEMA_AND_AUTHORING.md` §3.5.
@@ -154,7 +154,7 @@ repo source contains no hardcoded credentials at the audited SHA.
 
 ## Source & verification
 
-- Source: `citrate-inference-gateway` — `gateway/src/` (routes + handlers), `crates/x402-axum/`
+- Source: `citrate-inference-gateway`, `gateway/src/` (routes + handlers), `crates/x402-axum/`
   (payment middleware). Operator detail: `gateway/RUNBOOK.md`.
 - Audited against SHA: `a2ad401`.
 - Reference is `transcluded`: the truth lives in the repo at the pinned SHA.

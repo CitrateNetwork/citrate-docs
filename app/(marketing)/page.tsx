@@ -11,7 +11,7 @@ export default function Splash() {
       </div>
 
       <div className="eyebrow mb-3">Citrate Network · Documentation</div>
-      <h1 className="font-display text-6xl font-normal tracking-tight">Citrate Codex</h1>
+      <h1 className="font-display text-6xl font-normal tracking-tight">Citrate Atlas</h1>
       <p className="t-lede mt-4 max-w-2xl font-display text-xl leading-relaxed text-[var(--color-muted)]">
         A handbook you can run, gated like a vault, calm like a reading room. Every surface in the
         federation — contracts, RPC, SDKs, CLIs, apps — mapped, searchable, and live.

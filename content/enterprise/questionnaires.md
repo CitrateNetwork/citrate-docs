@@ -1,5 +1,5 @@
 ---
-title: Security Questionnaires (SIG / CAIQ) — Gated
+title: Security Questionnaires (SIG / CAIQ), Gated
 codex_slug: /enterprise/questionnaires
 tier: public
 org_scope: ~
@@ -19,8 +19,7 @@ author: Claude Opus 4.8 (1M context)
 
 Citrate maintains prepared responses to standard third-party security questionnaires
 (Shared Assessments SIG, Cloud Security Alliance CAIQ, and customer-specific variants) backed by
-the evidence in the private compliance corpus. Completed responses are **commercial-gated** —
-released to contracted / KYC'd principals running vendor due diligence — and are not authored in
+the evidence in the private compliance corpus. Completed responses are **commercial-gated**, released to contracted / KYC'd principals running vendor due diligence, and are not authored in
 this public docs tree. No answers, control mappings, or evidence are reproduced here, because
 questionnaire responses encode the same competitive and security-sensitive detail as the full
 compliance package.
