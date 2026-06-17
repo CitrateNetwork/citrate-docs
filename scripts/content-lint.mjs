@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // Citrate Atlas content linter (STYLE_GUIDE.md §9).
 // ERROR (gate, fails the build): em-dashes. They are mechanically removable and must stay at zero.
-// WARN (rewrite backlog): forbidden words + banned vocabulary. These need prose rewrites (S3..S10), so
-//   they are reported but do not fail the build, UNTIL `--strict` is passed (flip on after the rewrites).
+// ERROR under `--strict` (now enforced in CI, since the S3..S10 rewrites are done): forbidden words +
+//   banned vocabulary. Without `--strict` they report as a WARN backlog. CI runs `--strict`, so a new
+//   forbidden word or banned-vocabulary term in prose fails the build. Frontmatter, code, link URLs, and
+//   allowlisted proper nouns are excluded (see proseOf + ALLOW below).
 // Scans content/**/*.md + lib/content/confidential-store.ts. Code fences + inline code are excluded from
 // the word checks (so code samples and identifiers do not trip the vocabulary rules); em-dashes are
 // checked everywhere.
@@ -40,8 +42,25 @@ function listFiles() {
   return out;
 }
 
-function stripCode(text) {
-  return text.replace(/```[\s\S]*?```/g, "").replace(/`[^`]*`/g, "");
+// Allowlisted proper nouns / standard names that legitimately contain a flagged token. These are exact
+// names of real things (a browser API, a keystore standard, the cryptographic-erasure technique), not the
+// banned senses, so they are blanked before the word checks.
+const ALLOW = [
+  /web crypto api/gi, /web crypto/gi,         // the W3C Web Crypto API
+  /web3 secret storage(?: v3)?/gi, /web3 v3 keystore/gi, // the geth/MetaMask keystore standard
+  /crypto-shred(?:ding|ded)?/gi,              // cryptographic erasure
+];
+
+// Prose = the body with code fences, inline code, YAML frontmatter, markdown link URLs (route slugs live
+// there), and the allowlisted names removed. Word checks run on this so identifiers, paths, and real
+// product/standard names do not trip the vocabulary rules; em-dashes are still checked on the raw file.
+function proseOf(text) {
+  let t = text.replace(/^﻿?---\n[\s\S]*?\n---\n/, ""); // strip leading frontmatter
+  t = t.replace(/```[\s\S]*?```/g, "").replace(/`[^`]*`/g, ""); // strip code
+  t = t.replace(/\]\([^)]*\)/g, "]"); // strip link URLs, keep link text
+  t = t.replace(/\s+/g, " "); // collapse whitespace so allowlisted names that wrap a line still match
+  for (const re of ALLOW) t = t.replace(re, " ");
+  return t;
 }
 function lineOf(text, idx) { return text.slice(0, idx).split("\n").length; }
 
@@ -58,7 +77,7 @@ for (const f of listFiles()) {
   if (em.length) { emErrors += em.length; emFiles.push(`${rel}: ${em.length}`); }
 
   // word checks on prose only
-  const prose = stripCode(raw).toLowerCase();
+  const prose = proseOf(raw).toLowerCase();
   for (const term of [...FORBIDDEN, ...VOCAB]) {
     const re = new RegExp(term.includes("\\b") ? term : `\\b${term.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}\\b`, "g");
     const n = (prose.match(re) || []).length;

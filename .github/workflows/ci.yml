@@ -27,8 +27,8 @@ jobs:
         run: npm run build
       - name: Confidential-never-in-build gate
         run: npm run verify:bundle
-      - name: Content lint (em-dash gate)
-        run: npm run content-lint
+      - name: Content lint (em-dash + vocabulary gate, strict)
+        run: npm run content-lint -- --strict
       - name: SBOM (CycloneDX)
         run: npm run sbom
       - uses: actions/upload-artifact@v4
