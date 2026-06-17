@@ -40,7 +40,7 @@ export default function SearchPage() {
         )}
       </ul>
       <p className="mt-6 text-xs text-[var(--color-muted)]">
-        Results are filtered by your access — above-tier documents never appear here.
+        Results are filtered by your access, and above-tier documents never appear here.
       </p>
     </div>
   );
