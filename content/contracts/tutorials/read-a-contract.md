@@ -1,226 +1,116 @@
 ---
-title: "Tutorial: Read a Verified Contract"
+title: Read a contract
 codex_slug: /contracts/tutorials/read-a-contract
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-docs/content/contracts/tutorials/read-a-contract.md
-surfaces: [SC-econ-wrappedSALT, SC-econ-staking, SC-edu-classroomRegistry]
-audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+source: citrate-chain-laneB/contracts/src (WrappedSALT.sol, LiquidStakingPool.sol)
+surfaces: [SC-econ-wrappedSALT, SC-econ-staking]
+audited_against_sha: 54d1f2c
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Tutorial: Read a Verified Contract
+Read a deployed contract's state on the Citrate Network without sending a transaction. You will confirm the contract exists with `eth_getCode`, then call a view function with `eth_call`, first by encoding the selector yourself and then with tooling that does it for you. Read-only, no account, no gas, about ten minutes.
 
-> Query a live Citrate contract's state **without sending a transaction**, using
-> `eth_call` over raw JSON-RPC, then the same call via an SDK. Read-only, gasless,
-> safe to run against the public testnet. ~10 minutes.
+## What it is
 
-## What you'll do
+Reading a contract is a request, not a transaction. `eth_call` runs a function against the network's current state and hands back the return value; nothing is written, no fee is charged, and no signature is needed. The only inputs are the contract address and the function call data: a four-byte selector, the first four bytes of the keccak256 hash of the function signature, followed by any ABI-encoded arguments.
 
-1. Confirm a contract exists on-chain with `eth_getCode`.
-2. Read a simple value (`symbol()` on **WrappedSALT**) with raw `eth_call`.
-3. Read a value that takes an argument (`getSharePrice()` / `balanceOf(address)`
-   on **LiquidStakingPool**).
-4. Do the same with an SDK (viem) so you don't hand-encode calldata.
+The examples below read two contracts in the network economics family: Wrapped SALT, an ERC-20 wrapper whose `symbol` and `decimals` are constants, and the liquid staking pool, whose share price is computed live. Both are described under [economics contracts](/contracts/economics).
 
-Everything here is a **view/pure** call, no key, no gas, no signature. You are
-just reading the chain.
+## How to use it
 
-## Prerequisites
+You need a reachable Citrate JSON-RPC endpoint. The public one is `https://rpc.citrate.ai`. A local node serves `http://127.0.0.1:8545`. You will also want `curl`, and the `cast` command from [Foundry](https://book.getfoundry.sh/cast/) for the encode-free path.
 
-| Thing | Value |
-|---|---|
-| Chain ID | `40204` |
-| RPC (HTTP) | `https://rpc.citrate.ai` (raw: `http://142.93.58.145:8545`) |
-| Tools | `curl` + [`cast`](https://book.getfoundry.sh/cast/) (Foundry), or Node ≥ 18 with `viem` |
-
-Contract addresses used below (from `contracts/DEPLOYED_ADDRESSES.md`, chain
-40204 testnet-beta, always re-verify with step 1):
-
-| Contract | Address |
-|---|---|
-| WrappedSALT (wSALT) | `0xad7c3135c1b9b3189208fd617b6b058c1c0469f3` |
-| LiquidStakingPool (stSALT) | `0x8951ae72e5479cae28ef7bb3caa4207d5719e24b` |
-
-> The functions called here are audited against `citrate-chain` at SHA `03d7851`:
-> `WrappedSALT.symbol()` / `decimals()`, `LiquidStakingPool.getSharePrice()` /
-> `balanceOf(address)`. See [Economics Contracts](/contracts/economics).
-
----
-
-## Step 1, Confirm the contract is real (`eth_getCode`)
-
-A "verified contract" starts with: there *is* deployed bytecode at the address.
-If `eth_getCode` returns `0x` (empty), the address is an EOA or nothing, **stop**, you have the wrong address.
+Set up the same small helper used in [your first 10 minutes](/start/tutorials/your-first-10-minutes), so the steps stay short:
 
 ```bash
-curl -s https://rpc.citrate.ai \
-  -H 'content-type: application/json' \
-  -d '{
-    "jsonrpc":"2.0","id":1,"method":"eth_getCode",
-    "params":["0xad7c3135c1b9b3189208fd617b6b058c1c0469f3","latest"]
-  }' | python3 -c 'import sys,json; print("bytecode len:", len(json.load(sys.stdin)["result"]))'
+export RPC=https://rpc.citrate.ai
+
+rpc () {
+  curl -s "$RPC" -H 'content-type: application/json' \
+    -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"$1\",\"params\":${2:-[]}}"
+}
 ```
 
-Expected: a length well above `2` (i.e. more than just `0x`). Non-empty bytecode
-means a contract lives there.
+Read the address you want from `contracts/DEPLOYED_ADDRESSES.md`, the canonical record described on the [contracts reference](/contracts/reference). The examples here use the Wrapped SALT and liquid staking pool addresses from that file; always confirm an address with step 1 before trusting it, because the chain can be re-rolled.
 
----
+### Step 1, confirm the contract exists
 
-## Step 2, Read `symbol()` with raw `eth_call`
-
-`eth_call` runs a function against the latest state and returns the result
-without mining a transaction. The `data` field is the 4-byte function selector
-(`keccak256("symbol()")[:4]`) plus ABI-encoded args (none here).
+Ask the network for the code at the address. A non-empty result means a contract is deployed there. A bare `0x` means the address is empty or an account, in which case stop, you have the wrong address.
 
 ```bash
-# Selector for symbol(): 0x95d89b41
-curl -s https://rpc.citrate.ai \
-  -H 'content-type: application/json' \
-  -d '{
-    "jsonrpc":"2.0","id":1,"method":"eth_call",
-    "params":[{
-      "to":"0xad7c3135c1b9b3189208fd617b6b058c1c0469f3",
-      "data":"0x95d89b41"
-    },"latest"]
-  }'
+rpc eth_getCode '["<WrappedSALT-address>", "latest"]'
+# {"jsonrpc":"2.0","id":1,"result":"0x6080604052..."}   # long hex, a contract is here
 ```
 
-The `result` is ABI-encoded `string`. Decoding the hex gives `wSALT`.
+### Step 2, call a view function with raw eth_call
 
-`cast` does the encode + decode for you (much easier than hand-rolling selectors):
+`WrappedSALT.symbol()` takes no arguments, so the call data is just its selector. The selector for `symbol()` is `0x95d89b41`. Put the address and the selector in an `eth_call`.
 
 ```bash
-cast call 0xad7c3135c1b9b3189208fd617b6b058c1c0469f3 \
-  "symbol()(string)" \
-  --rpc-url https://rpc.citrate.ai
-# -> wSALT
-
-cast call 0xad7c3135c1b9b3189208fd617b6b058c1c0469f3 \
-  "decimals()(uint8)" \
-  --rpc-url https://rpc.citrate.ai
-# -> 18
+rpc eth_call '[{"to":"<WrappedSALT-address>","data":"0x95d89b41"},"latest"]'
 ```
 
----
+The `result` is an ABI-encoded string. Decoding it gives `wSALT`, the symbol declared as a constant in the source. You can compute any selector yourself with `cast sig "symbol()"`, which returns `0x95d89b41`.
 
-## Step 3, Read values, including one with an argument
+### Step 3, let cast encode and decode for you
 
-`LiquidStakingPool.getSharePrice()` returns SALT-per-stSALT scaled by 1e18
-(returns `1e18` when the pool is empty). `balanceOf(address)` returns the SALT
-value of a staker's shares.
+Hand-encoding selectors is error-prone, so for everyday work let `cast` do it. You give it the human-readable signature and it handles both the encoding and the decoding.
 
 ```bash
-# No-arg view: current share price (uint256, 1e18-scaled)
-cast call 0x8951ae72e5479cae28ef7bb3caa4207d5719e24b \
-  "getSharePrice()(uint256)" \
-  --rpc-url https://rpc.citrate.ai
+cast call <WrappedSALT-address> "symbol()(string)"   --rpc-url $RPC   # wSALT
+cast call <WrappedSALT-address> "decimals()(uint8)"  --rpc-url $RPC   # 18
+```
 
-# View with an address argument: a staker's SALT value
-cast call 0x8951ae72e5479cae28ef7bb3caa4207d5719e24b \
+### Step 4, read a value that is computed live
+
+`LiquidStakingPool.getSharePrice()` returns SALT per staked-SALT share, scaled by 1e18, and returns exactly 1e18 when the pool is empty. It takes no arguments and reads live state.
+
+```bash
+cast call <LiquidStakingPool-address> "getSharePrice()(uint256)" --rpc-url $RPC
+```
+
+A function that takes an argument encodes that argument into the call data after the selector. `cast` does the encoding from the signature.
+
+```bash
+cast call <LiquidStakingPool-address> \
   "balanceOf(address)(uint256)" \
   0x0000000000000000000000000000000000000000 \
-  --rpc-url https://rpc.citrate.ai
-# -> 0   (the zero address holds no shares)
+  --rpc-url $RPC
+# 0   (the zero address holds no shares)
 ```
 
-The address argument is ABI-encoded into the calldata for you. Note this
-`balanceOf` returns the **SALT value of shares** (Lido-style), not a raw token
-balance, read the contract's NatSpec before assuming a signature's meaning.
+One caution. `LiquidStakingPool.balanceOf(address)` returns the SALT value of a staker's shares, not a raw token count, so the signature alone does not tell you the meaning. Read the contract's NatSpec before assuming what a function returns.
 
----
+## Reference
 
-## Step 4, The same, from an SDK (viem)
+The functions read above, with their source files.
 
-Hand-encoding selectors is error-prone. An SDK takes a human-readable ABI
-fragment and does the encoding/decoding. This is read-only, no private key, no
-`walletClient`.
+| Contract | Function | Returns | Source |
+|---|---|---|---|
+| WrappedSALT | `symbol()` | `wSALT`, a constant | `contracts/src/WrappedSALT.sol` |
+| WrappedSALT | `decimals()` | `18`, a constant | `contracts/src/WrappedSALT.sol` |
+| LiquidStakingPool | `getSharePrice()` | SALT per share, 1e18-scaled | `contracts/src/LiquidStakingPool.sol` |
+| LiquidStakingPool | `balanceOf(address)` | SALT value of a staker's shares | `contracts/src/LiquidStakingPool.sol` |
 
-```bash
-mkdir read-contract && cd read-contract
-npm init -y >/dev/null
-npm install viem
-```
+For the full read surface and patterns like reading events, see [interact read-only](/contracts/tutorials/interact-read-only). For the address and ABI sources, see the [contracts reference](/contracts/reference).
 
-```ts
-// read.ts, run with: npx tsx read.ts   (or compile + node)
-import { createPublicClient, http, formatUnits } from "viem";
+## Failure modes
 
-const citrate = {
-  id: 40204,
-  name: "Citrate",
-  nativeCurrency: { name: "SALT", symbol: "SALT", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc.citrate.ai"] } },
-} as const;
+- A `0x` result from `eth_getCode` means no contract is at the address. Re-read it from `DEPLOYED_ADDRESSES.md`; the chain may have been re-rolled since you copied it.
+- `-32601 Method not found` means the RPC method is misspelled or not served by the node.
+- A call that reverts comes back as an error, not a value. Check that the function exists in the ABI and that any arguments are well-formed.
+- A decoded value that looks wrong is often a signature mismatch. Confirm the return type against the source before reading meaning into it, as with `balanceOf` above.
 
-const client = createPublicClient({ chain: citrate, transport: http() });
+## Access and canon
 
-const wSALT = "0xad7c3135c1b9b3189208fd617b6b058c1c0469f3" as const;
-const pool  = "0x8951ae72e5479cae28ef7bb3caa4207d5719e24b" as const;
+Public and read-only. Nothing here writes state, so you can run it against any Citrate endpoint you can reach without risk. No keys, no credentials, no gas. The public RPC hostname and the contract addresses are public values; re-verify any address with step 1 before trusting it.
 
-// Minimal ABI: only the view functions we call (Rule 9, summarize, don't dump).
-const wsaltAbi = [
-  { type: "function", name: "symbol",   stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
-  { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },
-] as const;
+## Source and verification
 
-const poolAbi = [
-  { type: "function", name: "getSharePrice", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
-] as const;
+Functions verified against `citrate-chain-laneB` at SHA `54d1f2c`: `contracts/src/WrappedSALT.sol` (`symbol`, `decimals`), `contracts/src/LiquidStakingPool.sol` (`getSharePrice`, `balanceOf`). Addresses live in `contracts/DEPLOYED_ADDRESSES.md`, chain 40204, testnet beta. Status: Implemented, testnet beta, pre-audit.
 
-async function main() {
-  const symbol = await client.readContract({ address: wSALT, abi: wsaltAbi, functionName: "symbol" });
-  const decimals = await client.readContract({ address: wSALT, abi: wsaltAbi, functionName: "decimals" });
-  const sharePrice = await client.readContract({ address: pool, abi: poolAbi, functionName: "getSharePrice" });
-
-  console.log(`token: ${symbol} (${decimals} decimals)`);
-  console.log(`stSALT share price: ${formatUnits(sharePrice, 18)} SALT`);
-}
-
-main().catch((e) => { console.error(e); process.exit(1); });
-```
-
-```bash
-npx tsx read.ts
-# token: wSALT (18 decimals)
-# stSALT share price: 1 SALT      (1.0 on an empty/new pool)
-```
-
-`readContract` issues an `eth_call` under the hood, exactly what you did by hand
-in steps 2–3, but type-safe and decoded.
-
----
-
-## What you learned
-
-- **`eth_getCode`** proves a contract is actually deployed at an address.
-- **`eth_call`** runs view/pure functions for free, against live state, the
-  selector + ABI-encoded args go in `data`.
-- **`cast` / viem** encode and decode for you so you work in human-readable
-  signatures instead of raw hex.
-- The signature alone doesn't tell you the semantics, read the contract's
-  NatSpec (e.g. `LiquidStakingPool.balanceOf` returns SALT value, not shares).
-
-## Next steps
-
-- Browse the full read surface: [edu contracts](/contracts/edu),
-  [economics contracts](/contracts/economics).
-- To **write** (send transactions), you need a wallet and gas, see the chain CLI
-  and SDK pages. Writing is out of scope for this read-only tutorial.
-
-## Security & access
-
-Public. Everything here is read-only against the public testnet; no keys,
-secrets, or credentials are used or shown. The testnet RPC and contract addresses
-are public values. Re-verify addresses with `eth_getCode` (step 1) before
-trusting any address copied from documentation.
-
-## Source & verification
-
-- Functions audited against `citrate-chain` at SHA `03d7851`:
-  `contracts/src/WrappedSALT.sol` (`symbol`, `decimals`),
-  `contracts/src/LiquidStakingPool.sol` (`getSharePrice`, `balanceOf`).
-- Addresses: `contracts/DEPLOYED_ADDRESSES.md` (chain 40204, testnet-beta).
+See also [chain RPC](/chain/rpc) and the [chain CLI](/chain/cli).
