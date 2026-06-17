@@ -1,109 +1,49 @@
 ---
-title: Citrate Sequencer, Mempool & Block Building
+title: Citrate Sequencer, Mempool and Block Building
 codex_slug: /chain/sequencer
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: citrate-chain/core/sequencer/
+source_kind: authored
+source: citrate-chain/core/sequencer/src/mempool.rs, citrate-chain/core/sequencer/src/validator.rs, citrate-chain/core/sequencer/src/block_builder.rs
 surfaces: [CHAIN-seq-mempool]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Sequencer, Mempool & Block Building
+The sequencer is the path a transaction takes between arriving at a node and landing in a block. It validates each transaction, holds the valid ones in a priority mempool, and assembles candidate blocks for proposers. This page is for developers who submit transactions and operators who want to understand how a block is put together.
 
-> The pipeline between "a transaction arrives" and "a block is produced." The
-> sequencer validates transactions, stages them in a priority mempool, and
-> assembles candidate blocks for proposers. The public surface (mempool basics,
-> validation rules) is here; parent-selection and bundle assembly are deeper
-> (academic-tier) because they are where competitive implementation detail lives.
+## What it is
 
-## Overview
+Think of the mempool as a sorting shed at harvest. Transactions come in, the ones that do not pass inspection are set aside, and the rest are sorted so the most important work is taken first. The sequencer (`core/sequencer/`) does this in three plain stages.
 
-The sequencer (`core/sequencer/`) owns three stages:
+1. Validate. An incoming transaction passes a validation pipeline: signature, balance, nonce, gas price and limit, data size, rate limit, and an address blacklist.
+2. Stage. A valid transaction enters the priority mempool, which holds up to ten thousand transactions by default, caps each sender, drops duplicates, and orders by priority.
+3. Build. The block builder takes the top-priority transactions, executes them, computes the state root and receipt root and an EIP-1559 base fee, and produces a signed candidate block.
 
-1. **Validate**, incoming transactions pass a validation pipeline (signature,
-   balance, nonce, gas, size, rate-limit, blacklist).
-2. **Stage**, valid transactions enter a **priority mempool** with AI-aware
-   transaction classification, per-sender limits, duplicate detection and
-   capacity bounds.
-3. **Build**, the block builder selects top-priority transactions, executes
-   them through the execution layer, computes state/receipt roots and an
-   EIP-1559 base fee, and produces a signed candidate block.
+Priority is not gas price alone. Every transaction carries a `TxClass`, and each class has a multiplier so that system and compute traffic can be ordered ahead of ordinary transfers. The effective priority is the gas price multiplied by the class multiplier.
 
-The mempool's distinctive feature is **AI-aware priority classes**: every
-transaction is tagged with a `TxClass`, and each class carries a priority
-multiplier so that, e.g., system and compute traffic can be ordered ahead of
-standard transfers.
-
-| `TxClass` | Relative priority |
+| `TxClass` | Priority multiplier |
 |---|---|
-| `System` | 1000× |
-| `Compute` | 500× |
-| `Training` | 400× |
-| `ModelUpdate` / `Inference` / `Storage` / `Standard` | lower (per `priority_multiplier()`) |
+| `System` | 1000 |
+| `ModelUpdate` | 100 |
+| `Compute` | 80 |
+| `Training` | 50 |
+| `Inference` | 20 |
+| `Storage` | 10 |
+| `Standard` | 1 |
 
-Source: `core/sequencer/src/mempool.rs`, `TxClass` and `priority_multiplier()`.
+Source: `core/sequencer/src/mempool.rs`, `TxClass::priority_multiplier()` (`src/mempool.rs:66`).
 
-> **Pre-audit status.** The sequencer is internally tested (94 tests, incl.
-> proptests) but **not** externally audited. Mempool/DoS surface (rate limiting,
-> per-sender caps, eviction) is implemented but should be treated as
-> pre-certification.
+## How to use it
 
-## Reference
+You submit transactions to the mempool; proposers build from it. In Rust the flow is:
 
-### Mempool, `src/mempool.rs`
-
-- `Mempool::new(config: MempoolConfig)`, capacity, gas floor, per-sender limit
-  (defaults: 10,000 capacity, 1 Gwei floor).
-- `Mempool::add_transaction(tx)`, validate + insert with priority sorting.
-- `Mempool::get_transactions(max)`, extract top-priority batch for building.
-- `Mempool::get_pending_transactions_for_sender(pubkey)`, pending-nonce support.
-- `Mempool::remove_transactions(hashes)`, drop mined transactions.
-- `Mempool::estimate_gas_price()`, gas-price estimate from current pool.
-- `Mempool::get_stats() -> MempoolStats`, size, gas stats, per-class breakdown.
-- `MempoolAccess` trait, async cross-crate mempool interface.
-
-### Transaction validator, `src/validator.rs`
-
-- `TxValidator::new(rules, state_provider)` / `validate(tx)` /
-  `validate_batch(txs)`.
-- `validate` runs: signature (ed25519 + ECDSA), balance, nonce, gas price/limit,
-  data-size limit, rate limit, address blacklist.
-- `ValidationRules`, configurable min gas price, max gas limit, max data size,
-  rate limits.
-- `ValidationPipeline`, parallel/sequential batch split into `(valid, invalid)`.
-- `TxValidator::blacklist_address(addr)` / `unblacklist_address(addr)`.
-- `StateProvider` trait, async account lookups (`get_account`, `get_balance`,
-  `get_nonce`); `MockStateProvider` is test-only.
-
-### {#parent-selection} Parent selection (academic)
-
-> **Tier: academic.** Block building selects DAG parents via the consensus
-> layer's `ParentSelector`, which returns `(selected_parent, merge_parents)` for
-> a new block (`citrate-consensus`, `core/consensus/src/tip_selection.rs`). The
-> selection strategy and its interaction with blue-score ordering are
-> research-depth detail and are documented at academic tier.
-
-### {#bundle} Bundle / block assembly (academic)
-
-> **Tier: academic.** `BlockBuilder` (`src/block_builder.rs`) is where the
-> candidate block is assembled, transaction selection from the mempool,
-> execution via `Executor` / `ParallelExecutor`, state-root and receipt-root
-> computation, EIP-1559 base-fee calculation and block signing. The ordering and
-> bundling heuristics are competitive implementation depth and are marked
-> academic.
-
-- `BlockBuilder::new(config, mempool, dag_store, ghostdag)`.
-- `BlockBuilder::with_executor(executor)`, attach the execution engine.
-- `BlockBuilder::build_block(parent, proposer, vrf_proof)`, full candidate.
-- `BlockBuilderConfig`, max block size, gas limits, tx bounds, target block time.
-
-## Examples
-
-Mirrors `core/sequencer/README.md` (Rust):
+1. Construct a mempool from a config (defaults: ten thousand capacity, one Gwei gas floor, one hundred transactions per sender).
+2. Validate a transaction against the current state before staging it.
+3. Add the validated transaction to the mempool; it is sorted into place by priority.
+4. When it is your turn to propose, build a candidate block from the top of the pool.
 
 ```rust
 use citrate_sequencer::*;
@@ -111,40 +51,66 @@ use std::sync::Arc;
 
 let mempool = Arc::new(Mempool::new(MempoolConfig::default())); // 10k cap, 1 Gwei floor
 
-// validate before staging
+// Validate before staging.
 let validator = TxValidator::new(ValidationRules::default(), state_provider);
 validator.validate(&tx).await?;
 mempool.add_transaction(tx).await?;
 
-// build a candidate block
+// Build a candidate block from the pool.
 let builder = BlockBuilder::new(builder_config, mempool.clone(), dag_store, ghostdag);
-let block = builder.build_block(parent_hash, proposer_key, vrf_proof).await?;
+let block = builder.build_block(selected_parent, merge_parents, proposer_key, vrf_proof).await?;
 ```
 
-To observe pending transactions on a live node, see
-`mempool_getPending` / `citrate_getMempoolStats` in the
-[Chain CLI](/chain/cli) and RPC reference.
+To watch pending transactions on a live node without Rust, use `mempool_getPending` and `citrate_getMempoolStats` over JSON-RPC; see [chain RPC](/chain/rpc).
 
-## Tutorials
+## Reference
 
-- [Read the DAG](/chain/tutorials/read-the-dag), also surfaces mempool stats
-  alongside DAG state. **Tier: public.**
+### Mempool, `src/mempool.rs`
 
-## Security & access
+- `Mempool::new(config)`, build a mempool. `MempoolConfig::default()` is ten thousand capacity, one Gwei gas floor, one hundred per sender (`src/mempool.rs:169`).
+- `Mempool::add_transaction(tx)`, validate and insert with priority sorting.
+- `Mempool::get_transactions(max)`, extract the top-priority batch for building.
+- `Mempool::get_pending_transactions_for_sender(pubkey)`, pending-nonce support.
+- `Mempool::remove_transactions(hashes)`, drop transactions once they are in a block.
+- `Mempool::estimate_gas_price()`, a gas-price estimate from the current pool.
+- `Mempool::get_stats()`, size, gas statistics, and a per-class breakdown.
 
-- **Tier: public** for mempool basics and validation rules, a developer needs
-  these to submit transactions and reason about ordering and fees.
-- **`#parent-selection` and `#bundle` are academic**, they are competitive
-  implementation depth (how the proposer picks parents and packs a block).
-  Public-good understanding stays public; the cloning-grade heuristics are gated.
-- **No secrets here.** Proposer keys and VRF proofs are *parameters*, never
-  documented values. `MockStateProvider` is test scaffolding, not a production
-  backend.
+### Transaction validator, `src/validator.rs`
 
-## Source & verification
+- `TxValidator::new(rules, state_provider)`, then `validate(tx)` or `validate_batch(txs)`.
+- `validate` runs, in order: signature (ed25519 and ECDSA), balance, nonce, gas price and limit, data-size limit, rate limit, and address blacklist.
+- `ValidationRules`, the configurable floor: minimum gas price, maximum gas limit, maximum data size, rate limits.
+- `ValidationPipeline`, splits a batch into valid and invalid.
+- `TxValidator::blacklist_address(addr)` and `unblacklist_address(addr)`.
+- `StateProvider` trait, async account lookups; `MockStateProvider` is test-only.
 
-- **Source repo / path:** `citrate-chain/core/sequencer/`
-- **Truth document (Rule 9):** `core/sequencer/README.md`, summarized and
-  linked, not copied.
-- **Audited against SHA:** `03d7851`.
-- **Honest status:** internally tested (94 tests); **pre external audit**.
+### Block builder, `src/block_builder.rs`
+
+The builder assembles the candidate block, plainly and in order: it takes the selected parent (the tip with the highest blue score) plus up to `max_parents`, which is ten, merge parents from the consensus layer, pulls the top-priority transactions from the mempool, executes them, computes the state and receipt roots, sets the EIP-1559 base fee, and signs the result.
+
+- `BlockBuilder::new(config, mempool, dag_store, ghostdag)`.
+- `BlockBuilder::with_executor(executor)`, attach the execution engine.
+- `BlockBuilder::build_block(selected_parent, merge_parents, proposer, vrf_proof)`, produce the full candidate (`src/block_builder.rs:144`).
+- `BlockBuilderConfig`, maximum block size, gas limits, transaction bounds, and `block_time_target`, which defaults to two seconds (`src/block_builder.rs:76`).
+
+Parent selection itself belongs to the consensus layer: `ParentSelector` returns `(selected_parent, merge_parents)` for a new block. See [consensus](/chain/consensus) for how blue score picks the selected parent, and [the LVM](/chain/lvm) for how the transactions execute.
+
+## Design rationale
+
+Two design choices stand out. The mempool sorts by class as well as price so the network does not let a fee war crowd out the work it exists to carry; compute and training traffic carry weight that an ordinary transfer does not. And the builder reuses the consensus layer's parent selection rather than inventing its own, so there is one definition of "which parents" across the codebase, not two that can drift apart. The two-second target keeps blocks frequent enough that priority work waits seconds, not minutes, while the BlockDAG absorbs the near-simultaneous blocks that a fast cadence produces.
+
+## Failure modes
+
+- A transaction that fails any validation check is set aside, not staged; an invalid signature, a stale nonce, a gas price below the floor, or a blacklisted sender each stop it at the door.
+- The mempool is bounded. At capacity, low-priority transactions are evicted rather than allowed to exhaust memory, and per-sender caps stop one account from filling the pool. The system fails closed: it sheds the lowest-priority load rather than accepting unbounded work.
+- A built block carries computed state and receipt roots; a proposer cannot substitute arbitrary roots, because the receiving nodes recompute and reject a block whose roots do not match execution.
+
+## Access and canon
+
+Public. Mempool behavior and validation rules are what a developer needs to submit transactions and reason about ordering and fees. No secrets appear here: proposer keys and VRF proofs are parameters, never documented values, and `MockStateProvider` is test scaffolding, not a production backend.
+
+## Source and verification
+
+- Source files: `core/sequencer/src/mempool.rs`, `src/validator.rs`, `src/block_builder.rs`.
+- Audited against SHA `03d7851`.
+- Status: Implemented, pre external audit. The crate is internally tested, including property tests; it has not completed a third-party audit. The mempool denial-of-service surface (rate limiting, per-sender caps, eviction) is implemented but should be treated as pre-certification.
