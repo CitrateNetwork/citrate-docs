@@ -5,6 +5,7 @@ import Link from "next/link";
 import { mockApi } from "@/prototype/fixtures";
 import { useViewer } from "./providers";
 import { tierLabel, TierChip } from "./tier-chip";
+import { Icon, CitrateMark } from "./icons";
 import { cn } from "@/lib/cn";
 
 type Cite = { slug: string; title: string; tier: "public" | "commercial" | "academic" | "confidential" };
@@ -79,9 +80,9 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
     <aside className="flex h-full w-80 shrink-0 flex-col border-l bg-[var(--color-canvas)]">
       <div className="flex items-center justify-between border-b px-4 py-3">
         <span className="flex items-center gap-2 font-semibold">
-          <span className="text-[var(--color-citrate)]">✦</span> Ask Codex
+          <CitrateMark size={16} color="var(--accent-text)" /> Ask Atlas
         </span>
-        <button onClick={onClose} aria-label="Close" className="text-[var(--color-muted)]">✕</button>
+        <button onClick={onClose} aria-label="Close" className="text-[var(--color-muted)]"><Icon name="x" size={16} /></button>
       </div>
 
       <div className="border-b px-4 py-2 text-xs text-[var(--color-muted)]">

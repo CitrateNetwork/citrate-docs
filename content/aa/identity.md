@@ -1,5 +1,5 @@
 ---
-title: Citrate Identity — OIDC Issuer & Claims
+title: Citrate Identity, OIDC Issuer & Claims
 codex_slug: /aa/identity
 tier: public
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Citrate Identity — OIDC Issuer & Claims
+# Citrate Identity, OIDC Issuer & Claims
 
 > Citrate's identity authority is a standard **OpenID Connect** provider at
 > `auth.citrate.ai`. It logs a user in (passkey, email/password, Google, or
@@ -36,19 +36,19 @@ rotation + revocation enabled).
 Two `sub` (subject) shapes flow through the authority (`findAccount` in
 `config.ts`):
 
-- **UUID** — a user record (passkey / email-password / Google sign-in). The
+- **UUID**, a user record (passkey / email-password / Google sign-in). The
   smart wallet exists counterfactually; the `wallet_address` claim is the CREATE2
   prediction for that user id (see [Passkeys](/aa/passkeys)).
-- **EIP-55 wallet address** — a SIWE (Sign-In With Ethereum, EIP-4361) login.
+- **EIP-55 wallet address**, a SIWE (Sign-In With Ethereum, EIP-4361) login.
   The wallet *is* the identity; KYC is keyed on the address.
 
 Login methods mounted in `server.ts`: SIWE (`/siwe/*`), email/password
-(`/auth/password/*`), WebAuthn (`/auth/webauthn/*`), and — **only when both
-`CITRATE_AA_GOOGLE_CLIENT_ID` and `..._SECRET` are set** — Google
+(`/auth/password/*`), WebAuthn (`/auth/webauthn/*`), and, **only when both
+`CITRATE_AA_GOOGLE_CLIENT_ID` and `..._SECRET` are set**, Google
 (`/auth/google/*`). With the AA env configured, `/aa/*` (address prediction +
 deploy permit) and guardian routes mount too.
 
-## Reference — scopes & claims
+## Reference, scopes & claims
 
 Defined in `config.ts` (`scopes` / `claims`):
 
@@ -62,35 +62,35 @@ Defined in `config.ts` (`scopes` / `claims`):
 
 ### Claim shapes
 
-- **`sub`** — the canonical subject: a lowercase UUID, or an EIP-55 wallet
+- **`sub`**, the canonical subject: a lowercase UUID, or an EIP-55 wallet
   address for SIWE logins.
-- **`email`** — present for users with an email-bearing record (email/password,
+- **`email`**, present for users with an email-bearing record (email/password,
   Google). Standard `profile`-scope claim.
-- **`wallet_address`** — the user's one canonical smart-wallet address (EIP-55).
+- **`wallet_address`**, the user's one canonical smart-wallet address (EIP-55).
   For UUID users it is the CREATE2 prediction unless they have explicitly bound a
   `primary_wallet`, which wins. Omitted when the AA env is unconfigured (dev).
-- **`wallets`** — the list of linked wallet addresses (grows via the IDP-S3
+- **`wallets`**, the list of linked wallet addresses (grows via the IDP-S3
   identity↔wallet registry).
-- **`signing_method`** — the most recent successful sign-in method
+- **`signing_method`**, the most recent successful sign-in method
   (`'siwe'`, passkey, etc.); per-session method is the standard `amr` claim.
 
-Claims are computed fresh at `claims()` time — panva re-invokes `claims()` on
+Claims are computed fresh at `claims()` time, panva re-invokes `claims()` on
 every `/userinfo` call, so a KYC revoke/expiry that lands after a token was
 minted is reflected on the next `/userinfo`, not stale at mint time.
 
-### KYC status (claim only — internals are gated)
+### KYC status (claim only, internals are gated)
 
 The `kyc` scope surfaces `kyc_status` (`verified` / `pending` / `revoked` /
 `expired` / `none`) plus `kyc_verified_at` / `kyc_expires_at`. **The claim record
-holds no PII** — only status + dates + an opaque vendor reference
+holds no PII**, only status + dates + an opaque vendor reference
 (ADR-2026-06-03); the KYC vendor remains the PII data controller.
 
-> The KYC *internals* — vendor wiring (e.g. CLEAR / Sumsub), webhook
-> verification, the data-controller schema, and the operator runbook — are
+> The KYC *internals*, vendor wiring (e.g. CLEAR / Sumsub), webhook
+> verification, the data-controller schema, and the operator runbook, are
 > **Confidential / gated** (registry `ID-kyc`, tier `X`, `source_kind: gated`)
 > and are **not documented here**. RPs consume only the claim shape above.
 
-### `entitlement` claim (planned — conceptual)
+### `entitlement` claim (planned, conceptual)
 
 > **Not yet implemented.** As of `4aa869c` there is no `entitlement` scope/claim
 > in `config.ts`. This describes the *intended* design only.
@@ -135,7 +135,7 @@ Resulting ID token / `/userinfo` (UUID user, AA configured):
 
 ## Security & access
 
-**Tier: public** for the OIDC issuer + claim shapes — an RP developer needs them
+**Tier: public** for the OIDC issuer + claim shapes, an RP developer needs them
 to integrate, and they are standard OIDC. **`ID-kyc` internals are confidential**
 and excluded. **`ID-entitlement` is academic** and described conceptually only.
 

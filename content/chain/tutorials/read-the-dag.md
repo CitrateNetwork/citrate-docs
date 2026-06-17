@@ -16,7 +16,7 @@ author: Claude Opus 4.8 (1M context)
 
 > Query a running Citrate node over JSON-RPC to see the live BlockDAG: its
 > current **tips**, its **height**, the **blue score** of the head, and a single
-> block. No keys, no SDK — just `curl` and a node URL. For any developer who
+> block. No keys, no SDK, just `curl` and a node URL. For any developer who
 > wants to *see* GhostDAG rather than read about it.
 
 ## What you'll do
@@ -39,7 +39,7 @@ author: Claude Opus 4.8 (1M context)
 > export RPC=http://127.0.0.1:8545
 > ```
 
-## Step 1 — Confirm the node and chain
+## Step 1, Confirm the node and chain
 
 ```bash
 curl -s $RPC -H 'content-type: application/json' \
@@ -56,7 +56,7 @@ curl -s $RPC -H 'content-type: application/json' \
 Methods: `eth_chainId`, `eth_blockNumber`
 (`core/api/src/eth_rpc_simple.rs`, `core/api/src/eth_rpc.rs`).
 
-## Step 2 — Read the DAG in one call
+## Step 2, Read the DAG in one call
 
 `citrate_getDagStats` returns tips, height, the head's blue score and the
 network's GhostDAG parameters in a single response:
@@ -66,7 +66,7 @@ curl -s $RPC -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"citrate_getDagStats","params":[]}' | jq
 ```
 
-Response shape (`core/api/src/eth_rpc.rs:2402` — `citrate_getDagStats`):
+Response shape (`core/api/src/eth_rpc.rs:2402`, `citrate_getDagStats`):
 
 ```json
 {
@@ -83,11 +83,11 @@ Response shape (`core/api/src/eth_rpc.rs:2402` — `citrate_getDagStats`):
 
 What you're looking at:
 
-- **`currentTips` / `tipsCount`** — the DAG's current leaf blocks. More than one
+- **`currentTips` / `tipsCount`**, the DAG's current leaf blocks. More than one
   tip is normal for a BlockDAG; consensus orders them deterministically.
-- **`maxBlueScore`** — the blue score of the highest tip (the head the network
+- **`maxBlueScore`**, the blue score of the highest tip (the head the network
   builds on; higher blue score wins tip selection).
-- **`ghostdagParams`** — the live consensus constants (`k = 18`,
+- **`ghostdagParams`**, the live consensus constants (`k = 18`,
   `maxParents = 10`); these come from `GhostDagParams::default()` in
   `core/consensus/src/types.rs`.
 
@@ -96,7 +96,7 @@ What you're looking at:
 > `maxBlueScore`, `height` and `ghostdagParams` are read directly from chain
 > state. Treat the blue/red split as indicative, not exact.
 
-## Step 3 — Read tips, then fetch one block
+## Step 3, Read tips, then fetch one block
 
 Get just the tips:
 
@@ -118,7 +118,7 @@ curl -s $RPC -H 'content-type: application/json' \
   -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"chain_getBlock\",\"params\":[{\"Hash\":\"$TIP\"}]}" | jq
 ```
 
-The block's header carries its `blue_score` — the same value GhostDAG uses for
+The block's header carries its `blue_score`, the same value GhostDAG uses for
 tip selection. You can also get the height alone:
 
 ```bash
@@ -129,7 +129,7 @@ curl -s $RPC -H 'content-type: application/json' \
 Methods: `chain_getTips`, `chain_getBlock`, `chain_getHeight`
 (`core/api/src/server.rs`).
 
-## Step 4 (bonus) — Sync, peers and mempool
+## Step 4 (bonus), Sync, peers and mempool
 
 ```bash
 # Is the node still catching up?
@@ -155,7 +155,7 @@ Methods: `eth_syncing`, `net_peerCount`, `citrate_getMempoolStats`
 - One call (`citrate_getDagStats`) gives the whole DAG snapshot; `chain_getTips`
   + `chain_getBlock` let you drill into individual blocks.
 
-Read the protocol behind these numbers in [Consensus — GhostDAG](/chain/consensus)
+Read the protocol behind these numbers in [Consensus, GhostDAG](/chain/consensus)
 (see `#finality` for how deep blocks become irreversible).
 
 ## Security & access
@@ -174,4 +174,4 @@ Read the protocol behind these numbers in [Consensus — GhostDAG](/chain/consen
 - **Audited against SHA:** `03d7851`.
 - **Honest status:** RPC surface is implemented and tested; the
   `blueBlocks`/`redBlocks` fields of `citrate_getDagStats` are estimates per the
-  handler's own comment — flagged above. Node is **pre external audit**.
+  handler's own comment, flagged above. Node is **pre external audit**.

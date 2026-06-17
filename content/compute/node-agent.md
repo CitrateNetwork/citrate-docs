@@ -32,7 +32,7 @@ handed to an external signing surface (a wallet / relay) that signs and
 broadcasts; the agent only observes the resulting transaction. This is why the
 operator flow involves a separate signer.
 
-This page is **transcluded** — the truth lives in the crates at the pinned SHA
+This page is **transcluded**, the truth lives in the crates at the pinned SHA
 (`6f915eb`). Each item cites the crate/path it is audited against; if a field or
 endpoint is not listed here, it does not exist at this SHA.
 
@@ -81,7 +81,7 @@ are ignored (forward-compatible); a missing/empty file fails **safe** (disabled)
 
 ### Environment variables
 
-Audited against the crates at this SHA. **No secrets here** — every URL below is
+Audited against the crates at this SHA. **No secrets here**, every URL below is
 validated at client construction and fails closed on plaintext HTTP to a
 non-loopback host.
 
@@ -109,7 +109,7 @@ non-loopback host.
 
 ## Reference
 
-### Bidder — `crates/bidder/src/lib.rs` → `evaluate()`
+### Bidder, `crates/bidder/src/lib.rs` → `evaluate()`
 
 Pure function: `evaluate(job, oracle, settings, caps) -> BidDecision`. Gating
 order (cheapest checks first), then cost-plus pricing:
@@ -124,13 +124,13 @@ order (cheapest checks first), then cost-plus pricing:
 8. Oracle stale → Skip (OracleStale)
 9. Price = `cost × 1.15`, capped at `0.9 × maxPrice`. If below cost → Skip (Unprofitable); else Bid.
 
-### Heartbeat — `crates/heartbeat/src/lib.rs`
+### Heartbeat, `crates/heartbeat/src/lib.rs`
 
 - Interval: **30 s** (`HEARTBEAT_INTERVAL`), kept under the on-chain heartbeat window so one miss never trips suspension.
 - Calldata: `HeartbeatMonitor.heartbeat()` selector only (no args).
 - Send errors are logged but do **not** stop the loop.
 
-### Supervision HTTP — `crates/supervision/src/server.rs`
+### Supervision HTTP, `crates/supervision/src/server.rs`
 
 Loopback-only (non-loopback binds rejected at startup). Bearer token is minted at
 startup (256-bit, hex), persisted to the token file at mode 0600, and compared in
@@ -145,7 +145,7 @@ constant time. All endpoints except `/health` require `Authorization: Bearer <to
 | GET | `/signature-requests` | bearer | Array of unsigned `SignatureRequest`s for the signer. |
 | POST | `/signature-requests/{id}/observed` | bearer | Mark request signed+broadcast; body `{"tx_hash":"0x…"}`. |
 
-### chainio — `crates/chainio/src/generated/addresses.json`
+### chainio, `crates/chainio/src/generated/addresses.json`
 
 Read client + ABI codec against the chain-40204 address book (mirrored from
 `citrate-chain`). Contracts the agent reads/calls: `ComputeMarketplace`
@@ -175,8 +175,8 @@ curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/pause
 
 ## Tutorials
 
-- [Become a compute seller](/operators/tutorials/become-a-seller) — runnable, end to end.
-- [Sell compute (operator SOP)](/operators/sell-compute) — the full procedure.
+- [Become a compute seller](/operators/tutorials/become-a-seller), runnable, end to end.
+- [Sell compute (operator SOP)](/operators/sell-compute), the full procedure.
 
 ## Security & access
 

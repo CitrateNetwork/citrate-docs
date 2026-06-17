@@ -15,7 +15,7 @@ author: Claude Opus 4.8 (1M context)
 # Python SDK Quickstart
 
 > Install `citrate-ai-sdk`, connect to a Citrate node, read account state, and
-> deploy + run inference on a model — in a few minutes. For Python developers
+> deploy + run inference on a model, in a few minutes. For Python developers
 > new to Citrate.
 
 This tutorial mirrors `citrate-sdk-python/examples/basic_usage.py`, which you
@@ -31,9 +31,9 @@ can run as-is from the repo. Every API call below exists in
 - Python **3.10+** (`pyproject.toml` `requires-python = ">=3.10"`)
 - A reachable Citrate RPC endpoint (your own node, or a network RPC URL)
 - For writes (deploy/inference/purchase): a funded account's private key,
-  supplied via environment variable — never hardcoded
+  supplied via environment variable, never hardcoded
 
-## Step 1 — Install
+## Step 1, Install
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -42,7 +42,7 @@ pip install citrate-ai-sdk
 
 The import name is `citrate_sdk` (the distribution name is `citrate-ai-sdk`).
 
-## Step 2 — Set environment variables
+## Step 2, Set environment variables
 
 ```bash
 export CITRATE_RPC_URL="https://rpc.example"     # your node's RPC endpoint
@@ -52,7 +52,7 @@ export CITRATE_PRIVATE_KEY="0x..."               # only if you need to write
 If you have no key yet, the SDK can generate one for you (Step 3). Keep any
 generated key safe and out of version control.
 
-## Step 3 — Connect
+## Step 3, Connect
 
 ```python
 import os
@@ -76,7 +76,7 @@ print("Connected to chain id:", client.get_chain_id())
 transactions over plaintext). Use `https://`, or pass
 `allow_insecure_http=True` only if you really mean it.
 
-## Step 4 — Read account state (no writes)
+## Step 4, Read account state (no writes)
 
 ```python
 address = client.key_manager.get_address()
@@ -91,7 +91,7 @@ print(f"Nonce:   {nonce}")
 These three calls (`get_balance`, `get_nonce`, `get_chain_id`) are read-only
 and work even without a private key.
 
-## Step 5 — Deploy a model
+## Step 5, Deploy a model
 
 ```python
 import json
@@ -107,8 +107,7 @@ config = ModelConfig(
     description="A simple demo classifier model",
     model_type=ModelType.CUSTOM,
     access_type=AccessType.PUBLIC,
-    encrypted=False,
-)
+    encrypted=False)
 
 deployment = client.deploy_model(model_path, config)
 print("Model ID:", deployment.model_id)
@@ -117,16 +116,15 @@ print("IPFS CID:", deployment.ipfs_hash)
 ```
 
 `deploy_model` hashes the file, uploads it to IPFS (failing closed if the
-upload fails — no fake CID), then deploys via the model-deployment precompile.
+upload fails, no fake CID), then deploys via the model-deployment precompile.
 It requires a private key.
 
-## Step 6 — Run inference
+## Step 6, Run inference
 
 ```python
 result = client.inference(
     model_id=deployment.model_id,
-    input_data={"data": [0.5] * 10, "format": "array"},
-)
+    input_data={"data": [0.5] * 10, "format": "array"})
 print("Output:  ", result.output_data)
 print("Gas used:", result.gas_used)
 ```
@@ -135,14 +133,14 @@ For **encrypted** inference, set `encrypted=True` and **you must** pass
 `recipient_public_key=...`. Without it the call fails closed rather than
 shipping a symmetric key in cleartext on public calldata.
 
-## Step 7 — Discover models
+## Step 7, Discover models
 
 ```python
 for m in client.list_models(limit=5):
     print(m.get("name", "Unnamed"), "→", m.get("model_id"))
 ```
 
-## Step 8 — (Optional) use a manager
+## Step 8, (Optional) use a manager
 
 Managers (Learning / Staking / Classroom / Compute / Treasury / Farming) are
 separate classes. Construct one with the client's `_rpc_call` callable, your
@@ -154,8 +152,7 @@ from citrate_sdk import StakingManager
 staking = StakingManager(
     client._rpc_call,
     default_account=address,
-    contract_addresses={"liquidStaking": "0xStakingContract"},
-)
+    contract_addresses={"liquidStaking": "0xStakingContract"})
 print("Staking info:", staking.get_info(address))
 ```
 
@@ -170,7 +167,7 @@ model_path.unlink(missing_ok=True)
 
 ## Where to go next
 
-- [Python SDK reference](/sdks/python) — full method tables + manager surface
+- [Python SDK reference](/sdks/python), full method tables + manager surface
 - Repo examples: `citrate-sdk-python/examples/encrypted_inference.py`,
   `citrate-sdk-python/examples/marketplace_demo.py`
 

@@ -1,5 +1,5 @@
 ---
-title: Contracts Reference — Addresses, ABIs & Verification
+title: Contracts Reference, Addresses, ABIs & Verification
 codex_slug: /contracts/reference
 tier: public
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Contracts Reference — Addresses, ABIs & Verification
+# Contracts Reference, Addresses, ABIs & Verification
 
 > Everything you need to call Citrate's on-chain contracts: where to get the
 > ABIs, the deployed-address table on chain **40204**, how to build/test the
@@ -35,7 +35,7 @@ deployed on testnet-beta.
 
 ## Getting the ABIs
 
-Use the published ABI bundle — do not hand-copy ABIs out of Codex (they drift):
+Use the published ABI bundle, do not hand-copy ABIs out of Codex (they drift):
 
 ```bash
 npm install @CitrateNetwork/contracts-abi
@@ -43,7 +43,7 @@ npm install @CitrateNetwork/contracts-abi
 pnpm add @CitrateNetwork/contracts-abi
 ```
 
-You can also regenerate ABIs straight from source with Foundry — after
+You can also regenerate ABIs straight from source with Foundry, after
 `forge build`, each contract's ABI is in
 `contracts/out/<Contract>.sol/<Contract>.json` under the `.abi` key:
 
@@ -55,7 +55,7 @@ jq '.abi' out/NematocystSlashing.sol/NematocystSlashing.json
 
 ## Deployed addresses (chain 40204)
 
-> Public on-chain data — safe to list. Cross-check any entry with `eth_getCode`
+> Public on-chain data, safe to list. Cross-check any entry with `eth_getCode`
 > against the canonical RPC. **Testnet-beta; pre-audit.** Source:
 > `citrate-chain/contracts/DEPLOYED_ADDRESSES.md`.
 
@@ -69,7 +69,7 @@ jq '.abi' out/NematocystSlashing.sol/NematocystSlashing.json
 | Canonical RPC (HTTP) | `https://rpc.citrate.ai` |
 | WebSocket | `wss://rpc.citrate.ai` |
 | Contract count | 39 |
-| Status | live — pilot testnet-beta |
+| Status | live, pilot testnet-beta |
 
 ### Contracts
 
@@ -135,7 +135,7 @@ forge fmt                   # format Solidity
 
 ## Verifying a deployed contract
 
-There is no block-explorer "verify" required to *trust* an address — verify the
+There is no block-explorer "verify" required to *trust* an address, verify the
 bytecode yourself against the canonical RPC:
 
 ```bash

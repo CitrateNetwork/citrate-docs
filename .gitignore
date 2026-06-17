@@ -8,3 +8,4 @@ next-env.d.ts.bak
 sbom.cyclonedx.json
 .env*.local
 .DS_Store
+.vercel

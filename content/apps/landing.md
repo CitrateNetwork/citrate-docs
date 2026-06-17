@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Citrate marketing site
 
-> The public Citrate Network website — what it is, who it serves, and how to get in touch.
+> The public Citrate Network website, what it is, who it serves, and how to get in touch.
 > The site holds no secrets, and every form submission is encrypted at rest.
 
 ## Overview
@@ -24,9 +24,9 @@ deployed on Vercel. It presents the network to institutional and public-good aud
 few structured inquiries (contact, host-compute application, verification-packet request).
 
 The mental model for readers: a normal marketing site, with the one notable difference that **anything
-you type into a form is encrypted before it's stored** — the database never holds your plaintext PII.
+you type into a form is encrypted before it's stored**, the database never holds your plaintext PII.
 
-> **Status — production.** The site is live and actively maintained (security headers, CSP with
+> **Status, production.** The site is live and actively maintained (security headers, CSP with
 > per-request nonce, OWASP ZAP baseline in CI, Playwright e2e). It is honest marketing copy, not a
 > certification claim.
 
@@ -62,14 +62,14 @@ SEO/meta: sitemap, robots, JSON-LD, dynamic OG images (`/api/og`).
 ### What happens to what you type
 
 Every form submission is encrypted with **AES-256-GCM envelope encryption** before it's written to the
-database (`src/lib/encryption.ts`). The stored columns are ciphertext only — plaintext PII never
+database (`src/lib/encryption.ts`). The stored columns are ciphertext only, plaintext PII never
 persists. Email is deduplicated with a keyed HMAC blind index, so even the lookup value isn't your
 plaintext address. Submissions are protected by origin checks, a honeypot, a timing heuristic, per-IP
 rate limiting, and short-lived single-use challenge tokens (`GET /api/challenge`).
 
 ## Tutorials
 
-- No runnable tutorial is needed for a visitor — the site is browse-and-submit. The forms are
+- No runnable tutorial is needed for a visitor, the site is browse-and-submit. The forms are
   self-explanatory; see **How to use** above.
 
 ## Security & access
@@ -77,7 +77,7 @@ rate limiting, and short-lived single-use challenge tokens (`GET /api/challenge`
 **Tier: public.** A marketing site is public-good content by definition.
 
 **No secrets here, and none in the repo.** `.env*` files are gitignored; only `.env.example` (a template
-with no real values) is committed. Secrets — the encryption key, database URL, SMTP password — live in
+with no real values) is committed. Secrets, the encryption key, database URL, SMTP password, live in
 Vercel project environment variables, not in code and not in this doc. This was verified against the
 repo's `.gitignore` and history.
 

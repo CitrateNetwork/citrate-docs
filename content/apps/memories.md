@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Memrizz
 
-> A federated knowledge-DAG webapp and MCP server — "git for agentic operators." Explore your
+> A federated knowledge-DAG webapp and MCP server, "git for agentic operators." Explore your
 > organization's memory as a constellation, ask it questions, and connect your own model over MCP.
 
 ## Overview
@@ -31,7 +31,7 @@ The model is two-plane: a **Derived** plane that rebuilds deterministically from
 and an **Asserted** plane of signed human/agent claims. Everything is Org-scoped, authorized by signed
 capability grants, and audited on a tamper-evident hash chain.
 
-> **Status — v1 in active development.** The security foundation (M0) landed 2026-06-14; the See/Ask/Steward
+> **Status, v1 in active development.** The security foundation (M0) landed 2026-06-14; the See/Ask/Steward
 > MVP (M1) is in progress. A Tier-1 security audit is required before any non-internal exposure. Treat
 > as exploratory.
 
@@ -83,7 +83,7 @@ carries provenance, trust tiers, and a freshness watermark.
 
 ## Security & access
 
-**Tier: commercial.** This is paid, contracted, multi-Org product depth — memory is client IP, isolated
+**Tier: commercial.** This is paid, contracted, multi-Org product depth, memory is client IP, isolated
 per Org. The Platform-Operator role deliberately has **no** access to memory content.
 
 **No secrets in this doc.** Auth uses OIDC (RS256 pinned, issuer/audience/expiry enforced, fail-closed)

@@ -36,14 +36,14 @@ rpc () {
 }
 ```
 
-## Step 1 — Confirm the chain (`eth_chainId`)
+## Step 1, Confirm the chain (`eth_chainId`)
 
 ```bash
 rpc eth_chainId
 # {"jsonrpc":"2.0","id":1,"result":"0x9d0c"}
 ```
 
-`0x9d0c` is **40204** in decimal — the canonical Citrate chain id. Convert to be sure:
+`0x9d0c` is **40204** in decimal, the canonical Citrate chain id. Convert to be sure:
 
 ```bash
 printf '%d\n' 0x9d0c   # 40204
@@ -57,16 +57,16 @@ rpc net_version
 # {"jsonrpc":"2.0","id":1,"result":"40204"}
 ```
 
-## Step 2 — Check the node and head (`web3_clientVersion`, `eth_blockNumber`)
+## Step 2, Check the node and head (`web3_clientVersion`, `eth_blockNumber`)
 
 ```bash
 rpc web3_clientVersion        # "citrate/v0.1.0"
 rpc eth_blockNumber           # latest height as hex, e.g. "0x3039"
 ```
 
-## Step 3 — Read the BlockDAG (`citrate_getDagStats`)
+## Step 3, Read the BlockDAG (`citrate_getDagStats`)
 
-This is the Citrate-native view of GhostDAG state — current tips, height, blue score, and the GhostDAG
+This is the Citrate-native view of GhostDAG state, current tips, height, blue score, and the GhostDAG
 parameters:
 
 ```bash
@@ -89,7 +89,7 @@ rpc citrate_getDagStats | jq
 > Note: `currentTips`, `height`, and `maxBlueScore` are read live; `blueBlocks`/`redBlocks` are estimated and
 > `ghostdagParams` are the network defaults at this SHA. See the reference for the honest-status caveat.
 
-## Step 4 — Read an account (`eth_getBalance`)
+## Step 4, Read an account (`eth_getBalance`)
 
 Citrate is EVM-address compatible, so standard `eth_*` reads work. Pass an address and a block tag:
 
@@ -98,7 +98,7 @@ rpc eth_getBalance '["0x0000000000000000000000000000000000000001","latest"]'
 # {"jsonrpc":"2.0","id":1,"result":"0x0"}
 ```
 
-## Step 5 — Run a built-in embedding (`citrate_getTextEmbedding`)
+## Step 5, Run a built-in embedding (`citrate_getTextEmbedding`)
 
 Citrate ships on-chain AI. Generate an embedding (the genesis `bge-m3` model) for a string:
 
@@ -116,7 +116,7 @@ rpc citrate_getTextEmbedding '[["alpha","beta","gamma"]]' | jq '.result | length
 
 > Sending more than 256 inputs returns an `invalid_params` error (a DoS guard, SECREM-01 Phase-8).
 
-## Step 6 — Semantic search over documents (`citrate_semanticSearch`)
+## Step 6, Semantic search over documents (`citrate_semanticSearch`)
 
 ```bash
 rpc citrate_semanticSearch \
@@ -132,14 +132,14 @@ rpc citrate_semanticSearch \
 
 Results are sorted by cosine similarity and truncated to `top_k` (here `2`).
 
-## Step 7 — Read the token (`citrate_getToken`)
+## Step 7, Read the token (`citrate_getToken`)
 
 ```bash
 rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-## Step 8 (optional) — Request inference
+## Step 8 (optional), Request inference
 
 If you know a registered `model_id` (32-byte hex), you can run a preview inference. Anonymous (unsigned)
 requests reach **Public** models only; gated models require a signed `from` (see the reference's security note):
@@ -164,13 +164,13 @@ rpc citrate_requestInference \
 
 ## Troubleshooting
 
-- **`Connection refused`** — the node isn't running on `$RPC`, or the RPC server is bound elsewhere. Default is
+- **`Connection refused`**, the node isn't running on `$RPC`, or the RPC server is bound elsewhere. Default is
   `127.0.0.1:8545`.
-- **`-32601 Method not found`** — either a typo, or (for economics methods) the node is running without an
+- **`-32601 Method not found`**, either a typo, or (for economics methods) the node is running without an
   economics manager. The chain/DAG/AI methods above don't require one.
-- **`-32602 Invalid params`** — check param shapes against the [reference](/chain/rpc); embeddings/search cap
+- **`-32602 Invalid params`**, check param shapes against the [reference](/chain/rpc); embeddings/search cap
   at 256 inputs.
-- **Wrong chain id** — anything other than `0x9d0c` / `40204` means you're not on canonical Citrate.
+- **Wrong chain id**, anything other than `0x9d0c` / `40204` means you're not on canonical Citrate.
 
 ## Next steps
 

@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Citrate Chat
 
-> A gasless, wallet-native AI chatbot on the Citrate testnet — log in with a wallet, chat with an on-network model, and the Citrate Foundation pays the gas for you.
+> A gasless, wallet-native AI chatbot on the Citrate testnet, log in with a wallet, chat with an on-network model, and the Citrate Foundation pays the gas for you.
 
 ## Overview
 
@@ -27,9 +27,9 @@ network. Two things make it different from a normal chat app:
   and pays the gas. You never need to hold SALT to use it.
 
 The mental model: you chat normally; behind the scenes, an optional on-chain *receipt* of the exchange
-can be anchored to a registry contract, and the network — not you — covers the fee.
+can be anchored to a registry contract, and the network, not you, covers the fee.
 
-> **Status — experimental / testnet.** This runs against the Citrate **testnet** (chain id `40204`).
+> **Status, experimental / testnet.** This runs against the Citrate **testnet** (chain id `40204`).
 > It has not completed a formal external audit. The seed inference model and on-chain receipt anchoring
 > are still being finished (see "Honest status" below). Don't treat anything here as production-grade.
 
@@ -78,8 +78,7 @@ to protect the Foundation wallet, validates the signature on-chain, then calls t
 
 ## Security & access
 
-**Tier: public.** This is exactly the kind of open, developer-facing dApp the Codex keeps public —
-concepts and reference a developer needs to build a gasless app.
+**Tier: public.** This is exactly the kind of open, developer-facing dApp the Codex keeps public, concepts and reference a developer needs to build a gasless app.
 
 **No secrets in this doc.** The relayer wallet key, Privy app secret, database URL, and Redis tokens
 are server-only environment variables and are **not** reproduced here. Public chain addresses and the
@@ -103,7 +102,7 @@ your authenticated session owns the address before sponsoring any transaction.
 
 ### Honest status
 
-- **Gas rail (S-2): done** — `CitrateForwarder` + `ChatRegistry` deployed to testnet; relay endpoint working.
+- **Gas rail (S-2): done**, `CitrateForwarder` + `ChatRegistry` deployed to testnet; relay endpoint working.
 - **In progress:** receipt-in-chat flow (S-3) and encrypted thread history (S-4).
 - **Open dependencies:** live inference gateway URL, a registered/runnable model in `ModelRegistry`,
   and Privy credentials must be supplied by the deployer. No formal audit yet.

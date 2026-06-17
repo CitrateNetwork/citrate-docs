@@ -32,7 +32,7 @@ author: Claude Opus 4.8 (1M context)
   address, and an external signer for that wallet.
 - KYC/contract in place.
 
-## Step 1 — Build
+## Step 1, Build
 
 ```bash
 # From the citrate-node-agent workspace root
@@ -40,7 +40,7 @@ cargo build --release
 # The binary is target/release/node-agent
 ```
 
-## Step 2 — Write a policy
+## Step 2, Write a policy
 
 Create `compute.json`:
 
@@ -53,9 +53,9 @@ Create `compute.json`:
 ```
 
 This allots 25% of the GPU, only at night (22:00–05:59 UTC). Fields are validated
-against `crates/config` — `allocation_percent` must be 0–100.
+against `crates/config`, `allocation_percent` must be 0–100.
 
-## Step 3 — Self-check offline
+## Step 3, Self-check offline
 
 ```bash
 node-agent compute.json
@@ -63,9 +63,9 @@ node-agent compute.json
 
 Expected: the agent prints your enabled/allocation/schedule, the current UTC
 clock, the heartbeat calldata, and a self-check OK. No RPC is contacted. If you
-set `enabled: false`, it reports disabled — a safe way to verify wiring.
+set `enabled: false`, it reports disabled, a safe way to verify wiring.
 
-## Step 4 — Run live
+## Step 4, Run live
 
 ```bash
 export CITRATE_RPC_URL=https://<your-rpc-endpoint>     # HTTPS (or loopback http) only
@@ -77,7 +77,7 @@ node-agent compute.json
 The daemon starts the supervision API on `127.0.0.1:19600` and begins reading
 chain state, bidding, and heart-beating every 30 s.
 
-## Step 5 — Drive it
+## Step 5, Drive it
 
 In a second terminal:
 
@@ -100,7 +100,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/pause
 curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/resume
 ```
 
-## Step 6 — Verify you're selling
+## Step 6, Verify you're selling
 
 - `/status` shows `bidding` or `executing` when there is matching demand.
 - `/health` shows a recent heartbeat age.
@@ -108,18 +108,18 @@ curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/resume
 
 ## Troubleshooting
 
-- **Daemon exits immediately** — `CITRATE_NODE_AGENT_ADDR` must be loopback; a
+- **Daemon exits immediately**, `CITRATE_NODE_AGENT_ADDR` must be loopback; a
   non-loopback bind is rejected by design.
-- **No bids** — check the bidder gates: `enabled`, schedule window, capacity
+- **No bids**, check the bidder gates: `enabled`, schedule window, capacity
   (<80%), deadline feasibility, oracle freshness, and the 10-SALT cap.
-- **RPC refused at startup** — the agent rejects plaintext HTTP to non-loopback
+- **RPC refused at startup**, the agent rejects plaintext HTTP to non-loopback
   hosts. Use HTTPS. Do **not** set `CITRATE_NODE_AGENT_ALLOW_INSECURE_OUTBOUND`
-  on a production node — it is a dev-only LAN escape hatch that exposes you to MITM.
+  on a production node, it is a dev-only LAN escape hatch that exposes you to MITM.
 
 ## Next steps
 
-- [Sell compute (operator SOP)](/operators/sell-compute) — the full procedure and bidding model.
-- [Node agent reference](/compute/node-agent) — every field, endpoint, and env var.
+- [Sell compute (operator SOP)](/operators/sell-compute), the full procedure and bidding model.
+- [Node agent reference](/compute/node-agent), every field, endpoint, and env var.
 
 ## Security & access
 

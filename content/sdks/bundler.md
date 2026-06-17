@@ -26,14 +26,14 @@ The bundler is an eth-infinitism v0.7 reference bundler with a Citrate **gate** 
 methods to the upstream bundler unchanged. Standard ERC-4337 wallets/SDKs talk to it as an ordinary
 bundler.
 
-Single documented surface: **`API-BUNDLER`** — the JSON-RPC methods (standard ERC-4337 plus the custom
+Single documented surface: **`API-BUNDLER`**, the JSON-RPC methods (standard ERC-4337 plus the custom
 `citrate_getUserAddress`).
 
-> **Status — pre-1.0 / pre-audit.** The upstream bundler runs in `--unsafe` mode because Citrate RPC
-> does not yet expose `debug_traceCall` (drop `--unsafe` once it does) — acceptable for the current
+> **Status, pre-1.0 / pre-audit.** The upstream bundler runs in `--unsafe` mode because Citrate RPC
+> does not yet expose `debug_traceCall` (drop `--unsafe` once it does), acceptable for the current
 > single-tenant deployment. See the per-method honesty note on `citrate_getUserAddress` below.
 
-## Reference — JSON-RPC methods (`API-BUNDLER`)
+## Reference, JSON-RPC methods (`API-BUNDLER`)
 
 The gate accepts JSON-RPC `POST` requests and proxies them to the upstream bundler; only
 `eth_sendUserOperation` gets an extra precheck (`gate/src/precheck.ts`). Standard ERC-4337 v0.7 methods:
@@ -41,7 +41,7 @@ The gate accepts JSON-RPC `POST` requests and proxies them to the upstream bundl
 | Method | Params | Returns |
 |---|---|---|
 | `eth_chainId` | `[]` | hex chain id (`0x9d0c` = `40204`) |
-| `eth_supportedEntryPoints` | `[]` | `Address[]` — configured EntryPoint(s) |
+| `eth_supportedEntryPoints` | `[]` | `Address[]`, configured EntryPoint(s) |
 | `eth_sendUserOperation` | `[userOp, entryPoint]` | UserOp hash (gated + prechecked) |
 | `eth_estimateUserOperationGas` | `[userOp, entryPoint]` | gas estimate (proxied) |
 | `eth_getUserOperationByHash` | `[hash]` | UserOp + location (proxied) |
@@ -49,9 +49,9 @@ The gate accepts JSON-RPC `POST` requests and proxies them to the upstream bundl
 
 **`eth_sendUserOperation` precheck** (`gate/src/precheck.ts`, only when a paymaster is configured):
 
-1. **Sender registration** — `CitratePaymaster.isRegistered(sender)`; rejects unregistered senders.
-2. **Paymaster category byte** — first byte of `paymasterData` must be `0`, `1`, or `2`.
-3. **EntryPoint deposit** — `EntryPoint.balanceOf(paymaster)` must be non-zero (else AA31 would follow).
+1. **Sender registration**, `CitratePaymaster.isRegistered(sender)`; rejects unregistered senders.
+2. **Paymaster category byte**, first byte of `paymasterData` must be `0`, `1`, or `2`.
+3. **EntryPoint deposit**, `EntryPoint.balanceOf(paymaster)` must be non-zero (else AA31 would follow).
 
 Failed prechecks return JSON-RPC error code `-32002`.
 
@@ -61,7 +61,7 @@ Failed prechecks return JSON-RPC error code `-32002`.
 for a Citrate user id (mirroring `citrate-wallet-aa::predict_address` in Rust and
 `CitrateWalletFactory.predictAddress` on-chain).
 
-> **Honest status:** the gate has **no dedicated handler** for this method at the audited SHA — it is
+> **Honest status:** the gate has **no dedicated handler** for this method at the audited SHA, it is
 > declared in the README but not yet implemented in the gate/bundler in this slice. Documenting it as the
 > intended surface; do not depend on it on the public endpoint until a handler lands. Address prediction
 > today is available via the AA SDK / on-chain factory.
@@ -107,14 +107,14 @@ curl -s -X POST https://<bundler-host>/ \
 behavior, EntryPoint config) is integration depth for contracted builders, gated from anonymous scraping
 per `00_SCHEMA_AND_AUTHORING.md` §3.5. The method surface itself is standard ERC-4337.
 
-**No secrets here — endpoints only.** The deployment runbook (`DEPLOY.md`) contains operator secrets
+**No secrets here, endpoints only.** The deployment runbook (`DEPLOY.md`) contains operator secrets
 (an operator wallet mnemonic, a generated store password). Those are **not** transcribed here and must
 never appear in documentation; they live only in a `0600` `.env` on the host. Do not paste any key,
-password, mnemonic, or private host detail into examples — use placeholder hosts and `<your-api-key>`.
+password, mnemonic, or private host detail into examples, use placeholder hosts and `<your-api-key>`.
 
 ## Source & verification
 
-- Source: `citrate-bundler` — `gate/src/server.ts` (routing/auth), `gate/src/precheck.ts` (paymaster
-  precheck), `README.md` (method surface). Deployment: `DEPLOY.md` (secrets — not documented here).
+- Source: `citrate-bundler`, `gate/src/server.ts` (routing/auth), `gate/src/precheck.ts` (paymaster
+  precheck), `README.md` (method surface). Deployment: `DEPLOY.md` (secrets, not documented here).
 - Audited against SHA: `a3287de`.
 - Reference is `transcluded`: the truth lives in the repo at the pinned SHA.

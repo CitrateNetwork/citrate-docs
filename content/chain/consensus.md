@@ -1,5 +1,5 @@
 ---
-title: Citrate Consensus — GhostDAG
+title: Citrate Consensus, GhostDAG
 codex_slug: /chain/consensus
 tier: public
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Citrate Consensus — GhostDAG
+# Citrate Consensus, GhostDAG
 
 > How Citrate orders blocks. Citrate is a BlockDAG: blocks may have multiple
 > parents, and the GhostDAG protocol turns that DAG into a single deterministic
@@ -28,7 +28,7 @@ GhostDAG protocol partitions every block into a **blue set** (the
 honest-majority-consistent blocks, governed by a *k*-cluster rule) and a **red
 set** (everything else), then derives a **deterministic total order** over all
 blocks from genesis to the selected tip. Every honest node that sees the same DAG
-computes the same order — that is what makes the ledger a ledger.
+computes the same order, that is what makes the ledger a ledger.
 
 The mental model in three steps:
 
@@ -44,11 +44,11 @@ The default consensus parameters are network constants:
 
 | Param | Default | Meaning |
 |---|---|---|
-| `k` | 18 | k-cluster width — anticone tolerance for "blue" classification |
+| `k` | 18 | k-cluster width, anticone tolerance for "blue" classification |
 | `max_parents` | 10 | Maximum parents a block may reference |
 | `finality_depth` | 100 | Depth at which depth-based finality applies |
 
-Source: `core/consensus/src/types.rs` — `GhostDagParams::default()`
+Source: `core/consensus/src/types.rs`, `GhostDagParams::default()`
 (`k = 18`, `max_parents = 10`, `finality_depth = 100`).
 
 > **Pre-audit status.** The consensus crate is internally audited and TLA+-checked
@@ -60,55 +60,55 @@ Source: `core/consensus/src/types.rs` — `GhostDagParams::default()`
 
 The consensus stack lives in `core/consensus/`. The audited core surfaces:
 
-### GhostDAG engine — `src/ghostdag.rs`
+### GhostDAG engine, `src/ghostdag.rs`
 
-- `GhostDag::new(params, dag_store)` — construct the engine over a DAG store.
-- `GhostDag::calculate_blue_set(block)` — compute a block's blue set under the
+- `GhostDag::new(params, dag_store)`, construct the engine over a DAG store.
+- `GhostDag::calculate_blue_set(block)`, compute a block's blue set under the
   k-cluster rule.
-- `GhostDag::add_block(block)` — admit a block, update relations and tips.
-- `GhostDag::select_tip()` / `GhostDag::get_tips()` — current best tip / all tips.
+- `GhostDag::add_block(block)`, admit a block, update relations and tips.
+- `GhostDag::select_tip()` / `GhostDag::get_tips()`, current best tip / all tips.
 
 Blue score is **recomputed**, never trusted from the header. A malicious
 `header.blue_score` (e.g. `u64::MAX`) is rejected at admission and ignored by
-ordering — see the regression test `core/consensus/tests/c03_total_order_recompute.rs`.
+ordering, see the regression test `core/consensus/tests/c03_total_order_recompute.rs`.
 
-### DAG storage — `src/dag_store.rs`
+### DAG storage, `src/dag_store.rs`
 
-- `DagStore::new()` — in-memory store.
-- `DagStore::persistent(kv)` — write-through to a `KvStore` backend (RocksDB),
+- `DagStore::new()`, in-memory store.
+- `DagStore::persistent(kv)`, write-through to a `KvStore` backend (RocksDB),
   loading prior state on construction so DAG state survives restart.
-- `DagStore::with_strict_vrf(bool)` — enable strict VRF admission gating.
+- `DagStore::with_strict_vrf(bool)`, enable strict VRF admission gating.
 - `store_block` · `get_block` · `get_tips` · `finalize_block` · `prune`.
 
-### Tip & chain selection — `src/tip_selection.rs`, `src/chain_selection.rs`
+### Tip & chain selection, `src/tip_selection.rs`, `src/chain_selection.rs`
 
 - `TipSelector` with `SelectionStrategy` (`HighestBlueScore`,
   `HighestBlueScoreWithTieBreak`, weighted-random).
-- `ParentSelector` — selects `(selected_parent, merge_parents)` for a new block.
-- `ChainSelector` — reorg detection with **finality-aware reorg rejection**
+- `ParentSelector`, selects `(selected_parent, merge_parents)` for a new block.
+- `ChainSelector`, reorg detection with **finality-aware reorg rejection**
   (a reorg that would revert a finalized block is refused).
 
-### Ordering — `src/ordering.rs`
+### Ordering, `src/ordering.rs`
 
-- `TotalOrdering::get_total_order(tip)` — deterministic order genesis → tip.
-- `TotalOrdering::get_ordered_blocks(from, to)` — ordered block range + tx order.
-- `TotalOrderIterator` — async iterator yielding blocks in consensus order.
+- `TotalOrdering::get_total_order(tip)`, deterministic order genesis → tip.
+- `TotalOrdering::get_ordered_blocks(from, to)`, ordered block range + tx order.
+- `TotalOrderIterator`, async iterator yielding blocks in consensus order.
 
-### {#ecvrf} ECVRF proposer election — `src/ecvrf.rs`, `src/vrf.rs`
+### {#ecvrf} ECVRF proposer election, `src/ecvrf.rs`, `src/vrf.rs`
 
 > **Tier: academic.** This subsection documents the cryptographic election
 > mechanism. The construction below is faithful to the code; the deeper
 > security argument and parameter analysis are academic-tier material.
 
-Proposer eligibility uses an **ECVRF over P-256** — specifically
+Proposer eligibility uses an **ECVRF over P-256**, specifically
 **ECVRF-P256-SHA256-TAI per RFC 9381** (`core/consensus/src/ecvrf.rs:3`). A VRF
 gives each candidate proposer a verifiable, unpredictable-but-deterministic
 output bound to their secret key and a public input (`alpha`), so the network can
 check *who was entitled to propose* without anyone being able to grind the result.
 
 - `ecvrf::prove(secret: &[u8;32], alpha: &[u8]) -> (EcvrfProof, [u8;32])`
-  (RFC 9381 §5.1) — `core/consensus/src/ecvrf.rs:288`.
-- `ecvrf::verify(...)` (RFC 9381 §5.3) — `core/consensus/src/ecvrf.rs:332`.
+  (RFC 9381 §5.1), `core/consensus/src/ecvrf.rs:288`.
+- `ecvrf::verify(...)` (RFC 9381 §5.3), `core/consensus/src/ecvrf.rs:332`.
 - Hash-to-curve uses **try-and-increment** (RFC 9381 §5.4.1.1).
 - Nonce generation is **deterministic** via an HMAC-DRBG (RFC 6979 §3.2), with
   the DRBG state `(k, v)` **wiped on drop** (`core/consensus/src/ecvrf.rs:208`).
@@ -119,7 +119,7 @@ check *who was entitled to propose* without anyone being able to grind the resul
 the VRF output and supports both ECVRF and a legacy SHA3 proof path during
 migration; `LeaderElection` provides epoch-based leader selection.
 
-### {#finality} BFT checkpoint finality — `src/finality.rs`, `src/checkpoint.rs`
+### {#finality} BFT checkpoint finality, `src/finality.rs`, `src/checkpoint.rs`
 
 > **Tier: academic.** Depth-based finality is the everyday mechanism; the
 > committee BFT checkpoint layer that hard-finalizes it is deeper material.
@@ -139,8 +139,7 @@ Citrate finalizes in two complementary layers:
    **ed25519-signed `CheckpointVote`s** over `(height || block_hash)`. A
    checkpoint finalizes once a **quorum** of votes is reached
    (`CheckpointState::has_quorum(threshold)`, `src/checkpoint.rs:173`). The
-   default committee is **100** members with a **67/100** quorum threshold —
-   i.e. 2/3 + 1 (`CheckpointConfig`, `src/checkpoint.rs:88,102-103`).
+   default committee is **100** members with a **67/100** quorum threshold, i.e. 2/3 + 1 (`CheckpointConfig`, `src/checkpoint.rs:88,102-103`).
 
 ## Examples
 
@@ -173,12 +172,12 @@ To read the live DAG over JSON-RPC (no Rust required), see the runnable
 
 ## Tutorials
 
-- [Read the DAG](/chain/tutorials/read-the-dag) — query tips, blue score and a
+- [Read the DAG](/chain/tutorials/read-the-dag), query tips, blue score and a
   block over JSON-RPC against a running node. **Tier: public.**
 
 ## Security & access
 
-- **Tier: public** for the GhostDAG overview and reference — this is protocol
+- **Tier: public** for the GhostDAG overview and reference, this is protocol
   a developer needs to reason about ordering and finality, and the algorithm
   is academically published (GhostDAG). The `#ecvrf` and `#finality`
   subsections are marked **academic** because the cryptographic and BFT
@@ -193,9 +192,9 @@ To read the live DAG over JSON-RPC (no Rust required), see the runnable
 ## Source & verification
 
 - **Source repo / path:** `citrate-chain/core/consensus/`
-- **Truth document (Rule 9):** `core/consensus/README.md` — this page summarizes
+- **Truth document (Rule 9):** `core/consensus/README.md`, this page summarizes
   and links; it does not duplicate the README.
 - **Audited against SHA:** `03d7851`
   (`git -C citrate-chain rev-parse --short HEAD`).
 - **Honest status:** internally tested (314 tests incl. proptests) and
-  TLA+-checked in places; **pre external audit** — not certified.
+  TLA+-checked in places; **pre external audit**, not certified.

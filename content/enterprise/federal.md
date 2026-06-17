@@ -1,5 +1,5 @@
 ---
-title: Federal & Defense (CMMC / FedRAMP / ITAR) — Gated
+title: Federal & Defense (CMMC / FedRAMP / ITAR), Gated
 codex_slug: /enterprise/federal
 tier: public
 org_scope: ~
@@ -24,10 +24,10 @@ deploy within their own authorization boundary; the vendor performs no data serv
 itself within that boundary (see [Compliance posture](/enterprise/compliance)). The specific
 control implementations, SPRS detail, SSP bodies, ODVs, sponsor/3PAO status, and any
 CUI/CMMC-specific particulars are **confidential** and **gated** (admins, contracted assessors,
-and issued auditors only) — they are **never built into the public docs**. No CMMC scores, control
+and issued auditors only), they are **never built into the public docs**. No CMMC scores, control
 detail, sponsor names, or federal-specific specifics are authored here.
 
-**Honest status note:** these frameworks are *in progress*, not certified — see the sanitized
+**Honest status note:** these frameworks are *in progress*, not certified, see the sanitized
 [Compliance posture](/enterprise/compliance). Nothing here is a claim of ATO, CMMC certification,
 or attestation.
 

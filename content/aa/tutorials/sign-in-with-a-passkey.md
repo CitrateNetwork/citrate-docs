@@ -15,7 +15,7 @@ author: Claude Opus 4.8 (1M context)
 # Sign In With a Passkey
 
 > Create a passkey-backed Citrate smart wallet and send your first sponsored
-> transaction — no seed phrase. Runnable end-to-end. For developers.
+> transaction, no seed phrase. Runnable end-to-end. For developers.
 
 > **Status: pre-audit.** The AA stack (validators, factory, paymaster, bundler,
 > SDK encoders) is experimental and **not yet third-party audited**. Use testnet
@@ -27,7 +27,7 @@ Every API call below exists in `citrate-sdk-js/src/aa/` at SHA `bc5a830`.
 
 - Node 18+ and `npm install citrate-js` (AA helpers are the `aa` namespace:
   `import { aa } from 'citrate-js'`).
-- A **secure context** (HTTPS or `localhost`) — passkeys require
+- A **secure context** (HTTPS or `localhost`), passkeys require
   `navigator.credentials`, which only runs in the browser. Run these steps in a
   browser app (e.g. a Vite/Next page), not a plain Node script.
 - Chain **40204** access: the Citrate identity authority (`auth.citrate.ai`) and
@@ -35,7 +35,7 @@ Every API call below exists in `citrate-sdk-js/src/aa/` at SHA `bc5a830`.
 - The deployed AA addresses (factory, kernel impl, EntryPoint, paymaster,
   validators) from the chain's `40204.json` / `DEPLOYED_ADDRESSES.md`.
 
-## Step 1 — Derive the user's wallet address
+## Step 1, Derive the user's wallet address
 
 ```ts
 import { aa } from 'citrate-js';
@@ -46,7 +46,7 @@ const sender = predictWalletAddress(FACTORY, KERNEL_IMPL, userId);
 // `sender` is this user's ONE wallet address on every surface (counterfactual).
 ```
 
-## Step 2 — Build the first UserOperation (with deploy)
+## Step 2, Build the first UserOperation (with deploy)
 
 Get the deploy permit from the authority, then assemble `initCode` and the call:
 
@@ -88,7 +88,7 @@ const op = buildPackedUserOp({
 });
 ```
 
-## Step 3 — Hash and sign with the passkey
+## Step 3, Hash and sign with the passkey
 
 ```ts
 import { aa } from 'citrate-js';
@@ -102,7 +102,7 @@ const signature = await signUserOpWithPasskey(hash);
 const signedOp = { ...op, signature };
 ```
 
-## Step 4 — Submit to the bundler and wait
+## Step 4, Submit to the bundler and wait
 
 ```ts
 import { aa } from 'citrate-js';
@@ -110,7 +110,7 @@ const { BundlerClient } = aa;
 
 const bundler = new BundlerClient(); // defaults to https://bundler.citrate.ai/rpc
 
-// Optional sanity check — bundler must be on 40204:
+// Optional sanity check, bundler must be on 40204:
 if ((await bundler.chainId()) !== 40204n) throw new Error('wrong chain');
 
 const userOpHash = await bundler.sendUserOperation(signedOp, ENTRYPOINT);
@@ -125,7 +125,7 @@ you can surface AA codes (e.g. `AA31` paymaster deposit too low) directly.
 
 - The wallet **deployed itself** on its first op (`initCode`), and the factory
   registered it with the paymaster so sponsorship was allowed.
-- The **passkey** authorized the op via `WebAuthnP256Validator` — no seed phrase
+- The **passkey** authorized the op via `WebAuthnP256Validator`, no seed phrase
   ever existed.
 - The **paymaster** paid gas under the first-op budget.
 
@@ -135,7 +135,7 @@ Next: add a recovery method in [Guardians](/aa/guardians), or read the full
 ## Security & access
 
 **Tier: public.** Runnable builder tutorial; nothing here is secret. No private
-keys, mnemonics, or credentials appear — the access token is the user's own OIDC
+keys, mnemonics, or credentials appear, the access token is the user's own OIDC
 token and the deploy permit is fetched at runtime; passkey private material never
 leaves the authenticator.
 

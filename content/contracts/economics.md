@@ -24,7 +24,7 @@ author: Claude Opus 4.8 (1M context)
 
 This page is **transcluded**: the truth lives in `citrate-chain` at the pinned
 SHA (`03d7851`). Every function and event below is audited against the `.sol`
-source cited per section — if a symbol is not listed here, it does not exist in
+source cited per section, if a symbol is not listed here, it does not exist in
 the contract at this SHA. The ABI is summarized, not reproduced (Rule 9); follow
 the source link for the full interface.
 
@@ -32,7 +32,7 @@ the source link for the full interface.
 > re-audit remediations noted inline in their NatSpec (e.g. wSALT SOL-01 / SOL-02
 > / RFI-01, staking SOL-16, contribution RFI-03/04). They also have Foundry
 > invariant suites and TLA+ specs in places. None of this is an external
-> third-party audit. Pilot is testnet-beta — treat as experimental.
+> third-party audit. Pilot is testnet-beta, treat as experimental.
 
 ### Contract map
 
@@ -154,7 +154,7 @@ proof, revert/0 == no proof. No money moves without a `0x0108` success
 (invariant `NoPayWithoutProof`). Invariants are asserted by the Foundry suite
 `test/IPFSIncentivesV2Invariant.t.sol`.
 
-### Key functions — v1 (`IPFSIncentives`)
+### Key functions, v1 (`IPFSIncentives`)
 
 | Function | Access | Purpose |
 |---|---|---|
@@ -167,7 +167,7 @@ proof, revert/0 == no proof. No money moves without a `0x0108` success
 
 Events: `PinReported`, `RewardClaimed`, `BaseRewardUpdated`, `RewardsDeposited`.
 
-### Key functions — v2 (`IPFSIncentivesV2`)
+### Key functions, v2 (`IPFSIncentivesV2`)
 
 | Function | Access | Purpose |
 |---|---|---|
@@ -178,10 +178,10 @@ Events: `PinReported`, `RewardClaimed`, `BaseRewardUpdated`, `RewardsDeposited`.
 | `challenge(bytes32 cid, uint256 sector)` | any | Open a storage challenge. |
 | `claim(bytes32 cid, uint256 sector)` → `uint256 owed` | pinner | Withdraw vested-minus-claimed reward. |
 | `slash(address pinner, bytes32 cid, uint256 sector)` | any | Slash on missed/failed proof; split bond. |
-| `clearSlashed(bytes32 cid, uint256 sector)` | — | Reset per-attempt counters (re-seal prep). |
+| `clearSlashed(bytes32 cid, uint256 sector)` |, | Reset per-attempt counters (re-seal prep). |
 | `returnBond(bytes32 cid, uint256 sector)` → `uint256` | pinner | Return bond once done + fully claimed. |
 | `withdrawChallengerCredit()` → `uint256` | challenger | Withdraw challenger rewards. |
-| `pinId`, `slotId`, `deriveReplicaId` (pure), `owedOf(...)` (view) | — | Id/accounting helpers. |
+| `pinId`, `slotId`, `deriveReplicaId` (pure), `owedOf(...)` (view) |, | Id/accounting helpers. |
 
 Events: `PinnerRegistered`, `Sealed`, `Challenged`, `PoStPassed`, `Claimed`,
 `Slashed`, `Missed`, `SlashedCleared`, `BondReturned`, `SlotFunded`.
@@ -229,7 +229,7 @@ Source: `contracts/src/StablecoinTreasury.sol` (MIT),
 `is ReentrancyGuard, Governable`.
 
 **Tier: commercial.** Treasury operator surface for the network's institutional
-revenue — narrative gated to contracted principals (bytecode/ABI remain public
+revenue, narrative gated to contracted principals (bytecode/ABI remain public
 on-chain). No secrets on this page.
 
 **Purpose.** Accumulates stablecoins from institutional compute purchases across
@@ -265,7 +265,7 @@ arrangement) surfaced to contracted principals; ABI remains public on-chain. No
 secrets on this page.
 
 **Purpose.** Receives a configurable share (default 1000 bps = 10%) of gas-pool
-fees — skimmed before the network's 7-way revenue split — as a cooperative
+fees, skimmed before the network's 7-way revenue split, as a cooperative
 incentive for the designated market maker, who provides liquidity and handles CEX
 listings. The market maker withdraws accumulated SALT; governance can change the
 market-maker address and the allocation rate.
@@ -293,13 +293,13 @@ Default `allocationBps = 1000` (10%).
 
 ## Tutorials
 
-- [Read a verified contract](/contracts/tutorials/read-a-contract) — query any of
+- [Read a verified contract](/contracts/tutorials/read-a-contract), query any of
   these contracts over `eth_call` / an SDK without sending a transaction.
 
 ## Security & access
 
 - **Tier rationale.** WrappedSALT, LiquidStakingPool, the IPFS incentives, and
-  ContributionAccounting are **public** — the open economic primitives a builder
+  ContributionAccounting are **public**, the open economic primitives a builder
   needs, with inherently-public on-chain ABIs. **StablecoinTreasury and
   MarketMakerAllocation are commercial**: they describe the network's revenue and
   strategic-partner economics, surfaced to contracted principals. Only the

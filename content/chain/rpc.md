@@ -20,7 +20,7 @@ author: Claude Opus 4.8 (1M context)
 This page is **code-audited** against `citrate-chain` @ `03d7851`. Every method below is registered in the
 node's `IoHandler` at that SHA; methods that do not appear in the code are not documented here. The truth lives
 in the source repo and Codex transcludes it at the pinned SHA (Rule 9). Where this page differs from the legacy
-`/chain/rpc` fixture, **this page wins** — see "Source & verification".
+`/chain/rpc` fixture, **this page wins**, see "Source & verification".
 
 ## Overview
 
@@ -47,7 +47,7 @@ Method namespaces and where they are registered:
 | `citrate_*` (economics) | `CHAIN-rpc-econ` | `core/api/src/economics_rpc.rs` | commercial |
 
 > **Naming note (registry correction).** There are **no** `citrate_blockDAG`, `citrate_blueScore`,
-> `citrate_selectedParent`, `citrate_tipSet`, `ai_*`, or `economics_*` methods in the code at this SHA — those
+> `citrate_selectedParent`, `citrate_tipSet`, `ai_*`, or `economics_*` methods in the code at this SHA, those
 > names in the registry/fixture are aspirational. The real DAG accessor is `citrate_getDagStats` (plus the
 > `chain_*` namespace for tips/height); AI and economics methods both use the `citrate_*` prefix. See the
 > registry-correction notes at the end.
@@ -63,7 +63,7 @@ Method namespaces and where they are registered:
 
 | Method | Params | Returns |
 |---|---|---|
-| `eth_blockNumber` | — | latest height, hex string (`eth_rpc.rs:147`) |
+| `eth_blockNumber` |, | latest height, hex string (`eth_rpc.rs:147`) |
 | `eth_getBlockByNumber` | `[blockTag\|hex, includeTxs:bool]` | block object or `null` (`eth_rpc.rs:160`) |
 | `eth_getBlockByHash` | `[hash, includeTxs:bool]` | block object or `null` (`eth_rpc.rs:246`) |
 | `eth_getBlockTransactionCountByNumber` | `[blockTag\|hex]` | hex count (`eth_rpc.rs`) |
@@ -81,7 +81,7 @@ Method namespaces and where they are registered:
 | `eth_getCode` | `[address, blockTag]` | code bytes, hex |
 | `eth_getStorageAt` | `[address, slot, blockTag]` | storage word, hex |
 | `eth_getTransactionCount` | `[address, blockTag]` | nonce, hex |
-| `eth_accounts` | — | `[]` (node holds no keys) |
+| `eth_accounts` |, | `[]` (node holds no keys) |
 
 ### Transactions & gas
 
@@ -91,40 +91,40 @@ Method namespaces and where they are registered:
 | `eth_sendTransaction` | `[txObject]` | tx hash |
 | `eth_call` | `[txObject, blockTag]` | return data, hex |
 | `eth_estimateGas` | `[txObject]` | gas estimate, hex |
-| `eth_gasPrice` | — | gas price, hex (`0x3b9aca00` = 1 gwei) (`eth_rpc.rs:494`) |
-| `eth_maxPriorityFeePerGas` | — | priority fee, hex |
+| `eth_gasPrice` |, | gas price, hex (`0x3b9aca00` = 1 gwei) (`eth_rpc.rs:494`) |
+| `eth_maxPriorityFeePerGas` |, | priority fee, hex |
 | `eth_feeHistory` | `[blockCount, newestBlock, rewardPercentiles]` | fee-history object |
 
 ### Filters & logs
 
 `eth_getLogs`, `eth_newFilter`, `eth_newBlockFilter`, `eth_newPendingTransactionFilter`,
-`eth_uninstallFilter`, `eth_getFilterChanges`, `eth_getFilterLogs` — standard Ethereum log/filter semantics,
+`eth_uninstallFilter`, `eth_getFilterChanges`, `eth_getFilterLogs`, standard Ethereum log/filter semantics,
 backed by `core/api/src/filter.rs`.
 
 ### Node metadata
 
 | Method | Params | Returns |
 |---|---|---|
-| `eth_chainId` | — | chain id, hex (`0x{:x}`, e.g. `0x9d0c` for 40204) (`eth_rpc.rs:480`) |
-| `eth_syncing` | — | `false` when synced (`eth_rpc.rs:486`) |
-| `eth_protocolVersion` / `eth_mining` / `eth_hashrate` / `eth_coinbase` | — | static/compat values |
-| `net_version` | — | chain id as decimal string (`server.rs:1158`) |
-| `net_peerCount` | — | connected peer count |
-| `net_listening` | — | `bool` |
-| `net_peers` / `net_peerInfo` | — | peer list / per-peer info |
-| `web3_clientVersion` | — | `"citrate/v0.1.0"` (`server.rs:1164`) |
+| `eth_chainId` |, | chain id, hex (`0x{:x}`, e.g. `0x9d0c` for 40204) (`eth_rpc.rs:480`) |
+| `eth_syncing` |, | `false` when synced (`eth_rpc.rs:486`) |
+| `eth_protocolVersion` / `eth_mining` / `eth_hashrate` / `eth_coinbase` |, | static/compat values |
+| `net_version` |, | chain id as decimal string (`server.rs:1158`) |
+| `net_peerCount` |, | connected peer count |
+| `net_listening` |, | `bool` |
+| `net_peers` / `net_peerInfo` |, | peer list / per-peer info |
+| `web3_clientVersion` |, | `"citrate/v0.1.0"` (`server.rs:1164`) |
 | `web3_sha3` | `[dataHex]` | keccak-256 digest, hex (`eth_rpc.rs`) |
 
 ### Native namespace aliases (`server.rs`)
 
 `chain_getHeight`, `chain_getBlock`, `chain_getTips`, `chain_getTransaction`, `state_getBalance`,
 `state_getCode`, `state_getNonce`, `mempool_getPending`, `mempool_getStatus`, `tx_sendRawTransaction`,
-`tx_estimateGas`, `tx_getGasPrice` — thin wrappers over the same `ChainApi`/`StateApi`/`MempoolApi`/
+`tx_estimateGas`, `tx_getGasPrice`, thin wrappers over the same `ChainApi`/`StateApi`/`MempoolApi`/
 `TransactionApi` (`core/api/src/methods/`).
 
 ---
 
-## Citrate methods — BlockDAG & node ops (`citrate_*`) {#citrate}
+## Citrate methods, BlockDAG & node ops (`citrate_*`) {#citrate}
 
 **Surface `CHAIN-rpc-citrate` · tier public.** Registered in `core/api/src/eth_rpc.rs`.
 
@@ -166,20 +166,19 @@ Status of a transaction by hash (mempool / mined / unknown). Params: `[hash]`. (
 
 **Auth-gated.** Per-transaction mempool detail. Requires operator auth inside the handler
 (`eth_rpc.rs:1903`). The unauthenticated, aggregate-only counterpart is `citrate_getMempoolStats` (see
-Economics). Do not confuse the two — a prior regression (audit RFI-A1 / H-API-01) collided these names; the
+Economics). Do not confuse the two, a prior regression (audit RFI-A1 / H-API-01) collided these names; the
 auth-gated snapshot is the only handler for this method name post-fix.
 
 ### Emergency controls (operator-only)
 
-`citrate_emergencyPause`, `citrate_emergencyResume`, `citrate_emergencyStatus` — halt/resume block production.
+`citrate_emergencyPause`, `citrate_emergencyResume`, `citrate_emergencyStatus`, halt/resume block production.
 **Authenticated inside the handler** via `require_operator_auth` (env token `CITRATE_OPERATOR_TOKEN`), not by
 seat. Only registered when the node is constructed with a `pause_flag` (`eth_rpc.rs:2461`). No secrets are
 documented here; the token is operator-supplied at runtime.
 
 ### Institutional / school-node (operator-only)
 
-`citrate_registerSchoolNode`, `citrate_getInstitutionalConfig`, `citrate_estimateInstitutionalRewards` —
-registration and reward-estimation for institutional nodes (`eth_rpc.rs`).
+`citrate_registerSchoolNode`, `citrate_getInstitutionalConfig`, `citrate_estimateInstitutionalRewards`, registration and reward-estimation for institutional nodes (`eth_rpc.rs`).
 
 ---
 
@@ -200,7 +199,7 @@ Run a preview inference against a registered on-chain model. (`server.rs:2070`)
 |---|---|---|---|
 | `model_id` | hex, 32 bytes | yes | model identity |
 | `input` | any JSON | yes | serialized to bytes for the model |
-| `from` | hex, 20 bytes | no | identity **claim** — anonymous unless signed |
+| `from` | hex, 20 bytes | no | identity **claim**, anonymous unless signed |
 | `signature` | hex | no | secp256k1 over `{chain_id, model_id, input, timestamp}` |
 | `timestamp` | number | no | unix seconds; required with `signature` |
 | `max_gas` | number | no | default `1_000_000` |
@@ -254,11 +253,11 @@ id. Both registered in `server.rs`.
 | Method | Params | Returns |
 |---|---|---|
 | `citrate_getTextEmbedding` | `[text \| string[]]` (≤256 inputs) | one `float[]`, or `float[][]` for arrays (`ai_rpc.rs:29`) |
-| `citrate_semanticSearch` | `[query, documents[], top_k?]` (≤256 docs) | `[{index, score, text}, ...]` sorted by cosine similarity (`ai_rpc.rs:100`) |
+| `citrate_semanticSearch` | `[query, documents[], top_k?]` (≤256 docs) | `[{index, score, text}...]` sorted by cosine similarity (`ai_rpc.rs:100`) |
 | `citrate_chatCompletion` | `[{...ChatCompletionRequest}]` or `[prompt, max_tokens?, temperature?]` | chat-completion response (`ai_rpc.rs:201`) |
 
 > Embedding model is `bge-m3`; default chat model is `mistral-7b-instruct-v0.3`. Batch size is clamped at
-> `MAX_EMBEDDING_INPUTS = 256` (SECREM-01 Phase-8, NET-1 variant) — larger batches return `invalid_params`.
+> `MAX_EMBEDDING_INPUTS = 256` (SECREM-01 Phase-8, NET-1 variant), larger batches return `invalid_params`.
 
 ---
 
@@ -270,13 +269,13 @@ runs without an economics manager (so values below assume one is configured).
 
 | Method | Params | Returns |
 |---|---|---|
-| `citrate_gasPrice` | — | base gas price, hex (`economics_rpc.rs:19`) |
-| `citrate_getEconomicState` | — | economic-state object (below) (`economics_rpc.rs:33`) |
+| `citrate_gasPrice` |, | base gas price, hex (`economics_rpc.rs:19`) |
+| `citrate_getEconomicState` |, | economic-state object (below) (`economics_rpc.rs:33`) |
 | `citrate_getVotingPower` | `[address]` | `{tokenPower, gasUsagePower, stakingPower, reputationPower, totalPower, quadraticPower}` all hex (`economics_rpc.rs:60`) |
 | `citrate_getStakeholderInfo` | `[address]` | `{stakeholderType, contributionScore, totalContribution, blocksActive, qualityScore}` (`economics_rpc.rs:110`) |
-| `citrate_getRevenueHistory` | — | `[{blockHeight, totalRevenue, poolType, distributionCount, timestamp}, ...]` (`economics_rpc.rs:161`) |
-| `citrate_getMempoolStats` | — | aggregate, unauthenticated mempool stats (`economics_rpc.rs:193`) |
-| `citrate_getToken` | — | `{name, symbol, decimals, totalSupply, totalMinted}` (`economics_rpc.rs:245`) |
+| `citrate_getRevenueHistory` |, | `[{blockHeight, totalRevenue, poolType, distributionCount, timestamp}...]` (`economics_rpc.rs:161`) |
+| `citrate_getMempoolStats` |, | aggregate, unauthenticated mempool stats (`economics_rpc.rs:193`) |
+| `citrate_getToken` |, | `{name, symbol, decimals, totalSupply, totalMinted}` (`economics_rpc.rs:245`) |
 | `citrate_getStakedBalance` | `[address]` | staked balance, hex (`economics_rpc.rs:268`) |
 | `citrate_getReputationScore` | `[address]` | reputation score, number (`economics_rpc.rs:308`) |
 
@@ -339,7 +338,7 @@ curl -s http://127.0.0.1:8545 \
   -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"citrate_getTextEmbedding",
        "params":["hello citrate"]}'
-# result: [0.0123, -0.045, ...]   (bge-m3 embedding vector)
+# result: [0.0123, -0.045...]   (bge-m3 embedding vector)
 ```
 
 ### `citrate_requestInference` (anonymous → Public models only)
@@ -357,12 +356,12 @@ curl -s http://127.0.0.1:8545 \
 curl -s http://127.0.0.1:8545 \
   -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"citrate_getToken","params":[]}'
-# {"name":"Citrate","symbol":"SALT","decimals":18, ...}
+# {"name":"Citrate","symbol":"SALT","decimals":18...}
 ```
 
 ## Tutorials
 
-- [Call the Citrate RPC](/chain/tutorials/call-citrate-rpc) — a runnable, copy-paste walkthrough.
+- [Call the Citrate RPC](/chain/tutorials/call-citrate-rpc), a runnable, copy-paste walkthrough.
 
 ## Security & access
 
@@ -370,7 +369,7 @@ curl -s http://127.0.0.1:8545 \
   (`citrate_emergency*`, `citrate_getMempoolSnapshot`, `citrate_deployModel`/`citrate_updateModel`,
   `citrate_registerSchoolNode`) authenticate via an operator-supplied token at runtime; the token is never
   documented.
-- **Tiering.** `eth_*`/`net_*`/`web3_*`/`citrate_*` chain, DAG, and AI methods are **public** — a developer
+- **Tiering.** `eth_*`/`net_*`/`web3_*`/`citrate_*` chain, DAG, and AI methods are **public**, a developer
   needs them to build. The **economics** documentation is **commercial**: the reward/stakeholder/voting-power
   model is operator/enterprise depth whose narrative sits behind a seat, even though the read methods are open
   on a configured node.

@@ -1,5 +1,5 @@
 ---
-title: LVM — EVM execution & parallel executor
+title: LVM, EVM execution & parallel executor
 codex_slug: /chain/lvm
 tier: public
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context) + Saul Loveman
 ---
 
-# LVM — EVM execution & parallel executor
+# LVM, EVM execution & parallel executor
 
 > Citrate's execution layer: a full EVM (via REVM) plus a Block-STM-style
 > MVCC parallel executor. For contract authors and node operators.
@@ -20,7 +20,7 @@ author: Claude Opus 4.8 (1M context) + Saul Loveman
 ## Overview
 
 The Citrate VM ("LVM") executes standard EVM bytecode. It does **not** fork
-the opcode set — contracts compiled by Solidity / Vyper for Ethereum run
+the opcode set, contracts compiled by Solidity / Vyper for Ethereum run
 unmodified. Under the hood the chain embeds [REVM](https://github.com/bluealloy/revm)
 behind a thin adapter (`StateDBAdapter`) that bridges REVM's `Database` trait to
 Citrate's `StateDB` and persistent store.
@@ -36,12 +36,12 @@ block run in parallel, then commit serializably.
 - **Hardfork spec:** `SpecId::CANCUN`. Set in the adapter at
   `core/execution/src/revm_adapter.rs` (`.with_spec_id(SpecId::CANCUN)`).
   CANCUN enables MCOPY (EIP-5656), which Solidity 0.8.25+ emits for
-  dynamic-bytes ABI return encoding — see the `BFR-VM-1` note in the source.
+  dynamic-bytes ABI return encoding, see the `BFR-VM-1` note in the source.
 - **Chain ID:** supplied per-executor (`Executor::with_chain_id(..)`) and
   written into the REVM `cfg_env`. Citrate mainnet uses **40204** (see
   `core/execution/tests/*` fixtures).
 - **Precompiles:** the 9 standard Ethereum precompiles (ECRECOVER … BLAKE2F,
-  `0x01`–`0x09`) plus Citrate extensions — see
+  `0x01`–`0x09`) plus Citrate extensions, see
   [Precompiles](/chain/precompiles) and
   [Confidential precompiles overview](/chain/precompiles-zkp).
 - **Logs / events:** REVM's emitted logs are converted 1:1 into Citrate
@@ -64,9 +64,9 @@ correct by the TLA+ spec `specs/tla/consensus/ExecutorMVCC.tla` (see the
 spec-mapping table in `core/execution/src/mvcc/mod.rs`). Each concurrent worker
 holds:
 
-- a **pinned read version** (`ReadVersion`) — the `StateVersion` at entry;
-- a **read set** (`ReadSet`) — accounts observed during execution;
-- a **scratch journal** (`ScratchJournal`) — pending writes for the tx.
+- a **pinned read version** (`ReadVersion`), the `StateVersion` at entry;
+- a **read set** (`ReadSet`), accounts observed during execution;
+- a **scratch journal** (`ScratchJournal`), pending writes for the tx.
 
 At commit the `CommitCoordinator` performs a CAS: if no account in the read set
 was written since the pin, it atomically applies the journal and bumps the
@@ -90,7 +90,7 @@ recipient access from the tx type.
 
 ## Examples
 
-Deploy and call a standard Solidity contract — no Citrate-specific changes are
+Deploy and call a standard Solidity contract, no Citrate-specific changes are
 required. Use any Ethereum tooling (Foundry, ethers, viem) pointed at the
 Citrate RPC with chain ID **40204**. See the [SDK](/sdks) and [CLI](/chain/cli)
 references for connection details.
@@ -106,7 +106,7 @@ and the parallel-execution model are all things a developer or operator needs
 to build and run on Citrate, and none of it is competitively sensitive. The
 MVCC section is tagged academic in the registry because its formal model
 (TLA+) is research material; the prose here links to that model rather than
-reproducing it. **No secrets appear on this page** — no endpoints, keys, or
+reproducing it. **No secrets appear on this page**, no endpoints, keys, or
 credentials.
 
 ## Source & verification

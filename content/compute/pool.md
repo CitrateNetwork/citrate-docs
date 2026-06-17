@@ -30,7 +30,7 @@ on-chain contracts via signed transactions.
 | `citrate-pool-coordinator` | `pool-coordinator/` | Subscribes to `ComputeRequested`, elects coordinator per epoch, round-robin selects a member, records dispatch on-chain, POSTs the request to the member's `/pool-infer`, then completes or fails the job on-chain. |
 | `citrate-training-worker` | `training-worker/` | `training` mode (CM-07): joins training pools, observes epoch events; `pipeline` mode (CM-08): inference-pipeline stage worker. |
 
-This page is **transcluded** — truth lives in the binaries at SHA `ae9358d`.
+This page is **transcluded**, truth lives in the binaries at SHA `ae9358d`.
 
 > **Honest status.** S1 scope for the training worker is **event observation
 > only**; the training backend (forward/backward, ring all-reduce, Merkle
@@ -57,11 +57,11 @@ Audited against `pool-coordinator/src/config.rs`.
 
 | Variable | Default | Required | Purpose |
 |---|---|---|---|
-| `CITRATE_POOL_KEYSTORE_PATH` | — | one-of | SSv3 keystore file path. |
-| `CITRATE_POOL_KEYSTORE_PASSPHRASE` | — | if keystore set | Keystore passphrase. |
-| `CITRATE_POOL_PRIVATE_KEY_HEX` | — | one-of (testnet) | Raw 64-hex key. |
-| `CITRATE_POOL_WALLET_ADDRESS` | — | **yes** | Must match derived key. |
-| `CITRATE_POOL_CONTRACT` | — | **yes** | `ComputePool` address. |
+| `CITRATE_POOL_KEYSTORE_PATH` |, | one-of | SSv3 keystore file path. |
+| `CITRATE_POOL_KEYSTORE_PASSPHRASE` |, | if keystore set | Keystore passphrase. |
+| `CITRATE_POOL_PRIVATE_KEY_HEX` |, | one-of (testnet) | Raw 64-hex key. |
+| `CITRATE_POOL_WALLET_ADDRESS` |, | **yes** | Must match derived key. |
+| `CITRATE_POOL_CONTRACT` |, | **yes** | `ComputePool` address. |
 | `CITRATE_POOL_MEMBER_ENDPOINTS` | `""` | **yes** | `addr1=url1,addr2=url2` member `/pool-infer` map. |
 | `CITRATE_POOL_CHAIN_ID` | `40204` | No | Chain ID (verified against RPC at startup). |
 | `CITRATE_POOL_RPC_URL` | `http://127.0.0.1:18545` | No | JSON-RPC endpoint. |
@@ -69,7 +69,7 @@ Audited against `pool-coordinator/src/config.rs`.
 | `CITRATE_POOL_POLL_INTERVAL_SECS` | `3` | No | Event poll cadence. |
 | `CITRATE_POOL_FROM_BLOCK` | `latest` | No | Event start block. |
 | `CITRATE_POOL_CONFIRMATIONS_BUFFER` | `12` | No | Reorg rescan depth. |
-| `CITRATE_POOL_METRICS_ADDR` | — | No | Prometheus `/metrics` bind (warns if non-loopback). |
+| `CITRATE_POOL_METRICS_ADDR` |, | No | Prometheus `/metrics` bind (warns if non-loopback). |
 | `LOG_FORMAT` / `RUST_LOG` | `pretty` / `info,…=debug` | No | Logging. |
 
 Dispatch protocol: HTTPS POST to `member/pool-infer` with
@@ -82,18 +82,18 @@ Audited against the training-worker config.
 
 | Variable | Default | Required | Purpose |
 |---|---|---|---|
-| `CITRATE_WORKER_MODE` | — | **yes** | `training` or `pipeline`. |
-| `CITRATE_TRAINING_KEYSTORE_PATH` | — | one-of | SSv3 keystore path. |
-| `CITRATE_TRAINING_KEYSTORE_PASSPHRASE` | — | if keystore set | Passphrase. |
-| `CITRATE_TRAINING_PRIVATE_KEY_HEX` | — | one-of (testnet) | Raw key. |
-| `CITRATE_WORKER_CONTRACT` | — | **yes** | `ComputePoolTraining` / pipeline contract. |
+| `CITRATE_WORKER_MODE` |, | **yes** | `training` or `pipeline`. |
+| `CITRATE_TRAINING_KEYSTORE_PATH` |, | one-of | SSv3 keystore path. |
+| `CITRATE_TRAINING_KEYSTORE_PASSPHRASE` |, | if keystore set | Passphrase. |
+| `CITRATE_TRAINING_PRIVATE_KEY_HEX` |, | one-of (testnet) | Raw key. |
+| `CITRATE_WORKER_CONTRACT` |, | **yes** | `ComputePoolTraining` / pipeline contract. |
 | `CITRATE_WORKER_CHAIN_ID` | `40204` | No | Chain ID. |
 | `CITRATE_WORKER_RPC_URL` | `https://rpc.citrate.ai` | No | JSON-RPC endpoint. |
-| `CITRATE_WORKER_JOB_ID` | — | No (recommended) | Watch a specific job. |
+| `CITRATE_WORKER_JOB_ID` |, | No (recommended) | Watch a specific job. |
 | `CITRATE_WORKER_POLL_INTERVAL_SECS` | `3` | No | Event poll cadence. |
 | `CITRATE_WORKER_FROM_BLOCK` | `latest` | No | Event start block. |
 | `CITRATE_WORKER_CONFIRMATIONS_BUFFER` | `12` | No | Reorg rescan depth. |
-| `CITRATE_WORKER_METRICS_ADDR` | — | No | Metrics bind (S1 follow-up). |
+| `CITRATE_WORKER_METRICS_ADDR` |, | No | Metrics bind (S1 follow-up). |
 | `LOG_FORMAT` / `RUST_LOG` | `pretty` / `info,…=debug` | No | Logging. |
 
 ## Examples
