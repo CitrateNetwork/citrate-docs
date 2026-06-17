@@ -1,210 +1,224 @@
 ---
-title: Citrate JavaScript/TypeScript SDK
+title: Citrate JavaScript SDK
 codex_slug: /sdks/js
 tier: public
 org_scope: ~
-source_kind: transcluded
+source_kind: authored
 source: citrate-sdk-js/src/index.ts
 surfaces: [SDK-JS-CitrateClient, SDK-JS-aa, SDK-JS-crypto, SDK-JS-react]
 audited_against_sha: bc5a830
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate JavaScript/TypeScript SDK
+`citrate-js` is the canonical TypeScript SDK for building on Citrate Network. It wraps the chain's JSON-RPC,
+the model and inference operations, and the account-abstraction stack into a typed API, so a Node or browser
+app can talk to Citrate without hand-rolling calldata. This page is for the developer writing that app.
 
-> The canonical TypeScript SDK for building on Citrate Network (chainId `40204`), chain RPC, model
-> deployment + inference, the embedded-wallet / ERC-4337 (`aa`) helpers, crypto utilities, and optional
-> React hooks. For app developers and integrators.
+## What it is
 
-## Overview
+The SDK is the typed front door to Citrate Network from JavaScript and TypeScript. The package is named
+`citrate-js` and the version of record is `0.2.0` in `package.json`. It is the canonical SDK; the other
+language SDKs follow it and stay non-canonical until a pilot integrator needs parity.
 
-`citrate-js` is the **canonical** Citrate SDK (`package.json#name: citrate-js`, `version 0.2.0`); all
-other language SDKs are non-canonical until a pilot integrator requires parity. It wraps the chain's
-JSON-RPC, the AI inference/model precompiles, and the account-abstraction stack into a typed API so a
-web/Node app can talk to Citrate without hand-rolling calldata.
+Four surfaces sit behind one import, and most apps only ever touch the first:
 
-The SDK is organized into four documented surfaces:
+- The client, `CitrateClient` and `WebSocketClient`, for reading chain state, deploying models, and running
+  inference against the chain (`src/client/`).
+- The account-abstraction helpers, exported under the `aa` namespace, for Citrate Keyring accounts built on
+  Kernel v3 and ERC-4337 v0.7: counterfactual address derivation, passkey and EOA signing, UserOperation
+  building, guardian recovery, and a bundler client (`src/aa/`).
+- The cryptography utilities, `CryptoManager`, `KeyManager`, and Shamir secret sharing (`src/crypto/`).
+- The optional React hooks (`src/react/hooks.ts`), which are not re-exported from the package root.
 
-- **`CitrateClient` / `WebSocketClient`**, the chain + AI client (`src/client/`).
-- **`aa`**, embedded wallet helpers: ERC-4337 v0.7 UserOps, ZeroDev Kernel v3 encoding, passkey/WebAuthn
-  + EOA signing, guardian recovery, and a bundler JSON-RPC client (`src/aa/`).
-- **crypto**, `CryptoManager`, `KeyManager`, and Shamir secret-sharing helpers (`src/crypto/`).
-- **react**, optional connection/model/inference hooks (`src/react/hooks.ts`).
+The mental model is two layers. Reach for `CitrateClient` when you hold a key and want to read or write the
+chain directly. Reach for `aa` when you want a Citrate Keyring account that a passkey controls and a paymaster
+can sponsor, instead of a raw key-pair account. Passkeys are covered under [passkeys](/aa/passkeys) and
+sponsorship under [the paymaster](/aa/paymaster).
 
-Mental model: build with `CitrateClient` for read/write chain + inference; reach for `aa` when you need a
-gasless / passkey-backed smart account instead of a raw EOA.
+The `aa` module is labeled EW-S1 WP-7 in source and points at infrastructure that is live but still moving
+(`bundler.citrate.ai`, `auth.citrate.ai`). Treat it as in development. One stale detail to know up front: the
+exported `VERSION` constant reads `0.1.1` (`src/index.ts`), which trails `package.json`. Use `package.json`
+as the version of record.
 
-> **Status, pre-1.0 / pre-audit surfaces.** The package is `0.2.0`. The `aa` module is labeled
-> *EW-S1 WP-7* in-source (embedded-wallet sprint 1) and points at live-but-evolving infrastructure
-> (`bundler.citrate.ai`, `auth.citrate.ai`); treat it as experimental. The exported `VERSION` constant is
-> `0.1.1` and is **stale** relative to `package.json` (`0.2.0`), see corrections. Use `package.json`
-> as the version of record.
+## How to use it
 
-## Install / Setup
+The package targets Node 16 and newer (`engines.node`), and runs in modern browsers through the Web Crypto
+API.
 
-Real package name and version are from `citrate-sdk-js/package.json` (`name: citrate-js`, `version 0.2.0`,
-`engines.node >=16`):
+1. Install the package.
 
-```bash
-npm install citrate-js
-# peer deps (optional, only for the React hooks): react >=16.8, react-dom >=16.8
-```
+   ```bash
+   npm install citrate-js
+   ```
 
-Runtime dependencies (declared in `package.json`): `ethers ^6.8`, `axios ^1.7`, `eventemitter3 ^5`.
+   The runtime dependencies are `ethers ^6.8`, `axios ^1.7`, and `eventemitter3 ^5`. The React hooks need
+   `react >=16.8` and `react-dom >=16.8`, which are optional peer dependencies; install them only if you use
+   the hooks.
 
-```ts
-import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from 'citrate-js';
+2. Construct a client. The defaults for testnet, chain id `40204`, live in `src/utils/constants.ts`.
 
-const client = new CitrateClient({
-  // multi-RPC fallback array supported (audit SDK-02); a bare string is the legacy single-RPC form
-  rpcUrl: DEFAULT_RPC_URLS[CHAIN_IDS.TESTNET], // ['https://rpc.citrate.ai']
-  // privateKey: process.env.CITRATE_PRIVATE_KEY,   // optional; from env, never hardcoded
-});
-```
+   ```typescript
+   import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from 'citrate-js';
 
-Defaults (`src/utils/constants.ts`): testnet chainId `40204`, RPC `https://rpc.citrate.ai`, WS
-`wss://rpc.citrate.ai/ws`.
+   const client = new CitrateClient({
+     // DEFAULT_RPC_URLS[40204] is ['https://rpc.citrate.ai']. An array
+     // enables fallback across endpoints; a bare string is the single-RPC form.
+     rpcUrl: DEFAULT_RPC_URLS[CHAIN_IDS.TESTNET],
+     // privateKey: process.env.CITRATE_PRIVATE_KEY, // optional; from env, never inline
+   });
+   ```
+
+   The constructor validates every RPC URL and any private key before it builds a provider, so a typo fails
+   immediately with a `ValidationError` rather than at first use.
+
+3. Read chain state. Read methods need no key.
+
+   ```typescript
+   console.log(await client.getChainId());                 // 40204
+   console.log((await client.getBalance('0xYourAddress'))); // bigint, wei
+   ```
+
+4. Write to the chain. Methods that send a transaction, `deployModel`, `inference`, and `batchInference`,
+   require a `privateKey` in the config. Without one they throw. To send a sponsored write through a Citrate
+   Keyring account instead of a raw key, build a UserOperation with the `aa` helpers and submit it through the
+   bundler client; the [first-app tutorial](/sdks/tutorials/first-app-with-sdk-js) walks the whole path.
+
+For a step-by-step build, follow [build your first app](/sdks/tutorials/first-app-with-sdk-js).
 
 ## Reference
 
-Each item cites its code symbol/path in `citrate-sdk-js` for auditability. This is a summary; the truth
-lives in the source (Rule 9, `source_kind: transcluded`).
+Each item names its export and source path in `citrate-sdk-js` so a reader can check it against the code.
 
-### CitrateClient, `src/client/CitrateClient.ts` (SDK-JS-CitrateClient)
+### Client, `src/client/CitrateClient.ts`
 
-Exported from `src/index.ts`. Constructor takes `CitrateClientConfig` (`rpcUrl: string | string[]`,
-optional `privateKey`, `timeout`, `retries`, `headers`, `ipfsApiUrl`). Both `rpcUrl` and `privateKey`
-are validated at construction (`validateRpcUrl` / `validatePrivateKey`; SECREM-02 trust-boundary fix).
+The constructor takes a `CitrateClientConfig`: `rpcUrl` as a string or string array, and optional
+`privateKey`, `timeout`, `retries`, `headers`, and `ipfsApiUrl`. Exported from `src/index.ts` alongside
+`WebSocketClient` (`src/client/WebSocketClient.ts`) for streaming and subscriptions.
 
-| Method | Signature (abridged) | Purpose |
+| Method | Signature | What it does |
 |---|---|---|
-| `getRpcUrls()` | `(): readonly string[]` | Current RPC fallback list (primary at index 0). |
-| `getChainId()` | `(): Promise<number>` | Chain id from the provider. |
-| `getBalance(address?)` | `(): Promise<bigint>` | Native balance. |
-| `getNonce(address?)` | `(): Promise<number>` | Account nonce. |
-| `getAddress()` | `(): string \| undefined` | Configured wallet address (if a key was given). |
-| `deployModel(modelData, config)` | `Promise<ModelDeployment>` | Deploy a model artifact. |
-| `inference(request)` | `Promise<InferenceResult>` | Single inference call. |
-| `batchInference(request)` | `Promise<BatchInferenceResult>` | Batched inference. |
-| `getModelInfo(modelId)` | `Promise<ModelInfo>` | Fetch model metadata. |
-| `listModels(owner?, limit=100)` | `Promise<ModelInfo[]>` | List models. |
-| `purchaseModelAccess(modelId, amount)` | `Promise<string>` | Purchase access. |
+| `getRpcUrls()` | `(): readonly string[]` | The current fallback list, primary first. |
+| `getChainId()` | `(): Promise<number>` | The chain id reported by the provider. |
+| `getBalance(address?)` | `(): Promise<bigint>` | Native balance in wei. |
+| `getNonce(address?)` | `(): Promise<number>` | Pending transaction count. |
+| `getAddress()` | `(): string \| undefined` | The configured account address, if a key was given. |
+| `deployModel(modelData, config)` | `(): Promise<ModelDeployment>` | Deploy a model artifact. Needs a key. |
+| `inference(request)` | `(): Promise<InferenceResult>` | One inference call. Needs a key. |
+| `batchInference(request)` | `(): Promise<BatchInferenceResult>` | Batched inference. Needs a key. |
+| `getModelInfo(modelId)` | `(): Promise<ModelInfo>` | Model metadata, via `citrate_getModel`. |
+| `listModels(owner?, limit=100)` | `(): Promise<ModelInfo[]>` | List models, via `citrate_listModels`. |
+| `purchaseModelAccess(modelId, amount)` | `(): Promise<string>` | Disabled, fails closed. See failure modes. |
 
-`WebSocketClient` (`src/client/WebSocketClient.ts`) is exported alongside for streaming/subscriptions.
+### Account abstraction, `src/aa/`
 
-### aa, embedded wallet / ERC-4337 v0.7 (SDK-JS-aa)
+Imported as a namespace, `import { aa } from 'citrate-js'`; the module index is `src/aa/index.ts`. The flow
+it documents is: derive a userId, predict the address, enroll a validator, then build, sign, and send a
+UserOperation. The market side of this is covered in [the marketplace SDK](/sdks/marketplace).
 
-Imported via the namespaced re-export `export * as aa from './aa'` in `src/index.ts`; the module index is
-`src/aa/index.ts`. Documents the flow: derive userId → predict address → enroll validator → build/sign/send
-a UserOp.
+- Address derivation (`src/aa/address.ts`): `uuidToUserId`, `accountIdToAaUserId`, `predictWalletAddress`,
+  `erc1967MinimalInitCodeHash`, and `AddressPredictionError`. The derivation is the cross-surface seam that
+  gives one user the same account address on every device. `uuidToUserId` is `keccak256(utf8(lowercase
+  uuid))`; `predictWalletAddress(factory, implementation, userId)` returns the CREATE2 address the factory
+  deploys the Kernel proxy to.
+- Kernel v3 encoding (`src/aa/kernel.ts`): nonce helpers `rootValidatorNonce`, `validatorNonceKey`, and
+  `composeNonce`; `encodeExecuteSingle` and `encodeExecuteBatch`; module management
+  `encodeInstallModule`, `encodeUninstallModule`, and `encodeChangeRootValidator`; and the install-data
+  builders `kernelInitializeCalldata`, `webauthnInstallData`, `ecdsaInstallData`, and `guardianInstallData`.
+  The guardian builder enforces a count in [2, 7] and a threshold in [1, count].
+- UserOperation building (`src/aa/userop.ts`): `buildPackedUserOp`, `getUserOpHash`, `encodeDeployFor`,
+  `packInitCode`, `packCitratePaymasterAndData`, `toRpcUserOperation`, and the gas-packing helpers
+  `packAccountGasLimits` and `packGasFees`. `getUserOpHash` is verified against the live EntryPoint v0.7 on
+  chain 40204.
+- Passkey signing (`src/aa/webauthn.ts`): `signUserOpWithPasskey` drives the browser's
+  `navigator.credentials.get()`; the pure encoders `encodeWebauthnValidatorSignature`,
+  `parseDerEcdsaSignature`, `normalizeP256S`, and `base64UrlEncode` are testable without a browser. The
+  validator rejects high-s signatures, so `normalizeP256S` folds `s` into the lower half of the curve order.
+- EOA signing (`src/aa/eoa.ts`): `signUserOpWithEoa(signer, userOpHash)` signs with any ethers `Signer` and
+  produces the EIP-191 shape the ECDSA validator accepts.
+- Guardian recovery (`src/aa/recovery.ts`): `guardianRecoveryDigest`, `packGuardianSignatures`,
+  `buildRotateSignerCall`, and `RecoveryError`. The recovery op rotates the account's root validator toward a
+  fresh passkey, validated by M-of-N guardian signatures bound to the account.
+- Bundler client (`src/aa/bundler.ts`): `BundlerClient` with `sendUserOperation`, `estimateUserOperationGas`,
+  `getUserOperationReceipt`, `waitForUserOperationReceipt`, `supportedEntryPoints`, and `chainId`. The default
+  endpoint is `CITRATE_BUNDLER_URL`, `https://bundler.citrate.ai/rpc`, a public RPC, not a secret. Errors
+  surface the bundler's `AAxx` codes through `BundlerRpcError`.
+- Types (`src/aa/types.ts`): `PackedUserOperation`, `RpcUserOperation`, `UserOperationReceipt`,
+  `CitrateAaConfig`, and the `PaymasterCategory` enum (`Standard`, `Recovery`, `FirstOp`).
 
-- **Address** (`src/aa/address.ts`): `uuidToUserId`, `accountIdToAaUserId`, `predictWalletAddress`,
-  `erc1967MinimalInitCodeHash`, `AddressPredictionError`. One deterministic address per user across surfaces.
-- **Kernel v3 encoding** (`src/aa/kernel.ts`): nonce helpers (`rootValidatorNonce`, `validatorNonceKey`,
-  `composeNonce`), `encodeExecuteSingle` / `encodeExecuteBatch`, module install/uninstall
-  (`encodeInstallModule`, `encodeUninstallModule`, `encodeChangeRootValidator`), and install-data builders
-  (`kernelInitializeCalldata`, `webauthnInstallData`, `ecdsaInstallData`, `guardianInstallData`).
-- **UserOp building** (`src/aa/userop.ts`): `buildPackedUserOp`, `getUserOpHash`, `encodeDeployFor`,
-  `packInitCode`, `packCitratePaymasterAndData`, `toRpcUserOperation`, gas-packing helpers.
-- **WebAuthn / passkey signing** (`src/aa/webauthn.ts`): `signUserOpWithPasskey`,
-  `encodeWebauthnValidatorSignature`, `parseDerEcdsaSignature`, `normalizeP256S` (P-256 low-s
-  normalization), `base64UrlEncode`.
-- **EOA signing** (`src/aa/eoa.ts`): `signUserOpWithEoa`.
-- **Guardian recovery** (`src/aa/recovery.ts`): `guardianRecoveryDigest`, `packGuardianSignatures`,
-  `buildRotateSignerCall`, `RecoveryError`.
-- **Bundler client** (`src/aa/bundler.ts`): `BundlerClient` with `sendUserOperation`,
-  `estimateUserOperationGas`, `getUserOperationReceipt`, `waitForUserOperationReceipt`,
-  `supportedEntryPoints`, plus `chainId`. Default endpoint `CITRATE_BUNDLER_URL =
-  https://bundler.citrate.ai/rpc` (public RPC; not a secret). Errors surface the bundler's `AAxx` codes
-  via `BundlerRpcError`.
+### Cryptography, `src/crypto/`
 
-### crypto (SDK-JS-crypto)
+- `CryptoManager` (`src/crypto/CryptoManager.ts`): SHA-256 hashing, AES-256-GCM, and PBKDF2 over the Web
+  Crypto API. The default work factor is `PBKDF2_DEFAULT_ITERATIONS`, 600,000 iterations.
+- `KeyManager` (`src/crypto/KeyManager.ts`): key handling and model encryption, returning
+  `EncryptedModelResult`. Encryption ECDH-wraps the symmetric key to the recipient and never ships it raw.
+- Shamir secret sharing (`src/crypto/FiniteField.ts`): `splitSecretBytes`, `reconstructSecretBytes`, `GF256`,
+  and `ShamirSecretSharing`. Share coefficients are drawn from a cryptographic RNG and fail closed if none is
+  available.
 
-Exported from `src/index.ts`:
+### React hooks, `src/react/hooks.ts`
 
-- `CryptoManager` (`src/crypto/CryptoManager.ts`), AES-256-GCM + HKDF/PBKDF2 helpers
-  (`PBKDF2_DEFAULT_ITERATIONS = 600_000`).
-- `KeyManager` (`src/crypto/KeyManager.ts`), key handling + `EncryptedModelResult`.
-- Shamir secret sharing (`src/crypto/FiniteField.ts`): `splitSecretBytes`, `reconstructSecretBytes`,
-  `GF256`, `ShamirSecretSharing`.
+The hooks are not re-exported from the package root, because React is an optional peer dependency. Import them
+from the build path; each hook throws if React is not installed.
 
-### react (SDK-JS-react)
-
-`src/react/hooks.ts`. **Not re-exported from the package root**, `react` is an optional peer dep, so the
-hooks are imported from the build path. Each hook throws if React is not installed.
-
-```ts
-// import path matches the package layout (dist/react/hooks); src lives at src/react/hooks.ts
+```typescript
 import { useCitrateClient } from 'citrate-js/dist/react/hooks';
 ```
 
-Hooks: `useCitrateClient`, `useModelDeployment`, `useInference`, `useModelInfo`, `useModelList`.
+The hooks are `useCitrateClient`, `useModelDeployment`, `useInference`, `useModelInfo`, and `useModelList`.
 
-### Constants & errors
+### Constants and errors
 
 - `src/utils/constants.ts`: `CHAIN_IDS` (`MAINNET: 1`, `TESTNET: 40204`), `DEFAULT_RPC_URLS`,
-  `DEFAULT_WS_URLS`, `PRECOMPILE_ADDRESSES`, `GAS_LIMITS`, `TIMEOUTS`, `MODEL_LIMITS`, `ENCRYPTION`,
-  `EVENTS`, `API_ENDPOINTS`.
-- `src/errors/CitrateError.ts`: `CitrateError`, `ModelNotFoundError`, `InsufficientFundsError`,
+  `DEFAULT_WS_URLS`, `PRECOMPILE_ADDRESSES`, `GAS_LIMITS`, `TIMEOUTS`, `MODEL_LIMITS`, `ENCRYPTION`, `EVENTS`,
+  and `API_ENDPOINTS`.
+- `src/errors/CitrateError.ts`: `CitrateError`, `ModelNotFoundError`, `InsufficientFundsError`, and
   `ValidationError`.
 
-## Examples
+## Design rationale
 
-```ts
-// Read chain state
-import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from 'citrate-js';
+The client holds the RPC fallback list and rotates through it on transport errors rather than wrapping
+ethers' automatic failover, which would double the connection budget. The trade is a little manual rotation
+in exchange for a predictable connection count. The `aa` helpers are written as pure functions: chain reads,
+nonces and deploy status, are passed in as arguments, so the same code that runs in a browser against
+`auth.citrate.ai` and the bundler also runs against pinned test vectors. Address derivation is duplicated
+byte-for-byte across the JavaScript, identity-TS, and Rust implementations on purpose, because the address a
+user controls must be identical no matter which surface computes it.
 
-const client = new CitrateClient({ rpcUrl: DEFAULT_RPC_URLS[CHAIN_IDS.TESTNET] });
-console.log(await client.getChainId());                  // 40204
-console.log(await client.getBalance('0xYourAddress'));   // bigint wei
-```
+## Failure modes
 
-```ts
-// Run inference
-const result = await client.inference({ /* InferenceRequest, see src/types/Inference.ts */ });
-```
+This is the surface where a mistake costs money or leaks data, so several methods fail closed.
 
-```ts
-// Embedded wallet: predict the user's smart-account address, then send a gasless UserOp
-import { aa } from 'citrate-js';
+- A write method called without a configured key throws rather than silently doing nothing. `deployModel`,
+  `inference`, and `batchInference` all require `privateKey` in the config.
+- When a model deployment or inference asks for encryption but no key manager is configured, the call throws
+  rather than uploading in plaintext. There is no silent downgrade onto public calldata.
+- `purchaseModelAccess` is disabled and throws. The canonical precompile table has no access-purchase
+  operation; the earlier implementation routed buyer funds to the verification precompile, where access was
+  never granted and value was never credited. It stays closed until a node-confirmed precompile exists.
+- Shamir share generation throws if no cryptographic RNG is present, because the scheme's secrecy depends on
+  unpredictable coefficients.
+- A bundler rejection surfaces as a `BundlerRpcError` carrying the `AAxx` code verbatim, for example `AA21`
+  for an unfunded prefund or `AA31` for a paymaster deposit too low, so the caller can act on the real cause.
 
-const userId = aa.uuidToUserId(citrateUserId);
-const address = aa.predictWalletAddress(factory, walletImpl, userId);
+## Access and canon
 
-const bundler = new aa.BundlerClient(); // defaults to https://bundler.citrate.ai/rpc
-// build callData via aa.encodeExecuteSingle(...), assemble with aa.buildPackedUserOp(...),
-// hash with aa.getUserOpHash(...), sign with aa.signUserOpWithPasskey(...) or aa.signUserOpWithEoa(...)
-const hash = await bundler.sendUserOperation(op, entryPoint);
-const receipt = await bundler.waitForUserOperationReceipt(hash);
-```
+Public. This is open SDK reference a developer needs to build on Citrate Network, and it carries no secrets.
+Private keys, mnemonics, and bundler API keys are never inline; they come from the caller's environment
+(`config.privateKey`, `BundlerClientOptions.apiKey`). The hostnames named here, `rpc.citrate.ai`,
+`bundler.citrate.ai`, and `auth.citrate.ai`, are public production endpoints already shipped as defaults in
+the source, not credentials. The chain on testnet is identity-checked through CLEAR for node operators; the
+SDK itself holds no such data.
 
-## Tutorials
+## Source and verification
 
-- [Build your first app with the JS SDK](/sdks/tutorials/first-app-with-sdk-js), runnable end-to-end
-  (install → connect → read chain → run inference).
-
-## Security & access
-
-- **Tier: `public`.** This is open SDK reference a developer needs to build on Citrate, per the tier
-  decision tree (§3.6), concepts/quickstarts/open SDK reference are public.
-- **No secrets here.** Private keys, mnemonics, and API keys are **never** hardcoded, they come from the
-  caller's environment (`config.privateKey`, `BundlerClientOptions.apiKey`). The endpoints named
-  (`rpc.citrate.ai`, `bundler.citrate.ai/rpc`, `auth.citrate.ai`) are public production hostnames already
-  shipped in the source defaults, not credentials.
-- **Pre-audit surfaces flagged.** The `aa` module (EW-S1 WP-7) is experimental and depends on
-  still-evolving relayer/bundler infra; the exported `VERSION` constant is stale (see Source &
-  verification). Mark this clearly to integrators.
-
-## Source & verification
-
-- **Source repo:** `citrate-sdk-js` (canonical SDK; split from the Citrate monorepo 2026-05-18).
-- **Package:** `citrate-js@0.2.0` (`package.json`).
-- **Audited against SHA:** `bc5a830` (`git -C citrate-sdk-js rev-parse --short HEAD`).
-- **Audited paths:** `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
-  `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler}.ts`,
-  `src/crypto/{CryptoManager,KeyManager,FiniteField}.ts`, `src/react/hooks.ts`,
-  `src/utils/constants.ts`, `src/errors/CitrateError.ts`.
-- `source_kind: transcluded`, Codex pulls reference from the source repo at the pinned SHA so docs
-  cannot drift from code.
+- Source repo: `citrate-sdk-js`, package `citrate-js@0.2.0` (`package.json`).
+- Audited against SHA: `bc5a830`.
+- Audited paths: `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
+  `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler,types}.ts`,
+  `src/crypto/{CryptoManager,KeyManager,FiniteField}.ts`, `src/react/hooks.ts`, `src/utils/constants.ts`, and
+  `src/errors/CitrateError.ts`.
+- Status: Implemented (pre-audit). The client and cryptography surfaces are built and run against testnet 40204.
+  The `aa` module is Implemented but in development (EW-S1 WP-7), depends on still-moving bundler and auth
+  infrastructure, and the exported `VERSION` constant is stale relative to `package.json`.

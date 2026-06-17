@@ -1,148 +1,189 @@
 ---
-title: Paymaster Policy & Bundler Topology
+title: Paymaster and bundler topology
 codex_slug: /aa/paymaster
 tier: commercial
 org_scope: ~
 source_kind: authored
-source: citrate-chain/contracts/src/aa/paymaster/CitratePaymaster.sol + citrate-bundler
+source: contracts/src/aa/paymaster/CitratePaymaster.sol + citrate-bundler (gate/src, README, Caddyfile)
 surfaces: [AA-paymaster, SC-aa-paymaster, API-BUNDLER]
-audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+audited_against_sha: 54d1f2c
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Paymaster Policy & Bundler Topology
+A paymaster sponsors the gas for an operation so a person can transact with no SALT in hand, which is what
+lets someone use a Citrate Keyring on their first visit. Citrate sponsors gas with a contract paymaster
+under per-account budgets, fronted by a bundler that authorizes and pre-checks operations at the edge. If
+you build or operate against sponsored operations, this is the page you work from.
 
-> How Citrate sponsors gas for embedded wallets: the per-user budget model in
-> `CitratePaymaster`, and the bundler edge that authorizes and pre-checks
-> sponsored UserOperations. For contracted integrators and operators.
+## What it is
 
-> **Status: pre-audit.** The paymaster, bundler gate sidecar, and the off-chain
-> pre-check shipped in EW-S1 and are **not yet third-party audited**. Caps and
-> defaults below are the as-shipped values and the operator may change them on
-> chain; treat numbers as illustrative, not guaranteed.
+There is no native gas-sponsorship operation on the network; sponsorship is done with an ERC-4337 paymaster
+contract. Sponsorship has two layers.
 
-## Overview
+The authoritative layer is `CitratePaymaster`, an ERC-4337 v0.7 paymaster that extends `BasePaymaster`. It
+enforces a per-account budget: every sponsored operation passes its `_validatePaymasterUserOp` check and
+settles in `_postOp`. The edge layer is the bundler: a self-hosted eth-infinitism reference bundler behind
+Caddy, fronted by a thin Citrate gate that does key authorization, rate limiting, and a paymaster pre-check,
+so an operation that is certain to fail is refused at the edge instead of taking a bundle slot. The edge is
+an optimization; the contract re-validates everything.
 
-Gas sponsorship has two layers:
+A related but separate mechanism serves the education stack. There, sponsored student actions go through an
+EIP-2771 forwarder (`contracts/src/edu/Forwarder.sol`), a meta-transaction relay where a relayer pays gas
+on behalf of a device-bound signer. That is a different path from the ERC-4337 paymaster described here; we
+note it so the two are not confused.
 
-1. **On-chain policy, `CitratePaymaster`** (`BasePaymaster`, ERC-4337 v0.7).
-   Enforces *per-account* budgets and is the authoritative gate: every sponsored
-   op passes `_validatePaymasterUserOp` and settles in `_postOp`.
-2. **Off-chain edge, the bundler.** A self-hosted eth-infinitism reference
-   bundler behind Caddy, fronted by a thin Citrate **gate** sidecar that does
-   Bearer-key auth, rate limiting, and a paymaster **pre-check** so doomed ops
-   are refused at the edge instead of burning a bundle slot. The edge is an
-   optimization; the chain re-validates everything.
+## How to use it
 
-## Reference, paymaster policy
+For an integrator the steps are: tag the operation, send it, watch the budget.
 
-Source: `citrate-chain/contracts/src/aa/paymaster/CitratePaymaster.sol` @
-`03d7851`. Policy follows `ADR-2026-06-05-ew-paymaster-policy`.
+1. **Tag.** Build the operation with a one-byte category in `paymasterAndData`. The SDK does this for you;
+   the category names the budget the operation should draw from.
+2. **Send.** Post the operation to the bundler at `https://bundler.citrate.ai/rpc`. When you have a `bk_`
+   key, send it as a Bearer token for the higher rate limit.
+3. **Watch.** Read `remainingStandard(account)` on the paymaster to show a person how much of their daily
+   sponsorship is left.
 
-### Categories (1-byte tag in `paymasterAndData`)
+A new account's first operation is unconditional, within its cap, so a person can deploy and act without
+SALT. After that, ordinary operations draw from a daily allowance, and recovery operations draw from their
+own budget so recovery is never blocked by a spent daily allowance.
 
-The bundler embeds a category byte at **offset 52** of `paymasterAndData` (after
-the ERC-4337 v0.7 prefix `paymaster(20) | verificationGasLimit(16) |
-postOpGasLimit(16)`), read on-chain as `PMD_TAG_OFFSET`:
+## Reference
+
+### Categories
+
+The bundler embeds a one-byte category at offset 52 of `paymasterAndData`, right after the ERC-4337 v0.7
+prefix of `paymaster(20) | verificationGasLimit(16) | postOpGasLimit(16)`. The contract reads it at
+`PMD_TAG_OFFSET`.
 
 | Tag | Category | Budget behavior |
 |---|---|---|
-| `0x00` | **Standard** | Draws from the per-account **daily** gas-unit allowance (default `dailyCap` = 100,000). Resets at the first sponsored op of a new UTC day. |
-| `0x01` | **Recovery** | Draws from a per-event budget (`recoveryEventCap`, default 200,000) that does **not** consume the daily counter, recovery must work even when the daily allowance is spent. |
-| `0x02` | **First-op** | Unconditional sponsorship for an account's first-ever op (bounded by `firstOpCap`); the `hasUsedFirstOp` flag flips so it cannot be reused. |
+| `0x00` | Standard | draws from the per-account daily gas-unit allowance, `dailyCap`; the counter resets at the first sponsored operation of a new UTC day |
+| `0x01` | Recovery | draws from a per-event budget, `recoveryEventCap`, that does not touch the daily counter, so recovery works even when the daily allowance is spent |
+| `0x02` | First-op | one unconditional sponsorship for an account's first operation, bounded by `firstOpCap`; the `hasUsedFirstOp` flag then flips so it cannot be reused |
 
-The SDK builds the tag with `packCitratePaymasterAndData({ ..., category })`
-(`citrate-sdk-js/src/aa/userop.ts`); `PaymasterCategory` enumerates the three.
+### Caps and accounting
 
-### Caps & accounting
+The caps live in `CitratePaymaster` as owner-settable values. The as-deployed defaults, set in
+`script/aa/DeployAA.s.sol`, are:
 
-- `dailyCap`, `recoveryEventCap`, `firstOpCap` are owner-settable
-  (`setDailyCap` / `setRecoveryEventCap` / `setFirstOpCap`). Setting a cap to `0`
-  **disables** that category.
-- **Fail-closed:** if the relevant budget can't cover the EntryPoint-reported
-  `maxCost`, validation reverts with a precise error (`StandardCapExceeded`,
-  `RecoveryCapExceeded`, `FirstOpCapExceeded`, `UnknownCategory`,
-  `MissingCategoryTag`).
-- Standard usage is recorded against the daily counter in `_postOp` (saturating
-  add); recovery/first-op need no counter.
-- `remainingStandard(account)` is a read for dashboards/SDK.
+| Cap | Default | Set with |
+|---|---|---|
+| `dailyCap` | 100,000 gas units | `setDailyCap` |
+| `recoveryEventCap` | 200,000 gas units | `setRecoveryEventCap` |
+| `firstOpCap` | 300,000 gas units | `setFirstOpCap` |
 
-### Eligibility, the registry gate
+Setting any cap to `0` disables that category. Standard usage is recorded against the daily counter in
+`_postOp` with a saturating add; the day key is `block.timestamp / 86400`, so the counter resets at the UTC
+day boundary. Recovery and first-op need no running counter. `remainingStandard(account)` returns what is
+left of the daily allowance for dashboards and the SDK. An operator may change any of these on-chain, so
+treat the numbers above as the shipped defaults, not guarantees.
 
-Only **registered** accounts can be sponsored. A single `registrar` address
-(typically `CitrateWalletFactory`) calls `registerWallet(account)` after a
-successful deploy; `_validatePaymasterUserOp` reverts
-`NotARegisteredCitrateWallet` otherwise.
+If the relevant budget cannot cover the cost the EntryPoint reports, validation reverts with a precise
+error rather than sponsoring anyway. It fails closed.
 
-> **Known gap (pre-audit):** sponsorship requires the account to be registered on
-> the paymaster, and registration is gated to the `registrar`. Operators wiring
-> the factory as registrar must confirm the factory actually calls
-> `registerWallet` on deploy, or first-op sponsorship will revert. This
-> registrar wiring is tracked as an open item in the EW-S1 / Lane C handoffs.
+| Error | Reverts when |
+|---|---|
+| `Paused()` | sponsorship is paused |
+| `NotARegisteredCitrateWallet(account)` | the account is not registered |
+| `StandardCapExceeded(account, used, cap, wouldUse)` | a standard operation would exceed `dailyCap`, or `dailyCap` is 0 |
+| `RecoveryCapExceeded(account, cap, wouldUse)` | a recovery operation would exceed `recoveryEventCap`, or it is 0 |
+| `FirstOpAlreadyUsed(account)` | the account already used its first-op sponsorship |
+| `FirstOpCapExceeded(cap, wouldUse)` | a first operation would exceed `firstOpCap`, or it is 0 |
+| `UnknownCategory(tag)` | the category byte is greater than 2 |
+| `MissingCategoryTag()` | `paymasterAndData` has no category byte |
 
-### Admin
+### Eligibility, the registrar gate
 
-- `setPaused(true)` halts all sponsorship for incident response (owner =
-  operator multisig).
-- `setRegistrar(addr)` rotates the registrar.
+Only registered accounts can be sponsored. A single `registrar` address, typically the account factory,
+calls `registerWallet(account)` after a successful deploy; `unregisterWallet(account)` reverses it. Any
+sponsored operation from an unregistered account reverts `NotARegisteredCitrateWallet`. The owner can rotate
+the registrar with `setRegistrar` and halt all sponsorship with `setPaused(true)` for incident response.
 
-## Reference, bundler topology
+An operator wiring the factory as registrar should confirm the factory actually calls `registerWallet` on
+deploy, or first-operation sponsorship will revert for new accounts. This registrar wiring is tracked as an
+open item in the EW-S1 handoffs.
 
-Source: `citrate-bundler` @ `a3287de` (README + `gate/src/`).
+### Bundler topology
+
+The bundler runs on its own host, so a bundler outage cannot take down the identity authority or the
+gateway. The path an operation takes:
 
 ```
-client (browser / SDK / gui-native / wallet-extension)
-   │  HTTPS JSON-RPC
-   ▼
-Caddy @ bundler.citrate.ai, TLS, per-IP + per-API-key rate limit
-   ▼
-Citrate gate sidecar (Node), bk_ Bearer auth + paymaster pre-check
-   ▼
+client (browser, SDK, native app)
+   |  HTTPS JSON-RPC
+   v
+Caddy at bundler.citrate.ai, TLS, per-IP rate limit
+   v
+Citrate gate (Node), bk_ Bearer auth, rate limiting, paymaster pre-check
+   v
 eth-infinitism bundler v0.7, standard ERC-4337 JSON-RPC
-   ▼
-citrate-chain RPC, EntryPoint v0.7 on chain 40204
+   v
+network RPC, EntryPoint v0.7 on chain 40204
 ```
 
-- Runs on its own host so a bundler outage cannot take down `auth.citrate.ai` or
-  the gateway.
-- **Rate limits:** per-IP for anonymous traffic, higher per-`bk_`-API-key. (Exact
-  numbers are operator config in the gate/Caddy; not reproduced here.)
-- **Pre-check** (`gate/src/precheck.ts`): for ops naming the Citrate paymaster it
-  `eth_call`s `CitratePaymaster.isRegistered(sender)` and
-  `EntryPoint.balanceOf(paymaster)`, and validates the category byte. Self-paid
-  ops (no paymaster) pass through untouched. **Fails open** on chain
-  unreachability, the EntryPoint re-validates on-chain, so the pre-check is an
-  optimization, not a security boundary.
+The gate (`citrate-bundler/gate/src`) authenticates `bk_` keys by SHA-256 hash held in Redis, so a dump of
+the store cannot be replayed as a credential. It rate-limits anonymous traffic per IP and authenticated
+traffic per key, with the limits as operator configuration. Its pre-check (`gate/src/precheck.ts`), for an
+operation naming the Citrate paymaster, calls `CitratePaymaster.isRegistered(sender)` and
+`EntryPoint.balanceOf(paymaster)` and validates the category byte. Self-paid operations, those naming no
+paymaster, pass through untouched. The pre-check fails open if the chain is unreachable, since the
+EntryPoint re-validates on-chain; the pre-check is an optimization, not a security boundary.
 
-### Bundler API
+The bundler exposes the standard ERC-4337 v0.7 methods, `eth_sendUserOperation`,
+`eth_estimateUserOperationGas`, `eth_getUserOperationReceipt`, `eth_supportedEntryPoints`, and
+`eth_chainId`, plus the Citrate extension `citrate_getUserAddress(userId)`, which predicts a Citrate Keyring
+address and mirrors the on-chain factory. The SDK's bundler client defaults to
+`https://bundler.citrate.ai/rpc`. See the [bundler SDK](/sdks/bundler) for the client.
 
-Standard ERC-4337 v0.7 methods (`eth_sendUserOperation`,
-`eth_estimateUserOperationGas`, `eth_getUserOperationReceipt`,
-`eth_supportedEntryPoints`, `eth_chainId`) plus the Citrate extension
-`citrate_getUserAddress(userId)` (predicts the smart-wallet address; mirrors the
-on-chain factory + the Rust `citrate-wallet-aa` crate). The SDK's `BundlerClient`
-defaults to `https://bundler.citrate.ai/rpc` and forwards a `bk_` key as a Bearer
-token when configured (`citrate-sdk-js/src/aa/bundler.ts`).
+## Design rationale
 
-## Security & access
+We made sponsorship contract-based because the network has no built-in way to sponsor gas, and a contract
+paymaster is the standard ERC-4337 answer that existing tooling already understands. Per-account budgets,
+rather than a single shared pool, mean one account cannot drain sponsorship for everyone, and the three
+categories exist so the budgets that must never fail, a person's first operation and an account recovery,
+draw from separate allowances than ordinary daily use. The registrar gate keeps sponsorship to accounts the
+network actually issued, so an arbitrary contract cannot spend the paymaster's deposit. The edge gate is
+there to save bundle slots and to rate-limit abuse, but we kept it strictly an optimization: it fails open,
+and the contract is the one place that decides whether an operation is sponsored. The cost is that operators
+must keep the paymaster funded and the registrar correctly wired; we think a clear on-chain budget is worth
+that. The economics of who funds sponsorship are in [network economics](/chain/economics).
 
-**Tier: commercial.** The budget model and the edge topology are
-operator/integrator depth: a contracted builder should have it, but anonymous
-publication of the full policy + topology aids an abuse actor more than a public
-developer. The *public* developer-facing piece (how to tag and send an op) is on
-the public [Passkeys](/aa/passkeys) page.
+## Failure modes
 
-No secrets here. No `bk_` keys, multisig addresses, deposit balances, private
-RPC/host endpoints, or droplet credentials appear on this page, those live only
-in operator config (`.env`, Caddyfile) and are never built into Codex.
+- **Over budget.** A standard operation past the daily cap, a recovery past the event cap, or a reused
+  first operation reverts with the matching error above. The contract never sponsors past a budget.
+- **Unregistered account.** Sponsorship reverts `NotARegisteredCitrateWallet`. If the factory is not wired
+  to register on deploy, new accounts cannot be sponsored until they are registered.
+- **Missing or unknown tag.** An operation with no category byte, or a byte greater than 2, reverts at
+  validation rather than being sponsored under a guessed category.
+- **Bundler outage.** The bundler is on its own host; if it is down, sponsored operations cannot be
+  submitted, but the identity authority and gateway keep running. Self-paid operations are unaffected.
+- **Edge fails open.** If the chain is unreachable the pre-check is skipped and the operation goes to the
+  bundler, where the EntryPoint and the paymaster contract re-validate. The edge skipping a check never
+  causes an over-budget sponsorship.
+- **Secrets.** No `bk_` key, multisig address, deposit balance, private RPC endpoint, or host credential
+  appears in Citrate Atlas. Those live only in operator configuration.
 
-## Source & verification
+## Access and canon
 
-- Paymaster: `citrate-chain/contracts/src/aa/paymaster/CitratePaymaster.sol` @ `03d7851`
-- Bundler + gate: `citrate-bundler` (`README.md`, `gate/src/precheck.ts`, `Caddyfile`) @ `a3287de`
-- SDK paymaster encoder: `citrate-sdk-js/src/aa/userop.ts` @ `bc5a830`
+Commercial. The budget model and the edge topology are operator and integrator depth; publishing the full
+policy and topology to anyone aids an abuse actor more than it helps a public developer. The public,
+developer-facing piece, how to tag and send a sponsored operation, sits on [Passkeys](/aa/passkeys). SALT
+settles the work the network performs, including the gas a paymaster fronts; it is the unit of account, not
+a product to hold.
 
-Pre-audit. Caps shown are defaults; verify on-chain values and re-check symbols
-against the source SHAs.
+## Source and verification
+
+| Surface | Source | Status |
+|---|---|---|
+| Paymaster policy, caps, errors | `contracts/src/aa/paymaster/CitratePaymaster.sol` | Implemented (pre-audit) |
+| Deployed cap defaults | `contracts/script/aa/DeployAA.s.sol` | Implemented (pre-audit) |
+| EIP-2771 forwarder (education stack) | `contracts/src/edu/Forwarder.sol` | Implemented (pre-audit) |
+| Bundler gate, pre-check, routing | `citrate-bundler/gate/src`, `README.md`, `Caddyfile` | Implemented (pre-audit) |
+
+Paymaster and forwarder verified against the contracts repo at `54d1f2c`; the bundler verified against
+`citrate-bundler` at `a3287de`. The caps shown are the as-deployed defaults and an operator may change them
+on-chain. The stack has shipped and runs on testnet 40204; it has not had an external audit. Re-verify the
+on-chain cap values and the source symbols against the SHAs before relying on this page.
