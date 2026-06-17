@@ -1,121 +1,155 @@
 ---
-title: Compute Marketplace (Buyer)
+title: Citrate Market (buyer)
 codex_slug: /apps/buyer
 tier: commercial
 org_scope: ~
-source_kind: transcluded
-source: citrate-buyer-webapp/app
+source_kind: authored
+source: citrate-buyer-webapp
 surfaces: [APP-buyer]
 audited_against_sha: 573da03
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Compute Marketplace (Buyer)
+The buyer side of Citrate Market, where you find a model provider, post a job, and pay for each
+request as it runs. It is for teams that want to buy compute and inference on the open marketplace
+and settle the cost per call rather than holding a balance.
 
-> The buyer side of the Citrate Compute Marketplace, browse providers and pools, post a job, pay per call with x402, and track the result to settlement.
+## What it is
 
-## Overview
+Citrate Market is where compute is bought and sold on the Citrate Network. This app
+(`citrate-buyer-webapp`) is the buyer-facing front end of that market. You browse the catalog of
+models, providers, and compute pools, post a job at a price you set, and the work settles back to
+you when a provider has run it and the result has been checked.
 
-The buyer web app (`citrate-buyer-webapp`) is the buyer-facing front end of the
-Citrate Compute Marketplace. It's a self-contained client SPA (hash router, ~20
-screens) mounted at `/` that lets you discover model providers and compute pools, run
-inference jobs through the Citrate gateway, and pay per request using the **x402**
-payment protocol settled in wSALT on chain `40204`.
+Two purchase paths run side by side, and the app picks one for you depending on how you start. The
+gateway path posts a chat completion to the Citrate gateway and pays for each request with x402, a
+per-request payment protocol covered under [the x402 contract](/contracts/x402). The direct path
+posts the job on the public ledger itself, locking escrow at your maximum price and opening an
+auction that providers bid into. Both settle in wSALT on chain 40204. The gateway path is the
+quicker route; the direct path keeps the whole transaction on the public ledger, where you can read
+it back yourself.
 
-Payment is real and bounded by design: jobs submit through `@citratenetwork/marketplace-sdk`,
-and the wallet's per-round auto-pay is capped (default ceiling 1 SALT) and restricted to
-a single allowed pay token (wSALT) on the Citrate chain, a challenge naming any other
-token/chain is rejected. (Source: `citrate-buyer-webapp/app/page.tsx`,
-`app/design/DesignMount.tsx`, `lib/submitJob.ts`, `lib/marketplace.ts`.)
+Payment is bounded by design. The x402 client signs for at most a fixed amount per round, defaulting
+to one SALT, and it will only ever pay in a single allowed token on a single chain. A payment
+request naming any other token or chain is rejected before it is signed. You can find the wider
+market in [the compute overview](/compute) and the client library in
+[the marketplace SDK](/sdks/marketplace).
 
-## Who it's for
+## How to use it
 
-- **Buyers of inference/compute** who want to run models on the open marketplace and pay per call.
-- **Teams** that need verifiable results (commitment, ZK-proof, or TEE-attested tiers).
-- **Developers** integrating marketplace job submission and x402 auto-pay into their own flows via the SDK.
+1. Open the app and browse the marketplace. Compare models by their per-1K pricing, providers by
+   reputation, stake, region, load, and the verification tiers they support, and compute pools by
+   mode, GPU count, throughput, and price.
+2. Open a provider to read its reputation, current capacity and load, supported models, and
+   verification tiers in one place.
+3. Post a job. Pick a model, choose a verification tier, set a maximum price, and submit. The gateway
+   path runs the request and auto-pays with x402; the direct path posts the job on the public ledger
+   and opens the auction.
+4. Approve the payment in your account when prompted. Auto-pay stays inside the per-round ceiling and
+   pays only in wSALT on chain 40204.
+5. Track the job through its states. On a bad outcome you are refunded, and a provider that misses its
+   deadline is slashed.
 
-## Key features & screens
+## Reference
 
-The SPA's screens (in `app/design/DesignApp.jsx`) cover the buyer journey:
+The buyer journey is built from the screens below. Each cites the code that backs it.
 
-| Area | What you do | Code |
+| Area | What you do | Source |
 |---|---|---|
-| **Marketplace / browse** | Browse models (with provider/pool counts and per-1K pricing), providers (reputation, stake, region, supported verification tiers, live status), and compute pools (mode, GPUs, throughput, price). | `app/design/DesignApp.jsx` |
-| **Provider detail** | Inspect a single provider's reputation, capacity/load, supported models, and verification tiers. | `app/design/DesignApp.jsx` |
-| **Post a job** | Choose a model and verification tier, **Standard** (commitment, 1.0×), **Cryptographic proof** (ZK Groth16, 1.5×), or **Secure enclave** (TEE attestation, 2.0×), set a max price, and post on-chain into the auction. | `app/design/DesignApp.jsx`, `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/submitTrainingJob.ts` |
-| **Track results** | Follow a job through its lifecycle: Posted → Bidding → Assigned → Executing → Verifying → Completed, plus terminal states (Expired/refunded, Timed out/slashed, Failed/refunded, Disputed/bisection). | `app/design/DesignApp.jsx` |
-| **Pay (x402)** | Pay per call with bounded auto-pay in wSALT; the SDK enforces the per-round ceiling and the allowed token/chain. | `lib/submitJob.ts`, `lib/buyCredits.ts`, `lib/creditsClient.ts` |
-| **Copilot (chat)** | An in-app assistant that streams from the Citrate gateway (OpenAI-compatible) to answer marketplace/chain questions. | `app/api/chat/route.ts` |
+| Marketplace browse | Compare models, providers, and compute pools by price, reputation, stake, region, load, throughput, and supported verification tiers. | `app/design/DesignApp.jsx` |
+| Provider detail | Inspect one provider's reputation, capacity and load, supported models, and verification tiers. | `app/design/DesignApp.jsx` |
+| Post a job | Choose a model and a verification tier, set a maximum price, and submit through the gateway or direct path. | `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/submitTrainingJob.ts` |
+| Track results | Follow a job through its lifecycle, including the terminal outcomes. | `app/design/DesignApp.jsx` |
+| Pay with x402 | Pay per request with bounded auto-pay in wSALT; the client enforces the ceiling and the allowed token and chain. | `lib/submitJob.ts`, `lib/buyCredits.ts`, `lib/creditsClient.ts` |
+| Copilot | Ask marketplace and network questions in an in-app assistant that streams from the Citrate gateway. | `app/api/chat/route.ts` |
 
-### Browse providers & pools
+### Verification tiers
 
-The marketplace surfaces models, providers, and pools with their economics, reputation,
-stake, region, load/capacity, throughput, and per-1K pricing, and which verification
-tiers each provider supports. A server-side `MarketplaceClient` (viem + the marketplace
-SDK) backs live reads against chain `40204`. (Source: `lib/marketplace.ts`,
-`lib/poolsClient.ts`.)
+When you post a job you choose how the result is checked. The tier sets a price multiplier, defined
+in `app/design/DesignApp.jsx`.
 
-### Post a job & pay with x402
+| Tier | Technique | Price multiplier |
+|---|---|---|
+| Standard | commitment | 1.0x |
+| Cryptographic proof | ZK proof, Groth16 | 1.5x |
+| Secure enclave | TEE attestation | 2.0x |
 
-Posting a job locks escrow at your `maxPrice` and opens an auction; providers bid, the
-best bid is assigned, the provider executes, and the result is verified at your chosen
-tier before funds settle. Inference jobs submit through `submitJob` with **x402
-auto-pay**: the wallet auto-signs up to a bounded per-round ceiling
-(`DEFAULT_MAX_PAY_WEI = 1 SALT`, overridable lower by the UI) and only in the single
-allowed token, wSALT on chain 40204. (Source: `lib/submitJob.ts`.)
+### Job lifecycle
 
-### Track results
+A job moves through a defined set of states. The happy path is documented in `DESIGN_HANDOFF.md` and
+backed by on-chain events such as `JobPosted`, `JobAssigned`, and `JobCompleted` parsed through the
+SDK.
 
-Each job moves through clearly described states (with on-chain events like `JobPosted`,
-`BidPlaced`, `JobAssigned`). Terminal outcomes are explicit: Completed (settled),
-Expired (refunded), Timed out (provider slashed, you refunded), Failed (verification
-invalid, refunded), and Disputed (resolved by bisection). (Source:
-`app/design/DesignApp.jsx`.)
+```text
+Posted -> Bidding -> Assigned -> Executing -> Verifying -> Completed
+```
 
-## How to use
+The terminal outcomes are explicit. Completed settles to the provider. Expired refunds you when no
+bid arrives. Timeout slashes a provider that misses its deadline and refunds you. Failed refunds you
+when verification does not pass. Disputed is resolved by the contract.
 
-1. Open the app and browse the **Marketplace** to compare models, providers, and pools.
-2. Open a provider to check reputation, load, and supported verification tiers.
-3. **Post a job:** pick a model, choose a verification tier, set a max price, and submit.
-4. Approve the **x402** payment in your wallet (Privy-connected), auto-pay stays within
-   the bounded ceiling and only pays in wSALT.
-5. **Track** the job through Bidding → Assigned → Executing → Verifying → Completed; on a
-   bad outcome you're refunded (or the provider is slashed).
+### x402 payment bounds
 
-## Tutorials
+The x402 client enforces two limits, defined in `lib/submitJob.ts`.
 
-- A "post your first inference job and pay with x402" tutorial is tracked as a stub.
-  For inspecting the resulting on-chain settlement, see
-  [Explore a transaction](/apps/tutorials/explore-a-transaction) on CitrateScan.
+```ts
+export const DEFAULT_MAX_PAY_WEI = 1_000_000_000_000_000_000n; // 1 SALT
+export const ALLOWED_PAY_TOKENS: Address[] = [
+  '0x1f73bb479f397a34b5e3145e51d25bc5007273bf', // wSALT
+];
+```
 
-## Security & access
+The per-round ceiling defaults to one SALT and the UI may set it lower. The allowed token is wSALT
+and the chain is 40204. Any other token or chain is refused.
 
-**Tier: commercial.** This is paid marketplace operation, job posting, provider
-economics, and payment, intended for contracted buyers; access is gated through the
-Codex chokepoint (`PLANSET/02_ARCHITECTURE.md` §4).
+## Design rationale
 
-- **Bounded auto-pay:** the wallet never signs an unbounded x402 amount; a finite
-  per-round ceiling is always applied and only the allowed token/chain (wSALT, 40204)
-  is accepted (audits `RM-F1` / `BUYER_WEBAPP-002`).
-- **Fail-closed copilot:** the chat route applies an IP rate limit *before* any
-  gateway/inference call, because every request costs real money (SECREM-01 WEB-3).
-- **Gateway allowlist:** outbound gateway targets are restricted by an allowlist.
-- **No secrets in this page.** Gateway/RPC hostnames are public; keys and signer
-  material live in environment/wallet, never in docs.
+Paying for each request, rather than topping up a balance, keeps the buyer in control of cost at the
+finest grain the market allows. The bounded auto-pay follows from that: a client that signs payments
+on your behalf must never be able to sign an open-ended amount, so a finite per-round ceiling and a
+single allowed token and chain are applied to every request before it is signed. Offering the two
+purchase paths is the other deliberate trade. The gateway path is faster and hides the auction; the
+direct path keeps the transaction on the public ledger where you can audit settlement yourself. We
+let the buyer choose which property matters more for a given job.
 
-## Source & verification
+## Failure modes
 
-- **Source repo:** `citrate-buyer-webapp` (split from the Citrate monorepo, 2026-05-18).
-- **Audited against:** `573da03` (`git -C citrate-buyer-webapp rev-parse --short HEAD`).
-- **Key paths:** `app/page.tsx`, `app/design/DesignMount.tsx`, `app/design/DesignApp.jsx`,
-  `app/api/chat/route.ts`, `lib/submitJob.ts`, `lib/marketplace.ts`,
-  `lib/buyCredits.ts`, `lib/gatewayAllowlist.ts`.
-- **Status:** The browse/marketplace SPA renders the design prototype with **sample
-  catalog data** for models/providers/pools; the **live, wired** paths are x402 job
-  submission (via `@citratenetwork/marketplace-sdk`), credits, the gateway-backed
-  copilot, and the server-side `MarketplaceClient`. Treat catalog figures in the UI as
-  illustrative until live indexing is fully wired. This page mirrors code at the pinned
-  SHA (Rule 9, link, don't copy); the repo README is monorepo-split boilerplate, so
-  screens here are audited against the app code, not the README.
+This surface moves real funds, so it is built to fail closed.
+
+- The payment client never signs an unbounded x402 amount. A finite per-round ceiling is always
+  applied, and a request naming any token other than wSALT or any chain other than 40204 is rejected
+  before signing (audited as `RM-F1` and `BUYER_WEBAPP-002`).
+- The copilot route applies an IP rate limit before any gateway or inference call, because every
+  request costs real money (tracked under SECREM-01 WEB-3). The default is 20 requests per minute,
+  overridable by environment.
+- Outbound gateway targets are restricted by an allowlist in `lib/gatewayAllowlist.ts`, validated
+  before a payment is signed.
+- No secrets appear in this page. Gateway and RPC hostnames are public; signer material lives in the
+  account and environment, never in documentation.
+
+## Access and canon
+
+Commercial. This is paid marketplace operation: job posting, provider economics, and payment,
+intended for contracted buyers, and gated through the Codex chokepoint (`PLANSET/02_ARCHITECTURE.md`
+section 4). Market participation settles in SALT, which pays for work and is not treated here as
+anything to hold. The wider network is on-premise by default and every node operator on the public
+network is identity-checked through CLEAR; that envelope is described in
+[what Citrate is](/start/what-is-citrate).
+
+## Source and verification
+
+- Source repo: `citrate-buyer-webapp`, split from the Citrate monorepo on 2026-05-18.
+- Audited against: `573da03`.
+- Key paths: `app/page.tsx`, `app/design/DesignApp.jsx`, `app/design/sdkBridge.ts`,
+  `app/api/chat/route.ts`, `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/marketplace.ts`,
+  `lib/buyCredits.ts`, `lib/gatewayAllowlist.ts`, `lib/chatGuard.ts`, `DESIGN_HANDOFF.md`.
+- Status: **Implemented (pre-audit).** The x402 job submission, credits, server-side
+  `MarketplaceClient` reads via `@citratenetwork/marketplace-sdk`, and the gateway-backed copilot are
+  wired and run against chain 40204. The browse catalog renders live SDK reads when a default model
+  hash is configured and otherwise falls back to sample provider data, which the UI labels as
+  `source: 'sample'` so the screen stays honest. Treat catalog figures as illustrative until live
+  indexing is fully wired. This app has not completed an external audit. The README is monorepo-split
+  boilerplate, so the screens here are audited against the app code and `DESIGN_HANDOFF.md`, not the
+  README.

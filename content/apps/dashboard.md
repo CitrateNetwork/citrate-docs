@@ -1,105 +1,126 @@
 ---
-title: Federated Learning Dashboard
+title: Learning dashboard
 codex_slug: /apps/dashboard
 tier: commercial
 org_scope: ~
-source_kind: transcluded
-source: citrate-dashboard/app
+source_kind: authored
+source: citrate-dashboard/{app/, lib/daemon-api.ts}
 surfaces: [APP-dashboard]
 audited_against_sha: f6e27c6
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Federated Learning Dashboard
+The learning dashboard is the live window onto Citrate Orchard, the federated-learning surface where models
+train across nodes without the training data leaving them. It shows each learning cycle as it runs, who
+contributed, and which mentor pairings were committed, all read from a public, read-only view of the
+network.
 
-> The live window into Citrate's federated-learning loop, watch each cycle run, see who contributed, and which mentor pairings landed.
+## What it is
 
-## Overview
+Citrate Orchard runs a federated-learning loop: one round roughly every 25 seconds, in which nodes submit
+embeddings, an on-chain Belnap-FOUR aggregator picks a canonical signal, the routing model retrains, and
+mentor pairings are committed on chain. The dashboard is the observability layer over that loop. It is a
+Next.js application, and it holds no canonical state of its own. Live cycle state, embeddings, mentor
+pairings, and contribution scores are read through from the network: from chain RPC and from a read-only
+daemon API. The only thing it persists locally is account-facing convenience, profiles, invite tokens, and
+cycle subscriptions. The chain is the source of truth, and the dashboard does not mirror it.
 
-The Citrate dashboard (`citrate-dashboard`) is a Next.js web app that monitors the
-network's **federated-learning (FL) loop in public**. One round of the loop runs
-roughly every ~25 seconds: nodes submit embeddings, an on-chain Belnap-FOUR
-aggregator picks a canonical signal, the routing model retrains, and mentor pairings
-get committed on-chain. The dashboard is the live view into that pipeline (the pilot
-is labeled `RM-FL-5`).
+The loop matters because of what it does not move. Embeddings are the only thing nodes publish; the data
+those embeddings were computed from stays on the node. The dashboard makes that loop legible to the people
+watching it without becoming a second copy of it.
 
-It reads cycle state through to a read-only daemon API
-(`federated.citrate.ai/api/{cycles, embeddings, mentors}`) and chain RPC
-(`https://rpc.citrate.ai`). Cycle pages render on every request (no caching) because
-cycle state is live, and they **degrade honestly**, if the daemon is unreachable the
-page shows a clear "Daemon API unavailable" panel instead of crashing.
-(Source: `citrate-dashboard/app/page.tsx`, `app/cycles/page.tsx`,
-`lib/daemon-api.ts`.)
+## How to use it
 
-## Who it's for
+The dashboard is read-mostly. Anyone can follow the cycles; participating in a cycle needs an account.
 
-- **Network participants and operators** following live FL cycles and their own contribution scores.
-- **Researchers** tracking the Paper II experiments (H1/H2/H3) and their measured outcomes.
-- **Node runners** who want to join a cycle and see their embeddings land.
+1. Open the dashboard and pick Cycles to see what is running now.
+2. Click any cycle to see its contributors and the mentor pairings it committed.
+3. Open Experiments to follow the research hypotheses and their status.
+4. To take part, open Profile, sign in, link your Citrate account, and join a cycle. Your contribution
+   score updates as cycles run.
 
-## Key features & screens
+## Reference
+
+The screens and what they read (`app/`, `lib/daemon-api.ts`).
 
 | Screen | Route | What you see | Code |
 |---|---|---|---|
-| **Home** | `/` | The FL loop explained, plus cards into Cycles, Experiments, and Profile; a developer section with the daemon API and RPC endpoints. | `app/page.tsx` |
-| **Cycles** | `/cycles` | A live list of learning cycles with status (`embeddings_open` → `embeddings_closed` → `aggregated` → `trained` → `matched` → `finalized`), participant count, and start/finalize times. | `app/cycles/page.tsx` |
-| **Cycle detail** | `/cycles/[id]` | One cycle: its embeddings contributors and committed mentor pairings. Missing/failed cycles render a standard 404. | `app/cycles/[id]/page.tsx` |
-| **Experiments** | `/experiments` | The Paper II hypotheses H1 (Belnap-FOUR vs flat-mean under mislabel injection), H2 (adapter-composition power law), and H3 (Byzantine convergence below the BFT threshold), what's measured and current status. | `app/experiments/page.tsx` |
-| **Profile** | `/profile` | Connect your wallet via Privy, link your Citrate address, set display/bio/timezone, view subscriptions, and join a cycle. | `app/profile/page.tsx` |
+| Home | `/` | The loop explained, cards into Cycles, Experiments, and Profile, and the public daemon and RPC endpoints. | `app/page.tsx` |
+| Cycles | `/cycles` | A live list of learning cycles with status, participant count, and start and finalize times. | `app/cycles/page.tsx` |
+| Cycle detail | `/cycles/[id]` | One cycle's embedding contributors and committed mentor pairings. A missing cycle renders a standard 404. | `app/cycles/[id]/page.tsx` |
+| Experiments | `/experiments` | The three research hypotheses, what each measures, and its current status. | `app/experiments/page.tsx` |
+| Profile | `/profile` | Sign in, link your Citrate account, set display name, bio, and timezone, view subscriptions, and join a cycle. | `app/profile/page.tsx` |
 
-### FL cycle monitoring
+A cycle moves through a fixed lifecycle, and the status badges map one-to-one onto it
+(`lib/daemon-api.ts`):
 
-The cycle status badges map one-to-one to the daemon's cycle lifecycle, so the list
-view is a real-time picture of where every cycle sits in the loop. Cycle detail joins
-three daemon reads (`getCycle`, `listEmbeddings`, `listMentors`) and tolerates partial
-failures, so a transient daemon 5xx degrades a panel rather than the page.
-(Source: `app/cycles/page.tsx`, `app/cycles/[id]/page.tsx`.)
+```text
+embeddings_open → embeddings_closed → aggregated → trained → matched → finalized
+```
 
-### Identity & profile
+The Experiments page tracks three hypotheses from the second research paper. They are spec-locked and
+awaiting testnet measurement, so the page renders the plan, not results
+(`app/experiments/page.tsx`):
 
-The Profile screen authenticates with **Privy** and derives identity from the verified
-Privy access token server-side, the API does not trust a `did` supplied in the
-URL/body (audit `CITRATE_DASHBOARD-2026-05-31-001`). The profile API
-(`app/api/profile/route.ts`) and invites API (`app/api/invites/route.ts`) sit behind
-that token. (Source: `app/profile/page.tsx`, `app/api/profile/route.ts`.)
+| Hypothesis | Question | Status |
+|---|---|---|
+| H1 | Belnap-FOUR aggregation versus a flat mean under injected mislabels, on a 4-node setup. | spec-locked, awaiting testnet |
+| H2 | Whether adapter-composition accuracy follows a power law as adapters are added, to 100. | spec-locked, awaiting testnet |
+| H3 | Routing-model convergence with Byzantine validators below the BFT threshold, to 30 nodes. | spec-locked, awaiting testnet |
 
-## How to use
+Data sources are read-only. The daemon API at `federated.citrate.ai/api/{cycles, embeddings, mentors}` is
+GET-only and enforced as such at the source by a tripwire that forbids mutating verbs; chain reads go to
+`rpc.citrate.ai` on chain 40204 (`lib/daemon-api.ts`).
 
-1. Open the dashboard and pick **Cycles** to see what's running now.
-2. Click any cycle to see its contributors and mentor pairings.
-3. Open **Experiments** to follow the research hypotheses and their status.
-4. To participate, open **Profile**, sign in with Privy, link your Citrate address,
-   and join a cycle, your contribution score updates as cycles run.
+## Design rationale
 
-## Tutorials
+A dashboard over a live network has one temptation, to cache the network into itself and slowly drift out
+of truth. This one refuses that. Cycle pages render on every request with no caching, because cycle state
+is live, and the dashboard reads through to the chain and the daemon rather than mirroring them, so the
+chain stays canonical. The daemon API it depends on is read-only by construction, which means the
+observability layer cannot become an accidental control surface. Identity is the same discipline: the
+account a request acts as is derived server-side from a verified session token, never from an identifier
+supplied in the URL or body, so one account can never read or write another's profile.
 
-- [Explore a transaction](/apps/tutorials/explore-a-transaction) (CitrateScan), useful
-  for inspecting the on-chain commits a cycle produces. A dashboard-specific
-  "watch a cycle finalize" tutorial is tracked as a stub.
+## Failure modes
 
-## Security & access
+The dashboard depends on services it does not own, so it is built to degrade rather than crash or leak.
 
-**Tier: commercial.** The dashboard surfaces operator- and participant-facing FL
-operations (cycle internals, contribution scoring, experiment tracking) intended for
-contracted/paid principals rather than anonymous scraping; access is gated per the
-Codex chokepoint (`PLANSET/02_ARCHITECTURE.md` §4).
+- When the daemon is unreachable, a cycle page shows a clear "Daemon API unavailable" panel instead of
+  failing, and a transient error on one of the three reads behind a cycle detail degrades that panel
+  rather than the page (`app/cycles/page.tsx`, `app/cycles/[id]/page.tsx`).
+- Upstream daemon error text, status lines, body snippets, connection strings, is never reflected to the
+  client. The server logs it and returns a fixed-shape 503 (audit `CITRATE_DASHBOARD-2026-05-31-006`).
+- The profile and invite APIs derive identity from a verified session token server-side and reject any
+  client-supplied identifier, closing an account-enumeration path found in audit
+  (`CITRATE_DASHBOARD-2026-05-31-001`).
 
-- Profile/invite actions require a verified Privy session; identity is derived
-  server-side from the token, never from client-supplied IDs.
-- The daemon API the dashboard reads is **read-only**.
-- **No secrets in this page.** Endpoints shown are public hostnames; configuration
-  such as `DAEMON_API_BASE_URL` lives in environment, not in docs.
+## Access and canon
 
-## Source & verification
+Tier: commercial. The dashboard surfaces operator- and participant-facing learning operations, cycle
+internals, contribution scoring, and experiment tracking, intended for contracted principals rather than
+anonymous scraping.
 
-- **Source repo:** `citrate-dashboard` (split from the Citrate monorepo, 2026-05-18).
-- **Audited against:** `f6e27c6` (`git -C citrate-dashboard rev-parse --short HEAD`).
-- **Key paths:** `app/page.tsx`, `app/cycles/page.tsx`, `app/cycles/[id]/page.tsx`,
-  `app/experiments/page.tsx`, `app/profile/page.tsx`, `app/api/*`, `lib/daemon-api.ts`.
-- **Status:** Pilot (`RM-FL-5`). The Experiments page currently renders the *plan*
-  (hypotheses are "spec-locked, awaiting testnet"); outcome measurement lands with the
-  experiment-runner work. Treat experiment results as **pre-data**. This page mirrors
-  code at the pinned SHA (Rule 9, link, don't copy); the repo README is monorepo-split
-  boilerplate, so screens here are audited against the app code, not the README.
+This is the observability window onto Citrate Orchard, not a place where learning data lives. Citrate
+Orchard's premise is that models train across nodes without the training data leaving them: a node
+publishes embeddings, not its underlying data, so the data stays on the node. The dashboard reads only the
+public, read-only view of that loop and holds no canonical state. No secrets appear in this page; the
+endpoints shown are public hostnames, and configuration lives in environment. See
+[federated learning](/research/learning) for Citrate Orchard and the research the loop rests on, and
+[the compute pool](/compute/pool) for how nodes join.
+
+## Source and verification
+
+- Source repo: `citrate-dashboard`, split from the Citrate monorepo on 2026-05-18, audited against SHA
+  `f6e27c6`.
+- Key paths: `app/page.tsx`, `app/cycles/page.tsx`, `app/cycles/[id]/page.tsx`, `app/experiments/page.tsx`,
+  `app/profile/page.tsx`, `app/api/profile/route.ts`, `app/api/invites/route.ts`, `lib/daemon-api.ts`.
+- Stack: Next.js 16, React 19, Prisma on Vercel Postgres for profiles and invites, ethers for chain reads,
+  Privy for account sign-in.
+- Status: Implemented (pre-audit), pilot, labelled `RM-FL-5` in the application. The Experiments page
+  renders the plan: the three hypotheses are spec-locked and awaiting testnet, so treat experiment results
+  as pre-data until the measurement work lands. The screens here are verified against the application code
+  at this SHA; the repository README is monorepo-split boilerplate and is not the source of these claims.
+  Tier 1 audit applies before a stable release.

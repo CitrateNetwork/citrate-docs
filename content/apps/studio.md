@@ -1,51 +1,45 @@
 ---
-title: Citrate Studio, Native Agent-Harness Interface (Overview)
+title: Citrate Studio
 codex_slug: /apps/studio
 tier: public
 org_scope: ~
-source_kind: linked
+source_kind: authored
 source: citrate-studio (private repo)
 surfaces: [APP-studio]
 audited_against_sha: c93a827
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Studio
+Citrate Studio is the agent-control interface for node operators, a native application for driving the
+Citrate agent runtime and watching its safety machinery work. This page is a public overview; the
+implementation internals are gated.
 
-> The native agent-harness interface for the Citrate runtime, a creative tool for driving a
-> compliance-first agent. For operators and builders who want the runtime's safety machinery to be
-> visible and usable rather than buried.
+## What it is
 
-## Overview
+Citrate Studio is the native interface that an operator uses to run a compliance-first agent. It puts the
+runtime's safety machinery, the approvals, the role quorum, the pre-flight checks, the tripwires, and the
+audit replay, in front of the operator as the main thing on screen rather than hidden plumbing. It is built
+in Slint, descends from the Citrate Market design system, and renders the agent runtime's own primitives
+directly.
 
-Citrate Studio is the native UI for driving the Citrate agent runtime. It hides the transformer at the
-top (chat) and reveals the calldata at the bottom (code), so each layer down trades one abstraction for
-one truth. The compliance the runtime enforces, hash-pinned approvals, the quorum lattice, the doctor
-checks, the tripwires, and frame-accurate audit replay, is surfaced as the primary interface rather
-than hidden plumbing.
+The runtime it drives is the [agent runtime](/compute/agent-runtime), and the people it is for are the
+[node operators](/operators/run-a-node) who run agents on their own hardware and want the safety controls
+to be visible and usable.
 
-It is built in Slint, descends from the Citrate Marketplace design system, and renders
-`citrate-agent-runtime` primitives directly. It is intended as the forward-looking UI kit for Citrate
-native apps.
+## Access and canon
 
-**Who it's for:** operators running compliance-first agents, and teams building native Citrate apps that
-want a consistent agent-control surface.
+Public, for this overview only. The implementation internals are Confidential and gated. The design
+specification, the map of what is built against what is modeled, the policy, signer-roster, approval-queue,
+and Capsule-dispatch implementation, and the packaging and release detail are not written into Citrate
+Atlas. They live in the private `citrate-studio` repository and are served at request time to authorized
+people only. This page points to that gated material; it does not reproduce it, and it contains no secrets.
 
-## Security & access
+## Source and verification
 
-Tier: **public** for this overview only.
-
-> **The implementation docs are Confidential and gated.** Citrate Studio's internals, the design spec,
-> the real-vs-modeled-vs-gated completion map, the policy/signer-roster/approval-queue/capsule-dispatch
-> implementation, packaging and release detail, are **not** authored into Codex. They live in the
-> private `citrate-studio` repo and are served at request time (S3 runtime gating) to authorized
-> principals only. This page is a public-safe overview that points to that gated material; it
-> deliberately does not reproduce competitive implementation depth, and it contains **no secrets**.
-
-## Source & verification
-
-- **Source repo:** `citrate-studio` (private). Public overview audited against SHA `c93a827`.
-- Confidential bodies (design spec, completion status, release docs) remain in the private repo for
-  runtime gating and are intentionally not in the public build.
+- Source repo: `citrate-studio` (private). Public overview audited against SHA `c93a827`.
+- Status: Implemented. The application is a hardened release candidate with real authentication, policy
+  core, signer roster, and chain reads; the precise built-versus-modeled map and the remaining 1.0 work are
+  in the gated material. The Confidential bodies remain in the private repository and are intentionally not
+  in the public build.

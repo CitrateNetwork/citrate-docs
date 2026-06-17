@@ -1,98 +1,99 @@
 ---
-title: Citrate marketing site
+title: The Citrate marketing site
 codex_slug: /apps/landing
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: citrate-landing/README.md
+source_kind: authored
+source: citrate-landing/README.md, citrate-landing/src/app, citrate-landing/src/lib
 surfaces: [APP-landing]
 audited_against_sha: d4f4a64
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate marketing site
+The public website for the Citrate Network is the first place most people meet us. It explains what the
+network is, who it serves, and how to reach the team, and it holds none of your plaintext: anything you type
+into a form is encrypted before it is written down.
 
-> The public Citrate Network website, what it is, who it serves, and how to get in touch.
-> The site holds no secrets, and every form submission is encrypted at rest.
+## What it is
 
-## Overview
+The marketing site is a plain website with one unusual property. It is built on Next.js 16 with the App
+Router, backed by Neon Postgres through Drizzle, and runs on Vercel. Nine pages, ported from the original
+design prototype, describe the network and the institutions it is built for. Three forms let you reach us.
 
-This is the Citrate Network marketing/landing site: a Next.js 16 (App Router) site on Neon Postgres,
-deployed on Vercel. It presents the network to institutional and public-good audiences and collects a
-few structured inquiries (contact, host-compute application, verification-packet request).
+The property worth knowing is that the site never keeps what you type in readable form. Every form
+submission is encrypted with AES-256-GCM before it reaches the database, so the stored columns are
+ciphertext and nothing else. The only plaintext use is a notification email so the team can write back. The
+site is a public front door for the network described in [what Citrate is](/start/what-is-citrate); it makes
+no claim of its own beyond that.
 
-The mental model for readers: a normal marketing site, with the one notable difference that **anything
-you type into a form is encrypted before it's stored**, the database never holds your plaintext PII.
+## How to use it
 
-> **Status, production.** The site is live and actively maintained (security headers, CSP with
-> per-request nonce, OWASP ZAP baseline in CI, Playwright e2e). It is honest marketing copy, not a
-> certification claim.
+You read the pages, and if you want to talk to us, you submit a form.
 
-## Who it's for
+1. Browse the nine pages: home, solutions, technology, host-compute, compliance, constitution, about,
+   resources, and legal. Each is a server-rendered page under `src/app/`.
+2. Choose the form that fits. Contact is for general inquiries, host-compute is to apply to run hardware on
+   the network, and verification-packet is to request our compliance and security documentation.
+3. Fill in the fields and submit. You receive a confirmation, and the team is notified by email and follows
+   up.
 
-- Institutions evaluating Citrate (defense/aerospace, manufacturing, healthcare, finance).
-- Public institutions (schools/districts, libraries) exploring the public network doors.
-- Anyone who wants to contact the team or request a verification packet.
+There is no account to create and nothing to install. The site is read and submit.
 
-## Key features & screens
+## Reference
 
-Source: `src/app/`.
+The pages and the three form endpoints, each citing its path in `citrate-landing`.
 
-| Page | Route | Purpose |
+| Page | Route | What it covers |
 |---|---|---|
-| Home | `/` | Hero, features, metrics, sector and public-door tiles |
-| Solutions / Technology / Host-Compute | `/solutions`, `/technology`, `/host-compute` | Product and infrastructure detail |
-| Compliance / Legal / Constitution | `/compliance`, `/legal`, `/constitution` | Posture and governance |
-| About / Resources | `/about`, `/resources` | Team and docs |
-| Contact | `/contact` | Contact form |
+| Home | `/` | Hero, the network at a glance, the sectors and public doors |
+| Solutions | `/solutions` | What you can build and run on the network |
+| Technology | `/technology` | The substrate, consensus, and on-premise model |
+| Host-compute | `/host-compute` | Running hardware on the public network |
+| Compliance | `/compliance` | The compliance posture by deployment context |
+| Constitution | `/constitution` | Network governance |
+| About | `/about` | The team and the mission |
+| Resources | `/resources` | Documentation and reading |
+| Legal | `/legal` | Terms and policies |
 
-SEO/meta: sitemap, robots, JSON-LD, dynamic OG images (`/api/og`).
+| Form endpoint | Method | Purpose |
+|---|---|---|
+| `/api/contact` | `POST` | General contact |
+| `/api/host-compute` | `POST` | Apply to host compute |
+| `/api/verification-packet` | `POST` | Request the verification packet |
+| `/api/challenge` | `GET` | Issues a short-lived, single-use submission token |
 
-## How to use
+Search and machine readers are served by a sitemap, a `robots.txt` written to welcome agents, JSON-LD for
+`Organization` and `WebSite`, and dynamic Open Graph images from `/api/og`.
 
-1. Browse the pages above.
-2. To reach the team, use one of the three forms:
-   - **Contact** → `POST /api/contact`
-   - **Host-compute application** → `POST /api/host-compute`
-   - **Verification-packet request** → `POST /api/verification-packet`
-3. Fill in the fields and submit. You'll get a confirmation; the team is notified by email and follows up.
+## Design rationale
 
-### What happens to what you type
+A site that gathers inquiries from schools, hospitals, and contractors is gathering names and email
+addresses, which are exactly the records those institutions are careful with. So the site is built to hold
+none of it in the clear. Submissions are written as AES-256-GCM ciphertext through envelope encryption
+(`src/lib/encryption.ts`), and email is deduplicated with a keyed HMAC blind index, so even the lookup value
+is not your address in plaintext. Submissions pass an origin check, a hidden honeypot, a Cloudflare Turnstile
+challenge, a Postgres-backed sliding-window rate limit, and the single-use token from `/api/challenge`. The
+trade is that a form submission does a little more work before it lands; for the records involved, that is
+the right trade.
 
-Every form submission is encrypted with **AES-256-GCM envelope encryption** before it's written to the
-database (`src/lib/encryption.ts`). The stored columns are ciphertext only, plaintext PII never
-persists. Email is deduplicated with a keyed HMAC blind index, so even the lookup value isn't your
-plaintext address. Submissions are protected by origin checks, a honeypot, a timing heuristic, per-IP
-rate limiting, and short-lived single-use challenge tokens (`GET /api/challenge`).
+## Access and canon
 
-## Tutorials
+Public. A marketing site is public by definition, and this page carries no secrets, keys, or private
+endpoints. None live in the repository either: `.env*` files are ignored by git, only `.env.example` is
+committed, and the real values for the encryption key, database URL, and SMTP password live in Vercel project
+environment variables. The encryption is the load-bearing fact for a visitor: forms are stored as ciphertext
+only, and the single plaintext use is the team's reply.
 
-- No runnable tutorial is needed for a visitor, the site is browse-and-submit. The forms are
-  self-explanatory; see **How to use** above.
+## Source and verification
 
-## Security & access
-
-**Tier: public.** A marketing site is public-good content by definition.
-
-**No secrets here, and none in the repo.** `.env*` files are gitignored; only `.env.example` (a template
-with no real values) is committed. Secrets, the encryption key, database URL, SMTP password, live in
-Vercel project environment variables, not in code and not in this doc. This was verified against the
-repo's `.gitignore` and history.
-
-The load-bearing fact for users: **forms are encrypted.** Submissions are stored as AES-256-GCM
-ciphertext only; the only plaintext use is an internal notification email so the team can reply.
-
-## Source & verification
-
-- **Repo:** `citrate-landing`
-- **Audited against SHA:** `d4f4a64`
-- **Key paths:** `src/lib/encryption.ts`, `src/lib/schemas.ts`, `src/lib/submission.ts`,
-  `src/app/api/contact/route.ts`, `src/app/api/host-compute/route.ts`,
-  `src/app/api/verification-packet/route.ts`, `src/app/api/challenge/route.ts`, `README.md`
-
-### Honest status
-
-Production and actively maintained. No committed secrets, no TODOs found in the surveyed code; the
-posture claims on the site are descriptive, not a third-party certification.
+- Source repo: `citrate-landing`, `README.md`.
+- Audited against SHA: `d4f4a64`.
+- Key paths: `src/lib/encryption.ts`, `src/lib/schemas.ts`, `src/app/api/contact/route.ts`,
+  `src/app/api/host-compute/route.ts`, `src/app/api/verification-packet/route.ts`,
+  `src/app/api/challenge/route.ts`, `src/app/` (nine pages).
+- Status: Implemented. The site is in production and actively maintained, with a strict Content Security
+  Policy carrying a per-request nonce, HSTS, an OWASP ZAP baseline scan in CI, and Playwright tests across
+  five viewports. The posture statements on the site are descriptive; they are not a third-party
+  certification.

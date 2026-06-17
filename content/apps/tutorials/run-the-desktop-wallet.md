@@ -1,127 +1,143 @@
 ---
-title: Run the Desktop Wallet
+title: Run the Citrate Keyring desktop app
 codex_slug: /apps/tutorials/run-the-desktop-wallet
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-native/README.md
+source: citrate-native/README.md, Cargo.toml, rust-toolchain.toml, gui/citrate_native/ui/
 surfaces: [APP-native]
 audited_against_sha: 6416447
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Run the Desktop Wallet
+This builds the Citrate Keyring desktop app from source with Cargo and opens it for the first time. It uses
+only the build steps that exist in the `citrate-native` repository. The commands take a few minutes plus a
+first-time Rust compile, which can take a while.
 
-> Build Citrate Native from source with cargo and open the wallet for the first
-> time. ~5 minutes plus a first-time Rust compile (which can take a while).
+## What it is
 
-This tutorial uses only build steps that exist in the `citrate-native` repo
-(`README.md` "Quick start"). For the full screen map, see
-[Citrate Native](/apps/native).
+The desktop app is a Cargo workspace; you build it and run the default member. The full screen map is on
+[the Citrate Keyring desktop app](/apps/native). This tutorial gets you from a clean checkout to an open
+window with an account.
 
-## Prerequisites
+## How to use it
 
-1. **Rust (stable toolchain).** The repo pins `channel = "stable"`
-   (`rust-toolchain.toml`); rustup will pick it up automatically. Install rustup
-   from <https://rustup.rs> if you don't have it:
+### Step 1, install the Rust toolchain
 
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
+The repository pins a stable toolchain in `rust-toolchain.toml`, so rustup picks it up automatically.
+Install rustup if you do not have it:
 
-2. **GitHub SSH access** to the sibling repos. Building pulls chain crates over
-   SSH; per the README, "ensure your personal SSH key is on GitHub and you have
-   read access to the three sibling repos (org membership covers this)." Verify:
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
-   ```bash
-   ssh -T git@github.com
-   ```
+### Step 2, set up GitHub SSH access
 
-3. **A C/C++ toolchain and platform libraries** that Slint and `rocksdb` need
-   (e.g. `build-essential`/`cmake`/`clang` on Linux, Xcode command-line tools on
-   macOS).
+The build pulls chain crates over SSH from sibling repositories. Per the README, make sure your personal
+SSH key is on GitHub and you have read access to `citrate-chain`, `citrate-learning-center`, and
+`citrate-agent-runtime`; organization membership grants it. Check the key works:
 
-## Steps
+```bash
+ssh -T git@github.com
+```
 
-### 1. Get the repo
+### Step 3, install the platform build tools
+
+Install a C and C++ toolchain and the system libraries Slint and `rocksdb` need: `build-essential`,
+`cmake`, and `clang` on Linux, or the Xcode command-line tools on macOS.
+
+### Step 4, get the repository
 
 ```bash
 git clone git@github.com:CitrateNetwork/citrate-native.git
 cd citrate-native
 ```
 
-### 2. Build
+### Step 5, build
 
-The default build target is `citrate-native` (the workspace `default-members`,
-`Cargo.toml`):
+The default build target is `citrate-native`, the workspace default member in `Cargo.toml`:
 
 ```bash
 cargo build --release
 ```
 
-First-time builds compile the whole dependency tree (chain crates, Slint,
-`rocksdb`) and will take several minutes. For a faster, unoptimized iteration
-build, drop `--release`.
+The first build compiles the whole dependency tree, the chain crates, Slint, and `rocksdb`, so it takes
+several minutes. For a faster, unoptimized iteration build, drop `--release`. If you hit a type-mismatch
+error at a chain-API boundary, it is the known double-fetch issue documented in the README, a chain crate
+pulled through both an SSH host alias and plain `github.com`. It is tracked for a Sprint 1 fix.
 
-> If you hit a type-mismatch error at a chain-API boundary, it is the known
-> double-fetch issue in the README (a chain crate pulled via both an SSH host
-> alias and plain `github.com`). It is tracked for a Sprint-1 fix.
-
-### 3. Run
+### Step 6, run
 
 ```bash
 cargo run --release -p citrate-native
 ```
 
-`-p citrate-native` is explicit, but since it is the default member, plain
-`cargo run --release` launches the same app.
+`-p citrate-native` is explicit, but since it is the default member, plain `cargo run --release` launches
+the same application.
 
-### 4. Create your wallet (first launch)
+### Step 7, create your account on first launch
 
 The onboarding flow opens (`gui/citrate_native/ui/onboarding/onboarding.slint`):
 
-1. **Welcome**, continue past the intro.
-2. **Create a password**, at least 8 characters. This encrypts your wallet
-   locally and **never leaves your device**.
-3. **Wallet provisioning**, the app generates and displays your recovery
-   mnemonic. Write it down and store it offline.
-4. **Security confirmation**, acknowledge that you have backed up the phrase.
+1. Welcome, continue past the intro.
+2. Create a password of at least eight characters. This encrypts your account locally and never leaves
+   your device.
+3. Provisioning, the app generates and shows your recovery phrase. Write it down and store it offline.
+4. Security confirmation, acknowledge that you backed up the phrase.
 
-(Already have a wallet? Use the import option to restore from a mnemonic or
-private key instead.)
+If you already have an account, use the import option to restore from a recovery phrase or a key instead.
 
-### 5. Look around
+### Step 8, look around
 
-You'll land in the app shell with the sidebar
-(`ui/shell/sidebar.slint`). Try:
+You land in the app shell with the sidebar (`ui/shell/sidebar.slint`). Try `Wallet` for your balance and
+transactions, and `DAG Explorer` to read the BlockDAG and open a transaction. When you reopen the app it
+will be locked; unlock it with the password from step 7.
 
-- **Wallet**, your balance and transactions.
-- **DAG Explorer**, browse the BlockDAG and inspect a transaction.
+## Reference
 
-When you re-open the app it will be locked; unlock with the password from step 4.
+| Step | Command or file | Source |
+|---|---|---|
+| Toolchain | `channel = "stable"` | `rust-toolchain.toml` |
+| Build | `cargo build --release` | `README.md`, `Cargo.toml` |
+| Run | `cargo run --release -p citrate-native` | `README.md`, `Cargo.toml` default member |
+| Onboarding | Welcome, password, provisioning, confirmation | `ui/onboarding/onboarding.slint` |
+| Shell | Sidebar groups and screens | `ui/shell/sidebar.slint` |
 
-## Verify it worked
+The DAG view here is a local reader; the shared public explorer is [CitrateScan](/apps/explorer). The
+account abstraction the app shares with the browser extension is covered under [passkeys](/aa/passkeys)
+and [guardians](/aa/guardians), and you can drive the same account from code with the
+[JavaScript SDK](/sdks/js).
 
-- A native window opens (not a browser).
-- After onboarding, the **Wallet** screen shows your new account.
-- The **DAG Explorer** screen loads block/transaction rows.
+## Design rationale
 
-## Security notes
+The app is built from source rather than shipped as a signed binary at this stage because it is pre-1.0 and
+its chain dependencies move with the network. Building it yourself means the account, the node reader, and
+the marketplaces all run from the same checked-out tree, with nothing fetched at runtime that you did not
+compile.
 
-- **No secrets in this tutorial.** Your password and mnemonic are created on
-  your machine, never paste your mnemonic into any website, chat, or file you
-  don't control.
-- Building requires *your own* GitHub SSH access; no shared credential is needed
-  or embedded here.
+## Failure modes
 
-## Source & verification
+- A native window does not open, or the build fails at link time: confirm the C and C++ toolchain and the
+  Slint and `rocksdb` system libraries from step 3 are installed.
+- A type mismatch at a chain-API boundary: this is the README's double-fetch issue from step 5, a chain
+  crate pulled twice through different URL conventions. It compiles today and is tracked for a Sprint 1
+  fix.
+- The app opens locked on a later run: that is expected. Unlock with your password. There is no
+  server-side recovery, the phrase from onboarding is the only backup.
 
-- **Source repo:** `citrate-native`, `README.md` "Quick start" (the build/run
-  commands), `Cargo.toml` (default member), `rust-toolchain.toml` (toolchain),
-  `gui/citrate_native/ui/onboarding/onboarding.slint` (onboarding steps).
-- **Audited against SHA:** `6416447`
-  (`git -C citrate-native rev-parse --short HEAD`).
-- **Status:** pre-1.0 (`version = 0.4.0`). The double-fetch caveat above is an
-  open, README-documented issue.
+## Access and canon
+
+Public. Nothing here is a secret. Your password and recovery phrase are created on your machine; never
+paste your recovery phrase into a website, a chat, or a file you do not control. Building requires your own
+GitHub SSH access to the sibling repositories; no shared credential is needed or embedded here.
+
+## Source and verification
+
+- Source repo: `citrate-native`, audited against SHA `6416447`.
+- Files read: `README.md` Quick start (the build and run commands), `Cargo.toml` (default member),
+  `rust-toolchain.toml` (toolchain), `gui/citrate_native/ui/onboarding/onboarding.slint` (onboarding steps),
+  `gui/citrate_native/ui/shell/sidebar.slint` (the shell).
+- Status: Implemented, version 0.4.0, pre-1.0. The build and run commands and the onboarding steps reflect
+  the repository as built. The double-fetch caveat is an open, README-documented issue.
