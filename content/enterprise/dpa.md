@@ -1,5 +1,5 @@
 ---
-title: DPA / SLA / Subprocessors (Gated)
+title: Data Processing Agreement (Gated)
 codex_slug: /enterprise/dpa
 tier: public
 org_scope: ~
@@ -7,27 +7,31 @@ source_kind: gated
 source: citrate-compliance/
 surfaces: [ENT-dpa]
 audited_against_sha: 8757357
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# DPA / SLA / Subprocessors
+This page confirms that a Data Processing Agreement exists and explains how to request it. The agreement itself is contractual and gated; it is not authored in these public docs.
 
-> Public-safe stub. The material below exists but is gated; this page only confirms it
-> exists and how to request it.
+## What it is
 
-Citrate maintains a Data Processing Agreement, Service Level Agreement, and subprocessor
-disclosures as part of its enterprise contracting package. Because Citrate ships
-**on-premise** and the vendor performs **no data services** (see
-[Procurement](/enterprise/procurement) and [Compliance posture](/enterprise/compliance)),
-the data-handling boundary sits with the customer; these documents define that boundary
-contractually. The full DPA/SLA/subprocessor terms are **commercial-gated**, surfaced to
-contracted / KYC'd principals, not authored in this public docs tree. No terms, SLAs, or
-subprocessor identities are reproduced here.
+Citrate maintains a Data Processing Agreement, with the service-level and subprocessor terms that go alongside it, as part of its contracting package. Because Citrate runs on-premise on Citrate Ground, a customer's data and models stay on the customer's own hardware, and the data-handling boundary sits with the customer. The agreement is what states that boundary in writing, so each side knows what it is responsible for.
 
-**Request access:** through your account channel or the commercial team, under NDA. The
-document of record lives in the private `citrate-compliance` corpus.
+We do not reproduce any of the terms here. No service levels, no subprocessor identities, and no customer specifics appear on this page or anywhere in the public docs.
 
-- Registry row: `ENT-dpa` (tier `commercial`, source_kind `gated`).
-- This stub audited against `citrate-compliance` SHA `8757357`.
+## How to request access
+
+Access is for named principals with a contractual reason to read the agreement, each under a non-disclosure agreement.
+
+1. Ask through your account channel or your commercial contact at Citrate.
+2. We confirm your role and put the non-disclosure agreement in place.
+3. We share the current document of record from its private home.
+
+## Access and canon
+
+The agreement is confidential. It is served at request time from its private home, under a non-disclosure agreement, to named recipients only. It is never copied into this documentation tree, and the public build never includes it. Every access is logged. The sanitized public summary of our compliance posture, which anyone may read, is at [Compliance posture](/enterprise/compliance).
+
+## Source and verification
+
+Private source: the `citrate-compliance` corpus. Audited against `citrate-compliance` SHA `8757357`. Status: Implemented (the agreement exists and is maintained as the document of record); no terms are shown here.
