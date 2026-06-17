@@ -7,89 +7,117 @@ source_kind: linked
 source: citrate-docs/gradient_papers_v3/Gradient_Papers_No3_Mentorship_Protocol_v3.md
 surfaces: [RES-mentorship]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-15T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# The Mentorship Protocol
+The mentorship protocol is how a weaker node in the Citrate Orchard finds a stronger one to learn from.
+At each checkpoint the network pairs nodes by their measured strengths and weaknesses, the stronger node
+produces a small update that moves the weaker one toward it, and the whole exchange is recorded. This
+page is for researchers and operators; it documents the matching code that runs today and summarizes
+Gradient Paper III for the protocol design around it.
 
-> The social fabric of the learning network: how nodes find one another to learn
-> from, who earns mentor status, and how the protocol tells a mentorship apart
-> from an extraction. Summary + link to Gradient Paper III.
+## What it is
 
-## Overview
+Think of the Orchard as a grove where some trees fruit well in one season and poorly in another. Rather
+than let each tree learn alone, the network grafts: a node strong in some region of the model's behavior
+lends a weaker node an adapter, a small set of weights that nudges the weaker node's representation
+toward the stronger one's. The paper's argument is that distributed model swarms fail the way human
+organizations fail, when knowledge transfer is implicit, unrecorded, and one-directional, so Citrate
+makes each transfer an explicit, recorded action.
 
-Paraconsistent consensus (Paper II) gives the *mechanism* for learning together.
-The **Mentorship Protocol** (Paper III) gives the *social layer*: a way for a
-node with a weakness in some embedding region to borrow a LoRA adapter from a
-node that is strong there, with the whole exchange recorded on-chain. The
-argument is that distributed AI swarms fail the way human organizations fail, when knowledge transfer is implicit, unrecorded, and one-directional, so
-Citrate makes mentorship explicit and auditable.
+Two layers are worth keeping separate. The matching layer, which decides who learns from whom, runs in
+the node software today. The fuller protocol around it, the trust gating and pricing and dispute handling
+the paper describes, is partly on the ledger and partly still specified. The sections below say which is
+which.
 
-## Concept
+## How to use it
 
-The paper grounds the design in three strands of organizational-learning theory
-and maps each to an on-chain primitive:
+Matching is not something an operator invokes by hand; it runs inside the learning cycle. The path it
+takes each checkpoint is:
 
-- **Senge (systems thinking)**, reinforcing/balancing feedback loops are made
-  explicit (adapter quality → usage → data → better adapter; performance score →
-  workload → regression to the mean).
-- **Nonaka & Takeuchi (SECI)**, socialization / externalization / combination /
-  internalization each leave an on-chain trace (e.g. publishing a LoRA adapter is
-  *externalization*; merging adapters is *combination*).
-- **Argyris & Schön (double-loop)**, single-loop = continuous LoRA adaptation;
-  double-loop = re-evaluating the routing taxonomy at checkpoint barriers.
+1. Each participant carries a performance profile, its measured accuracy and the domains it works in.
+2. Participants are sorted by accuracy. The stronger half are candidate mentors, the weaker half candidate mentees.
+3. Each mentee is matched to the mentor with the highest complementarity that still has spare capacity, where complementarity rewards a wide accuracy gap and shared working domains.
+4. The chosen mentor produces a delta adapter, the element-wise difference between its embedding and the mentee's, which applied to the mentee moves its representation toward the mentor's.
+5. The adapter is wrapped with provenance and a content hash so the exchange can be checked later.
 
-**Mentor–mentee matching** is run per checkpoint and protected by three filter
-passes: capacity (a mentor can only take `M_max` mentees), **blue-score trust
-floor** (a Sybil with no consensus history can't be a mentor), and contribution
-score (the candidate must actually have produced adapters worth borrowing). The
-trust floor reuses GhostDAG blue score as a *necessary but not sufficient*
-signal; the sufficient condition is per-type score from `ContributionAccounting`.
+To follow the surrounding surfaces, read [federated learning cycles](/research/learning) for where
+matching sits in the cycle, and [model contracts](/contracts/models) for the LoRAFactory registry that
+records adapters on the ledger.
 
-**Trust and verification.** A first-time mentee can require a Halo2-KZG proof of
-adapter quality before integrating (see [verifiable inference](/research/verifiable-inference)).
-Failure modes the paper addresses: mentor capture (per-mentor caps + open adapter
-registry + rotation), adapter pollution (slashing via dispute resolution +
-crowd-sourced suspension), and sycophant spam (score is **usage-weighted**, so
-unused adapters earn nothing).
+## Reference
 
-## How it maps to the network
+The matching surface, anchored in `citrate-chain` at `03d7851`.
 
-- **Contribution accounting (seven types).** `ContributionAccounting` weights
-  Validation, ModelHosting, AdapterCreation, DataProvision, AppDevelopment,
-  BridgeInfra, Governance. Mentorship queries the **AdapterCreation** column for
-  candidates; weights are governance-mutable with bounded score recomputation.
-- **Adapter registration.** LoRA adapters created in the learning cycle's `Act`
-  phase ([learning cycles](/research/learning)) are registered via `LoRAFactory`
-  and distilled with a `ProvenanceChain` in `core/learning/src/adapters.rs`.
-- **Pricing.** A mentee's fee to a mentor is calibrated by `ComputePricingOracle`
-  so mentoring is paid but not rent-extracting.
+| Surface | Where | What it does |
+|---|---|---|
+| `select_mentors` | `core/learning/src/mentor.rs` | Sorts participants by accuracy, splits into mentor and mentee halves, and pairs each mentee to the best uncapped mentor. |
+| `MentorPairing` | `core/learning/src/mentor.rs` | The record of one pairing: mentor, mentee, complementarity score, both accuracies, and shared domains. |
+| `generate_delta_adapter` | `core/learning/src/mentor.rs` | Computes the mentor-minus-mentee embedding delta, rejecting mismatched dimensions or non-finite values. |
+| `generate_adapter_for_mentee` | `core/learning/src/mentor.rs` | Wraps the delta in a `LearningAdapter` with metadata, provenance, and hash, ready to broadcast. |
+| `validate_pairing` | `core/learning/src/mentor.rs` | A pure predicate mirroring the `MentorMatcher.sol` contract check, in Q16.16 fixed point so the node and the contract agree exactly. |
 
-## Honest status
+The constants that bound matching are explicit in the code: `MIN_ACCURACY_GAP` is `0.05`, so a mentor
+must be at least five points more accurate than its mentee, and `MAX_MENTEES_PER_MENTOR` is `3`, so no
+mentor can take more than three mentees in a cycle. The complementarity score is
+`max(1, shared_domains) * accuracy_gap`, which keeps zero-overlap pairs scorable while rewarding shared
+ground. The `validate_pairing` helper enforces the on-ledger gate in lockstep with the contract, and its
+variant order is load-bearing because it ABI-decodes from the Solidity enum:
 
-`ContributionAccounting` (7-type tracking + weight-update recompute),
-`LoRAFactory` registration, and the `LearningPool`/`LearningCycleManager` state
-machines are **implemented** per the paper's reality-check table. The
-**mentor–mentee matching algorithm**, per-cycle blue-score-gated assignment, and
-the Sybil trust-floor enforcement are **specified, not yet on-chain** (the
-paper's `RM-MENT-*` sprint family). The Halo2-KZG adapter-verification *primitive*
-exists (precompile `0x0108`); the application-layer verification flow is pending.
-Treat mentorship as a designed protocol with implemented primitives and a
-not-yet-shipped orchestration layer.
+```rust
+pub enum PairingValidity {
+    Ok = 0,
+    SelfMentor = 1,
+    MentorBelowTrustFloor = 2,
+    AccuracyGapTooSmall = 3,
+    MentorAtCapacity = 4,
+    MenteeAlreadyAssigned = 5,
+}
+```
 
-## Source & verification
+The paper adds the protocol layer the matching code rides on. The `ContributionAccounting` contract
+weights seven contribution types, with adapter creation weighted highest at 2.0, so the candidate pool is
+nodes that have actually produced useful adapters. A node's standing in consensus, its blue score from
+GhostDAG, is reused as a necessary trust floor: a node that cannot keep up with consensus is an unlikely
+source of good adapters, though a high blue score alone does not earn mentor standing. A first-time
+mentee can require a Halo2-KZG proof of adapter quality before integrating, described under
+[verifiable inference](/research/verifiable-inference). Fees are calibrated by a pricing oracle so
+mentoring is paid but not rent-extracting.
 
-- **Paper (linked, not copied):**
-  `citrate-docs/gradient_papers_v3/Gradient_Papers_No3_Mentorship_Protocol_v3.md`.
-- **Code anchors (citrate-chain @ `03d7851`):** `core/learning/src/adapters.rs`
-  (LoRA + provenance), `core/learning/src/mentor.rs` (`MentorPairing`,
-  checkpoint-time mentor selection), `contracts/src/ContributionAccounting.sol`,
-  `contracts/src/LoRAFactory.sol`, `contracts/src/LearningPool.sol`,
-  `contracts/src/ComputePricingOracle.sol`.
-- **Related:** [Paraconsistent consensus](/research/paraconsistent),
-  [Federated learning cycles](/research/learning),
-  [Verifiable inference](/research/verifiable-inference).
-- **No secrets on this page.** Contract *addresses* in the paper are public; no
-  keys or credentials are reproduced here.
+## Design rationale
+
+The matching code is deliberately fixed point, not floating point, on its on-ledger path. Float results
+are not guaranteed identical across processors, and the node and the contract must agree on whether a
+pairing is valid; the Q16.16 representation in `validate_pairing` makes the two implementations produce
+the same answer over the full input space, which the property tests in the file pin. The accuracy-gap
+floor and the per-mentor capacity cap are the smallest set of rules that prevent the obvious failures: a
+node mentoring itself, a node with no standing posing as a mentor, a pairing with no real gap to learn
+across, and one strong node saturating all demand. The paper's wider counters, an open adapter registry
+so any mentee can use a published adapter, per-checkpoint rotation, usage-weighted scoring so spam
+adapters earn nothing, and slashing for adapters later proven adversarial, address mentor capture and
+adapter pollution at the protocol level.
+
+## Access and canon
+
+Academic tier. The mentorship surface runs inside the on-premise node software in the Citrate Orchard;
+matching operates over performance profiles and embeddings that stay on the operator's hardware, and only
+the adapter and its provenance are published when an operator chooses to. Contract addresses cited in the
+paper are public; no keys or credentials appear here.
+
+## Source and verification
+
+- Paper, linked, not copied: `citrate-docs/gradient_papers_v3/Gradient_Papers_No3_Mentorship_Protocol_v3.md`.
+- Code anchor, citrate-chain at `03d7851`: `core/learning/src/mentor.rs` for matching, delta-adapter
+  generation, and the `validate_pairing` mirror; surrounding surfaces in `core/learning/src/adapters.rs`,
+  `contracts/src/ContributionAccounting.sol`, `contracts/src/LoRAFactory.sol`, and `contracts/src/MentorMatcher.sol`.
+- Status: Implemented for matching. `select_mentors`, the delta-adapter pipeline, and the
+  `validate_pairing` predicate exist, run, and are covered by unit and property tests in `mentor.rs`; this
+  is pre-audit. Specified for the full distillation pipeline: the wider protocol the paper describes,
+  blue-score trust gating, on-ledger per-cycle assignment, priced mentoring, and the application-layer
+  proof-of-quality flow, is designed and partly built but not yet shipped end to end. The delta adapter
+  in the code is a real update vector, not the full low-rank LoRA decomposition the paper envisions.
+- Related: [federated learning cycles](/research/learning), [model contracts](/contracts/models),
+  [paraconsistent consensus](/research/paraconsistent), [verifiable inference](/research/verifiable-inference),
+  [the Gradient Papers](/research/gradient-papers).

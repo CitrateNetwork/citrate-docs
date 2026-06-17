@@ -1,103 +1,78 @@
 ---
-title: Paraconsistent Consensus (Belnap Four-Valued Logic)
+title: Paraconsistent aggregation, Belnap four-valued logic
 codex_slug: /research/paraconsistent
 tier: academic
 org_scope: ~
-source_kind: linked
-source: citrate-docs/gradient_papers_v3/Gradient_Papers_No2_Paraconsistent_Consensus_v3.md
+source_kind: authored
+source: citrate-chain/core/learning/src/belnap.rs
 surfaces: [RES-paraconsistent]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-15T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Paraconsistent Consensus
+When nodes in Citrate Orchard disagree about what a model should have learned, the network records the disagreement as information rather than averaging it into a single answer nobody holds. It does this with Belnap's four-valued logic. This page documents the implementation and is written for researchers.
 
-> Disagreement as information. How Citrate aggregates embeddings across nodes
-> using Belnap's four-valued logic instead of averaging conflict away. Summary +
-> link to Gradient Paper II.
+## What it is
 
-## Overview
+Classical agreement treats a difference of opinion as a fault to be resolved: honest parties are expected to converge on one value. Paraconsistent aggregation declines that frame. If one node's data says a given dimension of an embedding should be strongly positive and another node's says it should be strongly negative, the mean sits near zero, a value that is right for neither and that quietly erases the fact that the two nodes saw different worlds. That difference is often the most useful thing in the data: it is what distinguishes a personalized model, a regional dialect, or a domain specialist from a generic one.
 
-Classical BFT treats disagreement as a defect: honest nodes must converge on a
-single value. **Paraconsistent consensus** refuses that frame. It treats
-disagreement as *information about the network's epistemic state*, and a system
-that averages it away throws out the very data that distinguishes a healthy
-decentralized network from a collapsed one. The protocol runs **on top of** the
-GhostDAG/BFT checkpoint mechanism: each checkpoint is a synchronization barrier
-not just for blocks but for routing weights, adapter registrations, and embedding
-aggregations.
+So the aggregator produces two outputs per dimension, computed independently. One is a numeric value, a confidence-and-trust-weighted mean over the consenting sources. The other is a Belnap state, a label that says whether the sources agreed, disagreed, or said nothing. The router downstream reads both, so a dimension marked as contradictory can be sent to several sources for cross-validation instead of being trusted as a fictional average.
 
-## Concept, Belnap FOUR
+## The four values
 
-Nuel Belnap's 1977 four-valued logic admits four truth values, each with a
-network meaning:
+Nuel Belnap's logic admits four truth values. In `belnap.rs` they are the variants of `BelnapValue`, and each carries a meaning for the network.
 
-| Value | Reading | Network meaning |
-|---|---|---|
-| **T** | True | all known sources agree this dimension is positive |
-| **F** | False | all known sources agree it is negative |
-| **B** | Both | sources disagree, contradictory information |
-| **N** | Neither | no source has spoken, unknown |
+| Value | In code | Reading | Network meaning |
+|---|---|---|---|
+| True | `BelnapValue::True` | known true | the trusted sources agree this dimension is positive |
+| False | `BelnapValue::False` | known false | the trusted sources agree it is negative |
+| Both | `BelnapValue::Both` | true and false at once | sources of comparable trust genuinely disagree |
+| Neither | `BelnapValue::Neither` | no information | no source spoke with enough confidence |
 
-Classical aggregation (mean / median / weighted average) collapses **B** and
-**N** into the T/F continuum. Paraconsistent aggregation **preserves** them. If
-node A's data says dimension 47 should be `+0.8` and node B's says `-0.6`, the
-mean (`+0.1`) is right for neither, it is the projection onto a fictional
-consensus. The paraconsistent answer is "dimension 47 is in state **B** for this
-checkpoint; route queries that activate it to multiple sources for
-cross-validation, not to the mean." This matters precisely when node data
-distributions genuinely differ (personalized models, regional dialects,
-domain-specialist adapters).
+A mean collapses Both and Neither into the True/False continuum and loses them. The four-valued reduction keeps them. A `Both` is the signal that a dimension is contested; a `Neither` is the signal that it is simply unknown.
 
-The aggregation rule produces **two** outputs per dimension: a Belnap state
-*computed independently* of the embedding, and a weighted mean restricted to
-consenting sources (a pair for `B`, undefined for `N`). The routing model
-receives the enriched representation, not a flat scalar.
+## How the implementation works
+
+The four values form a bilattice with two orderings. `belnap.rs` implements both: a knowledge ordering, where Neither sits below True and False, which sit below Both, and a truth ordering, where False sits below Neither and Both, which sit below True. The operations are `join` (combine information), `meet` (keep only what both inputs agree on), and `negation` (swap True and False, leave Both and Neither unchanged). Property tests check that join and meet are commutative, associative, idempotent, satisfy absorption, and that negation is its own inverse.
+
+Aggregation runs in three steps inside `ParaconsistentAggregator::aggregate_paraconsistent` (`aggregation.rs`):
+
+1. Trust weights come from consensus. Each source's blue score is turned into a softmax weight, `softmax(blue_score / temperature)`, so a node that cannot keep up with consensus carries little weight in learning (`belnap.rs::softmax_weights`, `blue_scores_to_trust_weights`).
+2. Each source is classified per dimension by the function `classify_belnap`. A source above the high-confidence threshold that agrees with the trust-weighted majority is True; one that disagrees alone is False; one that disagrees but has a comparably trusted ally on its side is Both; one below the threshold is Neither.
+3. The per-source classifications are reduced to one state vector by joining across sources (`reduce_belnap_states`). If any source is Both, or sources split True against False, the result is Both. If all agree, it is True. Neither is absorbed by any other value.
+
+The numeric embedding is computed separately, as a weighted mean using each source's trust weight times its per-dimension confidence. The two outputs, the embedding and the state vector, never read each other, which is what lets a dimension be numerically near zero and still be labelled Both.
 
 ## How it maps to the network
 
-- **Implemented in code, not just on paper.** The `citrate-learning` crate
-  implements the Belnap FOUR lattice (`belnap.rs`: `BelnapValue` with
-  `join`/`meet`/`negation`, the `classify_belnap` classification function, and
-  `reduce_belnap_states`), and a **dual-output** `ParaconsistentAggregator`
-  (`aggregation.rs`) returning `(embedding, state_vector, confidence)`. Property
-  tests verify the lattice laws.
-- **Trust weights from consensus.** Per-source weights are
-  `softmax(blue_score / τ)`, see `belnap.rs::blue_scores_to_trust_weights`.
-- **Checkpoint-aligned.** Validators co-sign learning roots at the checkpoint
-  barrier (~50× cheaper than per-block voting), so learning **safety inherits
-  from BFT safety** and **liveness inherits from GhostDAG liveness**. The
-  load-bearing claim: *consensus and learning are the same process at different
-  time scales*.
-- **Q16 substrate.** The paper proposes a Belnap aggregation precompile in the
-  Q16 quantized-inference range so in-circuit aggregation is bit-deterministic, see [verifiable inference](/research/verifiable-inference).
+- The aggregation is checkpoint-aligned. Validators co-sign learning roots at the checkpoint barrier rather than per block, so learning safety inherits from the chain's safety and learning liveness from its liveness. See [the checkpoint mechanism](/chain/consensus).
+- The state vector is carried into [the learning cycle](/research/learning): the router reads it, and the macro-phase progression uses the aggregation's confidence.
+- A verifiable, in-circuit form of this aggregation is proposed but not built. The plan is a Belnap reduction over a fixed-point representation so the result is bit-deterministic and can be proved, which would let the aggregation be checked rather than trusted. See [zero-knowledge precompiles](/chain/precompiles-zkp) and [verifiable inference](/research/verifiable-inference).
 
-## Honest status
+## Reference
 
-The on-chain `LearningPool` / `LearningCycleManager` state machines and the
-`LoRAFactory` are implemented. The **Belnap aggregation as a precompile** (the
-paper proposes address `0x0110`) and the **extended `learning_payload` block /
-checkpoint fields** are **specified, not yet in the consensus structs** (the
-`RM-PARA-1` sprint). The paraconsistent aggregator itself **is implemented at the
-crate level** and tested, ahead of where the April paper's reality-check table
-shows it. The paper's three experimental hypotheses (aggregation quality,
-adapter-composition power law, Byzantine convergence) are **specified
-experiments, not yet run**. Treat the logic and crate engine as real; treat live
-federated paraconsistent rounds on testnet as the frontier.
+| Item | Kind | Source |
+|---|---|---|
+| `BelnapValue` | the four values | `core/learning/src/belnap.rs` |
+| `join`, `meet`, `negation` | lattice operations | `core/learning/src/belnap.rs` |
+| `k_leq`, `t_leq` | knowledge and truth orderings | `core/learning/src/belnap.rs` |
+| `softmax_weights`, `blue_scores_to_trust_weights` | trust weights from blue scores | `core/learning/src/belnap.rs` |
+| `classify_belnap` | per-source per-dimension classification | `core/learning/src/belnap.rs` |
+| `reduce_belnap_states` | reduce sources to one state vector | `core/learning/src/belnap.rs` |
+| `ParaconsistentAggregator::aggregate_paraconsistent` | the dual-output aggregation | `core/learning/src/aggregation.rs` |
 
-## Source & verification
+## Design rationale
 
-- **Paper (linked, not copied):**
-  `citrate-docs/gradient_papers_v3/Gradient_Papers_No2_Paraconsistent_Consensus_v3.md`.
-- **Code anchors (citrate-chain @ `03d7851`):** `core/learning/src/belnap.rs`,
-  `core/learning/src/aggregation.rs`, `core/learning/src/knowledge.rs`;
-  `core/consensus/src/finality.rs` (checkpoint barrier; learning fields not yet
-  added). Tests: `core/learning/tests/belnap_adversarial.rs`.
-- **Belnap-q16 lattice aggregation precompile (proposed):** registry surface
-  `CHAIN-pre-q16` (`/chain/precompiles#q16`), specified, not yet implemented.
-- **Related:** [Federated learning cycles](/research/learning),
-  [The Mentorship Protocol](/research/mentorship),
-  [Verifiable inference](/research/verifiable-inference).
-- **No secrets on this page.**
+Averaging is cheap and almost always wrong when the inputs come from different distributions. Treating disagreement as information costs a richer representation, a state vector alongside the numbers, and a router that knows how to read it. The return is that the network can tell the difference between a dimension everyone agrees on, one that is genuinely contested, and one nobody has an opinion on, and it can act differently in each case. The two outputs are kept independent so that the label is never quietly derived from the number it is meant to qualify.
+
+## Access and canon
+
+Academic tier. No keys, endpoints, or credentials appear here. The logic is a research contribution; the in-circuit precompile that would make the aggregation verifiable is a design direction, labelled below.
+
+## Source and verification
+
+- Source: `citrate-chain/core/learning/src/belnap.rs` and `aggregation.rs`, audited against SHA `03d7851`. Adversarial tests in `core/learning/tests/belnap_adversarial.rs`.
+- Status by surface. The Belnap lattice, the classification function, the reduction, and the dual-output aggregator are Implemented (pre-audit), with property tests for the lattice laws. The fixed-point, in-circuit aggregation precompile and the proof tie-in are Specified, not yet built.
+- Related: [Citrate Orchard, federated learning cycles](/research/learning), [zero-knowledge precompiles](/chain/precompiles-zkp), [verifiable inference](/research/verifiable-inference).
