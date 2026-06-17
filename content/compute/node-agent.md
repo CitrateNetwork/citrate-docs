@@ -1,75 +1,85 @@
 ---
-title: Citrate Node Agent
+title: Citrate Node
 codex_slug: /compute/node-agent
 tier: commercial.kyc
 org_scope: ~
-source_kind: transcluded
-source: citrate-node-agent (crates/)
+source_kind: authored
+source: citrate-node-agent (crates/, README.md)
 surfaces: [OPS-node-agent]
-audited_against_sha: 6f915eb
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+audited_against_sha: 38bc9d1
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Node Agent
+Citrate Node is the daemon an operator runs to sell compute on Citrate Market from their own hardware.
+It reads a small settings file, watches the market over JSON-RPC, decides which jobs to bid on, proves
+liveness with a heartbeat, and drives a won job to payout. It holds no keys: every write it wants made is
+handed, unsigned, to a separate signing surface. This page is for identity-verified operators on Citrate
+Network, chain id 40204.
 
-> The local daemon a compute provider runs to sell GPU time on the Citrate
-> marketplace: it reads your participation policy, decides which jobs to bid on,
-> proves liveness with a heartbeat, drives the job lifecycle, and emits
-> **unsigned** transactions for an external signer to sign. Holds no keys. For
-> KYC'd / contracted compute operators on chainId **40204**.
+## What it is
 
-## Overview
+Citrate Node is a Rust workspace of focused crates, built into one `node-agent` binary. The binary loads
+`compute.json`, samples the clock, reads chain state, runs the bidder, and exposes a loopback supervision
+API the operator's tools drive. Compute is sold on Citrate Market; the machine running this daemon stays
+on your premises, and the work it performs settles in SALT.
 
-`citrate-node-agent` is a Rust workspace of focused crates. The binary ties them
-together: it loads `compute.json`, reads chain state over JSON-RPC, runs the
-bidder, broadcasts heartbeats, and exposes a loopback-only supervision HTTP API.
+One property shapes the whole design: the daemon holds no signing keys. Every on-chain write is produced
+as an unsigned `SignatureRequest` and queued for an external signing surface, the operator's Citrate
+Keyring or a signing relay, which signs and broadcasts it. The daemon only observes the resulting
+transaction. This is why selling involves two roles, the agent that decides and the signer that holds
+keys, and it is enforced in code at `crates/lifecycle/src/lib.rs` and `crates/node-agent/src/main.rs`
+(ADR-agent-signing / TD-17).
 
-A defining property: **the agent holds no signing keys** (ADR-agent-signing /
-TD-17). Every on-chain write is produced as an unsigned `SignatureRequest` and
-handed to an external signing surface (a wallet / relay) that signs and
-broadcasts; the agent only observes the resulting transaction. This is why the
-operator flow involves a separate signer.
-
-This page is **transcluded**, the truth lives in the crates at the pinned SHA
-(`6f915eb`). Each item cites the crate/path it is audited against; if a field or
-endpoint is not listed here, it does not exist at this SHA.
+The crates, each citing the path it is audited against:
 
 | Crate | Path | Role |
 |---|---|---|
-| `config` | `crates/config/src/lib.rs` | Parse `compute.json` (`ComputeSettings`). |
+| `config` | `crates/config/src/lib.rs` | Parse `compute.json` into `ComputeSettings`; schedule-window logic. |
 | `bidder` | `crates/bidder/src/lib.rs` | Pure `evaluate()` cost-plus bid decision. |
-| `heartbeat` | `crates/heartbeat/src/lib.rs` | 30 s liveness loop, `heartbeat()` calldata. |
-| `supervision` | `crates/supervision/src/server.rs` | Loopback HTTP control plane. |
-| `chainio` | `crates/chainio/` | chain-40204 address book + RPC read client + ABI codec. |
-| `node-agent` | `crates/node-agent/` | Binary entry point. |
-| `lifecycle` | `crates/lifecycle/src/lib.rs` | Job state machine (SELL-S2). |
-| `executor` | `crates/executor/` | Model provisioning + inference adapter (SELL-S2). |
-| `earnings` | `crates/earnings/` | Claimable poll + auto `claimRewards()` (SELL-S2). |
+| `heartbeat` | `crates/heartbeat/src/lib.rs` | 30-second liveness loop, `heartbeat()` calldata. |
+| `chainio` | `crates/chainio/` | Chain-40204 address book, JSON-RPC read client, ABI codec, outbound TLS gate. |
+| `supervision` | `crates/supervision/src/server.rs` | Loopback HTTP control surface, bearer-token gated. |
+| `node-agent` | `crates/node-agent/` | The binary that ties the crates together. |
+| `lifecycle` | `crates/lifecycle/src/lib.rs` | Job state machine, plans the next unsigned write. |
+| `executor` | `crates/executor/` | Model provisioning and inference adapter. |
+| `earnings` | `crates/earnings/` | Claimable poll and `claimRewards()` calldata. |
+| `pinning` | `crates/pinning/` | Replication-slot pinning sidecar. |
 
-> **Honest status.** SELL-S1 (config + bidder + heartbeat + supervision + live
-> chain reads) is implemented. Execution, model provisioning and earnings
-> (SELL-S2) are present as crates but mark themselves as not-yet-production in
-> several paths. Treat S2 surfaces as experimental. This agent is pre-audit.
+The settings, bidder, heartbeat, and supervision surfaces are the implemented selling path (SELL-S1). The
+execution, model-provisioning, and earnings surfaces (SELL-S2) compile and are wired into the daemon loop
+but several paths still report themselves as not yet production; treat them as experimental. The agent
+has not had an external audit.
 
-## Install / Setup
+## How to use it
 
-```bash
-# From the citrate-node-agent workspace root
-cargo build --release           # produces the `node-agent` binary
-```
+1. Build the binary from the workspace root with `cargo build --release`. The result is
+   `target/release/node-agent`.
+2. Write `compute.json`, your participation policy. Start with `enabled: false` to dry-run the wiring,
+   then flip it to `true`.
+3. Self-check offline by running `node-agent path/to/compute.json`. No RPC is contacted; the agent prints
+   your policy, the clock, and the heartbeat calldata it would send.
+4. Run live as a daemon with `CITRATE_RPC_URL` and `CITRATE_PROVIDER_ADDRESS` set. The daemon brings up
+   the loopback supervision API, reads chain state each tick, runs the bidder, and beats every 30 seconds.
+5. Wire up your signer. The signing surface pulls unsigned requests from `/signature-requests`, signs and
+   broadcasts them, then reports each back to `/signature-requests/{id}/observed`.
 
-### `compute.json` schema
+The runnable, end-to-end version of this is [become a compute seller](/operators/tutorials/become-a-seller),
+and the full operating procedure is [sell compute](/operators/sell-compute).
 
-Audited against `crates/config/src/lib.rs` → `ComputeSettings`. Unknown fields
-are ignored (forward-compatible); a missing/empty file fails **safe** (disabled).
+## Reference
+
+### `compute.json`, `crates/config/src/lib.rs`
+
+Audited against `ComputeSettings`. Unknown fields are ignored, so newer writers stay forward-compatible; a
+missing or empty file falls back to disabled, the fail-safe default.
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
 | `enabled` | bool | `false` | Master participation switch. |
-| `allocation_percent` | u8 (0–100) | `0` | Fraction of GPU you allot. Out-of-range is rejected. |
-| `schedule` | enum | `always` | `always` · `nights` (22:00–05:59 UTC) · `weekends` (Sat/Sun). |
+| `allocation_percent` | u8, 0 to 100 | `0` | Fraction of the GPU you allot. Out of range is rejected. In S1 this is read and surfaced, not yet hardware-enforced. |
+| `schedule` | enum | `always` | `always`, `nights` (22:00 to 05:59 local), or `weekends` (Saturday and Sunday). |
 
 ```json
 {
@@ -81,117 +91,123 @@ are ignored (forward-compatible); a missing/empty file fails **safe** (disabled)
 
 ### Environment variables
 
-Audited against the crates at this SHA. **No secrets here**, every URL below is
-validated at client construction and fails closed on plaintext HTTP to a
-non-loopback host.
+Audited against the crates at this SHA. No secrets belong here. Every outbound URL is validated at client
+construction and fails closed on plaintext HTTP to a non-loopback host (`crates/chainio/src/outbound.rs`).
 
 | Variable | Default | Required | Purpose |
 |---|---|---|---|
-| `CITRATE_RPC_URL` | unset | No (S1 runs offline) | chain-40204 JSON-RPC endpoint (https or loopback http). |
-| `CITRATE_PROVIDER_ADDRESS` | unset | No | Operator provider wallet address (20-byte hex). |
-| `CITRATE_NODE_AGENT_DAEMON` | unset | No | Enable daemon mode (`1`/`true`); or pass `--daemon`. |
-| `CITRATE_NODE_AGENT_ADDR` | `127.0.0.1:19600` | No | Supervision bind address (**must stay loopback**; daemon exits otherwise). |
-| `CITRATE_NODE_AGENT_TOKEN_FILE` | `$HOME/.citrate/node-agent/supervision.token` | No | Bearer-token file (generated at startup, mode 0600). |
-| `CITRATE_NODE_PFLOPS_1E18` | `6e18` (6 pflops) | No | Node throughput (fixed-point ×1e18) for exec-time estimates. |
-| `CITRATE_CLAIM_THRESHOLD_WEI` | unset | No | Auto-claim earnings when claimable ≥ threshold (S2). |
-| `CITRATE_MODEL_CACHE_DIR` | temp dir | No | Model-weights cache (S2). |
-| `CITRATE_MODEL_SHA256` | unset | No | Trusted weights digest for integrity check (S2). |
-| `CITRATE_IPFS_GATEWAY` | unset | No | IPFS gateway for model CID fetch (S2). |
+| `CITRATE_RPC_URL` | unset | No, S1 runs offline | Chain-40204 JSON-RPC endpoint, https or loopback http. |
+| `CITRATE_PROVIDER_ADDRESS` | unset | No | The operator's provider account address, 20-byte hex. |
+| `CITRATE_NODE_AGENT_DAEMON` | unset | No | Enable daemon mode (`1` or `true`), or pass `--daemon`. |
+| `CITRATE_NODE_AGENT_ADDR` | `127.0.0.1:19600` | No | Supervision bind address; must stay loopback or the daemon refuses to start. |
+| `CITRATE_NODE_AGENT_TOKEN_FILE` | `$HOME/.citrate/node-agent/supervision.token` | No | Bearer-token file, minted at startup, mode 0600. |
+| `CITRATE_NODE_PFLOPS_1E18` | `6e18`, 6 pflops | No | Node throughput as fixed-point times 1e18, feeds execution-time estimates. |
+| `CITRATE_CLAIM_THRESHOLD_WEI` | `1e18`, 1 SALT | No | Auto-claim earnings once claimable reaches this threshold (S2). |
+| `CITRATE_MODEL_CACHE_DIR` | `/var/lib/citrate-node-agent/models` | No | Model-weights cache (S2). |
+| `CITRATE_MODEL_SHA256` | unset | No | Trusted weights digest, recomputed locally for integrity (S2). |
+| `CITRATE_IPFS_GATEWAY` | unset | No | Gateway for model-CID weight fetch (S2). |
 | `CITRATE_LLAMA_URL` | unset | No | Resident llama-server inference endpoint (S2). |
-| `CITRATE_JOB_INPUT_DIR` | unset | No | Off-chain job input drop dir (S2). |
-| `CITRATE_MAX_WEIGHT_BYTES` | (large) | No | Download size guard against DoS (S2). |
+| `CITRATE_JOB_INPUT_DIR` | unset | No | Watched directory for off-chain job input (S2). |
 
-> **DEV-ONLY, never in production: `CITRATE_NODE_AGENT_ALLOW_INSECURE_OUTBOUND=1`.**
-> This bypasses the TLS requirement and permits plaintext HTTP to non-loopback
-> hosts for LAN test rigs only. A MITM on a plaintext RPC link can feed the agent
-> false chain truth, false oracle prices, and false job state. The agent logs
-> loudly whenever it is set. Do not set it on any production node.
+The execution path turns on only when `CITRATE_IPFS_GATEWAY`, `CITRATE_LLAMA_URL`, and
+`CITRATE_JOB_INPUT_DIR` are all set; otherwise the daemon bids and claims earnings but does not execute
+won jobs (`crates/node-agent/src/main.rs`, `build_job_executor`).
 
-## Reference
+There is also a dev-only escape hatch, `CITRATE_NODE_AGENT_ALLOW_INSECURE_OUTBOUND=1`. It bypasses the TLS
+requirement and permits plaintext HTTP to non-loopback hosts, for LAN test rigs only. A network attacker
+on a plaintext RPC link can feed the agent false chain state, false oracle prices, and false job state.
+The agent logs loudly whenever it is set. Do not set it on any production node.
 
-### Bidder, `crates/bidder/src/lib.rs` → `evaluate()`
+### Bidder, `crates/bidder/src/lib.rs`
 
-Pure function: `evaluate(job, oracle, settings, caps) -> BidDecision`. Gating
-order (cheapest checks first), then cost-plus pricing:
+A pure function, `evaluate(job, oracle, settings, caps) -> BidDecision`. The gates run cheapest first,
+then pricing:
 
-1. `enabled == false` → Skip (Disabled)
-2. Outside schedule window → Skip (OutsideSchedule)
-3. `maxPrice ≥ 10 SALT` → Skip (ExceedsCommitmentCap; S1 stays under the ZK-upgrade threshold)
-4. Non-Commitment tier → Skip (UnsupportedTier)
-5. Active jobs ≥ 80% of max-concurrent → Skip (AtCapacity)
-6. Deadline < 2× estimated exec seconds → Skip (DeadlineInfeasible)
-7. Schedule window closes < 2× estimated exec seconds → Skip (WindowClosingSoon)
-8. Oracle stale → Skip (OracleStale)
-9. Price = `cost × 1.15`, capped at `0.9 × maxPrice`. If below cost → Skip (Unprofitable); else Bid.
+1. `enabled == false`, skip (Disabled).
+2. Outside the schedule window, skip (OutsideSchedule).
+3. `maxPrice >= 10 SALT`, skip (ExceedsCommitmentCap); S1 stays below the threshold above which a job
+   auto-upgrades to a verification tier whose precompile is stubbed.
+4. Tier other than Commitment, skip (UnsupportedTier).
+5. Active jobs at or above 80% of capacity, skip (AtCapacity).
+6. Time to deadline below twice the estimated execution seconds, skip (DeadlineInfeasible).
+7. Schedule window closes within twice the estimated execution seconds, skip (WindowClosingSoon).
+8. Oracle price stale, skip (OracleStale).
+9. Price is `cost x 1.15`, capped at `0.9 x maxPrice`; if that would fall below cost, skip (Unprofitable);
+   otherwise bid.
 
 ### Heartbeat, `crates/heartbeat/src/lib.rs`
 
-- Interval: **30 s** (`HEARTBEAT_INTERVAL`), kept under the on-chain heartbeat window so one miss never trips suspension.
-- Calldata: `HeartbeatMonitor.heartbeat()` selector only (no args).
-- Send errors are logged but do **not** stop the loop.
+The cadence is 30 seconds (`HEARTBEAT_INTERVAL`), kept under the on-chain heartbeat window so a single
+missed beat never trips suspension. The calldata is the `HeartbeatMonitor.heartbeat()` selector alone, no
+arguments. Send errors are logged but do not stop the loop.
 
 ### Supervision HTTP, `crates/supervision/src/server.rs`
 
-Loopback-only (non-loopback binds rejected at startup). Bearer token is minted at
-startup (256-bit, hex), persisted to the token file at mode 0600, and compared in
-constant time. All endpoints except `/health` require `Authorization: Bearer <token>`.
+Loopback only; a non-loopback bind is rejected at startup. A 256-bit bearer token is minted at startup,
+persisted at mode 0600, and required on every endpoint except `/health`.
 
 | Method | Route | Auth | Response |
 |---|---|---|---|
-| GET | `/health` | none | Health JSON snapshot (liveness probes). |
-| GET | `/status` | bearer | `"idle"` · `"bidding"` · `"executing"` · `"paused"`. |
-| POST | `/pause` | bearer | Pause new bids (in-flight jobs finish). |
+| GET | `/health` | none | Health snapshot for liveness probes. |
+| GET | `/status` | bearer | `idle`, `bidding`, `executing`, or `paused`. |
+| POST | `/pause` | bearer | Stop new bids; in-flight jobs finish. |
 | POST | `/resume` | bearer | Resume bidding. |
-| GET | `/signature-requests` | bearer | Array of unsigned `SignatureRequest`s for the signer. |
-| POST | `/signature-requests/{id}/observed` | bearer | Mark request signed+broadcast; body `{"tx_hash":"0x…"}`. |
+| GET | `/signature-requests` | bearer | The unsigned `SignatureRequest`s waiting for the signer. |
+| POST | `/signature-requests/{id}/observed` | bearer | Mark a request signed and broadcast; body `{"tx_hash":"0x..."}`. |
 
-### chainio, `crates/chainio/src/generated/addresses.json`
+### Marketplace calls, `crates/chainio/`
 
-Read client + ABI codec against the chain-40204 address book (mirrored from
-`citrate-chain`). Contracts the agent reads/calls: `ComputeMarketplace`
-(`getProvider`, `getJob`, `bidOnJob`, `startExecution`, `submitCommitment`,
-`submitResult`, `completeJob`), `ComputePricingOracle` (`saltPerPflopHour`,
-`isPriceStale`), `ComputeVerifier`, `HeartbeatMonitor` (`heartbeat`),
-`ContributionAccounting` (`claimRewards`), `ModelRegistry` (`getModel`).
+The read client and ABI codec work against the chain-40204 address book, mirrored from Citrate Network and
+guarded by a divergence test. On `ComputeMarketplace` the agent reads `getProvider` and `getJob` and builds
+calldata for `registerProvider`, `bidOnJob`, `assignBestBid`, `startExecution`, `submitCommitment`,
+`submitResult`, and `completeJob`. It reads `saltPerPflopHour` and `isPriceStale` from `ComputePricingOracle`,
+sends `heartbeat()` to `HeartbeatMonitor`, claims from `ContributionAccounting`, and reads `getModel` from
+`ModelRegistry`. The marketplace functions are documented in full in [compute contracts](/contracts/compute).
 
-## Examples
+## Design rationale
 
-```bash
-# Offline self-check (no RPC needed)
-node-agent path/to/compute.json
+The two-role split, an agent that never holds keys and a signer that does, is the load-bearing decision.
+An unattended daemon that watches the market and reacts to prices is exactly the kind of process you do not
+want holding a signing key on a production GPU host. By emitting unsigned requests and letting the operator's
+Citrate Keyring or a relay sign them, a compromise of the daemon cannot move funds or stake on its own. The
+cost is the extra signer hop, which the supervision API and the observe callback are built to make routine.
 
-# Live daemon
-export CITRATE_RPC_URL=https://<your-rpc-endpoint>
-export CITRATE_PROVIDER_ADDRESS=0x<operator-wallet>
-export CITRATE_NODE_AGENT_DAEMON=1
-node-agent path/to/compute.json
+The bidder's gates lean conservative for the same reason. New providers start with no reputation, jobs that
+miss a deadline are slashed, and the night and weekend schedules exist so an operator can sell idle hours
+without supervising the machine. The 80% capacity cap and the twice-execution-time margins all reserve
+headroom so the daemon does not take on work it cannot safely finish.
 
-# Supervise
-TOKEN=$(cat ~/.citrate/node-agent/supervision.token)
-curl http://127.0.0.1:19600/health
-curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/status
-curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/pause
-```
+## Failure modes
 
-## Tutorials
+- A non-loopback `CITRATE_NODE_AGENT_ADDR` is refused at startup; the supervision surface cannot be widened
+  to a routable interface.
+- Plaintext HTTP to a non-loopback RPC, IPFS, or inference endpoint fails closed at client construction, so
+  a misconfigured daemon dies at startup rather than mid-job. The dev-only insecure-outbound flag is the
+  only override, and it is forbidden in production.
+- The bearer token is minted locally at mode 0600. A web page the operator visits cannot read it, which
+  also closes the cross-site request hole on `/pause` and `/resume`. `/health` is intentionally open and
+  exposes no secret.
+- Past the execution deadline the lifecycle planner aborts rather than submit a late, slashable result.
+- A stale oracle stops the bidder from pricing off bad data.
 
-- [Become a compute seller](/operators/tutorials/become-a-seller), runnable, end to end.
-- [Sell compute (operator SOP)](/operators/sell-compute), the full procedure.
+## Access and canon
 
-## Security & access
+Tier commercial.kyc. The agent is operator-depth implementation, the bid-pricing logic, the lifecycle, and
+the capacity gates, that any contracted operator should have but whose anonymous theft would materially help
+a competitor clone the selling side of the market. Access is gated on identity verification through CLEAR,
+not on a seat. Every operator and machine on Citrate Network is identity-verified through CLEAR, and Citrate
+holds the verification result, not the personal data behind it. Compute is sold from your own hardware, and
+SALT settles the work; it is the unit you count in, not a product to hold. No secrets appear on this page:
+the supervision token is generated locally and never transcribed, and the agent holds no keys by design.
 
-Tier **commercial.kyc**: the agent is operator-depth implementation
-(bid-pricing logic, lifecycle, capacity gating) whose anonymous theft would
-materially help a competitor clone the marketplace seller side, but which any
-contracted/KYC'd operator should have. Gated on KYC, not on a seat.
+## Source and verification
 
-No secrets appear on this page. The supervision token is generated locally and
-never transcribed. The dev-only `CITRATE_NODE_AGENT_ALLOW_INSECURE_OUTBOUND`
-escape hatch is documented as forbidden in production, with its value never set
-here. The agent holds no keys by design.
-
-## Source & verification
-
-- Source repo: `citrate-node-agent` (`crates/`)
-- Audited against SHA: `6f915eb`
-- Pre-audit; SELL-S2 surfaces (execution/executor/earnings) are experimental.
+Verified against `citrate-node-agent` at `38bc9d1`. `compute.json` against `crates/config/src/lib.rs`; the
+bidder gates and cost-plus pricing against `crates/bidder/src/lib.rs`; the 30-second cadence against
+`crates/heartbeat/src/lib.rs`; the loopback bind, bearer token, and routes against
+`crates/supervision/src/server.rs` and `crates/supervision/src/auth.rs`; the no-keys signing seam against
+`crates/lifecycle/src/lib.rs` and `crates/node-agent/src/main.rs`; the outbound TLS gate against
+`crates/chainio/src/outbound.rs`; the marketplace calls against `crates/chainio/src/marketplace.rs` and the
+chain-40204 address book in `crates/chainio/src/generated/addresses.json`. Status: SELL-S1 (settings,
+bidder, heartbeat, supervision, live reads) Implemented, pre-audit; SELL-S2 (execution, executor, earnings)
+Specified and experimental.
