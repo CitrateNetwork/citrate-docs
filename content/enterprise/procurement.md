@@ -1,5 +1,5 @@
 ---
-title: Procurement, How to Buy Citrate (MSA, Order Forms, SOW)
+title: Procurement, how to buy Citrate
 codex_slug: /enterprise/procurement
 tier: commercial
 org_scope: ~
@@ -7,94 +7,114 @@ source_kind: authored
 source: citrate-commercial/CITRATE_PROCUREMENT_ORDER_FORM.md
 surfaces: [ENT-procurement]
 audited_against_sha: fea06db
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Specified
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Procurement, How to Buy Citrate
+The non-sensitive shape of a Citrate procurement: a master agreement, order forms, and statements of work.
+This page is for contracted and identity-verified principals planning a purchase. Deal-specific economics,
+named parties, and rate cards are negotiated privately and are not published here. Nothing on this page is
+a binding offer.
 
-> The non-sensitive shape of a Citrate enterprise procurement: a Master Agreement,
-> Order Forms, and Statements of Work. For contracted / KYC'd principals. Deal-specific
-> economics, named parties, and rate cards are negotiated privately and are not published here.
+## What it is
 
-## Overview
+Citrate is procured as software you run, not a hosted service. The software is delivered to infrastructure
+you control, and you operate it; there is no vendor-operated hosting environment. The standard commercial
+structure has three layers:
 
-Citrate is procured as **software you run**, not a hosted service. The standard
-commercial structure has three layers:
+1. A master license and implementation services agreement, the umbrella contract that governs the
+   relationship: definitions, IP ownership, confidentiality, warranties, indemnification, limitation of
+   liability, term and termination, and dispute resolution. Signed once.
+2. Order forms. Each transaction, a license procurement, an implementation engagement, or ongoing support,
+   is issued as an order form under the master agreement. An order form carries the commercial specifics for
+   that transaction and prevails over the master agreement for the deal it governs.
+3. Statements of work. Implementation is scoped phase by phase as statements of work, signed by a joint
+   steering committee, and billed on a time-and-materials basis against a rate card.
 
-1. **Master License & Implementation Services Agreement (MLISA)**, the umbrella contract
-   that governs the relationship (definitions, IP ownership, confidentiality, warranties,
-   indemnification, liability, term/termination, dispute resolution). Signed once.
-2. **Order Forms**, each transaction (a license procurement, an implementation engagement,
-   ongoing support) is issued as an Order Form under the MLISA. An Order Form carries the
-   commercial specifics for that transaction and prevails over the MLISA for the deal it governs.
-3. **Statements of Work (SOW)**, implementation work is scoped phase-by-phase as SOWs,
-   signed by a joint Steering Committee, and billed on a time-and-materials basis against a
-   rate card.
+Three commercial properties are fixed, not negotiable per deal:
 
-The defining commercial properties (these are **final**, not negotiable):
-
-- **On-premise / customer-controlled delivery.** Software is delivered; the customer operates it.
-  There is no vendor-operated hosting environment.
-- **No data services.** The vendor does not host, store, transmit, process, or access customer
-  data, and is not a data processor/controller/business-associate/sub-processor under any
-  regulatory regime. This keeps the vendor outside the customer's authorization boundary
-  (FedRAMP/CMMC/HIPAA/GDPR/CCPA/ITAR). See [Compliance posture](/enterprise/compliance).
-- **One-time perpetual license** for the software, plus **separately-billed T&M implementation**.
+- On-premise, customer-controlled delivery. The software is delivered; you operate it. There is no
+  vendor-operated hosting environment.
+- No data services. The software operator does not host, store, transmit, process, or access customer data,
+  and is not a data processor, controller, business associate, or sub-processor under any regime. This keeps
+  the operator outside your authorization boundary. See [compliance posture](/enterprise/compliance).
+- A one-time perpetual license for the software, plus separately billed time-and-materials implementation.
   There is no recurring subscription or usage fee for the license itself.
+
+## How to use it
+
+A typical deal proceeds in this order.
+
+1. Introduction and mutual non-disclosure, before any deal-specific material is shared.
+2. Discovery, the first implementation phase: an assessment of your environment, identity provider,
+   monitoring stack, and compliance posture.
+3. The master agreement and the first order form for the license, executed with the deal-specific economics
+   filled in by the commercial team and outside counsel.
+4. Statements of work per phase: discovery, then installation and configuration, then integration and
+   validation, then knowledge transfer and operator training, then acceptance testing.
+5. Acceptance and escrow. The acceptance certificate triggers the final license milestone, and the source
+   escrow is deposited.
+6. Optional ongoing support or a resale track, each via a separate order form.
+
+To receive the procurement template, the master agreement, and the rate card under agreement, contact the
+commercial team through your account channel. Per-deal materials are released after non-disclosure and
+identity verification. See [district registration](/apps/district-registration) for the K-12 onboarding
+path specifically.
 
 ## Reference
 
-The procurement template (`citrate-commercial/CITRATE_PROCUREMENT_ORDER_FORM.md`) defines the
-following components at a structural level:
+The procurement template, `citrate-commercial/CITRATE_PROCUREMENT_ORDER_FORM.md`, defines the following
+components at a structural level.
 
-| Component | What it covers (non-sensitive) |
+| Component | What it covers, non-sensitive |
 |---|---|
-| **Order Form, License** | Effective date, parties, fee schedule keyed to milestones (execution / delivery / acceptance), ship-to / location of use, hosting (N/A, on-prem). |
-| **Order Form, Implementation (Anchor SOW)** | Phased engagement scoped against a rate card, invoiced monthly in arrears, governed by a Steering Committee. |
-| **License Grant** | Perpetual, non-exclusive, worldwide; rights to use, copy, modify, deploy, and white-label on customer-controlled infrastructure; restrictions on standalone resale and open-sourcing. |
-| **Deliverables at delivery** | Source + reproducible-build binaries + smart-contract source/tests + documentation set + TLA+ specs + build/test scripts + detached cryptographic signatures over every artifact. |
-| **Acceptance testing** | A defined window (default 90 days) with an Acceptance Certificate or Rejection Notice path, and deemed acceptance if neither issues. |
-| **No-Data-Services carve-out** | The explicit, absolute statement that the vendor never holds customer data, central to the customer's compliance boundary. |
-| **MLISA terms** | Confidentiality, IP ownership, fees/payment, warranties, indemnification, limitation of liability, term/termination, governing law + arbitration. |
-| **Source-code escrow** | Deposit with a mutually-agreed escrow agent, with defined release conditions (insolvency, cessation of operations, uncured warranty breach). |
-| **Resale addendum** | Optional, separately-executed track if the customer later wishes to resell the software. |
+| Order form, license | Effective date, parties, a fee schedule keyed to milestones (execution, delivery, acceptance), location of use, and hosting marked not applicable because delivery is on-premise. |
+| Order form, implementation | A phased engagement scoped against a rate card, invoiced monthly in arrears, governed by a steering committee. |
+| License grant | Perpetual, non-exclusive, worldwide; rights to use, copy, modify, deploy, and white-label on customer-controlled infrastructure; restrictions on standalone resale and on open-sourcing. |
+| Deliverables at delivery | Source, reproducible-build binaries, smart-contract source and tests, a documentation set, TLA+ specifications, build and test scripts, and detached cryptographic signatures over every artifact. |
+| Acceptance testing | A defined window, 90 days by default, with an acceptance-certificate or rejection-notice path, and deemed acceptance if neither issues. |
+| No-data-services carve-out | The explicit, absolute statement that the operator never holds customer data, central to your compliance boundary. |
+| Master agreement terms | Confidentiality, IP ownership, fees and payment, warranties, indemnification, limitation of liability, term and termination, governing law, and arbitration. |
+| Source-code escrow | A deposit with a mutually agreed escrow agent, with defined release conditions: insolvency, cessation of operations, or an uncured warranty breach. |
+| Resale addendum | An optional, separately executed track if you later wish to resell the software. |
 
-> **Audit note (Rule 9).** This page summarizes the *structure* of the procurement template.
-> The authoritative contract terms, fee schedules, rate card, named parties, and patent
-> schedule live in the private `citrate-commercial` repo and are surfaced only to
-> contracted principals. Nothing in this page is a binding offer.
+The supporting templates in `citrate-commercial/commercial/` cover the federal procurement path: a
+commercial-item determination, representations and certifications, a statement-of-work template, a mutual
+non-disclosure template, a source-code escrow agreement, and an acceptance test plan, among others. They are
+released to contracted principals, not authored in this docs tree.
 
-## How a deal proceeds (typical flow)
+## Design rationale
 
-1. **Intro + NDA.** Mutual confidentiality before any deal-specific material is shared.
-2. **Discovery.** Environment, identity, monitoring, and compliance-posture assessment
-   (the first implementation phase).
-3. **MLISA + Order Form #1 (License).** Executed with deal-specific economics filled in by
-   sales + outside counsel.
-4. **SOWs per phase.** Discovery → Installation → Integration → Knowledge Transfer → Acceptance.
-5. **Acceptance + escrow.** Acceptance Certificate triggers the final license milestone; source
-   escrow is deposited.
-6. **Optional ongoing support / resale** via separate Order Forms.
+The structure exists to remove negotiation friction rather than create it. A perpetual license plus
+time-and-materials implementation separates what you own from what you pay people to do, so the two are
+priced and accepted independently. The no-data-services carve-out is the load-bearing term: because the
+operator never holds your data, your own assessment governs the regulated workload, and a contracting
+officer's questions have clean answers. The mandatory knowledge-transfer phase exists so your own operations
+team can run the deployment without us, which is the point of buying software you run.
 
-## Security & access
+## Failure modes and honest gaps
 
-- **Tier: commercial.** The procurement *shape* is shared with contracted / KYC'd principals so
-  a buyer's procurement team can plan; the *terms and economics* are gated to the private
-  `citrate-commercial` repo. This page is the public-safe structural summary only.
-- **No secrets here.** No dollar values, named customer/vendor entities, rate-card figures,
-  patent schedule, signatory PII, or hosting addresses are reproduced on this page, those are deal-specific and confidential.
-- Per-company spaces (`ENT-org-<id>`) are provisioned at runtime per contract and are not
-  authored in this docs tree.
+- The procurement template is a draft for legal review. Outside counsel reviews every clause against your
+  deal context, jurisdiction, and regulatory profile before execution.
+- The structure is final; the economics are not. Dollar values, dates, the customer entity, hosting
+  locations, and warranty scope are negotiated per deal and are not published here.
+- Implementation estimates are good-faith estimates only. Actual hours are invoiced against the rate card.
+- Acceptance has a deadline. If you issue neither an acceptance certificate nor a rejection notice within the
+  acceptance window, acceptance is deemed automatic.
 
-## Request access
+## Access and canon
 
-To receive the procurement template, MLISA, and rate card under NDA, contact the commercial
-team through your account channel. Per-deal materials are released after NDA and KYC.
+This page is the commercial-tier structural summary, shared with contracted and identity-verified principals
+so a buyer's procurement team can plan. The terms and economics are gated to the private
+`citrate-commercial` repo. No dollar values, named customer or vendor entities, rate-card figures, patent
+schedule, signatory personal data, or hosting addresses are reproduced here; those are deal-specific and
+confidential. Per-company spaces are provisioned at runtime per contract and are not authored in this docs
+tree. For where the operator sits in your authorization boundary, see [compliance posture](/enterprise/compliance).
 
-## Source & verification
+## Source and verification
 
-- Source of truth: `citrate-commercial/CITRATE_PROCUREMENT_ORDER_FORM.md` (PRIVATE repo).
-- Audited against `citrate-commercial` SHA `fea06db`.
-- Registry row: `ENT-procurement`.
+Source: `citrate-commercial/CITRATE_PROCUREMENT_ORDER_FORM.md` and the templates under
+`citrate-commercial/commercial/` (private repo). Audited against `citrate-commercial` SHA `fea06db`. Status:
+Specified. The procurement structure is written down and current as of that SHA; it is a template for legal
+review, not an executed agreement, and the deal-specific terms it brackets are negotiated privately.
