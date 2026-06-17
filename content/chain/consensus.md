@@ -3,198 +3,126 @@ title: Citrate Consensus, GhostDAG
 codex_slug: /chain/consensus
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: citrate-chain/core/consensus/
+source_kind: authored
+source: citrate-chain/core/consensus/src/types.rs, citrate-chain/core/consensus/src/ghostdag.rs, citrate-chain/core/consensus/src/ecvrf.rs, citrate-chain/core/consensus/src/finality.rs, citrate-chain/core/consensus/src/checkpoint.rs
 surfaces: [CHAIN-consensus-ghostdag, CHAIN-consensus-ecvrf, CHAIN-consensus-finality]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Consensus, GhostDAG
+Consensus is how Citrate Network turns many blocks into one agreed history. The ledger is a BlockDAG, so a block may name several parents, and the GhostDAG protocol reads that graph and produces a single order that every honest node computes the same way. This page is for developers and operators who want the mental model first and the audited surface after.
 
-> How Citrate orders blocks. Citrate is a BlockDAG: blocks may have multiple
-> parents, and the GhostDAG protocol turns that DAG into a single deterministic
-> total order. This page is for developers and operators who want the mental
-> model first, then the audited reference. ECVRF proposer election and BFT
-> checkpoint finality are deeper (academic-tier) subsections.
+## What it is
 
-## Overview
+A single-parent chain is a line. Citrate Network is a graph: each block names a selected parent and, optionally, a few merge parents, so the ledger grows like a grafted orchard rather than a single stem. GhostDAG sorts that growth into a total order so the ledger reads as one history.
 
-Unlike a single-parent chain, Citrate blocks reference **multiple parents**, so
-the ledger is a directed acyclic graph (a BlockDAG) rather than a line. The
-GhostDAG protocol partitions every block into a **blue set** (the
-honest-majority-consistent blocks, governed by a *k*-cluster rule) and a **red
-set** (everything else), then derives a **deterministic total order** over all
-blocks from genesis to the selected tip. Every honest node that sees the same DAG
-computes the same order, that is what makes the ledger a ledger.
+The protocol divides every block into two sets. The blue set holds the blocks that agree with the honest majority, judged by a k-cluster rule that tolerates a bounded number of blocks seen in parallel. The red set holds the rest. Walking from genesis to the selected tip and interleaving each block's merge set gives the canonical order. The ordering key is blue score, the cumulative count of a block's blue ancestors. The tip with the highest blue score is the head the network builds on, with deterministic tie-breaking when two tips draw level.
 
-The mental model in three steps:
+One property matters above all the rest: blue score is recomputed, never trusted from the block header. A block that arrives claiming an inflated `blue_score` is checked against the feasible range derived from its own ancestry, and a value outside that range is rejected at admission. This is enforced in `ghostdag.rs` and covered by regression tests.
 
-1. **Add a block.** A new block names its parents. The engine computes the
-   block's blue set and **blue score** (cumulative count of blue ancestors).
-2. **Select a tip.** Among current tips, the one with the highest blue score wins
-   (with deterministic tie-breaking). This is the head the network builds on.
-3. **Order and finalize.** Walking the selected-parent chain and interleaving
-   each block's mergeset yields the canonical total order; depth-based finality
-   plus committee checkpoints make sufficiently deep blocks irreversible.
+The default parameters are network constants.
 
-The default consensus parameters are network constants:
-
-| Param | Default | Meaning |
+| Parameter | Default | Meaning |
 |---|---|---|
-| `k` | 18 | k-cluster width, anticone tolerance for "blue" classification |
-| `max_parents` | 10 | Maximum parents a block may reference |
-| `finality_depth` | 100 | Depth at which depth-based finality applies |
+| `k` | 18 | k-cluster width, how many parallel blocks are tolerated as blue |
+| `max_parents` | 10 | the most parents a block may name |
+| `max_blue_score_diff` | 1000 | the blue-score gap a reorg may span |
+| `pruning_window` | 100000 | how far back the DAG retains full detail |
+| `finality_depth` | 100 | the depth at which depth-based finality applies |
 
-Source: `core/consensus/src/types.rs`, `GhostDagParams::default()`
-(`k = 18`, `max_parents = 10`, `finality_depth = 100`).
+Block target time is about two seconds. For where these blocks come from, see [the sequencer](/chain/sequencer); for the broader picture, see [the primer](/start/primer).
 
-> **Pre-audit status.** The consensus crate is internally audited and TLA+-checked
-> in several areas (see below) but has **not** completed an external third-party
-> audit. Treat the protocol as production-track but pre-certification. Do not read
-> "verified" as "certified".
+## How to use it
+
+You do not run GhostDAG directly; you read its output. To follow the live order against a running node:
+
+1. Ask the node for its current tips, the heads it is building on.
+2. Read a block and note its blue score; the higher the blue score, the closer to the selected tip.
+3. Walk the selected-parent chain back from the tip to see the order the network agreed on.
+4. Check a block's depth behind the selected tip. At one hundred blocks of depth it is final under depth-based finality, and a committee checkpoint may have finalized it sooner.
+
+The runnable steps, with the exact JSON-RPC calls, are in [read the DAG](/chain/tutorials/read-the-dag). To construct the engine in Rust, see the example at the end of this page.
 
 ## Reference
 
-The consensus stack lives in `core/consensus/`. The audited core surfaces:
+The consensus stack lives in `core/consensus/`. The audited surface follows, each item with its code path.
 
 ### GhostDAG engine, `src/ghostdag.rs`
 
 - `GhostDag::new(params, dag_store)`, construct the engine over a DAG store.
-- `GhostDag::calculate_blue_set(block)`, compute a block's blue set under the
-  k-cluster rule.
+- `GhostDag::calculate_blue_set(block)`, compute a block's blue set under the k-cluster rule.
+- `GhostDag::calculate_blue_score(block)`, recompute blue score from the blue set, not from the header.
 - `GhostDag::add_block(block)`, admit a block, update relations and tips.
-- `GhostDag::select_tip()` / `GhostDag::get_tips()`, current best tip / all tips.
+- `GhostDag::select_tip()` and `GhostDag::get_tips()`, the current best tip and all tips.
 
-Blue score is **recomputed**, never trusted from the header. A malicious
-`header.blue_score` (e.g. `u64::MAX`) is rejected at admission and ignored by
-ordering, see the regression test `core/consensus/tests/c03_total_order_recompute.rs`.
+A header claiming a blue score outside its feasible range is rejected here (`GhostDagError`, `src/ghostdag.rs:34`).
 
-### DAG storage, `src/dag_store.rs`
+### Parameters, `src/types.rs`
 
-- `DagStore::new()`, in-memory store.
-- `DagStore::persistent(kv)`, write-through to a `KvStore` backend (RocksDB),
-  loading prior state on construction so DAG state survives restart.
-- `DagStore::with_strict_vrf(bool)`, enable strict VRF admission gating.
-- `store_block` · `get_block` · `get_tips` · `finalize_block` · `prune`.
+`GhostDagParams::default()` sets `k = 18`, `max_parents = 10`, `max_blue_score_diff = 1000`, `pruning_window = 100000`, and `finality_depth = 100` (`src/types.rs:175`).
 
-### Tip & chain selection, `src/tip_selection.rs`, `src/chain_selection.rs`
+### Proposer election, `src/ecvrf.rs`, `src/vrf.rs`
 
-- `TipSelector` with `SelectionStrategy` (`HighestBlueScore`,
-  `HighestBlueScoreWithTieBreak`, weighted-random).
-- `ParentSelector`, selects `(selected_parent, merge_parents)` for a new block.
-- `ChainSelector`, reorg detection with **finality-aware reorg rejection**
-  (a reorg that would revert a finalized block is refused).
+Proposer eligibility uses an elliptic-curve verifiable random function over NIST P-256, specifically ECVRF-P256-SHA256-TAI per RFC 9381 (`src/ecvrf.rs:3`). Each candidate produces an output bound to their secret key and a public input, so the network can check who was entitled to propose without anyone being able to grind the result.
 
-### Ordering, `src/ordering.rs`
+- `ecvrf::prove(secret, alpha)`, RFC 9381 section 5.1.
+- `ecvrf::verify(...)`, RFC 9381 section 5.3.
+- `VrfProposerSelector` (`src/vrf.rs`) applies stake-weighted eligibility on top of the VRF output.
 
-- `TotalOrdering::get_total_order(tip)`, deterministic order genesis → tip.
-- `TotalOrdering::get_ordered_blocks(from, to)`, ordered block range + tx order.
-- `TotalOrderIterator`, async iterator yielding blocks in consensus order.
+### Depth-based finality, `src/finality.rs`
 
-### {#ecvrf} ECVRF proposer election, `src/ecvrf.rs`, `src/vrf.rs`
+`FinalityTracker` marks a block final once it sits under enough confirmations, `finality_depth = 100` by default (`FinalityConfig`, `src/finality.rs:42`). `FinalityStatus` is `Finalized`, `PendingFinalization`, or `Unfinalized`. A finalized block is protected from reorg: a reorganization that would rewrite it is refused at admission by `ChainSelector` (`src/chain_selection.rs:25`).
 
-> **Tier: academic.** This subsection documents the cryptographic election
-> mechanism. The construction below is faithful to the code; the deeper
-> security argument and parameter analysis are academic-tier material.
+### Committee checkpoint finality, `src/checkpoint.rs`
 
-Proposer eligibility uses an **ECVRF over P-256**, specifically
-**ECVRF-P256-SHA256-TAI per RFC 9381** (`core/consensus/src/ecvrf.rs:3`). A VRF
-gives each candidate proposer a verifiable, unpredictable-but-deterministic
-output bound to their secret key and a public input (`alpha`), so the network can
-check *who was entitled to propose* without anyone being able to grind the result.
+Depth-based finality is the everyday mechanism. The checkpoint layer adds deterministic finality on top of it. `CheckpointManager` coordinates a deterministically selected committee that signs over `(height || block_hash)` with ed25519, and the signatures are aggregated. A checkpoint finalizes once a quorum signs (`CheckpointState::has_quorum`). The chain id is bound into the signed message so a vote on one chain cannot replay onto another (`src/checkpoint.rs:90`).
 
-- `ecvrf::prove(secret: &[u8;32], alpha: &[u8]) -> (EcvrfProof, [u8;32])`
-  (RFC 9381 §5.1), `core/consensus/src/ecvrf.rs:288`.
-- `ecvrf::verify(...)` (RFC 9381 §5.3), `core/consensus/src/ecvrf.rs:332`.
-- Hash-to-curve uses **try-and-increment** (RFC 9381 §5.4.1.1).
-- Nonce generation is **deterministic** via an HMAC-DRBG (RFC 6979 §3.2), with
-  the DRBG state `(k, v)` **wiped on drop** (`core/consensus/src/ecvrf.rs:208`).
-- Proof serialization is a fixed **114 bytes**:
-  `pk_p256(33) || Gamma(33) || c(16) || s(32)` (`ecvrf.rs:33`).
+`CheckpointConfig::default()` sets `interval = 50` blocks, `committee_size = 100`, and `quorum_threshold = 67`, which is two-thirds of one hundred plus one (`src/checkpoint.rs:98`).
 
-`VrfProposerSelector` (`src/vrf.rs`) applies stake-weighted eligibility on top of
-the VRF output and supports both ECVRF and a legacy SHA3 proof path during
-migration; `LeaderElection` provides epoch-based leader selection.
+### Example
 
-### {#finality} BFT checkpoint finality, `src/finality.rs`, `src/checkpoint.rs`
-
-> **Tier: academic.** Depth-based finality is the everyday mechanism; the
-> committee BFT checkpoint layer that hard-finalizes it is deeper material.
-
-Citrate finalizes in two complementary layers:
-
-1. **Depth-based finality** (`src/finality.rs`). `FinalityTracker` with a
-   configurable `FinalityConfig` marks a block final once it is buried under
-   enough confirmations (`finality_depth`, default 100). `FinalityStatus` is one
-   of `Finalized`, `PendingFinalization`, or `Unfinalized { confirmations }`;
-   `FinalityEvent` is broadcast when a block crosses the line. Finalized blocks
-   are protected from reorg by `ChainSelector`.
-
-2. **Committee BFT checkpoints** (`src/checkpoint.rs`). `CheckpointManager`
-   coordinates a deterministically selected committee
-   (`CommitteeSelector::select(validators, height, vrf_seed, size)`) that casts
-   **ed25519-signed `CheckpointVote`s** over `(height || block_hash)`. A
-   checkpoint finalizes once a **quorum** of votes is reached
-   (`CheckpointState::has_quorum(threshold)`, `src/checkpoint.rs:173`). The
-   default committee is **100** members with a **67/100** quorum threshold, i.e. 2/3 + 1 (`CheckpointConfig`, `src/checkpoint.rs:88,102-103`).
-
-## Examples
-
-Constructing the engine and querying the DAG (Rust, mirrors
-`core/consensus/README.md`):
+Construct the engine and read the order in Rust.
 
 ```rust
 use citrate_consensus::*;
 use std::sync::Arc;
 
 let dag_store = Arc::new(DagStore::new());
-let params = GhostDagParams::default();         // k=18, max_parents=10
+let params = GhostDagParams::default();          // k=18, max_parents=10, finality_depth=100
 let ghostdag = GhostDag::new(params, dag_store.clone());
 
 dag_store.store_block(genesis_block).await?;
 ghostdag.add_block(&child_block).await?;
-let blue_set = ghostdag.calculate_blue_set(&child_block).await?;
 
 // Deterministic total order from genesis to a tip:
 let ordering = TotalOrdering::new(dag_store.clone(), Arc::new(ghostdag));
 let order = ordering.get_total_order(tip_hash).await?;
 
-// Depth-based finality:
+// Depth-based finality (default depth 100):
 let tracker = FinalityTracker::with_defaults(dag_store.clone());
 let finalized = tracker.update_finality(&tip_hash, tip_height).await?;
 ```
 
-To read the live DAG over JSON-RPC (no Rust required), see the runnable
-[Read the DAG](/chain/tutorials/read-the-dag) tutorial.
+## Design rationale
 
-## Tutorials
+A graph orders work better than a line under load. When two proposers produce blocks at nearly the same moment, a single-parent chain has to discard one; a BlockDAG keeps both as parents and lets GhostDAG decide their order later. That is why blocks may name up to ten parents and why the target time can sit near two seconds without the orphan waste a line would suffer.
 
-- [Read the DAG](/chain/tutorials/read-the-dag), query tips, blue score and a
-  block over JSON-RPC against a running node. **Tier: public.**
+Two choices guard the ledger. Blue score is recomputed rather than trusted, so a block cannot lie its way to the front by claiming a large score. And finality is layered: depth-based finality settles in over one hundred blocks for every block automatically, while committee checkpoints give a faster, signed, deterministic guarantee every fifty blocks. The cost is a checkpoint committee that must be selected and must sign; the benefit is that a settled block is settled by both depth and signature.
 
-## Security & access
+## Failure modes
 
-- **Tier: public** for the GhostDAG overview and reference, this is protocol
-  a developer needs to reason about ordering and finality, and the algorithm
-  is academically published (GhostDAG). The `#ecvrf` and `#finality`
-  subsections are marked **academic** because the cryptographic and BFT
-  arguments are research-depth, not because they are secret.
-- **No secrets here.** No keys, no validator secrets, no private endpoints.
-  ECVRF `prove` takes a secret key *parameter*; no secret value is documented.
-  The crate's HMAC-DRBG explicitly wipes nonce state on drop.
-- Integrity of AI-model commitments carried in blocks is formally checked by
-  `specs/tla/consensus/EmbeddedModelCommitment.tla` (7 invariants, 7,110 states,
-  zero violations). This is a property check, **not** an external audit.
+- A block arriving with a forged `blue_score` is rejected at admission; ordering ignores the header value and uses the recomputed one.
+- A reorganization that would rewrite a finalized block is refused by `ChainSelector`, which returns a finality error rather than reverting history. The system fails closed: it keeps the finalized history rather than accepting the longer-but-conflicting branch.
+- A checkpoint cannot finalize without a quorum of sixty-seven of one hundred committee signatures, so a minority of the committee cannot force a checkpoint. Chain-id binding stops a valid vote from one network being replayed onto another.
 
-## Source & verification
+## Access and canon
 
-- **Source repo / path:** `citrate-chain/core/consensus/`
-- **Truth document (Rule 9):** `core/consensus/README.md`, this page summarizes
-  and links; it does not duplicate the README.
-- **Audited against SHA:** `03d7851`
-  (`git -C citrate-chain rev-parse --short HEAD`).
-- **Honest status:** internally tested (314 tests incl. proptests) and
-  TLA+-checked in places; **pre external audit**, not certified.
+Public. The GhostDAG model, the parameters, and the audited surface are protocol a developer needs to reason about ordering and finality, and GhostDAG itself is published research. No keys, validator secrets, or private endpoints appear here. ECVRF `prove` takes a secret key as a parameter; no secret value is documented.
+
+## Source and verification
+
+- Source files: `core/consensus/src/types.rs`, `src/ghostdag.rs`, `src/ecvrf.rs`, `src/vrf.rs`, `src/finality.rs`, `src/chain_selection.rs`, `src/checkpoint.rs`.
+- Audited against SHA `03d7851`.
+- Status: Implemented, pre external audit. The crate is internally tested and TLA+-checked in several areas; it has not completed a third-party audit, so read "tested" as tested, not certified.

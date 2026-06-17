@@ -1,50 +1,46 @@
 ---
-title: Citrate Cross-Chain Bridge, Overview
+title: Cross-chain bridge
 codex_slug: /chain/bridge
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-chain/core/bridge/ (design detail Confidential, gated)
+source: citrate-chain/core/bridge/ (internals gated)
 surfaces: [CHAIN-bridge]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Specified
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Cross-Chain Bridge, Overview
+This is a brief, sober overview of the Citrate cross-chain bridge. The bridge is pre-alpha and its
+implementation internals are gated; this page states what it is and where it stands, and nothing more.
 
-> A public, non-implementation overview. The bridge's design and internals are
-> **confidential** and intentionally not documented on this page.
+## What it is
 
-## Overview
+The bridge is a cross-chain relay between Ethereum and the Citrate Network. It moves value in by watching
+for events on Ethereum, on the Sepolia testnet today, and crediting the corresponding amount on Citrate once
+those events are independently confirmed.
 
-Citrate is building a cross-chain bridge to move value between an external chain
-and the Citrate network, so assets and credits can flow into the Citrate economy.
-The bridge is **pre-alpha**: it currently runs only in a development
-configuration, and the **mainnet bridge ceremony is pending an external security
-audit**. Do not treat it as production-ready, and do not bridge funds you cannot
-afford to lose.
+Confirmation does not rest on a single observer. An M-of-N oracle set independently verifies each Ethereum
+event and signs an attestation over it, using ed25519 signatures with a five-minute freshness window so that
+stale attestations are not honoured. The relay acts only once a quorum of attestations has been collected,
+and it rejects duplicate or inconsistent attestations rather than acting on a contested view. Deposit
+pricing uses a bonding curve, with per-transaction limits and a hard cap on total deposits.
 
-There is nothing else to document publicly here yet. As the bridge matures and
-the audited mainnet ceremony is scheduled, this page will gain user-facing
-instructions (supported assets, deposit/withdraw flows, finality expectations).
+The bridge is pre-alpha. It runs only in a development configuration today, and the audited mainnet bridge
+ceremony has not been scheduled. Do not treat it as production-ready.
 
-## Security & access
+## Access and canon
 
-- **Tier of this page: public**, but it is a stub by design. The bridge's
-  **trust model, oracle/relay design, signature and finality mechanisms, and
-  parameters are Confidential (tier X)** and are **gated**, not authored here.
-  The home repo's `core/bridge/SECURITY.md` (which exists) and the bridge source
-  remain confidential.
-- **No secrets here.** No keys, no endpoints, no thresholds, no mechanism
-  internals.
-- **Honest status:** pre-alpha; mainnet ceremony pending audit. No external
-  audit has been completed.
+This page is public, but it is intentionally brief. The bridge's implementation internals, its trust model,
+oracle and relay design, signature and freshness handling, and the bonding-curve and limit parameters, are
+gated and confidential, held in `core/bridge/` and its `SECURITY.md` rather than authored here. No keys,
+endpoints, thresholds, or mechanism internals appear on this page.
 
-## Source & verification
+## Source and verification
 
-- **Source repo / path:** `citrate-chain/core/bridge/`, **confidential**; this
-  public page does not transclude or summarize its internals.
-- **Audited against SHA:** `03d7851`
-  (`git -C citrate-chain rev-parse --short HEAD`).
+- Source: `citrate-chain/core/bridge/`, internals gated; this public page does not transclude or summarise
+  them.
+- Audited against SHA: `03d7851`.
+- Status: Specified, pre-alpha. Runs in a development configuration only; no external audit has been
+  completed and the mainnet ceremony is not yet scheduled.

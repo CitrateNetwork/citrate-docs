@@ -1,198 +1,122 @@
 ---
-title: Citrate Economics, SALT, Fees, Rewards
+title: Network economics
 codex_slug: /chain/economics
 tier: public
 org_scope: ~
-source_kind: transcluded
+source_kind: authored
 source: citrate-chain/core/economics/
 surfaces: [CHAIN-econ]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Economics, SALT, Fees, Rewards
+This is the unit of account on the Citrate Network and the rules that move it. SALT settles the work the
+network performs, fees, block rewards, and staking; it is not a product to hold, and this page does not
+treat it as one. It is for builders and operators who need to reason about what the network charges, what
+it pays, and how supply behaves over the long view.
 
-> The economic engine of Citrate: the SALT token, gas/fee pricing, fee
-> distribution, block rewards, and governance. Token fundamentals and fee
-> mechanics are public. Institutional operator reward profiles are
-> **commercial**. Slashing policy and genesis allocations are
-> **confidential**, summarized here at the level a developer needs, with the
-> detail gated.
+## What it is
 
-## Overview
+SALT is the credit the network counts in. When a transaction pays a fee, when a node earns a reward for
+sealing a block, or when stake is placed and returned, the amount is denominated in SALT. The supply is
+fixed at genesis: one billion SALT, never more. The smallest unit is wei-style, so one SALT divides into
+10^18 base units, the same granularity a developer already expects from an account balance.
 
-The economics crate (`core/economics/`) implements the on-chain economy as
-governance-configurable modules unified by `UnifiedEconomicsManager`
-(`src/unified_economics.rs`): the token (`token.rs`), dynamic gas pricing
-(`dynamic_pricing.rs`), block rewards (`rewards.rs`), multi-party fee
-distribution (`revenue_sharing.rs`), institutional rewards (`institutional.rs`),
-slashing (`slashing.rs`), governance (`governance.rs`), and genesis allocations
-(`genesis.rs`). Almost every parameter below is a *default* that on-chain
-governance can change; only the token fundamentals are genesis-fixed.
+The economics live in one crate, `core/economics/`. It holds the token itself (`token.rs`), the per-block
+reward schedule (`enhanced_rewards.rs`), and the constants that bound the whole system (`lib.rs`). The
+reward schedule is the part worth understanding early, because it is what gives a node a reason to keep the
+network running, and it shrinks on a fixed cadence so that early seasons are more generous than late ones.
 
-> **Pre-audit status.** Internally tested (a large unit/simulation suite) but
-> **not** externally audited. Some modules are partially built (e.g.
-> `enhanced_rewards.rs`, `estimator.rs`) and `rewards.inference_bonus` is
-> currently `0`. Treat numbers as production-track defaults, pre-certification.
+A block reward is built from a base reward plus four bonus pools, each expressed as a percentage of that
+base reward. The four pools recognise four kinds of contribution: validator performance, AI contribution,
+network health, and long-term staking. A node that does more of the work the network values earns a larger
+share of the pools. The base reward halves every 2,100,000 blocks, roughly four years at the testnet
+cadence, so issuance tapers toward zero over the network's life rather than running flat forever.
+
+## How to use it
+
+You rarely set these values yourself; you read them, so you can price work and project earnings.
+
+1. **Price a transaction.** Estimate the fee the way you would on any account-based ledger: gas used times
+   the prevailing price. SALT carries 18 decimals, so amounts and balances behave like the smallest units
+   you are used to.
+2. **Read the live economic state.** Call `citrate_getEconomicState` for current network metrics and
+   `citrate_getToken` for token fundamentals over JSON-RPC. Both are documented in the
+   [chain RPC reference](/chain/rpc).
+3. **Reason about rewards.** If you operate a node, the reward you can expect for a sealed block is the base
+   reward plus your earned share of the four bonus pools, adjusted for where the chain sits in its halving
+   schedule. See [run a node](/operators/run-a-node) for the operator path.
 
 ## Reference
 
-### SALT token, `src/token.rs`, `src/lib.rs`
+Token constants, verified in `core/economics/src/lib.rs` and `core/economics/src/token.rs`:
 
 | Constant | Value | Source |
 |---|---|---|
-| Symbol (`TOKEN_SYMBOL`) | `SALT` | `src/lib.rs` |
-| Name (`TOKEN_NAME`) | `Citrate` | `src/lib.rs` |
-| Total supply (`TOTAL_SUPPLY`) | **1,000,000,000** (1 billion) | `src/lib.rs` |
-| Decimals (`DECIMALS`) | **18** | `src/token.rs` |
+| Symbol (`TOKEN_SYMBOL`) | `SALT` | `lib.rs` |
+| Name (`TOKEN_NAME`) | `Citrate` | `lib.rs` |
+| Total supply (`TOTAL_SUPPLY`) | 1,000,000,000 (one billion) | `lib.rs` |
+| Decimals (`DECIMALS`) | 18 | `token.rs` |
 
-`Token` tracks `balances`, `total_minted`, `total_burned` in `U256`; circulating
-supply = minted − burned. `mint` enforces the 1B supply cap; `burn`, `transfer`,
-`balance_of` round out the surface. Total supply in base units is
-`1_000_000_000 × 10^18` wei.
+Total supply in base units is `1_000_000_000 × 10^18`. The token tracks balances, total minted, and total
+burned; circulating supply is minted minus burned, and minting is capped at the one billion ceiling.
 
-### Dynamic gas pricing, `src/dynamic_pricing.rs`
+Block reward schedule, verified in `core/economics/src/enhanced_rewards.rs`:
 
-EIP-1559-style per-block adjustment toward a target utilization. Defaults
-(`DynamicPricingConfig`):
-
-| Param | Default | Meaning |
+| Element | Value | Source |
 |---|---|---|
-| `base_gas_price` | 1 Gwei (1e9 wei) | starting gas price |
-| `target_utilization` | 70% | target block fill |
-| `adjustment_factor` | 1.25%/block | price step per block off-target |
-| `max_price_multiplier` / `min_price_multiplier` | 50× / 0.1× | price cap / floor |
-| `ai_inference_multiplier` | 2× | surcharge on AI operations |
+| Base reward | a configurable base reward | `enhanced_rewards.rs` (`base_block_reward`) |
+| Validator performance pool | percentage of the base reward | `enhanced_rewards.rs` (`performance_bonus_pool`) |
+| AI contribution pool | percentage of the base reward | `enhanced_rewards.rs` (`ai_contribution_pool`) |
+| Network health pool | percentage of the base reward | `enhanced_rewards.rs` (`network_health_pool`) |
+| Long-term staking pool | percentage of the base reward | `enhanced_rewards.rs` (`staking_bonus_pool`) |
+| Halving interval | 2,100,000 blocks (~4 years at testnet cadence) | `enhanced_rewards.rs` (`halving_interval`) |
 
-`get_operation_price(OperationType)` prices standard transfers, contract calls,
-AI inference (compute-unit scaled), model deployment, and training.
-
-### Fee distribution, `src/revenue_sharing.rs`
-
-Fees flow into typed revenue pools (`GasFees`, `AIInference`, `ModelDeployment`,
-`ModelTraining`, `MarketplaceFees`, `SlashingRedistribution`, `FacilitatorFees`)
-and are split among stakeholders. The default stakeholder shares
-(`RevenueShareConfig`, basis points):
-
-| Stakeholder | Share | bps |
-|---|---|---|
-| Model creators | 30% | 3000 |
-| Validators | 23% | 2300 |
-| Infrastructure | 15% | 1500 |
-| Stakers | 15% | 1500 |
-| Treasury / DAO | 12% | 1200 |
-| x402 facilitators | 5% | 500 |
-
-A configurable market-maker skim (`market_maker_gas_bps`, default 1000 = 10%)
-is taken from the **gas pool** before the residual split. Per-pool splits differ
-(e.g. AI-inference favors model creators; deployment/training favor
-creators+infrastructure), see `revenue_sharing.rs` for the per-pool logic.
-Distribution triggers above `min_distribution_threshold` (1000 SALT) on a
-`distribution_frequency` cadence (7200 blocks ≈ 1 day), with up to a 5%
-performance bonus.
-
-### Block rewards, `src/rewards.rs`
-
-`RewardConfig` defaults:
-
-| Param | Default | Meaning |
-|---|---|---|
-| `block_reward` | 10 SALT | base reward per block |
-| `halving_interval` | 2,100,000 blocks (~4 yr) | reward halving period |
-| `treasury_percentage` | 10% | treasury cut of each block reward |
-| `model_deployment_bonus` | 1 SALT | per model deployed in a block |
-| `inference_bonus` | 0 SALT | per inference (currently disabled) |
-
-Each block reward splits 90% validator / 10% treasury, halving every
-`halving_interval` until it reaches zero.
-
-### Institutional rewards, `src/institutional.rs` *(commercial)*
-
-> **Tier: commercial.** Operator-facing reward profiles for institutional
-> validators. Summarized here; the full profile/estimator detail is
-> contracted-tier (see [Operator rewards](/operators/rewards)).
-
-`InstitutionalRewardConfig` rewards four contribution types, block validation
-(monthly base SALT + an uptime bonus up to 1.2× above a minimum uptime
-threshold), model hosting, adapter creation, and data provision, each subject
-to per-epoch caps. `estimator.rs` projects monthly earnings.
-
-### Slashing, `src/slashing.rs` *(confidential)*
-
-> **Tier: confidential.** Slashing exists and covers three offense categories:
-> **equivocation** (double-signing), **invalid state transition**, and
-> **transaction censorship**, with first-offense grace, a cooldown, and a
-> cumulative-slash deactivation ceiling. The institutional policy is designed to
-> be lenient (e.g. no downtime penalties for institutions). **Penalty
-> percentages, grace/cooldown parameters, and the deactivation threshold are
-> gated**, they are not published here. See `core/economics/src/slashing.rs`
-> and the gated security docs for the parameters.
-
-### Governance, `src/governance.rs`
-
-`GovernanceConfig` defaults: proposal threshold 10,000 SALT; voting period
-50,400 blocks (~7 days); execution delay 7,200 blocks (~1 day); 10% quorum of
-supply; 60% approval. Proposal types: `ParameterChange`, `NetworkUpgrade`,
-`TreasurySpend`, `Emergency`, `MarketplaceGovernance`. Votes are `For` /
-`Against` / `Abstain` with delegation; `unified_economics.rs` adds a quadratic
-voting-power aggregation to temper plutocracy.
-
-### Genesis allocations, `src/genesis.rs` *(confidential accounts)*
-
-> **Tier: confidential, accounts.** The genesis allocation *structure* is
-> public; the *specific genesis account addresses are not published here*, and
-> **no private keys or mnemonics exist in the repository** (key material is held
-> out-of-band; the code carries only public addresses).
-
-The genesis allocation is organized into named categories (treasury, faucet,
-deployer, team/dev, validator) plus a remaining mining-reward pool, all summing
-to the 1B SALT cap. The standard `0x4e59…` Arachnid deterministic CREATE2
-deployer is pre-deployed at genesis (zero balance, code-only) so ERC-4337
-tooling works from block 0. `initialize_shared_genesis_state()` is the single
-source of truth, guaranteeing **deterministic genesis** (same config → same
-state root → same block hash) across independent node startups.
-
-## Examples
+The base reward and the four pool percentages are defaults in the source; we describe the base as a
+configurable base reward rather than asserting a fixed number, since governance can move it. What does not
+move is the halving cadence and the fixed supply.
 
 ```rust
 use citrate_economics::*;
 
 // Token fundamentals are constants:
 assert_eq!(TOKEN_SYMBOL, "SALT");
-assert_eq!(TOTAL_SUPPLY, 1_000_000_000);
-// DECIMALS == 18
-
-// Default block-reward schedule:
-let rewards = RewardConfig::default();   // 10 SALT/block, halving every 2.1M blocks
-
-// Default fee split:
-let shares = RevenueShareConfig::default(); // creators 30 / validators 23 / infra 15 / …
+assert_eq!(TOTAL_SUPPLY, 1_000_000_000); // 18 decimals; base units = value × 10^18
 ```
 
-## Tutorials
+## Design rationale
 
-- [Operator rewards](/operators/rewards), institutional reward profiles and
-  estimation. **Tier: commercial.**
+A fixed supply with a halving base reward keeps the accounting honest: the network can settle the work it
+performs without an open-ended issuance that quietly dilutes everyone who came before. Splitting the reward
+into four pools, rather than paying a flat amount per block, lets the network pay for the behaviours it
+actually depends on, uptime, useful compute, a healthy peer set, and committed stake, instead of paying
+the same for a block whether or not the node contributed anything beyond sealing it. The trade is more
+moving parts to reason about; the benefit is that incentives point at the work rather than at the clock.
 
-## Security & access
+## Failure modes
 
-- **Tier: public** for SALT fundamentals, gas pricing, fee distribution, block
-  rewards, and governance, these are what builders and the community need to
-  reason about the economy. **Institutional rewards** are **commercial**;
-  **slashing parameters** and **genesis account addresses** are
-  **confidential** and intentionally not enumerated here.
-- **No secrets here.** No private keys, no mnemonics, no genesis account
-  addresses, no slashing penalty math. The repository itself contains no key
-  material, only public addresses, held out-of-band.
+The supply cap is enforced at mint: an attempt to mint past one billion SALT is rejected, so no path
+through the reward schedule can inflate beyond the ceiling. Burned credits are tracked separately, so
+circulating supply stays an honest minted-minus-burned figure rather than drifting. Because the base reward
+and pool percentages are governance-configurable, the load-bearing invariant is the supply cap and the
+halving cadence, not any single reward number; treat a published base-reward figure as a default, not a
+guarantee.
 
-## Source & verification
+## Access and canon
 
-- **Source repo / path:** `citrate-chain/core/economics/`
-- **Truth document (Rule 9):** `core/economics/README.md`, this page summarizes
-  and links.
-- **Audited against SHA:** `03d7851`
-  (`git -C citrate-chain rev-parse --short HEAD`).
-- **Honest status:** internally tested; **pre external audit**, not certified.
-  Some modules partial (`enhanced_rewards`, `estimator`); `inference_bonus = 0`.
+Public. SALT settles the work the network performs; it is not an investment instrument, and Atlas does not
+describe it as one. The token fundamentals, the reward structure, and the halving cadence are exactly what a
+builder or operator needs to reason about the economy. No keys, balances, or private allocations appear
+here.
+
+## Source and verification
+
+- Source: `citrate-chain/core/economics/`, constants in `src/lib.rs` and `src/token.rs`, reward schedule in
+  `src/enhanced_rewards.rs`.
+- Live state over JSON-RPC: `citrate_getEconomicState` and `citrate_getToken`
+  (`core/api/src/economics_rpc.rs`); see [chain RPC](/chain/rpc).
+- Audited against SHA: `03d7851`.
+- Status: Implemented (testnet), internally tested, pre external audit. The base reward and pool
+  percentages are configurable defaults in source, not certified values.
