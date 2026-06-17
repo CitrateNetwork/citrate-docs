@@ -24,8 +24,7 @@ Paraconsistent consensus (Paper II) gives the *mechanism* for learning together.
 The **Mentorship Protocol** (Paper III) gives the *social layer*: a way for a
 node with a weakness in some embedding region to borrow a LoRA adapter from a
 node that is strong there, with the whole exchange recorded on-chain. The
-argument is that distributed AI swarms fail the way human organizations fail —
-when knowledge transfer is implicit, unrecorded, and one-directional — so
+argument is that distributed AI swarms fail the way human organizations fail, when knowledge transfer is implicit, unrecorded, and one-directional, so
 Citrate makes mentorship explicit and auditable.
 
 ## Concept
@@ -33,13 +32,13 @@ Citrate makes mentorship explicit and auditable.
 The paper grounds the design in three strands of organizational-learning theory
 and maps each to an on-chain primitive:
 
-- **Senge (systems thinking)** — reinforcing/balancing feedback loops are made
+- **Senge (systems thinking)**, reinforcing/balancing feedback loops are made
   explicit (adapter quality → usage → data → better adapter; performance score →
   workload → regression to the mean).
-- **Nonaka & Takeuchi (SECI)** — socialization / externalization / combination /
+- **Nonaka & Takeuchi (SECI)**, socialization / externalization / combination /
   internalization each leave an on-chain trace (e.g. publishing a LoRA adapter is
   *externalization*; merging adapters is *combination*).
-- **Argyris & Schön (double-loop)** — single-loop = continuous LoRA adaptation;
+- **Argyris & Schön (double-loop)**, single-loop = continuous LoRA adaptation;
   double-loop = re-evaluating the routing taxonomy at checkpoint barriers.
 
 **Mentor–mentee matching** is run per checkpoint and protected by three filter

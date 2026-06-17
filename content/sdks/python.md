@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Python SDK (`citrate-ai-sdk`)
 
-> The Python client for the Citrate distributed-AI network — deploy models, run
+> The Python client for the Citrate distributed-AI network, deploy models, run
 > (optionally encrypted) inference, read balances/nonces, and drive the
 > Learning / Staking / Classroom / Compute / Treasury / Farming managers. For
 > Python developers and data/ML teams.
@@ -27,7 +27,7 @@ canonical one. This is stated in the package metadata itself
 (`pyproject.toml` `description`, and `citrate-sdk-python/NON_CANONICAL.md`).
 
 The package is in early development. Its `pyproject.toml` classifier is
-`Development Status :: 2 - Pre-Alpha` — treat every surface here as
+`Development Status :: 2 - Pre-Alpha`, treat every surface here as
 **experimental and pre-audit**.
 
 Mental model: you create one `CitrateClient` bound to an RPC endpoint and
@@ -56,7 +56,7 @@ Runtime dependencies (from `pyproject.toml`): `requests~=2.33`,
 
 Configuration is via constructor args or environment variables used by the
 examples/tests: `CITRATE_RPC_URL`, `CITRATE_CHAIN_ID`, `CITRATE_PRIVATE_KEY`.
-**Never commit a private key** — pass it through the environment (see Security
+**Never commit a private key**, pass it through the environment (see Security
 & access below).
 
 ```python
@@ -75,7 +75,7 @@ only when you intend plaintext to a remote host
 
 ## Reference
 
-### SDK-PY-client — `CitrateClient`
+### SDK-PY-client, `CitrateClient`
 
 Source: `citrate-sdk-python/citrate_sdk/client.py` (class `CitrateClient`).
 Exported from `citrate_sdk/__init__.py`.
@@ -96,7 +96,7 @@ Signing binds `chainId` (EIP-155, RM-G.4) so a signature cannot be replayed on
 another network (`client.py:312` `_eip155_chain_id`, `client.py:341`). IPFS
 upload **fails closed** rather than fabricating a fallback CID (`client.py:298`).
 
-### SDK-PY-managers — economic & education managers
+### SDK-PY-managers, economic & education managers
 
 These are separate classes, **not** attributes of `CitrateClient`. Each takes
 a `rpc_call` callable (pass `client._rpc_call`), an optional `default_account`
@@ -120,7 +120,7 @@ Shared data types (`LearningPool`, `CycleStatus`, `ComputeJob`,
 Writes raise `ConfigurationError` when `default_account` is unset
 (`learning.py:159`); read methods are `eth_call`-only and need no account.
 
-### SDK-PY-cli — `citrate` console script
+### SDK-PY-cli, `citrate` console script
 
 Source of declaration: `citrate-sdk-python/pyproject.toml`
 `[project.scripts]` → `citrate = "citrate_sdk.cli:main"`.
@@ -128,7 +128,7 @@ Source of declaration: `citrate-sdk-python/pyproject.toml`
 > **Status: declared but not implemented (broken entry point).** As of the
 > audited SHA there is **no `citrate_sdk/cli.py`** and **no `main()`** anywhere
 > in the package (no `argparse`/`click` either). The console-script target
-> `citrate_sdk.cli:main` therefore does not resolve — installing the package
+> `citrate_sdk.cli:main` therefore does not resolve, installing the package
 > and running `citrate` raises `ModuleNotFoundError: No module named
 > 'citrate_sdk.cli'`. This is recorded as a registry correction below. Until
 > a CLI module lands, use the `CitrateClient` API directly (see the
@@ -157,8 +157,7 @@ from citrate_sdk import CitrateClient, FarmingManager
 client = CitrateClient(rpc_url="https://rpc.example")
 farming = FarmingManager(
     client._rpc_call,
-    contract_addresses={"farming": "0xFarmingContract"},
-)
+    contract_addresses={"farming": "0xFarmingContract"})
 for row in farming.get_leaderboard(count=10):
     print(row)
 ```
@@ -168,7 +167,7 @@ See the full walkthrough in
 
 ## Tutorials
 
-- [Python quickstart](/sdks/python/tutorials/python-quickstart) — install,
+- [Python quickstart](/sdks/python/tutorials/python-quickstart), install,
   connect, read account state, deploy + run inference.
 
 ## Security & access

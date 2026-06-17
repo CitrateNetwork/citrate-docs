@@ -1,5 +1,5 @@
 ---
-title: Model Contracts — Registry, Inference Router, Marketplace, LoRA & Access
+title: Model Contracts, Registry, Inference Router, Marketplace, LoRA & Access
 codex_slug: /contracts/models
 tier: commercial
 org_scope: ~
@@ -21,7 +21,7 @@ author: Claude Opus 4.8 (1M context)
 
 > **Rule 9 / transclusion.** The canonical truth is the Solidity source in
 > `citrate-chain/contracts/src/`. This page summarises the audited public/external
-> surface at a pinned SHA; ABIs come from `@CitrateNetwork/contracts-abi` — do not
+> surface at a pinned SHA; ABIs come from `@CitrateNetwork/contracts-abi`, do not
 > hand-copy them.
 
 > **Tiers.** [ModelRegistry](#modelregistry) and
@@ -47,14 +47,14 @@ access/staking/revenue-share registry with its own encrypted-inference path.
 
 ## ModelRegistry
 
-`src/ModelRegistry.sol` — `contract ModelRegistry is IModelRegistry, AccessControl, ReentrancyGuard`
+`src/ModelRegistry.sol`, `contract ModelRegistry is IModelRegistry, AccessControl, ReentrancyGuard`
 (project-local `AccessControl`/`ReentrancyGuard`).
 
 Stores model metadata, manages owner permissions, charges a fixed registration
 fee, and proxies registration/inference to Citrate precompiles
 (`MODEL_PRECOMPILE = 0x...1000`).
 
-**Constructor:** `constructor()` — grants `DEFAULT_ADMIN_ROLE` and `OPERATOR_ROLE`
+**Constructor:** `constructor()`, grants `DEFAULT_ADMIN_ROLE` and `OPERATOR_ROLE`
 to the deployer.
 
 ### Functions
@@ -87,13 +87,13 @@ Constants: `REGISTRATION_FEE = 0.1 ether`, `MODEL_PRECOMPILE = 0x...1000`,
 
 ## InferenceRouter
 
-`src/InferenceRouter.sol` — `contract InferenceRouter is AccessControl, ReentrancyGuard`
+`src/InferenceRouter.sol`, `contract InferenceRouter is AccessControl, ReentrancyGuard`
 (project-local).
 
 Routes inference requests to registered compute providers with a load-balancing
 score, response caching, provider staking, and payment/refund distribution.
 
-**Constructor:** `constructor(address _modelRegistry)` — grants admin + operator
+**Constructor:** `constructor(address _modelRegistry)`, grants admin + operator
 roles to the deployer.
 
 ### Functions
@@ -122,14 +122,14 @@ Config: `minProviderStake = 100 ether`, `platformFee = 250` (2.5%),
 
 > **Pre-audit note.** Only `requestInference` carries `nonReentrant`; the contract
 > header comment claiming a guard on every value-moving function is **not** matched
-> by the code — `completeInference`, `cancelRequest`, `withdrawEarnings`,
+> by the code, `completeInference`, `cancelRequest`, `withdrawEarnings`,
 > `withdrawStake`, and `withdrawPlatformFees` issue low-level transfers without it
 > (flag for audit). `successRate` is initialized to 100% and never updated, so it
 > is a static scoring input.
 
 ## ModelMarketplace
 
-`src/ModelMarketplace.sol` — `contract ModelMarketplace is IModelMarketplace, AccessControl, ReentrancyGuard`
+`src/ModelMarketplace.sol`, `contract ModelMarketplace is IModelMarketplace, AccessControl, ReentrancyGuard`
 (project-local).
 
 Marketplace layered on `ModelRegistry`: owners list models, buyers purchase
@@ -166,13 +166,13 @@ Events and structs (`ModelListing`, `Purchase`, `Review`) are declared in the
 `MAX_PRICE = 1000 ether`, `FEATURED_FEE = 1 ether`.
 
 > **Pre-audit note.** `getTopRatedModels` uses an O(n²) selection sort over all
-> listings (self-noted "could be optimized with a heap") — an unbounded-gas view
+> listings (self-noted "could be optimized with a heap"), an unbounded-gas view
 > as listings grow. `addReview` does not require a verified purchase; unverified
 > reviews still affect `averageRating` (they are flagged `verified=false`).
 
 ## LoRAFactory
 
-`src/LoRAFactory.sol` — `contract LoRAFactory is AccessControl` (project-local;
+`src/LoRAFactory.sol`, `contract LoRAFactory is AccessControl` (project-local;
 **does not** inherit ReentrancyGuard).
 
 Factory for creating, training, merging, and cryptographically verifying LoRA
@@ -180,7 +180,7 @@ low-rank adapters against base models in `ModelRegistry`, integrating the LoRA
 precompile (`0x...1001`) and the Halo2-KZG inference-proof verifier
 (`0x...0108`).
 
-**Constructor:** `constructor(address _modelRegistry)` — grants admin + operator
+**Constructor:** `constructor(address _modelRegistry)`, grants admin + operator
 roles to the deployer.
 
 ### Functions
@@ -214,13 +214,13 @@ Structs `LoRAAdapter`, `TrainingConfig`, `MergeRequest`. Constants:
 > **Pre-audit note.** Adapter cryptographic verification (`RM-FL-4 / WP-4.7`) is a
 > recent flow; the precompile wire format is
 > `inputCommitment(32) + modelCommitment(32) + outputCommitment(32) + circuit_version(4 BE) + chain_id(4 BE) + proofBytes`
-> — off-chain generators must match it. The contract does **not** inherit
+>, off-chain generators must match it. The contract does **not** inherit
 > ReentrancyGuard despite value-moving calls in `inferWithLoRA`/`withdrawFees`;
 > flag for audit.
 
 ## ModelAccessControl
 
-`src/ModelAccessControl.sol` — `contract ModelAccessControl is Ownable, ReentrancyGuard`
+`src/ModelAccessControl.sol`, `contract ModelAccessControl is Ownable, ReentrancyGuard`
 (OpenZeppelin).
 
 A standalone tiered access registry distinct from `ModelRegistry`: paid/
@@ -228,7 +228,7 @@ approval-based access grants, per-model staking, revenue sharing, and an encrypt
 inference path through Citrate runtime precompiles
 (`MODEL_INFERENCE = 0x0101`, `MODEL_ENCRYPTION = 0x0106`).
 
-**Constructor:** `constructor()` — deployer is the Ownable owner.
+**Constructor:** `constructor()`, deployer is the Ownable owner.
 
 ### Functions
 
@@ -263,7 +263,7 @@ Access levels (uint8 constants): `ACCESS_NONE=0`, `ACCESS_INFERENCE=1`,
 
 ## Deployed addresses (chain 40204)
 
-> Public on-chain data — re-verify with `eth_getCode`. **Testnet-beta; pre-audit.**
+> Public on-chain data, re-verify with `eth_getCode`. **Testnet-beta; pre-audit.**
 > Source: `citrate-chain/contracts/DEPLOYED_ADDRESSES.md`.
 
 | Contract | Address |
@@ -318,7 +318,7 @@ running inference end-to-end.
 
 ## Source & verification
 
-- Source: `citrate-chain/contracts/src/` — `ModelRegistry.sol`,
+- Source: `citrate-chain/contracts/src/`, `ModelRegistry.sol`,
   `InferenceRouter.sol`, `ModelMarketplace.sol`, `LoRAFactory.sol`,
   `ModelAccessControl.sol`.
 - Audited against `citrate-chain` SHA **`03d7851`**.

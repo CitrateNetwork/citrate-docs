@@ -32,7 +32,7 @@ failure, not a documentation lapse.
 The motivation is that coding agents fail in characteristic, reproducible ways
 (scope drift, architectural amnesia, silent regressions, stub proliferation,
 platform inconsistency). Stating a work package as concrete observable behavior
-structurally blocks each failure mode — e.g. a `Given an empty pool` scenario
+structurally blocks each failure mode, e.g. a `Given an empty pool` scenario
 fails any hardcoded stub return, and `Background` steps pin the exact chain id
 and RPC URL so platform assumptions can't drift.
 
@@ -70,13 +70,13 @@ Feature: Mentor-mentee matching protocol
 
 The BDD cycle (Paper IV §2.2) ties each feature to code and tests:
 
-1. **Human writes Gherkin** — the feature file is the operator↔agent contract;
+1. **Human writes Gherkin**, the feature file is the operator↔agent contract;
    each `Scenario` is a behavior to implement.
-2. **Agent writes step definitions (red)** — scenarios become failing tests in
+2. **Agent writes step definitions (red)**, scenarios become failing tests in
    `core/execution/tests/` or `contracts/test/`.
-3. **Agent writes implementation (green)** — code until every step passes.
-4. **Refactor** — clean up, tests stay green.
-5. **Commit** — the `.feature` file lands in the repo beside the implementation;
+3. **Agent writes implementation (green)**, code until every step passes.
+4. **Refactor**, clean up, tests stay green.
+5. **Commit**, the `.feature` file lands in the repo beside the implementation;
    **CI runs the steps as integration tests** on every commit.
 
 Relationship to the other research surfaces: Gherkin features describe

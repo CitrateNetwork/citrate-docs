@@ -22,14 +22,14 @@ author: Claude Opus 4.8 (1M context)
 
 Classical BFT treats disagreement as a defect: honest nodes must converge on a
 single value. **Paraconsistent consensus** refuses that frame. It treats
-disagreement as *information about the network's epistemic state* — and a system
+disagreement as *information about the network's epistemic state*, and a system
 that averages it away throws out the very data that distinguishes a healthy
 decentralized network from a collapsed one. The protocol runs **on top of** the
 GhostDAG/BFT checkpoint mechanism: each checkpoint is a synchronization barrier
 not just for blocks but for routing weights, adapter registrations, and embedding
 aggregations.
 
-## Concept — Belnap FOUR
+## Concept, Belnap FOUR
 
 Nuel Belnap's 1977 four-valued logic admits four truth values, each with a
 network meaning:
@@ -38,13 +38,13 @@ network meaning:
 |---|---|---|
 | **T** | True | all known sources agree this dimension is positive |
 | **F** | False | all known sources agree it is negative |
-| **B** | Both | sources disagree — contradictory information |
-| **N** | Neither | no source has spoken — unknown |
+| **B** | Both | sources disagree, contradictory information |
+| **N** | Neither | no source has spoken, unknown |
 
 Classical aggregation (mean / median / weighted average) collapses **B** and
 **N** into the T/F continuum. Paraconsistent aggregation **preserves** them. If
 node A's data says dimension 47 should be `+0.8` and node B's says `-0.6`, the
-mean (`+0.1`) is right for neither — it is the projection onto a fictional
+mean (`+0.1`) is right for neither, it is the projection onto a fictional
 consensus. The paraconsistent answer is "dimension 47 is in state **B** for this
 checkpoint; route queries that activate it to multiple sources for
 cross-validation, not to the mean." This matters precisely when node data
@@ -65,15 +65,14 @@ receives the enriched representation, not a flat scalar.
   (`aggregation.rs`) returning `(embedding, state_vector, confidence)`. Property
   tests verify the lattice laws.
 - **Trust weights from consensus.** Per-source weights are
-  `softmax(blue_score / τ)` — see `belnap.rs::blue_scores_to_trust_weights`.
+  `softmax(blue_score / τ)`, see `belnap.rs::blue_scores_to_trust_weights`.
 - **Checkpoint-aligned.** Validators co-sign learning roots at the checkpoint
   barrier (~50× cheaper than per-block voting), so learning **safety inherits
   from BFT safety** and **liveness inherits from GhostDAG liveness**. The
   load-bearing claim: *consensus and learning are the same process at different
   time scales*.
 - **Q16 substrate.** The paper proposes a Belnap aggregation precompile in the
-  Q16 quantized-inference range so in-circuit aggregation is bit-deterministic —
-  see [verifiable inference](/research/verifiable-inference).
+  Q16 quantized-inference range so in-circuit aggregation is bit-deterministic, see [verifiable inference](/research/verifiable-inference).
 
 ## Honest status
 
@@ -97,7 +96,7 @@ federated paraconsistent rounds on testnet as the frontier.
   `core/consensus/src/finality.rs` (checkpoint barrier; learning fields not yet
   added). Tests: `core/learning/tests/belnap_adversarial.rs`.
 - **Belnap-q16 lattice aggregation precompile (proposed):** registry surface
-  `CHAIN-pre-q16` (`/chain/precompiles#q16`) — specified, not yet implemented.
+  `CHAIN-pre-q16` (`/chain/precompiles#q16`), specified, not yet implemented.
 - **Related:** [Federated learning cycles](/research/learning),
   [The Mentorship Protocol](/research/mentorship),
   [Verifiable inference](/research/verifiable-inference).

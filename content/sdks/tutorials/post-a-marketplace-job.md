@@ -40,7 +40,7 @@ By the end you'll have a Node/TypeScript script that:
 npm install @citratenetwork/marketplace-sdk viem
 ```
 
-## Step 1 — Set up clients
+## Step 1, Set up clients
 
 ```ts
 import { createPublicClient, http } from "viem";
@@ -53,7 +53,7 @@ const market = new MarketplaceClient({ publicClient, addresses: defaultAddresses
 console.log("chainId:", CITRATE_TESTNET_CHAIN_ID);     // 40204
 ```
 
-## Step 2 — Pick a model and inspect providers
+## Step 2, Pick a model and inspect providers
 
 Slice 1 requires a fully pinned model hash (`0x` + 64 hex). Validate it, then list providers:
 
@@ -63,7 +63,7 @@ const providers = await market.listProviders(modelHash);
 console.log(`${providers.length} active providers`, providers.map(p => p.endpoint));
 ```
 
-## Step 3 — Estimate cost
+## Step 3, Estimate cost
 
 ```ts
 import { VerificationTier, grainsToSaltDisplay } from "@citratenetwork/marketplace-sdk";
@@ -77,7 +77,7 @@ const cost = await market.estimateCost({
 console.log("estimated cost:", grainsToSaltDisplay(cost)); // e.g. "0.0123 SALT"
 ```
 
-## Step 4 — Load a buyer wallet
+## Step 4, Load a buyer wallet
 
 Use a passphrase-encrypted keystore that stays in the local key store. The passphrase comes from the
 environment, never from source:
@@ -98,7 +98,7 @@ const wallet = (await CitrateWallet.unlockWallet(process.env.WALLET_PASSPHRASE!)
   .connect(citrate, RPC_URL);                // connect() is required before sendTransaction
 ```
 
-## Step 5 — Build job calldata and submit
+## Step 5, Build job calldata and submit
 
 ```ts
 import { postJobCalldata, PaymentMethod } from "@citratenetwork/marketplace-sdk";
@@ -121,7 +121,7 @@ const txHash = await wallet.sendTransaction({
 console.log("posted job:", txHash, "inputHash:", inputHash);
 ```
 
-## Step 6 — Read back the result events
+## Step 6, Read back the result events
 
 ```ts
 const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
@@ -129,7 +129,7 @@ const { parseJobEvents } = await import("@citratenetwork/marketplace-sdk");
 console.log(parseJobEvents(receipt.logs));
 ```
 
-## Optional — Pay-per-inference over the gateway (x402)
+## Optional, Pay-per-inference over the gateway (x402)
 
 Instead of posting an on-chain job, you can call a paid Inference Gateway route and settle per request:
 
@@ -156,7 +156,7 @@ See the [gateway page](/sdks/inference-gateway#x402) for the server side of the 
 ## Recap
 
 You read marketplace state, estimated cost, loaded a wallet, posted a job on-chain, and (optionally)
-paid for inference over x402 — all with the typed SDK and no hand-rolled calldata.
+paid for inference over x402, all with the typed SDK and no hand-rolled calldata.
 
 ## Security & access
 
@@ -164,11 +164,11 @@ paid for inference over x402 — all with the typed SDK and no hand-rolled calld
 scraping per `00_SCHEMA_AND_AUTHORING.md` §3.5.
 
 **No secrets.** Every credential (`CITRATE_RPC_URL`, `WALLET_PASSPHRASE`, `MODEL_HASH`, `WSALT_ADDRESS`,
-`GATEWAY_URL`) is read from the environment — never hardcode a key, passphrase, or mnemonic. The wallet
+`GATEWAY_URL`) is read from the environment, never hardcode a key, passphrase, or mnemonic. The wallet
 key stays encrypted in the local Web3-v3 keystore.
 
 ## Source & verification
 
-- Built against `citrate-sdk-marketplace` — `src/index.ts`, `src/client.ts`, `src/jobs.ts`,
+- Built against `citrate-sdk-marketplace`, `src/index.ts`, `src/client.ts`, `src/jobs.ts`,
   `src/x402.ts`, `src/wallet/`.
 - Audited against SHA: `41211bd`.

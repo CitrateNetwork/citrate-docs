@@ -1,10 +1,10 @@
 ---
-title: Citrate Cross-Chain Bridge — Overview
+title: Citrate Cross-Chain Bridge, Overview
 codex_slug: /chain/bridge
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-chain/core/bridge/ (design detail Confidential — gated)
+source: citrate-chain/core/bridge/ (design detail Confidential, gated)
 surfaces: [CHAIN-bridge]
 audited_against_sha: 03d7851
 status: draft
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Citrate Cross-Chain Bridge — Overview
+# Citrate Cross-Chain Bridge, Overview
 
 > A public, non-implementation overview. The bridge's design and internals are
 > **confidential** and intentionally not documented on this page.
@@ -32,7 +32,7 @@ instructions (supported assets, deposit/withdraw flows, finality expectations).
 
 ## Security & access
 
-- **Tier of this page: public** — but it is a stub by design. The bridge's
+- **Tier of this page: public**, but it is a stub by design. The bridge's
   **trust model, oracle/relay design, signature and finality mechanisms, and
   parameters are Confidential (tier X)** and are **gated**, not authored here.
   The home repo's `core/bridge/SECURITY.md` (which exists) and the bridge source
@@ -44,7 +44,7 @@ instructions (supported assets, deposit/withdraw flows, finality expectations).
 
 ## Source & verification
 
-- **Source repo / path:** `citrate-chain/core/bridge/` — **confidential**; this
+- **Source repo / path:** `citrate-chain/core/bridge/`, **confidential**; this
   public page does not transclude or summarize its internals.
 - **Audited against SHA:** `03d7851`
   (`git -C citrate-chain rev-parse --short HEAD`).

@@ -1,5 +1,5 @@
 ---
-title: Citrate mental models — a primer
+title: Citrate mental models, a primer
 codex_slug: /start/primer
 tier: public
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Citrate mental models — a primer
+# Citrate mental models, a primer
 
 > Five ideas that make the rest of the docs click. If you come from a
 > single-chain EVM world, these are the places your intuition needs to bend.
@@ -23,7 +23,7 @@ author: Claude Opus 4.8 (1M context)
 On a single-parent chain, "block N" is unambiguous. On a BlockDAG, blocks have
 **multiple parents**, so "height" alone can't order them.
 
-- **Height** is roughly "how many layers deep" a block sits — useful, but not the
+- **Height** is roughly "how many layers deep" a block sits, useful, but not the
   ordering key.
 - **Blue score** is the GhostDAG ordering key: the cumulative count of a block's
   *blue* ancestors (the honest-majority-consistent set, governed by the
@@ -39,7 +39,7 @@ Citrate finalizes by **depth**, not by a single magic block. A block is final
 once it is buried `finality_depth` (= 100) deep behind the selected tip; reorgs
 that would rewrite a finalized block are rejected at admission.
 
-Mental shortcut: **the deeper a block, the more final it is** — and past
+Mental shortcut: **the deeper a block, the more final it is**, and past
 `finality_depth = 100` it cannot be reorged. (There's also a BFT checkpoint
 mechanism on top, but depth-based finality is the everyday rule.) Detail:
 [Consensus → finality](/chain/consensus#finality).
@@ -58,14 +58,14 @@ interleaved into the canonical order. Detail: [Consensus](/chain/consensus).
 ## 4. Gasless accounts (smart wallets, no seed phrase)
 
 Citrate ships **ERC-4337 account abstraction**. A user signs in with a **passkey**
-(WebAuthn-P256) or an existing EOA and gets a **smart-contract wallet** — no seed
+(WebAuthn-P256) or an existing EOA and gets a **smart-contract wallet**, no seed
 phrase to lose. Transactions are sent as *UserOperations* through a bundler, and
 a **paymaster** can sponsor the gas, so a user can transact with zero SALT in
 hand. There is no native paymaster opcode; sponsorship is done with an EIP-2771
 forwarder + paymaster contract.
 
 Mental shortcut: **the wallet is a contract, the key is a passkey, and someone
-else can pay the gas.** Recovery is via guardians (2–7 of N) — and Citrate is
+else can pay the gas.** Recovery is via guardians (2–7 of N), and Citrate is
 never a guardian. Detail: [Passkeys & AA](/aa/passkeys),
 [Paymaster](/aa/paymaster), [Guardians](/aa/guardians).
 
@@ -75,7 +75,7 @@ never a guardian. Detail: [Passkeys & AA](/aa/passkeys),
 block rewards, and staking. Amounts in the API are wei-style integers (10^18 =
 1 SALT). Supply = minted − burned, capped at 1B.
 
-Mental shortcut: **SALT is to Citrate what ETH is to Ethereum** — same decimal
+Mental shortcut: **SALT is to Citrate what ETH is to Ethereum**, same decimal
 convention, hard-capped supply. Detail: [Economics](/chain/economics).
 
 ## Putting it together
@@ -88,14 +88,14 @@ deep, it's final. Fees and rewards are denominated in SALT.
 
 ## Where to go next
 
-- [Your first 10 minutes](/start/tutorials/your-first-10-minutes) — hands-on.
-- [JSON-RPC reference](/chain/rpc) — read the DAG, token, and AI methods.
+- [Your first 10 minutes](/start/tutorials/your-first-10-minutes), hands-on.
+- [JSON-RPC reference](/chain/rpc), read the DAG, token, and AI methods.
 - [Consensus](/chain/consensus), [Execution (LVM)](/chain/lvm),
-  [Economics](/chain/economics) — the deep versions of 1–3 and 5.
+  [Economics](/chain/economics), the deep versions of 1–3 and 5.
 
 ## Security & access
 
-Public. Conceptual explainers only — no secrets, keys, or private endpoints. The
+Public. Conceptual explainers only, no secrets, keys, or private endpoints. The
 academic-tier proofs behind GhostDAG and finality live on the linked chain pages.
 
 ## Source & verification

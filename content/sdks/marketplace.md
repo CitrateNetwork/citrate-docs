@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Citrate Marketplace SDK
 
-> The TypeScript SDK for the Citrate compute marketplace (chainId `40204`) — read marketplace state,
+> The TypeScript SDK for the Citrate compute marketplace (chainId `40204`), read marketplace state,
 > pay per-inference over HTTP 402 (x402), manage a buyer wallet, and build the calldata for posting
 > inference + training jobs and buying compute credits. For integrators and app builders.
 
@@ -25,11 +25,11 @@ marketplace into a typed API so a buyer-side app can list providers, estimate co
 and post jobs without hand-rolling calldata. It is built on [viem](https://viem.sh) (`^2.21.0`, a direct
 dependency) and ships four documented surfaces:
 
-- **`MarketplaceClient`** — read-only marketplace queries (`src/client.ts`).
-- **`X402Client`** — auto-pay-on-`402` HTTP client + the x402 EIP-712 payment codec (`src/x402.ts`).
-- **`CitrateWallet` / `InjectedSigner`** — buyer wallet: native passphrase keystore or browser-injected
+- **`MarketplaceClient`**, read-only marketplace queries (`src/client.ts`).
+- **`X402Client`**, auto-pay-on-`402` HTTP client + the x402 EIP-712 payment codec (`src/x402.ts`).
+- **`CitrateWallet` / `InjectedSigner`**, buyer wallet: native passphrase keystore or browser-injected
   signer (`src/wallet/`).
-- **ABIs + calldata builders** — contract ABIs and the calldata/event helpers for jobs, credits, and
+- **ABIs + calldata builders**, contract ABIs and the calldata/event helpers for jobs, credits, and
   training (`src/contracts.ts`, plus `src/jobs.ts`, `src/credits.ts`, `src/training.ts`).
 
 Mental model: read state with `MarketplaceClient`; pay for an inference request with `X402Client`; sign
@@ -37,7 +37,7 @@ with a `CitrateWallet` (key in browser) or `InjectedSigner` (MetaMask/Rabby); fo
 (post a job, buy credits, request training) build calldata with the builder functions and send it with
 your wallet/viem.
 
-> **Status — pre-1.0 / pre-audit.** The package is `0.1.0` and classified **Tier 1** in-repo
+> **Status, pre-1.0 / pre-audit.** The package is `0.1.0` and classified **Tier 1** in-repo
 > (`AUDIT_TIER.md`): a full external crypto audit is required before any `v1.0.0` stable release; no
 > stable release ships without written audit attestation. Treat all surfaces as experimental. Known
 > slice-2 gaps: model-name resolution (slice 1 accepts pinned hashes only), `watchJob` event
@@ -112,16 +112,16 @@ See [the gateway page](/sdks/inference-gateway#x402) for the server side of this
 
 ### Wallet (`src/wallet/`)
 
-- **`CitrateWallet`** (`src/wallet/citrate.ts`) — native keystore wallet. Factories: `createWallet(passphrase)`
+- **`CitrateWallet`** (`src/wallet/citrate.ts`), native keystore wallet. Factories: `createWallet(passphrase)`
   (generates a 32-byte key, encrypts under the passphrase, persists to `localStorage`; passphrase must be
   `≥12` chars) and `unlockWallet(passphrase)`. Instance: `sign({ hash })`, `sendTransaction(tx)` (requires
   `connect(chain, rpcUrl?)` first), `lock()`, `get unlocked()`. Helpers: `peekKeystoreAddress()`,
   `hasStoredKeystore()`, `clearKeystore()` (unrecoverable).
-- **`InjectedSigner`** (`src/wallet/injected.ts`) — browser-extension adapter. `InjectedSigner.connect(opts?)`
+- **`InjectedSigner`** (`src/wallet/injected.ts`), browser-extension adapter. `InjectedSigner.connect(opts?)`
   requests accounts and asserts/switches chain. Implements `sign` (`personal_sign`), `signEip712`
   (`eth_signTypedData_v4`, required for x402), `sendTransaction`. `hasInjectedProvider()` detects
   `window.ethereum`. Re-checks the chain before every sign/tx (TOCTOU guard).
-- **Keystore** (`src/wallet/keystore.ts`) — Web3 Secret Storage v3: `encryptKeystore` / `decryptKeystore`
+- **Keystore** (`src/wallet/keystore.ts`), Web3 Secret Storage v3: `encryptKeystore` / `decryptKeystore`
   (AES-128-CTR + PBKDF2-SHA256 at 262144 iterations; constant-time MAC check). Portable to geth/MetaMask.
 
 ### ABIs + calldata builders (`src/contracts.ts`, `src/jobs.ts`, `src/credits.ts`, `src/training.ts`)
@@ -165,12 +165,12 @@ const res = await x402.send(`${gatewayBaseUrl}/v1/chat/completions`, {
 
 ## Tutorials
 
-- [Post a marketplace job](/sdks/tutorials/post-a-marketplace-job) — end-to-end runnable walkthrough.
+- [Post a marketplace job](/sdks/tutorials/post-a-marketplace-job), end-to-end runnable walkthrough.
 
 ## Security & access
 
 **Tier: commercial.** This is buyer-side marketplace integration depth (job/credit/training calldata,
-the x402 payment codec, provider selection) — exactly the implementation work that benefits a contracted
+the x402 payment codec, provider selection), exactly the implementation work that benefits a contracted
 integrator and that we gate from anonymous scraping per `00_SCHEMA_AND_AUTHORING.md` §3.5. It is not
 secret: every symbol resolves to public on-chain ABIs and an open SDK package.
 
@@ -181,7 +181,7 @@ private key, passphrase, or mnemonic into any example.
 
 ## Source & verification
 
-- Source: `citrate-sdk-marketplace` — `src/index.ts` (public surface), `src/client.ts`, `src/x402.ts`,
+- Source: `citrate-sdk-marketplace`, `src/index.ts` (public surface), `src/client.ts`, `src/x402.ts`,
   `src/wallet/`, `src/contracts.ts`.
 - Audited against SHA: `41211bd`.
 - Reference is `transcluded`: the truth lives in the repo at the pinned SHA; this page mirrors it.

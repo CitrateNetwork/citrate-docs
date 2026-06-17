@@ -20,7 +20,7 @@ author: Claude Opus 4.8 (1M context)
 ## Overview
 
 You'll create a tiny Node/TypeScript script that uses `CitrateClient` to talk to Citrate testnet
-(chainId `40204`). No smart-account / `aa` flow here — that's covered separately; this is the smallest
+(chainId `40204`). No smart-account / `aa` flow here, that's covered separately; this is the smallest
 working path. Every symbol used is verified against `citrate-sdk-js` at SHA `bc5a830`.
 
 ## Install / Setup
@@ -98,7 +98,7 @@ console.log('inference result:', result);
 ```
 
 > Inspect `src/types/Inference.ts` (`InferenceRequest` / `InferenceResult`) in the source repo for the
-> exact fields — they are the auditable contract for this call.
+> exact fields, they are the auditable contract for this call.
 
 ### 5. Run it
 
@@ -115,7 +115,7 @@ model listing.
 
 ## Security & access
 
-- **Tier: `public`.** A getting-started tutorial for the open SDK — public per the tier decision tree.
+- **Tier: `public`.** A getting-started tutorial for the open SDK, public per the tier decision tree.
 - **No secrets here.** Read operations need no key. For writes, source keys from the environment, never
   inline. The RPC hostname (`rpc.citrate.ai`) is a public default already shipped in the SDK.
 
@@ -126,5 +126,5 @@ model listing.
 - **Symbols used:** `CitrateClient` + `getRpcUrls`/`getChainId`/`getBalance`/`getNonce`/`listModels`/
   `getModelInfo`/`inference` (`src/client/CitrateClient.ts`); `CHAIN_IDS`/`DEFAULT_RPC_URLS`
   (`src/utils/constants.ts`); `InferenceRequest`/`InferenceResult` (`src/types/Inference.ts`).
-- `source_kind: authored` — narrative tutorial authored in Codex (no single code file is the truth);
+- `source_kind: authored`, narrative tutorial authored in Codex (no single code file is the truth);
   every symbol referenced is verified against the source at the pinned SHA.

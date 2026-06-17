@@ -1,5 +1,5 @@
 ---
-title: Precompiles — tensor, x402, Belnap-q16
+title: Precompiles, tensor, x402, Belnap-q16
 codex_slug: /chain/precompiles
 tier: commercial
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context) + Saul Loveman
 ---
 
-# Precompiles — tensor, x402, Belnap-q16
+# Precompiles, tensor, x402, Belnap-q16
 
 > The non-confidential Citrate precompiles: deterministic tensor primitives,
 > x402 payment verification, and Belnap-q16 lattice aggregation. Addresses,
@@ -21,7 +21,7 @@ author: Claude Opus 4.8 (1M context) + Saul Loveman
 > **Note on tiering.** This page mixes academic (`tensor`, `q16`) and
 > commercial (`x402`) surfaces and is staged at the higher of those tiers.
 > The confidential ZKP / inference / attestation precompiles are documented
-> separately — see [Confidential precompiles overview](/chain/precompiles-zkp).
+> separately, see [Confidential precompiles overview](/chain/precompiles-zkp).
 
 ## Overview
 
@@ -38,7 +38,7 @@ address pages routed by `PrecompileExecutor` in
 `is_precompile()` recognizes an address by matching its high-17 zero bytes plus
 the page bytes; `execute()` dispatches by the same prefix. This page documents
 the **tensor**, **x402**, and **q16** surfaces. (The `0x0100`–`0x0109` ZKP /
-inference / attestation surfaces are confidential — see the overview page.)
+inference / attestation surfaces are confidential, see the overview page.)
 
 ## Reference
 
@@ -51,8 +51,7 @@ Code: `core/execution/src/tensor/` and the canonical wire format in
   `Tensor` values (`ArrayD<f32>` + `TensorShape`, optional grad) keyed by a
   `U256` id, with a configurable memory cap. `tensor/ops.rs` provides
   `TensorOps`.
-- **Canonical binary tensor format v1** (`tensor_format.rs`) — **FROZEN** —
-  is what every AI precompile that accepts/returns tensor data uses on the
+- **Canonical binary tensor format v1** (`tensor_format.rs`), **FROZEN**, is what every AI precompile that accepts/returns tensor data uses on the
   wire:
 
   ```text
@@ -87,7 +86,7 @@ These accelerate Coinbase x402 payment verification at the precompile level
 The EIP-3009 type hash is
 `keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)")`.
 Constants live in `x402::addresses` and `x402::gas_costs`. (See the source for
-the exact byte offsets of each field — the layout is the authoritative ABI.)
+the exact byte offsets of each field, the layout is the authoritative ABI.)
 
 > A Level-3 upgrade path (validator-embedded facilitator, implicit header
 > payments, cross-shard settlement) is described in the source header and
@@ -101,7 +100,7 @@ Code: `core/execution/src/precompiles/q16/`. Address `0x0110`
 
 - **Substrate:** a hand-rolled, integer-only, saturating **Q16.16
   fixed-point** library (`q16/mod.rs`, type `Q16(i32)`; value = `inner / 2^16`).
-  Every op uses only `i32`/`i64` math — no floats, no `unsafe` — so results are
+  Every op uses only `i32`/`i64` math, no floats, no `unsafe`, so results are
   **bit-identical on any CPU**. Overflow saturates to `Q16::MAX`/`MIN`; division
   by zero returns `MAX`/`MIN` by numerator sign (never panics). `f64`
   conversions exist only behind `#[cfg(test)]`.
@@ -120,7 +119,7 @@ Code: `core/execution/src/precompiles/q16/`. Address `0x0110`
 
 ## Examples
 
-Call a precompile like any EVM precompile — `staticcall` to the address with
+Call a precompile like any EVM precompile, `staticcall` to the address with
 ABI-packed input. For example, x402 EIP-712 verify is a `staticcall` to
 `0x0000…0200`; the 32-byte return contains the recovered address in its low 20
 bytes. See `x402.rs` test vectors for exact encodings.
@@ -134,11 +133,11 @@ See [Chain tutorials](/chain/tutorials) for a worked x402 verification example.
 This page is staged **commercial** because it documents competitive
 implementation depth (precompile ABIs and gas economics) that any contracted /
 KYC'd builder should have but that we don't want anonymously vacuumed up; the
-tensor and q16 surfaces are academic (research provenance — TLA+ /
-formal-methods adjacent). **No secrets here** — only addresses, public ABIs,
+tensor and q16 surfaces are academic (research provenance, TLA+ /
+formal-methods adjacent). **No secrets here**, only addresses, public ABIs,
 gas constants, and type hashes that are observable on-chain anyway. The
 genuinely sensitive precompiles (ZKP / inference / attestation internals) are
-**not** on this page — see [Confidential precompiles overview](/chain/precompiles-zkp).
+**not** on this page, see [Confidential precompiles overview](/chain/precompiles-zkp).
 
 ## Source & verification
 

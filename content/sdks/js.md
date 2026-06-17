@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Citrate JavaScript/TypeScript SDK
 
-> The canonical TypeScript SDK for building on Citrate Network (chainId `40204`) — chain RPC, model
+> The canonical TypeScript SDK for building on Citrate Network (chainId `40204`), chain RPC, model
 > deployment + inference, the embedded-wallet / ERC-4337 (`aa`) helpers, crypto utilities, and optional
 > React hooks. For app developers and integrators.
 
@@ -27,19 +27,19 @@ web/Node app can talk to Citrate without hand-rolling calldata.
 
 The SDK is organized into four documented surfaces:
 
-- **`CitrateClient` / `WebSocketClient`** — the chain + AI client (`src/client/`).
-- **`aa`** — embedded wallet helpers: ERC-4337 v0.7 UserOps, ZeroDev Kernel v3 encoding, passkey/WebAuthn
+- **`CitrateClient` / `WebSocketClient`**, the chain + AI client (`src/client/`).
+- **`aa`**, embedded wallet helpers: ERC-4337 v0.7 UserOps, ZeroDev Kernel v3 encoding, passkey/WebAuthn
   + EOA signing, guardian recovery, and a bundler JSON-RPC client (`src/aa/`).
-- **crypto** — `CryptoManager`, `KeyManager`, and Shamir secret-sharing helpers (`src/crypto/`).
-- **react** — optional connection/model/inference hooks (`src/react/hooks.ts`).
+- **crypto**, `CryptoManager`, `KeyManager`, and Shamir secret-sharing helpers (`src/crypto/`).
+- **react**, optional connection/model/inference hooks (`src/react/hooks.ts`).
 
 Mental model: build with `CitrateClient` for read/write chain + inference; reach for `aa` when you need a
 gasless / passkey-backed smart account instead of a raw EOA.
 
-> **Status — pre-1.0 / pre-audit surfaces.** The package is `0.2.0`. The `aa` module is labeled
+> **Status, pre-1.0 / pre-audit surfaces.** The package is `0.2.0`. The `aa` module is labeled
 > *EW-S1 WP-7* in-source (embedded-wallet sprint 1) and points at live-but-evolving infrastructure
 > (`bundler.citrate.ai`, `auth.citrate.ai`); treat it as experimental. The exported `VERSION` constant is
-> `0.1.1` and is **stale** relative to `package.json` (`0.2.0`) — see corrections. Use `package.json`
+> `0.1.1` and is **stale** relative to `package.json` (`0.2.0`), see corrections. Use `package.json`
 > as the version of record.
 
 ## Install / Setup
@@ -70,9 +70,9 @@ Defaults (`src/utils/constants.ts`): testnet chainId `40204`, RPC `https://rpc.c
 ## Reference
 
 Each item cites its code symbol/path in `citrate-sdk-js` for auditability. This is a summary; the truth
-lives in the source (Rule 9 — `source_kind: transcluded`).
+lives in the source (Rule 9, `source_kind: transcluded`).
 
-### CitrateClient — `src/client/CitrateClient.ts` (SDK-JS-CitrateClient)
+### CitrateClient, `src/client/CitrateClient.ts` (SDK-JS-CitrateClient)
 
 Exported from `src/index.ts`. Constructor takes `CitrateClientConfig` (`rpcUrl: string | string[]`,
 optional `privateKey`, `timeout`, `retries`, `headers`, `ipfsApiUrl`). Both `rpcUrl` and `privateKey`
@@ -94,7 +94,7 @@ are validated at construction (`validateRpcUrl` / `validatePrivateKey`; SECREM-0
 
 `WebSocketClient` (`src/client/WebSocketClient.ts`) is exported alongside for streaming/subscriptions.
 
-### aa — embedded wallet / ERC-4337 v0.7 (SDK-JS-aa)
+### aa, embedded wallet / ERC-4337 v0.7 (SDK-JS-aa)
 
 Imported via the namespaced re-export `export * as aa from './aa'` in `src/index.ts`; the module index is
 `src/aa/index.ts`. Documents the flow: derive userId → predict address → enroll validator → build/sign/send
@@ -124,15 +124,15 @@ a UserOp.
 
 Exported from `src/index.ts`:
 
-- `CryptoManager` (`src/crypto/CryptoManager.ts`) — AES-256-GCM + HKDF/PBKDF2 helpers
+- `CryptoManager` (`src/crypto/CryptoManager.ts`), AES-256-GCM + HKDF/PBKDF2 helpers
   (`PBKDF2_DEFAULT_ITERATIONS = 600_000`).
-- `KeyManager` (`src/crypto/KeyManager.ts`) — key handling + `EncryptedModelResult`.
+- `KeyManager` (`src/crypto/KeyManager.ts`), key handling + `EncryptedModelResult`.
 - Shamir secret sharing (`src/crypto/FiniteField.ts`): `splitSecretBytes`, `reconstructSecretBytes`,
   `GF256`, `ShamirSecretSharing`.
 
 ### react (SDK-JS-react)
 
-`src/react/hooks.ts`. **Not re-exported from the package root** — `react` is an optional peer dep, so the
+`src/react/hooks.ts`. **Not re-exported from the package root**, `react` is an optional peer dep, so the
 hooks are imported from the build path. Each hook throws if React is not installed.
 
 ```ts
@@ -163,7 +163,7 @@ console.log(await client.getBalance('0xYourAddress'));   // bigint wei
 
 ```ts
 // Run inference
-const result = await client.inference({ /* InferenceRequest — see src/types/Inference.ts */ });
+const result = await client.inference({ /* InferenceRequest, see src/types/Inference.ts */ });
 ```
 
 ```ts
@@ -182,14 +182,14 @@ const receipt = await bundler.waitForUserOperationReceipt(hash);
 
 ## Tutorials
 
-- [Build your first app with the JS SDK](/sdks/tutorials/first-app-with-sdk-js) — runnable end-to-end
+- [Build your first app with the JS SDK](/sdks/tutorials/first-app-with-sdk-js), runnable end-to-end
   (install → connect → read chain → run inference).
 
 ## Security & access
 
-- **Tier: `public`.** This is open SDK reference a developer needs to build on Citrate — per the tier
+- **Tier: `public`.** This is open SDK reference a developer needs to build on Citrate, per the tier
   decision tree (§3.6), concepts/quickstarts/open SDK reference are public.
-- **No secrets here.** Private keys, mnemonics, and API keys are **never** hardcoded — they come from the
+- **No secrets here.** Private keys, mnemonics, and API keys are **never** hardcoded, they come from the
   caller's environment (`config.privateKey`, `BundlerClientOptions.apiKey`). The endpoints named
   (`rpc.citrate.ai`, `bundler.citrate.ai/rpc`, `auth.citrate.ai`) are public production hostnames already
   shipped in the source defaults, not credentials.
@@ -206,5 +206,5 @@ const receipt = await bundler.waitForUserOperationReceipt(hash);
   `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler}.ts`,
   `src/crypto/{CryptoManager,KeyManager,FiniteField}.ts`, `src/react/hooks.ts`,
   `src/utils/constants.ts`, `src/errors/CitrateError.ts`.
-- `source_kind: transcluded` — Codex pulls reference from the source repo at the pinned SHA so docs
+- `source_kind: transcluded`, Codex pulls reference from the source repo at the pinned SHA so docs
   cannot drift from code.

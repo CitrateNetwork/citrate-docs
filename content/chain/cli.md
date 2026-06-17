@@ -56,7 +56,7 @@ Audited against `cli/src/main.rs` (`struct Cli`). These apply to every subcomman
 |---|---|---|
 | `-c, --config <PATH>` | `CITRATE_CONFIG` | Config file path. |
 | `-r, --rpc <URL>` | `CITRATE_RPC` | RPC endpoint override. |
-| `-v, --verbose` | — | Verbosity (repeatable: `-v` warn … `-vvvv` trace). |
+| `-v, --verbose` |, | Verbosity (repeatable: `-v` warn … `-vvvv` trace). |
 
 Defaults come from `cli/src/config.rs` (`Config::default`): RPC `http://localhost:8545`,
 `chain_id 40204`, keystore `~/.citrate/keystore`, gas price 1 gwei, gas limit 3,000,000.
@@ -77,13 +77,12 @@ are derived to be EVM-compatible (`derive_address`).
 | Subcommand | Args / flags | Notes |
 |---|---|---|
 | `account create` | `-p, --password <PW>`, `-o, --output <PATH>` | Generates a new ed25519 keypair; prompts for password if omitted. |
-| `account list` | — | Lists keystore `*.json` files. |
-| `account balance <ADDRESS>` | — | `eth_getBalance`. |
+| `account list` |, | Lists keystore `*.json` files. |
+| `account balance <ADDRESS>` |, | `eth_getBalance`. |
 | `account import` | `--key-stdin` \| `--key-file <PATH>` \| `--insecure-key-from-arg <HEX>`; `-p, --password` | One key source is **required at runtime**. See Security & access. |
 | `account export <ADDRESS>` | `--out <PATH>` \| `--confirm-stdout`; `-p, --password` | Refuses to print to stdout unless `--out` is given or `--confirm-stdout` is set; `--out` writes mode `0600` on Unix. |
 
-> Secure-input note (`RM-K / WP-K1.6`): the legacy `--key` flag was removed —
-> `account import --key …` no longer parses. Use `--key-stdin` (recommended),
+> Secure-input note (`RM-K / WP-K1.6`): the legacy `--key` flag was removed, > `account import --key …` no longer parses. Use `--key-stdin` (recommended),
 > `--key-file`, or the loud-warning `--insecure-key-from-arg`.
 
 ### `citrate model`
@@ -96,7 +95,7 @@ HuggingFace Hub helpers.
 | `model deploy <MODEL>` | `-m, --metadata <PATH>`, `-n, --name <NAME>`, `-v, --version <VER>`, `-a, --account <ADDR>`, `--access-policy <public\|private\|restricted\|payPerUse>` (default `public`), `--price <WEI>`. RPC: `citrate_deployModel`. |
 | `model inference` | `--model-id <HEX>`, `-i, --input <PATH>`, `-o, --output <PATH>`, `--with-proof`. RPC: `citrate_runInference`. |
 | `model list` | `-o, --owner <ADDR>`, `-m, --model-type <T>`, `-l, --limit <N>` (default 10). RPC: `citrate_listModels`. |
-| `model info <MODEL_ID>` | — RPC: `citrate_getModel`. |
+| `model info <MODEL_ID>` |, RPC: `citrate_getModel`. |
 | `model update <MODEL_ID> <METADATA>` | `-a, --account <ADDR>`, `--model <PATH>`, `--cid <CID>`. RPC: `citrate_updateModel`. |
 | `model verify <PROOF>` | `--output-hash <HASH>`. RPC: `citrate_verifyProof`. |
 | `model search <QUERY>` | `-l, --limit <N>` (default 10), `--gguf <bool>` (default true). HuggingFace search. |
@@ -105,8 +104,7 @@ HuggingFace Hub helpers.
 ### `citrate contract`
 
 Source: `cli/src/commands/contract.rs` → `ContractCommands`. The CLI's ABI encoder
-(`encode_method_call`) supports `address`, `bool`, `bytes32`, and `uint{8..256}` only —
-dynamic `string`/`bytes` are not yet supported.
+(`encode_method_call`) supports `address`, `bool`, `bytes32`, and `uint{8..256}` only, dynamic `string`/`bytes` are not yet supported.
 
 | Subcommand | Args / flags |
 |---|---|
@@ -125,13 +123,13 @@ queries (plus a standalone bootnode reachability check).
 
 | Subcommand | Args / flags | RPC |
 |---|---|---|
-| `network status` | — | `net_version`, `eth_blockNumber`, `eth_syncing` |
+| `network status` |, | `net_version`, `eth_blockNumber`, `eth_syncing` |
 | `network block [BLOCK]` | positional `block` (default `latest`) | `eth_getBlockByNumber` (shows GhostDAG merge-parents / blue score when present) |
-| `network transaction <TX_HASH>` | — | `eth_getTransactionByHash` (+ receipt) |
-| `network gas-price` | — | `eth_gasPrice` |
-| `network peers` | — | `net_peerCount`, `admin_peers` |
-| `network sync` | — | `eth_syncing` |
-| `network dag-stats` | — | `citrate_getDagStats` |
+| `network transaction <TX_HASH>` |, | `eth_getTransactionByHash` (+ receipt) |
+| `network gas-price` |, | `eth_gasPrice` |
+| `network peers` |, | `net_peerCount`, `admin_peers` |
+| `network sync` |, | `eth_syncing` |
+| `network dag-stats` |, | `citrate_getDagStats` |
 | `network bootnodes` | `--bootnodes <CSV>` (or env `CITRATE_BOOTNODES`), `--timeout-ms <MS>` (default 3000) | Standalone TCP ping; no local node required. |
 
 ### `citrate governance`
@@ -141,12 +139,12 @@ governance precompile at `0x0000000000000000000000000000000000001003`.
 
 | Subcommand | Args | Precompile call |
 |---|---|---|
-| `governance set-admin <ADDRESS>` | — | `setAdmin(address)` (tx) |
+| `governance set-admin <ADDRESS>` |, | `setAdmin(address)` (tx) |
 | `governance queue-param <KEY> <VALUE> <ETA>` | `eta` is a `u64` timelock | `queueSetParam(bytes32,bytes,uint64)` (tx) |
-| `governance execute-param <KEY>` | — | `executeSetParam(bytes32)` (tx) |
-| `governance get-param <KEY>` | — | `getParam(bytes32)` (`eth_call`) |
+| `governance execute-param <KEY>` |, | `executeSetParam(bytes32)` (tx) |
+| `governance get-param <KEY>` |, | `getParam(bytes32)` (`eth_call`) |
 
-### `citrate advanced` — academic-tier
+### `citrate advanced`, academic-tier
 
 See **Security & access** below. Source: `cli/src/commands/advanced.rs` → `AdvancedCommands`.
 These are network monitoring, benchmarking, stress-test and introspection tools.
@@ -195,7 +193,7 @@ amounts are denominated in **SALT** (18 decimals).
 |---|---|
 | `new` | `-a, --alias <NAME>`. Creates an account (prompts for password). |
 | `import` | `-k, --key <HEX>`, `-a, --alias <NAME>`. Prompts for the key (no echo) if `--key` omitted. |
-| `list` | — Lists accounts; optionally unlocks to show balances. |
+| `list` |, Lists accounts; optionally unlocks to show balances. |
 | `balance [ACCOUNT]` | Account index or `0x` address; omit for all. |
 | `send` | `-f, --from <INDEX>`, `-t, --to <ADDR>`, `-a, --amount <SALT>`, `-g, --gas-price <GWEI>`, `-l, --gas-limit <N>`. |
 | `export <INDEX>` | Prints the decrypted private key after unlock (warns). |
@@ -206,7 +204,7 @@ amounts are denominated in **SALT** (18 decimals).
 
 ## `citrate-faucet`
 
-Source: `faucet/src/main.rs`. The faucet is **not** a subcommand-style CLI — it is an HTTP
+Source: `faucet/src/main.rs`. The faucet is **not** a subcommand-style CLI, it is an HTTP
 server with no positional commands. It is configured entirely by environment variables and
 exposes HTTP routes. It drips a fixed **10 SALT** (`DRIP_AMOUNT = 10·10¹⁸ wei`) per request.
 
@@ -224,13 +222,13 @@ Audited against `faucet/src/main.rs`:
 |---|---|---|
 | `FAUCET_PRIVATE_KEY` | **required** | secp256k1 signing key (hex) for the genesis-funded faucet account. See Security & access. |
 | `CITRATE_RPC_URL` | `http://localhost:8545` | Node RPC the faucet submits raw txns to. |
-| `CITRATE_API_KEY` | — | Optional `X-API-Key` header for RPC calls. |
+| `CITRATE_API_KEY` |, | Optional `X-API-Key` header for RPC calls. |
 | `CITRATE_CHAIN_ID` | `40204` | EIP-155 chain ID for signing. |
 | `FAUCET_PORT` | `3002` | Listen port. |
-| `FAUCET_WHITELIST` | — | Comma-separated allowlist of addresses. |
-| `FAUCET_COOLDOWN_FILE` | — (in-memory) | Path for persistent per-address/per-IP cooldowns. |
-| `FAUCET_TURNSTILE_SECRET` | — (disabled) | Cloudflare Turnstile CAPTCHA secret. |
-| `FAUCET_TRUSTED_PROXIES` | — (none trusted) | IPs whose `X-Forwarded-For`/`X-Real-IP` are honored. |
+| `FAUCET_WHITELIST` |, | Comma-separated allowlist of addresses. |
+| `FAUCET_COOLDOWN_FILE` |, (in-memory) | Path for persistent per-address/per-IP cooldowns. |
+| `FAUCET_TURNSTILE_SECRET` |, (disabled) | Cloudflare Turnstile CAPTCHA secret. |
+| `FAUCET_TRUSTED_PROXIES` |, (none trusted) | IPs whose `X-Forwarded-For`/`X-Real-IP` are honored. |
 
 ### HTTP routes
 
@@ -245,10 +243,9 @@ Audited against `faucet/src/main.rs`:
 
 ## Security & access
 
-**Tiering.** `citrate`, `citrate-wallet`, and `citrate-faucet` reference is **public** —
-this is the open CLI/RPC surface a developer needs to build (tree §3 rule 6).
+**Tiering.** `citrate`, `citrate-wallet`, and `citrate-faucet` reference is **public**, this is the open CLI/RPC surface a developer needs to build (tree §3 rule 6).
 
-**Academic tier — `citrate advanced`.** The advanced DAG / consensus / mempool
+**Academic tier, `citrate advanced`.** The advanced DAG / consensus / mempool
 introspection subcommands (`advanced monitor --dag --mempool`, `advanced topology`,
 `advanced tx-debug --trace`, `advanced model-stats`, and the benchmark/stress harnesses)
 expose deep operator/consensus internals (`citrate_getDAGInfo`, `citrate_getMempoolInfo`,

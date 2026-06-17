@@ -9,11 +9,12 @@ import { CONTENT_NAV } from "@/content/_generated/content";
  */
 const fx = Object.fromEntries(NAV.map((g) => [g.id, g]));
 
+// CONTENT_NAV already covers start + enterprise (content/start/**, content/enterprise/**), so we do not
+// re-add the fixtures start/enterprise groups (that duplicated them). We keep the fixtures-only groups
+// that have no file-backed content: Sandboxes (app routes), Internal/Audit + Admin (gated, server-only).
 export const MERGED_NAV: NavNode[] = [
-  fx["start"],
   ...CONTENT_NAV,
   fx["sandboxes"],
-  fx["enterprise"],
   fx["internal"],
   fx["admin"],
 ].filter(Boolean) as NavNode[];

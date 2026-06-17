@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Federated Learning Dashboard
 
-> The live window into Citrate's federated-learning loop — watch each cycle run, see who contributed, and which mentor pairings landed.
+> The live window into Citrate's federated-learning loop, watch each cycle run, see who contributed, and which mentor pairings landed.
 
 ## Overview
 
@@ -28,7 +28,7 @@ is labeled `RM-FL-5`).
 It reads cycle state through to a read-only daemon API
 (`federated.citrate.ai/api/{cycles, embeddings, mentors}`) and chain RPC
 (`https://rpc.citrate.ai`). Cycle pages render on every request (no caching) because
-cycle state is live, and they **degrade honestly** — if the daemon is unreachable the
+cycle state is live, and they **degrade honestly**, if the daemon is unreachable the
 page shows a clear "Daemon API unavailable" panel instead of crashing.
 (Source: `citrate-dashboard/app/page.tsx`, `app/cycles/page.tsx`,
 `lib/daemon-api.ts`.)
@@ -46,7 +46,7 @@ page shows a clear "Daemon API unavailable" panel instead of crashing.
 | **Home** | `/` | The FL loop explained, plus cards into Cycles, Experiments, and Profile; a developer section with the daemon API and RPC endpoints. | `app/page.tsx` |
 | **Cycles** | `/cycles` | A live list of learning cycles with status (`embeddings_open` → `embeddings_closed` → `aggregated` → `trained` → `matched` → `finalized`), participant count, and start/finalize times. | `app/cycles/page.tsx` |
 | **Cycle detail** | `/cycles/[id]` | One cycle: its embeddings contributors and committed mentor pairings. Missing/failed cycles render a standard 404. | `app/cycles/[id]/page.tsx` |
-| **Experiments** | `/experiments` | The Paper II hypotheses H1 (Belnap-FOUR vs flat-mean under mislabel injection), H2 (adapter-composition power law), and H3 (Byzantine convergence below the BFT threshold) — what's measured and current status. | `app/experiments/page.tsx` |
+| **Experiments** | `/experiments` | The Paper II hypotheses H1 (Belnap-FOUR vs flat-mean under mislabel injection), H2 (adapter-composition power law), and H3 (Byzantine convergence below the BFT threshold), what's measured and current status. | `app/experiments/page.tsx` |
 | **Profile** | `/profile` | Connect your wallet via Privy, link your Citrate address, set display/bio/timezone, view subscriptions, and join a cycle. | `app/profile/page.tsx` |
 
 ### FL cycle monitoring
@@ -60,7 +60,7 @@ failures, so a transient daemon 5xx degrades a panel rather than the page.
 ### Identity & profile
 
 The Profile screen authenticates with **Privy** and derives identity from the verified
-Privy access token server-side — the API does not trust a `did` supplied in the
+Privy access token server-side, the API does not trust a `did` supplied in the
 URL/body (audit `CITRATE_DASHBOARD-2026-05-31-001`). The profile API
 (`app/api/profile/route.ts`) and invites API (`app/api/invites/route.ts`) sit behind
 that token. (Source: `app/profile/page.tsx`, `app/api/profile/route.ts`.)
@@ -71,11 +71,11 @@ that token. (Source: `app/profile/page.tsx`, `app/api/profile/route.ts`.)
 2. Click any cycle to see its contributors and mentor pairings.
 3. Open **Experiments** to follow the research hypotheses and their status.
 4. To participate, open **Profile**, sign in with Privy, link your Citrate address,
-   and join a cycle — your contribution score updates as cycles run.
+   and join a cycle, your contribution score updates as cycles run.
 
 ## Tutorials
 
-- [Explore a transaction](/apps/tutorials/explore-a-transaction) (CitrateScan) — useful
+- [Explore a transaction](/apps/tutorials/explore-a-transaction) (CitrateScan), useful
   for inspecting the on-chain commits a cycle produces. A dashboard-specific
   "watch a cycle finalize" tutorial is tracked as a stub.
 
@@ -101,5 +101,5 @@ Codex chokepoint (`PLANSET/02_ARCHITECTURE.md` §4).
 - **Status:** Pilot (`RM-FL-5`). The Experiments page currently renders the *plan*
   (hypotheses are "spec-locked, awaiting testnet"); outcome measurement lands with the
   experiment-runner work. Treat experiment results as **pre-data**. This page mirrors
-  code at the pinned SHA (Rule 9 — link, don't copy); the repo README is monorepo-split
+  code at the pinned SHA (Rule 9, link, don't copy); the repo README is monorepo-split
   boilerplate, so screens here are audited against the app code, not the README.

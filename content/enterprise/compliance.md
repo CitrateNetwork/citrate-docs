@@ -21,7 +21,7 @@ author: Claude Opus 4.8 (1M context)
 > **Disclaimer.** This page is an honest, point-in-time status summary, **not** a
 > claim of certification or attestation. Where a framework is "in progress," it is
 > not certified. This is not legal advice. Nothing here authorizes a deployment for
-> any regulated workload — that depends on the customer's own authorization boundary
+> any regulated workload, that depends on the customer's own authorization boundary
 > and assessment. For an authoritative, current status under NDA, request the gated
 > package (see below).
 
@@ -34,7 +34,7 @@ Two facts shape Citrate's compliance posture:
 2. **The vendor performs no data services.** It does not host, store, transmit, process,
    or access customer data, and is not a data processor / controller / business associate /
    sub-processor under any regime. This keeps the vendor **outside the customer's
-   authorization boundary** — the customer's own controls govern the regulated workload.
+   authorization boundary**, the customer's own controls govern the regulated workload.
 
 Because of (1) and (2), many frameworks apply to *the customer's deployment* rather than to
 a vendor-operated service. The status below describes Citrate's own readiness work to support
@@ -56,7 +56,7 @@ customers who must meet these frameworks.
 
 We deliberately avoid certification language we have not earned. Per our public-language rule,
 we use terms like **high-assurance**, **on-prem capable**, **air-gap friendly**, **role-gated**,
-**auditable**, **encryption in transit and at rest**, and **private-network deployable** — and we
+**auditable**, **encryption in transit and at rest**, and **private-network deployable**, and we
 avoid "military grade," "fully compliant," "impossible to hack," and "zero risk." Procurement
 teams want evidence, baselines, and contract language, not slogans.
 
@@ -67,7 +67,7 @@ teams want evidence, baselines, and contract language, not slogans.
 - **What is gated:** the full framework packages (SSPs, control crosswalks, POA&Ms, SPRS
   calculator detail, audit evidence) live in the **private** `citrate-compliance` corpus and the
   audit archive. See [Compliance posture (full)](/enterprise/compliance-full) and
-  [Security questionnaires](/enterprise/questionnaires) — both gated.
+  [Security questionnaires](/enterprise/questionnaires), both gated.
 - **No secrets here.** No SPRS scores, POA&M item detail, operator PII, named CPA/sponsor/counsel,
   or remediation timelines are reproduced on this page.
 

@@ -1,5 +1,5 @@
 ---
-title: Citrate Learning Center — School Desktop App
+title: Citrate Learning Center, School Desktop App
 codex_slug: /apps/learning-center
 tier: academic
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context)
 ---
 
-# Citrate Learning Center — School Desktop App
+# Citrate Learning Center, School Desktop App
 
 > A Slint-native desktop application for school pilots on the Citrate Network:
 > students do coursework, teachers run classrooms, and institutional admins
@@ -29,12 +29,12 @@ it runs as a native desktop window backed by a local service layer.
 The repo is a Cargo workspace with three crates
 (`citrate-learning-center/README.md`):
 
-- `gui/citrate_learning_center` (`citrate-learning-center`) — the school-pilot
+- `gui/citrate_learning_center` (`citrate-learning-center`), the school-pilot
   desktop app (the window and all classroom/admin screens).
-- `gui/citrate_edu_app` (`citrate-edu-app`) — the EDU backend: encryption,
+- `gui/citrate_edu_app` (`citrate-edu-app`), the EDU backend: encryption,
   AEAD, identity, roles, roster/classroom/budget/institutional services, and the
   encrypted local store.
-- `cli-school-bootstrap` (`citrate-school-bootstrap`) — a CLI for **provisioning
+- `cli-school-bootstrap` (`citrate-school-bootstrap`), a CLI for **provisioning
   a school environment** before the desktop app is handed to staff.
 
 The app is **role-aware**: the left sidebar (`ui/shell/sidebar.slint`) shows
@@ -44,14 +44,14 @@ institutional admin. Identity and roles are managed by `citrate-edu-app`
 
 ## Who it's for
 
-- **Students** — see their own Home, Assignments, and Progress.
-- **Teachers** — manage a classroom: students, assignments, and a classroom
+- **Students**, see their own Home, Assignments, and Progress.
+- **Teachers**, manage a classroom: students, assignments, and a classroom
   home.
-- **Institutional admins / IT** — provision and run the school: institution
+- **Institutional admins / IT**, provision and run the school: institution
   overview, classrooms, staff, finance (budget + approvals), user accounts and
   bulk import, device fleet, and infrastructure (node status, security, getting
   started).
-- **Charter / Management Organization (CMO) operators** — the cross-school
+- **Charter / Management Organization (CMO) operators**, the cross-school
   administration surfaces (the CMO dashboard/tenancy/compliance panels live in
   the [Citrate Native](/apps/native) app for CMOSuperAdmins; Learning Center is
   the per-school operator and end-user surface).
@@ -83,7 +83,7 @@ material tied to pilots, not a public consumer wallet.
 Prerequisites (from `rust-toolchain.toml` and `README.md`):
 
 - A stable Rust toolchain (rustup).
-- Read access to `CitrateNetwork/citrate-chain` — three chain crates
+- Read access to `CitrateNetwork/citrate-chain`, three chain crates
   (`citrate-wallet-core`, `citrate-security`, `citrate-signing`) are pulled over
   SSH. Local builds use your personal GitHub SSH key.
 - A C/C++ toolchain and platform libraries for Slint and `rocksdb`.
@@ -127,27 +127,27 @@ labels are quoted from `ui/shell/sidebar.slint`. Groups are role-gated.
 
 ### Student accounts
 
-- **"Home"**, **"Assignments"**, **"Progress"** — the student's own dashboard,
+- **"Home"**, **"Assignments"**, **"Progress"**, the student's own dashboard,
   assigned work, and learning progress.
 
 ### Classroom management (teacher)
 
-- **CLASSROOM** group: **"Home"**, **"Students"**, **"Assignments"** — the
+- **CLASSROOM** group: **"Home"**, **"Students"**, **"Assignments"**, the
   teacher's classroom view, roster, and assignment management.
 
 ### Institution & finance (admin)
 
 - **INSTITUTION**: **"Overview"**, **"Classrooms"**, **"Staff"**.
-- **FINANCE**: **"Budget"** (and at admin scope, **"Approvals"**) — backed by the
+- **FINANCE**: **"Budget"** (and at admin scope, **"Approvals"**), backed by the
   budget service (`citrate-edu-app/src/services/budget.rs`).
 
 ### Accounts & devices (admin / IT)
 
-- **ACCOUNTS**: **"User Accounts"**, **"Bulk Import"** — create accounts
+- **ACCOUNTS**: **"User Accounts"**, **"Bulk Import"**, create accounts
   individually or import a roster in bulk (roster service:
   `citrate-edu-app/src/services/roster.rs`; bulk import has dedicated fixtures
   in `gui/citrate_edu_app/tests/bulk_import_fixtures.rs`).
-- **DEVICES**: **"Fleet"** — device fleet management.
+- **DEVICES**: **"Fleet"**, device fleet management.
 - **INFRASTRUCTURE**: **"Node Status"**, **"Security"**, **"Getting Started"**.
 
 ### Shell
@@ -162,7 +162,7 @@ forms, badges/role badges, modals, toasts, progress, skeletons, empty states).
 
 The runnable build tutorial for the native desktop apps is
 [Run the desktop wallet](/apps/tutorials/run-the-desktop-wallet) (Citrate Native).
-The Learning Center builds the same way — substitute
+The Learning Center builds the same way, substitute
 `-p citrate-learning-center` for the package flag.
 
 ## Security & access
@@ -173,19 +173,19 @@ The Learning Center builds the same way — substitute
 - **No secrets here.** No keys, passwords, org secrets, or Docusign credentials
   are reproduced. The bootstrap CLI's org secret can be supplied via
   `--org-secret-hex` or `CITRATE_ORG_SECRET_HEX`, but in production it is loaded
-  from the school's **encrypted keystore** — do not hardcode it or paste it into
+  from the school's **encrypted keystore**, do not hardcode it or paste it into
   shared docs. `DOCUSIGN_*` values are operator credentials, kept out of this
   page.
 - **Local data is encrypted at rest** by `citrate-edu-app` (AEAD via
   `citrate-security`; `src/encryption.rs`, `src/local_store.rs`,
-  `src/key_rotation.rs`). Student/guardian data is sensitive — follow your
+  `src/key_rotation.rs`). Student/guardian data is sensitive, follow your
   institution's data-handling policy.
 - **Role separation is enforced in the backend** (`role.rs`, `it_elevation.rs`),
   not by hiding sidebar items. Privileged actions have dedicated coverage tests
   (`tests/k1_4_privileged_actions_coverage.rs`,
   `tests/rem_g_02_fresh_password_gate.rs`).
 - **The `reset` command is destructive** and does not cancel sent Docusign
-  envelopes — void those in the Docusign tenant separately.
+  envelopes, void those in the Docusign tenant separately.
 
 ## Source & verification
 

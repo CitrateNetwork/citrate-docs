@@ -13,7 +13,7 @@ export default function SandboxPage({ params }: { params: Promise<{ id: string }
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <Link href="/sandboxes" className="text-xs text-[var(--color-muted)]">← all sandboxes</Link>
-      <h1 className="mb-4 mt-2 font-display text-2xl font-normal">▷ {title}</h1>
+      <h1 className="mb-4 mt-2 font-display text-2xl font-normal">{title}</h1>
       <Comp />
     </div>
   );

@@ -27,16 +27,16 @@ author: Claude Opus 4.8 (1M context)
 
 Gas sponsorship has two layers:
 
-1. **On-chain policy — `CitratePaymaster`** (`BasePaymaster`, ERC-4337 v0.7).
+1. **On-chain policy, `CitratePaymaster`** (`BasePaymaster`, ERC-4337 v0.7).
    Enforces *per-account* budgets and is the authoritative gate: every sponsored
    op passes `_validatePaymasterUserOp` and settles in `_postOp`.
-2. **Off-chain edge — the bundler.** A self-hosted eth-infinitism reference
+2. **Off-chain edge, the bundler.** A self-hosted eth-infinitism reference
    bundler behind Caddy, fronted by a thin Citrate **gate** sidecar that does
    Bearer-key auth, rate limiting, and a paymaster **pre-check** so doomed ops
    are refused at the edge instead of burning a bundle slot. The edge is an
    optimization; the chain re-validates everything.
 
-## Reference — paymaster policy
+## Reference, paymaster policy
 
 Source: `citrate-chain/contracts/src/aa/paymaster/CitratePaymaster.sol` @
 `03d7851`. Policy follows `ADR-2026-06-05-ew-paymaster-policy`.
@@ -50,7 +50,7 @@ postOpGasLimit(16)`), read on-chain as `PMD_TAG_OFFSET`:
 | Tag | Category | Budget behavior |
 |---|---|---|
 | `0x00` | **Standard** | Draws from the per-account **daily** gas-unit allowance (default `dailyCap` = 100,000). Resets at the first sponsored op of a new UTC day. |
-| `0x01` | **Recovery** | Draws from a per-event budget (`recoveryEventCap`, default 200,000) that does **not** consume the daily counter — recovery must work even when the daily allowance is spent. |
+| `0x01` | **Recovery** | Draws from a per-event budget (`recoveryEventCap`, default 200,000) that does **not** consume the daily counter, recovery must work even when the daily allowance is spent. |
 | `0x02` | **First-op** | Unconditional sponsorship for an account's first-ever op (bounded by `firstOpCap`); the `hasUsedFirstOp` flag flips so it cannot be reused. |
 
 The SDK builds the tag with `packCitratePaymasterAndData({ ..., category })`
@@ -69,7 +69,7 @@ The SDK builds the tag with `packCitratePaymasterAndData({ ..., category })`
   add); recovery/first-op need no counter.
 - `remainingStandard(account)` is a read for dashboards/SDK.
 
-### Eligibility — the registry gate
+### Eligibility, the registry gate
 
 Only **registered** accounts can be sponsored. A single `registrar` address
 (typically `CitrateWalletFactory`) calls `registerWallet(account)` after a
@@ -88,7 +88,7 @@ successful deploy; `_validatePaymasterUserOp` reverts
   operator multisig).
 - `setRegistrar(addr)` rotates the registrar.
 
-## Reference — bundler topology
+## Reference, bundler topology
 
 Source: `citrate-bundler` @ `a3287de` (README + `gate/src/`).
 
@@ -96,13 +96,13 @@ Source: `citrate-bundler` @ `a3287de` (README + `gate/src/`).
 client (browser / SDK / gui-native / wallet-extension)
    │  HTTPS JSON-RPC
    ▼
-Caddy @ bundler.citrate.ai   — TLS, per-IP + per-API-key rate limit
+Caddy @ bundler.citrate.ai, TLS, per-IP + per-API-key rate limit
    ▼
-Citrate gate sidecar (Node)  — bk_ Bearer auth + paymaster pre-check
+Citrate gate sidecar (Node), bk_ Bearer auth + paymaster pre-check
    ▼
-eth-infinitism bundler v0.7  — standard ERC-4337 JSON-RPC
+eth-infinitism bundler v0.7, standard ERC-4337 JSON-RPC
    ▼
-citrate-chain RPC            — EntryPoint v0.7 on chain 40204
+citrate-chain RPC, EntryPoint v0.7 on chain 40204
 ```
 
 - Runs on its own host so a bundler outage cannot take down `auth.citrate.ai` or
@@ -113,7 +113,7 @@ citrate-chain RPC            — EntryPoint v0.7 on chain 40204
   `eth_call`s `CitratePaymaster.isRegistered(sender)` and
   `EntryPoint.balanceOf(paymaster)`, and validates the category byte. Self-paid
   ops (no paymaster) pass through untouched. **Fails open** on chain
-  unreachability — the EntryPoint re-validates on-chain, so the pre-check is an
+  unreachability, the EntryPoint re-validates on-chain, so the pre-check is an
   optimization, not a security boundary.
 
 ### Bundler API
@@ -135,7 +135,7 @@ developer. The *public* developer-facing piece (how to tag and send an op) is on
 the public [Passkeys](/aa/passkeys) page.
 
 No secrets here. No `bk_` keys, multisig addresses, deposit balances, private
-RPC/host endpoints, or droplet credentials appear on this page — those live only
+RPC/host endpoints, or droplet credentials appear on this page, those live only
 in operator config (`.env`, Caddyfile) and are never built into Codex.
 
 ## Source & verification

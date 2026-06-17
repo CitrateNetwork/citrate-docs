@@ -64,7 +64,7 @@ export default function SettingsPage() {
       {tab === "appearance" && (
         <Section title="Appearance">
           <p className="text-sm text-[var(--color-muted)]">
-            Theme & density (use the ◐ toggle in the top bar). Accent is locked to Citrate green. Full
+            Theme and density (use the theme toggle in the top bar). Accent is locked to Citrate green. Full
             controls land in S6. Current prefs:
           </p>
           <pre className="mt-2 overflow-x-auto rounded-xl border bg-[var(--color-panel)] p-3 text-xs">
@@ -100,7 +100,7 @@ export default function SettingsPage() {
               <li key={e.id} className="flex items-center gap-2 rounded-lg border bg-[var(--color-panel)] px-3 py-2 text-xs">
                 <TierChip tier={e.tier} />
                 <span className="font-mono">{e.docSlug}</span>
-                {e.disclosureAck && <span className="text-[var(--color-amber)]">disclosure ✓</span>}
+                {e.disclosureAck && <span className="text-[var(--color-amber)]">disclosure ack</span>}
                 <span className="ml-auto text-[var(--color-muted)]">{new Date(e.at).toISOString().slice(0, 16).replace("T", " ")}</span>
               </li>
             ))}

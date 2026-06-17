@@ -1,5 +1,6 @@
 import React from "react";
 import { Tier } from "@/prototype/fixtures";
+import { Icon } from "./icons";
 import { cn } from "@/lib/cn";
 
 /**
@@ -9,9 +10,9 @@ import { cn } from "@/lib/cn";
 
 const TIER_META: Record<Tier, { label: string; cls: string; icon: string }> = {
   public: { label: "Public", cls: "text-[var(--color-muted)] border-[var(--color-border)]", icon: "" },
-  commercial: { label: "Commercial", cls: "text-[var(--color-citrate-deep)] border-[color-mix(in_oklab,var(--color-citrate-deep)_40%,transparent)]", icon: "●" },
-  academic: { label: "Academic", cls: "text-[var(--color-violet)] border-[color-mix(in_oklab,var(--color-violet)_40%,transparent)]", icon: "◆" },
-  confidential: { label: "Confidential", cls: "text-[var(--color-amber)] border-[color-mix(in_oklab,var(--color-amber)_45%,transparent)]", icon: "🔒" },
+  commercial: { label: "Commercial", cls: "text-[var(--color-citrate-deep)] border-[color-mix(in_oklab,var(--color-citrate-deep)_40%,transparent)]", icon: "dot" },
+  academic: { label: "Academic", cls: "text-[var(--color-violet)] border-[color-mix(in_oklab,var(--color-violet)_40%,transparent)]", icon: "node" },
+  confidential: { label: "Confidential", cls: "text-[var(--color-amber)] border-[color-mix(in_oklab,var(--color-amber)_45%,transparent)]", icon: "lock" },
 };
 
 export function TierChip({ tier, className }: { tier: Tier; className?: string }) {
@@ -26,7 +27,7 @@ export function TierChip({ tier, className }: { tier: Tier; className?: string }
       )}
       title={`${m.label} tier`}
     >
-      <span aria-hidden>{m.icon}</span>
+      {m.icon ? <Icon name={m.icon} size={10} /> : null}
       {m.label}
     </span>
   );
