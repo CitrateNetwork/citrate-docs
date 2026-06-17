@@ -1,0 +1,10 @@
+# Citrate Codex app
+/node_modules
+/.next
+/out
+/build
+next-env.d.ts.bak
+*.tsbuildinfo
+sbom.cyclonedx.json
+.env*.local
+.DS_Store
