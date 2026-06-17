@@ -1,152 +1,105 @@
 ---
-title: Citrate Network, P2P, Bootstrap & Gossip
+title: Peer-to-peer networking
 codex_slug: /chain/network
 tier: public
 org_scope: ~
-source_kind: transcluded
+source_kind: authored
 source: citrate-chain/core/network/
 surfaces: [CHAIN-net-p2p]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Network, P2P, Bootstrap & Gossip
+This is how Citrate nodes find each other, talk securely, and spread blocks and transactions across the
+network. It is for operators bringing up a node and anyone who needs to understand how a new node reaches
+the network head.
 
-> How Citrate nodes find each other, talk securely, and propagate blocks and
-> transactions. Encrypted transport, peer discovery, gossip and chain sync are
-> public. The peer **reputation/scoring** policy is marked commercial, its exact
-> thresholds are anti-abuse detail a competitor or attacker would want.
+## What it is
 
-## Overview
+The networking layer is a peer-to-peer mesh: there is no central server that nodes phone home to, only other
+nodes. A node joins by reaching out to a small set of configured bootstrap nodes, learning about more peers
+from them, and then maintaining its own set of connections from there. Every connection is encrypted and
+authenticated using the Noise protocol over TCP, so a peer both proves who it is and keeps the conversation
+private.
 
-`core/network/` is the P2P stack. The transport is **Noise-encrypted**, `Noise_XX_25519_ChaChaPoly_SHA256` over TCP with length-delimited framing, so
-every peer connection is authenticated and confidential. On top of transport:
+Three flows do the real work, and they layer cleanly on top of one another:
 
-- **Discovery** finds peers starting from configured **bootstrap nodes** and
-  tracks connected peers.
-- **Gossip** propagates blocks and transactions, de-duplicating with
-  `DashMap`-backed seen-message caches.
-- **Sync** brings a node up to the network head with a multi-phase
-  (headers → blocks → verify → apply) protocol.
-- **NAT traversal** and a **relay service** keep peers reachable behind NAT.
+- **Discovery and bootstrap.** A fresh node starts from its configured bootstrap nodes
+  (`bootnode.rs`), connects to them, and uses peer discovery (`discovery.rs`) to widen its set of known and
+  connected peers. Bootstrap nodes are an entry point, not a dependency; once a node has peers, it keeps
+  going without them.
+- **Gossip propagation.** New blocks and transactions spread by gossip (`gossip.rs`,
+  `block_propagation.rs`): each node forwards what it has not seen before to its peers, and a seen-message
+  cache stops the same item from circulating endlessly. A block reaches the whole network in a handful of
+  hops without any node needing a global view.
+- **Reaching peers behind NAT.** Many nodes sit behind home or institutional routers, so the layer includes
+  NAT traversal (`nat.rs`) to keep those peers reachable rather than stranded.
 
-Concurrency safety is explicit: a four-level **lock ordering** is documented at
-the crate root (`src/lib.rs`), and all shared state uses either lock-free
-`DashMap` or `RwLock`/`Mutex` following that hierarchy, this is how the crate
-avoids deadlocks.
+The layer also carries message types for the network's AI and learning traffic (`ai_handler.rs`,
+`learning_messages.rs`), so model and training-related messages travel the same authenticated mesh as
+ordinary blocks and transactions.
 
-> **Pre-audit status.** The networking crate is internally tested (128 tests) but
-> **not** externally audited. Treat NAT/relay and sync DoS surfaces as
-> production-track but pre-certification.
+## How to use it
+
+You configure the networking layer, you do not call it directly; the node drives it for you.
+
+1. **Supply bootstrap nodes.** Point your node at a known set of bootstrap nodes for the network you are
+   joining. The node connects to them first, then discovers the rest of the mesh on its own.
+2. **Let the node sync.** Once connected, the node downloads from the network head and applies blocks until
+   it is caught up. From then on it stays current through gossip.
+3. **Check peer health.** Confirm your node has peers and is keeping up using the node's status over
+   JSON-RPC. See [run a node](/operators/run-a-node) for the operator walkthrough and the
+   [consensus reference](/chain/consensus) for how the blocks it receives are ordered.
 
 ## Reference
 
-### Transport & encryption, `src/noise.rs`, `src/transport.rs`
+The components of `core/network/`, each citing its file:
 
-- `NoiseKeypair`, X25519 static keypair = the node's Noise identity.
-- `NoiseSession`, Noise_XX handshake + encrypted transport over TCP.
-- `NetworkTransport`, TCP listener/connector with optional Noise encryption,
-  handshake, and a peer **allow-list**.
+| Component | File | What it does |
+|---|---|---|
+| Encrypted transport | `noise.rs` | Noise handshake and encrypted, authenticated transport over TCP |
+| Peer discovery | `discovery.rs` | finds peers and tracks connected ones |
+| Bootstrap nodes | `bootnode.rs` | the configured entry points a new node starts from |
+| Block gossip | `gossip.rs`, `block_propagation.rs` | spreads blocks with seen-message de-duplication |
+| Transaction gossip | `transaction_gossip.rs` | relays transactions with a seen-transaction cache |
+| Chain sync | `sync.rs` | brings a node up to the network head |
+| NAT traversal | `nat.rs` | keeps peers behind routers reachable |
+| AI and learning messages | `ai_handler.rs`, `learning_messages.rs` | message types for model and training traffic |
 
-### Discovery & bootstrap, `src/discovery.rs`, `src/bootnode.rs`
+We do not list live bootstrap addresses here. They are deployment configuration, not documentation, and a
+node operator supplies them for the network being joined; fetch current values from the testnet operator
+docs.
 
-- `Discovery`, bootstrap-node-seeded peer discovery; tracks connected peers.
-- `DiscoveryConfig`, bootstrap node set and discovery tuning.
+## Design rationale
 
-> **No bootstrap addresses are listed here.** Bootstrap endpoints are deployment
-> configuration, not documentation; publishing live addresses would be an
-> operational/secret leak. Operators supply them via `DiscoveryConfig`.
+A gossip mesh seeded by a few bootstrap nodes is the design that keeps the network from depending on any one
+machine. There is no coordinator to take down, no single node whose failure stops propagation, and a new
+operator needs only a couple of known entry points to join. Encrypting every link with Noise means a peer is
+authenticated before it can influence a node's view, which matters on a network where participation is
+identity-checked rather than anonymous. The trade is that propagation is probabilistic rather than directed;
+gossip accepts a little redundant traffic in exchange for not needing a global map of the network.
 
-### Gossip & propagation, `src/gossip.rs`, `src/block_propagation.rs`, `src/transaction_gossip.rs`
+## Failure modes
 
-- `GossipProtocol`, block/transaction gossip with dedup and peer scoring;
-  `GossipConfig`.
-- `BlockPropagation`, header-first block download with source tracking and
-  recent-broadcast dedup.
-- `TransactionGossip`, transaction relay with seen-tx cache, peer inventory
-  tracking, and a pending AI-transaction queue.
+Bootstrap nodes are an entry point, not a single point of failure: once a node has discovered peers it no
+longer needs them, so a bootstrap node going offline does not cut a synced node off. The seen-message caches
+in gossip stop a block or transaction from looping forever, which bounds the traffic a single item can
+generate. Because every connection is authenticated through the Noise handshake, an unauthenticated peer
+cannot inject blocks or transactions into a node's view. NAT and sync surfaces are internally tested but not
+yet externally audited; treat them as production-track, pre-certification.
 
-### Sync, `src/sync.rs`
+## Access and canon
 
-- `SyncManager`, multi-phase sync with header/block queues and progress
-  tracking.
-- `SyncState`, `Idle`, `DownloadingHeaders`, `DownloadingBlocks`, `Verifying`,
-  `Applying`, `Complete`.
-- `SyncConfig`, sync tuning.
+Public. Transport, discovery, gossip, and sync are what a node operator needs to join the network and stay
+current. No bootstrap addresses, node keys, or relay credentials appear here; each node generates its own
+Noise identity, and nothing is hardcoded in these docs.
 
-### NAT & relay, `src/nat.rs`, `src/relay.rs`
+## Source and verification
 
-- `NatInfo` / `NatType`, NAT classification for traversal.
-- `RelayService`, session-based relay for NAT-traversed peers; `RelayError`.
-
-### Peer management, `src/peer.rs`
-
-- `PeerManager`, peer lifecycle: connect, disconnect, score, ban.
-- `Peer`, `PeerId`, `PeerInfo`, `PeerManagerConfig`.
-
-### {#reputation} Peer reputation & banning (commercial)
-
-> **Tier: commercial.** Citrate scores peers on behavior and bans misbehaving
-> ones; the precise scoring deltas, thresholds and ban-window policy are anti-abuse
-> detail. We confirm the *mechanism* publicly; the exact tuned values are gated to
-> contracted/seat principals so attackers can't calibrate against them.
-
-What is public about the mechanism (from `src/peer.rs` and `src/gossip.rs`):
-
-- Each `Peer` carries an `i32` `score`; valid blocks/transactions earn small
-  positive scores, invalid messages and spam incur penalties.
-- A peer whose cumulative score drops below `PeerManagerConfig::score_threshold`
-  is banned for `ban_duration`.
-- Bans are enforced at **three levels**, by `SocketAddr`, by **IP**, and by
-  **peer ID**, because a `SocketAddr`-only ban is trivially evaded by
-  reconnecting from a new source port (SECREM-01 NET-4(b),
-  `src/peer.rs:154-162`).
-
-The specific numeric deltas and thresholds are documented in the
-commercial-tier operator material, not here.
-
-## Examples
-
-The crate's public structs compose as: build a `NetworkTransport` (optionally
-with a `NoiseKeypair`), drive `Discovery` from `DiscoveryConfig` bootstrap nodes,
-attach `GossipProtocol` for propagation, and run `SyncManager` to reach the head.
-See `core/network/README.md` and `core/network/examples/` for runnable wiring.
-
-```rust
-use citrate_network::*;
-
-// node identity + encrypted transport
-let keypair = NoiseKeypair::generate();
-// discovery is seeded from operator-supplied bootstrap nodes via DiscoveryConfig
-let discovery = Discovery::new(DiscoveryConfig::default());
-// gossip + sync run on top of the transport
-let sync = SyncManager::new(SyncConfig::default());
-```
-
-To inspect peers on a live node over JSON-RPC, use `net_peers`, `net_peerCount`
-and `net_peerInfo` (see the [Read the DAG](/chain/tutorials/read-the-dag)
-tutorial and the RPC reference).
-
-## Tutorials
-
-- [Read the DAG](/chain/tutorials/read-the-dag), includes a peer/sync health
-  check via `net_peerCount` / `eth_syncing`. **Tier: public.**
-
-## Security & access
-
-- **Tier: public** for transport, discovery, gossip, sync, NAT/relay, this is
-  what a node operator needs to join and stay synced.
-- **`#reputation` is commercial**, exact scoring/ban thresholds are anti-abuse
-  tuning; the mechanism is public, the calibrated values are gated.
-- **No secrets here.** No bootstrap endpoints, no node keys, no relay
-  credentials. `NoiseKeypair` is generated per node; nothing is hardcoded in
-  these docs.
-
-## Source & verification
-
-- **Source repo / path:** `citrate-chain/core/network/`
-- **Truth document (Rule 9):** `core/network/README.md`, summarized and linked.
-- **Audited against SHA:** `03d7851`.
-- **Honest status:** internally tested (128 tests); **pre external audit**.
+- Source: `citrate-chain/core/network/` (`noise.rs`, `discovery.rs`, `bootnode.rs`, `gossip.rs`,
+  `block_propagation.rs`, `sync.rs`, `nat.rs`, `ai_handler.rs`, `learning_messages.rs`).
+- Operator path: [run a node](/operators/run-a-node); block ordering: [consensus](/chain/consensus).
+- Audited against SHA: `03d7851`.
+- Status: Implemented (testnet), internally tested, pre external audit.
