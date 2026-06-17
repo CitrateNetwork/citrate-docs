@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* Class-based theme. Default is paper/light (the Citrate document feel); dark = deep evergreen. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ───────────────────────────────── Citrate design tokens (from CitrateLabs Design System) */
+@theme {
+  /* surfaces (paper, light default) */
+  --color-canvas: #f4f1ea;     /* paper — page */
+  --color-panel: #faf8f3;      /* paper-2 — raised card */
+  --color-elevated: #ffffff;   /* paper-pure — instruments/dialogs */
+  --color-border: #d9dad4;     /* stone-200 — hairlines */
+  --color-border-strong: #0e0f0c;
+  --color-fg: #0e0f0c;         /* ink */
+  --color-muted: #84867f;      /* stone-500 */
+
+  /* brand accents */
+  --color-citrate: #8ecc09;        /* primary — action/proof; fills only */
+  --color-citrate-deep: #5a8205;   /* AA green text on paper, hover */
+  --color-citrate-fg: #0e0f0c;     /* ink text on green button */
+  --color-citrate-tint: #e8f3c6;
+  --color-yellow: #ffbd10;         /* evidence / pending */
+  --color-evergreen: #0f2a1a;      /* trust anchor / dark surfaces */
+
+  /* tier signal colors (legible on paper) */
+  --color-amber: #b07b00;      /* Confidential */
+  --color-violet: #1b4965;     /* Academic (in-palette navy/info) */
+  --color-danger: #a72414;     /* brick */
+
+  /* type families */
+  --font-display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Geist", "Söhne", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* restrained radii (remaps Tailwind rounded-* to the design scale) */
+  --radius-sm: 4px;
+  --radius-md: 6px;   /* buttons, inputs */
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;  /* cards */
+  --radius-3xl: 12px; /* modals */
+}
+
+/* dark = deep evergreen surfaces */
+.dark {
+  --color-canvas: #0f2a1a;
+  --color-panel: #14301f;
+  --color-elevated: #1a3b27;
+  --color-border: #2c5038;
+  --color-fg: #f4f1ea;
+  --color-muted: #9bb0a2;
+  --color-citrate-deep: #a6e016;
+  --color-amber: #ffbd10;
+  --color-violet: #7fb2d6;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv01", "kern";
+  }
+  * { border-color: var(--color-border); }
+  ::selection { background: var(--color-yellow); color: #0e0f0c; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+}
+
+/* ─────────────────── utilities: eyebrow / compliance label (the brand's mono signature) */
+@layer components {
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-muted);
+  }
+  .font-display { font-family: var(--font-display); }
+  .lattice-dots {
+    background-image: radial-gradient(circle at 1px 1px, rgba(14,15,12,.10) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .dark .lattice-dots {
+    background-image: radial-gradient(circle at 1px 1px, rgba(205,231,214,.14) 1px, transparent 1px);
+  }
+  .lattice-grid {
+    background-image:
+      linear-gradient(to right, rgba(14,15,12,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14,15,12,.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
+/* ───────────────────────────────── Markdown reading surface (serif display, document feel) */
+@layer components {
+  .md { max-width: 72ch; line-height: 1.65; font-size: 16px; }
+  .md h1 {
+    font-family: var(--font-display); font-weight: 400; font-size: 2.25rem;
+    line-height: 1.1; letter-spacing: -0.022em; margin: 0 0 1rem;
+    font-variation-settings: "opsz" 32;
+  }
+  .md h2 {
+    font-family: var(--font-display); font-weight: 460; font-size: 1.5rem;
+    line-height: 1.15; letter-spacing: -0.011em; margin: 2rem 0 0.75rem; scroll-margin-top: 5rem;
+    font-variation-settings: "opsz" 24;
+  }
+  .md h3 { font-family: var(--font-sans); font-weight: 600; font-size: 1.15rem; margin: 1.5rem 0 0.5rem; }
+  .md p { margin: 0.85rem 0; }
+  .md ul, .md ol { margin: 0.85rem 0; padding-left: 1.4rem; }
+  .md ul { list-style: disc; }
+  .md ol { list-style: decimal; }
+  .md li { margin: 0.3rem 0; }
+  .md a { color: var(--color-citrate-deep); text-underline-offset: 3px; text-decoration: underline; }
+  .md blockquote {
+    border-left: 2px solid var(--color-border); padding-left: 1rem; margin: 1rem 0; color: var(--color-muted);
+  }
+  .md code:not(pre code) {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--color-panel); border: 1px solid var(--color-border);
+    border-radius: 4px; padding: 0.1rem 0.35rem;
+  }
+  .md pre {
+    font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6;
+    background: var(--color-elevated); border: 1px solid var(--color-border);
+    border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0;
+  }
+  .md table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .md th, .md td { border: 1px solid var(--color-border); padding: 0.4rem 0.6rem; text-align: left; }
+}
+
+/* streamed-answer cursor */
+@keyframes codex-blink { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }
+.codex-cursor::after { content: "▍"; animation: codex-blink 1s step-end infinite; color: var(--color-citrate-deep); }

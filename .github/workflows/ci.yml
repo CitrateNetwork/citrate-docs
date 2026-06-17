@@ -1,6 +1,10 @@
-name: Structure check
+name: ci
+
+# Tier-1 CI gate for Citrate Codex. Build + typecheck + the ConfidentialNeverInBuild invariant
+# (verify:bundle) + SBOM. A failure here blocks merge/release.
 on:
-  push: { branches: [main] }
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -8,18 +12,24 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Verify README and at least one content file
-        run: |
-          test -f README.md || { echo "README.md missing"; exit 1; }
-          count=$(find . -type f -name '*.md' | wc -l)
-          echo "Markdown files: $count"
-          if [[ $count -lt 2 ]]; then
-            echo "Too few content files — repo may be empty"
-            exit 1
-          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build (prebuild=content, postbuild=verify:bundle)
+        run: npm run build
+      - name: Confidential-never-in-build gate
+        run: npm run verify:bundle
+      - name: SBOM (CycloneDX)
+        run: npm run sbom
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codex-sbom
+          path: sbom.cyclonedx.json
