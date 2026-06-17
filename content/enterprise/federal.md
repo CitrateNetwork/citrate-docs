@@ -1,5 +1,5 @@
 ---
-title: Federal & Defense (CMMC / FedRAMP / ITAR), Gated
+title: Federal and On-Prem Isolation (Gated)
 codex_slug: /enterprise/federal
 tier: public
 org_scope: ~
@@ -7,33 +7,33 @@ source_kind: gated
 source: citrate-compliance + nist-agent
 surfaces: [ENT-federal]
 audited_against_sha: 8757357
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Specified
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Federal & Defense (CMMC / FedRAMP / ITAR)
+This page confirms that a federal and on-prem isolation package exists and explains how to request it. The package is confidential; it is never built into these public docs, and nothing here is a claim of certification or authorization.
 
-> Public-safe stub. The federal/defense package exists but is **confidential**; this page only
-> confirms it exists and how to request access.
+## What it is
 
-For federal and defense engagements, Citrate maintains a confidential package covering CMMC 2.0
-(L1/L2 against NIST 800-171 r2), the FedRAMP authorization pathway (NIST 800-53), and the
-ITAR/EAR export-control overlay. Citrate ships **on-premise / air-gap capable**, so customers can
-deploy within their own authorization boundary; the vendor performs no data services and is not
-itself within that boundary (see [Compliance posture](/enterprise/compliance)). The specific
-control implementations, SPRS detail, SSP bodies, ODVs, sponsor/3PAO status, and any
-CUI/CMMC-specific particulars are **confidential** and **gated** (admins, contracted assessors,
-and issued auditors only), they are **never built into the public docs**. No CMMC scores, control
-detail, sponsor names, or federal-specific specifics are authored here.
+For federal and defense engagements, Citrate maintains a confidential package covering the federal control families, the authorization pathway, and the export-control overlay that those engagements require. Citrate runs on-premise on Citrate Ground and can run air-gapped, so a customer deploys inside their own authorization boundary, on their own hardware. The vendor performs no data services and is not itself inside that boundary.
 
-**Honest status note:** these frameworks are *in progress*, not certified, see the sanitized
-[Compliance posture](/enterprise/compliance). Nothing here is a claim of ATO, CMMC certification,
-or attestation.
+The package ties to the air-gapped deployment described for [Citrate NIST Agent](/apps/nist-agent), which is the surface that runs against the federal control corpus on Citrate Ground. The detail behind all of this, the control implementations, the system security plan bodies, and any sponsor or assessor particulars, stays in the private home. No scores, control detail, sponsor names, or customer specifics appear on this page or anywhere in the public docs.
 
-**Request access:** federal contracting officers, sponsors, and assessors request the package
-under NDA through the commercial / compliance team; it is served at request time from its private
-home (`citrate-compliance` + the NIST control corpus), never copied into this tree.
+These frameworks are in progress, not certified. Nothing on this page is a claim of authorization to operate, of certification, or of attestation. The honest public summary is at [Compliance posture](/enterprise/compliance).
 
-- Registry row: `ENT-federal` (tier `confidential`, source_kind `gated`).
-- This stub audited against `citrate-compliance` SHA `8757357`.
+## How to request access
+
+Access is for people with a contractual reason to read the package: federal contracting officers, sponsors, contracted assessors, and issued auditors, each under a non-disclosure agreement.
+
+1. Ask through your commercial or compliance contact at Citrate.
+2. We confirm your role and put the non-disclosure agreement in place.
+3. We grant time-bound access to the package in its private home.
+
+## Access and canon
+
+The package is confidential. It is served at request time from its private home, under a non-disclosure agreement, to named recipients only. It is never copied into this documentation tree, and the public build never includes it. Every access is logged. The sanitized public summary, which anyone may read, is at [Compliance posture](/enterprise/compliance); for the schools deployment context see [Citrate Schools](/enterprise/k12).
+
+## Source and verification
+
+Private source: the `citrate-compliance` corpus and the `nist-agent` control corpus. Audited against `citrate-compliance` SHA `8757357`. Status: Specified (the package and the air-gapped deployment are designed and documented; the frameworks it targets are in progress, not certified, with no scores shown here).
