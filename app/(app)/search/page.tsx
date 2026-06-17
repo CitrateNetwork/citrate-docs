@@ -14,7 +14,7 @@ export default function SearchPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="mb-4 text-2xl font-bold">Search</h1>
+      <h1 className="font-display mb-4 text-2xl font-bold">Search</h1>
       <input
         autoFocus
         value={q}

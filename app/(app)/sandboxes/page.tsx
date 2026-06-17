@@ -12,7 +12,7 @@ const SANDBOXES = [
 export default function SandboxesPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="mb-1 text-2xl font-bold">Sandboxes</h1>
+      <h1 className="font-display mb-1 text-2xl font-bold">Sandboxes</h1>
       <p className="mb-6 text-sm text-[var(--color-muted)]">
         Live testnet (chain 40204), read-mostly, fail-closed. Public — no login required.
       </p>
