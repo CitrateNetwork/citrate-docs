@@ -1,108 +1,122 @@
 ---
-title: Python SDK (citrate-ai-sdk)
+title: Python SDK
 codex_slug: /sdks/python
 tier: public
 org_scope: ~
-source_kind: transcluded
+source_kind: authored
 source: citrate-sdk-python/citrate_sdk/
 surfaces: [SDK-PY-client, SDK-PY-managers, SDK-PY-cli]
 audited_against_sha: 0b5c642
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Python SDK (`citrate-ai-sdk`)
+The Python client for Citrate, for data and ML teams who already live in Python. It reads account state,
+deploys models, runs inference, and drives the economic and education managers against a Citrate node. It
+is a secondary client. The canonical, fullest SDK is the JavaScript one at [JavaScript SDK](/sdks/js); read
+this page when Python is where your work already is, and expect it to lag.
 
-> The Python client for the Citrate distributed-AI network, deploy models, run
-> (optionally encrypted) inference, read balances/nonces, and drive the
-> Learning / Staking / Classroom / Compute / Treasury / Farming managers. For
-> Python developers and data/ML teams.
+## What it is
 
-## Overview
+`citrate-ai-sdk` is a thin Python layer over a Citrate node's JSON-RPC. You create one `CitrateClient`,
+bound to an RPC endpoint and, for writes, a private key. The client speaks JSON-RPC to the node and exposes
+the model, inference, and account methods directly. The economic and education surfaces, learning, staking,
+classroom, compute, treasury, and farming, are separate manager classes you construct yourself, passing the
+client's RPC callable and the relevant contract addresses.
 
-`citrate-ai-sdk` is the **non-canonical** Python SDK for Citrate. The canonical
-SDK is the TypeScript `citrate-js` SDK; the Python SDK is opt-in and may lag the
-canonical one. This is stated in the package metadata itself
-(`pyproject.toml` `description`, and `citrate-sdk-python/NON_CANONICAL.md`).
+Two facts about maturity belong up front, because the package states them about itself. The SDK is
+non-canonical: its own `pyproject.toml` description and its `NON_CANONICAL.md` say the canonical SDK is the
+JavaScript `citrate-js`, that features land there first, and that Python may lag by an unbounded amount. And
+it is early: the `pyproject.toml` classifier is `Development Status :: 2 - Pre-Alpha`. Treat every surface
+here as pre-audit and subject to change. New work should start on the [JavaScript SDK](/sdks/js); reach for
+Python when a Python codebase is the reason you are here.
 
-The package is in early development. Its `pyproject.toml` classifier is
-`Development Status :: 2 - Pre-Alpha`, treat every surface here as
-**experimental and pre-audit**.
+## How to use it
 
-Mental model: you create one `CitrateClient` bound to an RPC endpoint and
-(optionally) a private key. The client talks JSON-RPC to a Citrate node and
-exposes core model/inference/account methods directly. The economic and
-education **managers** are separate classes that you construct yourself,
-passing them the client's `_rpc_call` callable plus the relevant contract
-addresses.
+1. Install the package. The distribution is `citrate-ai-sdk`; the import name is `citrate_sdk`.
 
-## Install / Setup
+   ```bash
+   pip install citrate-ai-sdk
+   ```
 
-- **PyPI package name:** `citrate-ai-sdk` (import name is `citrate_sdk`)
-- **Version (audited):** `0.5.0`
-- **Python:** `>=3.10` (classifiers list 3.10 / 3.11 / 3.12)
+2. Point the client at a node. Without a private key the client is read-only, which is all you need for
+   balances, nonces, and model listings.
 
-```bash
-pip install citrate-ai-sdk
-```
+   ```python
+   from citrate_sdk import CitrateClient
 
-> Source-of-truth: `citrate-sdk-python/pyproject.toml`
-> (`[project] name`, `version`, `requires-python`, `classifiers`).
+   client = CitrateClient(rpc_url="https://rpc.example")
+   print("chain id:", client.get_chain_id())
+   ```
 
-Runtime dependencies (from `pyproject.toml`): `requests~=2.33`,
-`cryptography~=46.0`, `eth-account~=0.9`, `web3~=7.15`, `numpy~=2.0`,
-`typing-extensions~=4.0`. Optional extras: `[dev]`, `[docs]`.
+3. Supply a key for writes. Pass it through the environment, never in source. A remote `http://` endpoint
+   raises a cleartext-transport warning, because a signed transaction would cross the wire in the clear;
+   `localhost` http is allowed silently. Pass `allow_insecure_http=True` only when you mean plaintext to a
+   remote host.
 
-Configuration is via constructor args or environment variables used by the
-examples/tests: `CITRATE_RPC_URL`, `CITRATE_CHAIN_ID`, `CITRATE_PRIVATE_KEY`.
-**Never commit a private key**, pass it through the environment (see Security
-& access below).
+   ```python
+   import os
+   from citrate_sdk import CitrateClient
 
-```python
-from citrate_sdk import CitrateClient
+   client = CitrateClient(
+       rpc_url=os.environ["CITRATE_RPC_URL"],
+       private_key=os.environ["CITRATE_PRIVATE_KEY"],
+   )
+   ```
 
-client = CitrateClient(
-    rpc_url="https://rpc.example",   # your node's RPC endpoint
-    private_key=None,                 # read-only if omitted
-)
-```
+4. Use a manager when you need an economic or education surface. Managers are not attributes of the client;
+   you construct them with the client's `_rpc_call` callable and the addresses they act on.
 
-A remote `http://` endpoint raises a cleartext-transport warning (SECREM-01
-WEB-4); `localhost` http is allowed silently. Pass `allow_insecure_http=True`
-only when you intend plaintext to a remote host
-(`citrate_sdk/client.py:31`, `citrate_sdk/_url_security.py`).
+   ```python
+   from citrate_sdk import FarmingManager
+
+   farming = FarmingManager(
+       client._rpc_call,
+       contract_addresses={"farming": "0xFarmingContract"},
+   )
+   for row in farming.get_leaderboard(count=10):
+       print(row)
+   ```
+
+The full install-to-inference walkthrough is in [Python quickstart](/sdks/python/tutorials/python-quickstart).
 
 ## Reference
 
-### SDK-PY-client, `CitrateClient`
+The surface below is verified against `citrate-sdk-python` at `0b5c642`. Distribution name `citrate-ai-sdk`,
+version `0.5.0`, `requires-python >= 3.10`. Runtime dependencies, from `pyproject.toml`: `requests~=2.33`,
+`cryptography~=46.0`, `eth-account~=0.9`, `web3~=7.15`, `numpy~=2.0`, `typing-extensions~=4.0`. Optional
+extras: `dev`, `docs`. Configuration reads `CITRATE_RPC_URL`, `CITRATE_CHAIN_ID`, and `CITRATE_PRIVATE_KEY`
+in the examples and tests.
 
-Source: `citrate-sdk-python/citrate_sdk/client.py` (class `CitrateClient`).
-Exported from `citrate_sdk/__init__.py`.
+### CitrateClient
+
+Source: `citrate_sdk/client.py` (class `CitrateClient`), exported from `citrate_sdk/__init__.py`.
 
 | Method | Signature | Notes |
 |---|---|---|
 | `__init__` | `(rpc_url="http://localhost:8545", private_key=None, allow_insecure_http=False)` | `client.py:31`. Read-only without a key. |
-| `get_chain_id()` | `-> int` | `eth_chainId` (`client.py:103`). |
-| `get_balance(address)` | `-> int` | wei; `eth_getBalance` (`client.py:107`). |
-| `get_nonce(address)` | `-> int` | pending nonce; `eth_getTransactionCount` (`client.py:112`). |
-| `deploy_model(model_path, config)` | `-> ModelDeployment` | requires a key; hashes + (optionally) encrypts + IPFS-uploads + deploys via precompile `0x…0100` (`client.py:117`). |
-| `inference(model_id, input_data, encrypted=False, max_gas=1000000, recipient_public_key=None)` | `-> InferenceResult` | encrypted path **fails closed** without `recipient_public_key` (`client.py:192`). |
-| `get_model_info(model_id)` | `-> Dict` | `citrate_getModel`; raises `ModelNotFoundError` (`client.py:267`). |
-| `list_models(owner=None, limit=100)` | `-> List[Dict]` | `citrate_listModels` (`client.py:277`). |
-| `purchase_model_access(model_id, payment_amount)` | `-> str` | requires a key; access-control precompile (`client.py:282`). |
+| `get_chain_id()` | `-> int` | `eth_chainId`, `client.py:103`. |
+| `get_balance(address)` | `-> int` | wei, `eth_getBalance`, `client.py:107`. |
+| `get_nonce(address)` | `-> int` | pending nonce, `eth_getTransactionCount`, `client.py:112`. |
+| `deploy_model(model_path, config)` | `-> ModelDeployment` | needs a key; hashes, optionally encrypts, uploads to IPFS, deploys via precompile `0x...0100`, `client.py:117`. |
+| `inference(model_id, input_data, encrypted=False, max_gas=1000000, recipient_public_key=None)` | `-> InferenceResult` | precompile `0x...0101`; the encrypted path fails closed without `recipient_public_key`, `client.py:192`. |
+| `get_model_info(model_id)` | `-> Dict` | `citrate_getModel`, raises `ModelNotFoundError`, `client.py:267`. |
+| `list_models(owner=None, limit=100)` | `-> List[Dict]` | `citrate_listModels`, `client.py:277`. |
+| `purchase_model_access(model_id, payment_amount)` | `-> str` | needs a key; access-control precompile `0x...0104`, `client.py:282`. |
 
-Signing binds `chainId` (EIP-155, RM-G.4) so a signature cannot be replayed on
-another network (`client.py:312` `_eip155_chain_id`, `client.py:341`). IPFS
-upload **fails closed** rather than fabricating a fallback CID (`client.py:298`).
+Signing binds `chainId` under EIP-155 (`_eip155_chain_id`, `client.py:312`) so a signature cannot be replayed
+on another network. IPFS upload fails closed rather than fabricating a fallback CID (`client.py:298`). A
+private key creates a `KeyManager` on `client.key_manager` (`citrate_sdk/crypto.py`), which exposes
+`get_address()`, `get_private_key()`, and the ECDH helpers used by encrypted inference.
 
-### SDK-PY-managers, economic & education managers
+### Economic and education managers
 
-These are separate classes, **not** attributes of `CitrateClient`. Each takes
-a `rpc_call` callable (pass `client._rpc_call`), an optional `default_account`
-(required for writes), and a `contract_addresses` dict. Constructors share the
-shape `(rpc_call, default_account=None, gas_limit=…, gas_price="0x3b9aca00",
-contract_addresses=None)`.
+These are separate classes, not attributes of `CitrateClient`. Each takes the `_rpc_call` callable, an
+optional `default_account` (required for writes), `gas_limit`, `gas_price`, and the addresses it acts on.
+Most take a `contract_addresses` dict; `StakingManager` and `ClassroomManager` instead take a single
+`staking_address` or `classroom_address`. Writes raise `ConfigurationError` when `default_account` is unset;
+read methods are `eth_call`-only and need no account.
 
 | Manager | Source | Selected methods |
 |---|---|---|
@@ -113,80 +127,55 @@ contract_addresses=None)`.
 | `TreasuryManager` | `treasury.py:60` | `deposit_stablecoin`, `purchase_compute_credits`, `get_credit_balance`, `estimate_calls_remaining`, `get_treasury_value`, `get_epoch_revenue`, `get_current_epoch`, `get_stablecoin_balance`, `get_total_distributed`, `get_credit_price_usd` |
 | `FarmingManager` | `farming.py:56` | `get_my_score`, `get_my_share`, `get_leaderboard`, `claim`, `has_claimed`, `get_distribution_info`, `is_in_snapshot`, `get_claimed_amount` |
 
-All six classes are re-exported from `citrate_sdk/__init__.py` (`__all__`).
-Shared data types (`LearningPool`, `CycleStatus`, `ComputeJob`,
-`ProviderInfo`, `StakingInfo`, …) live in `citrate_sdk/types.py`.
+All six classes are re-exported from `citrate_sdk/__init__.py`. Shared data types (`LearningPool`,
+`CycleStatus`, `ComputeJob`, `ProviderInfo`, `StakingInfo`, and the rest) live in `citrate_sdk/types.py`;
+model types (`ModelConfig`, `ModelDeployment`, `InferenceResult`, `ModelType`, `AccessType`) live in
+`citrate_sdk/models.py`.
 
-Writes raise `ConfigurationError` when `default_account` is unset
-(`learning.py:159`); read methods are `eth_call`-only and need no account.
+### The citrate console script
 
-### SDK-PY-cli, `citrate` console script
+`pyproject.toml` declares a console script under `[project.scripts]`, `citrate = "citrate_sdk.cli:main"`.
+That entry point does not resolve. At the audited SHA there is no `citrate_sdk/cli.py` and no `main()`
+anywhere in the package, and no `argparse` or `click` dependency. Installing the package and running
+`citrate` raises `ModuleNotFoundError: No module named 'citrate_sdk.cli'`. The CLI is declared but not
+implemented; until a CLI module lands, use the `CitrateClient` API directly. Status for this surface:
+Specified, not Implemented.
 
-Source of declaration: `citrate-sdk-python/pyproject.toml`
-`[project.scripts]` → `citrate = "citrate_sdk.cli:main"`.
+## Design rationale
 
-> **Status: declared but not implemented (broken entry point).** As of the
-> audited SHA there is **no `citrate_sdk/cli.py`** and **no `main()`** anywhere
-> in the package (no `argparse`/`click` either). The console-script target
-> `citrate_sdk.cli:main` therefore does not resolve, installing the package
-> and running `citrate` raises `ModuleNotFoundError: No module named
-> 'citrate_sdk.cli'`. This is recorded as a registry correction below. Until
-> a CLI module lands, use the `CitrateClient` API directly (see the
-> quickstart tutorial).
+The managers are constructed separately, rather than hung off the client, because each binds to a contract
+address that varies by deployment and that the client has no business knowing by default. Passing
+`_rpc_call` keeps a single transport and a single signing path while letting a caller wire up only the
+surfaces they use. The harder edges, EIP-155 chain binding on every signature and a fail-closed IPFS upload,
+are there so a transaction signed for Citrate cannot be replayed elsewhere and so a deploy never reports a
+fabricated content hash. The cost of being a secondary client is real: this SDK trails the JavaScript one,
+and we say so rather than paper over it.
 
-## Examples
+## Failure modes
 
-Runnable examples ship in the repo: `citrate-sdk-python/examples/`
-(`basic_usage.py`, `encrypted_inference.py`, `marketplace_demo.py`).
+- Encrypted inference without `recipient_public_key` fails closed (`client.py:208`). The symmetric key is
+  ECDH-wrapped to the recipient and is never shipped in cleartext on public calldata.
+- A signed transaction binds `chainId` via EIP-155, so it cannot be replayed on a different network.
+- IPFS upload failures propagate; `deploy_model` never invents a fallback CID (`client.py:298`).
+- A manager write without `default_account` raises `ConfigurationError`. Reads are `eth_call`-only and need
+  no account.
+- A remote `http://` RPC endpoint raises a cleartext-transport warning. Use `https://`, or set
+  `allow_insecure_http=True` only when you intend plaintext to a remote host.
+- Running the `citrate` console script raises `ModuleNotFoundError`; the CLI is not implemented.
 
-Read-only connect:
+## Access and canon
 
-```python
-from citrate_sdk import CitrateClient
+Public. This is open SDK reference a developer needs to build on Citrate, so no tier gate applies. No keys,
+mnemonics, or private endpoints appear here; private keys are supplied at runtime through `private_key=` or
+`CITRATE_PRIVATE_KEY` and must never be committed. Every node and machine on the public network is
+identity-checked through CLEAR before it can take part; the SDK itself holds no such data.
 
-client = CitrateClient(rpc_url="https://rpc.example")
-print("chain:", client.get_chain_id())
-print("balance (wei):", client.get_balance("0xYourAddress"))
-```
+## Source and verification
 
-Using a manager (Farming, read-only leaderboard):
-
-```python
-from citrate_sdk import CitrateClient, FarmingManager
-
-client = CitrateClient(rpc_url="https://rpc.example")
-farming = FarmingManager(
-    client._rpc_call,
-    contract_addresses={"farming": "0xFarmingContract"})
-for row in farming.get_leaderboard(count=10):
-    print(row)
-```
-
-See the full walkthrough in
-[Python quickstart](/sdks/python/tutorials/python-quickstart).
-
-## Tutorials
-
-- [Python quickstart](/sdks/python/tutorials/python-quickstart), install,
-  connect, read account state, deploy + run inference.
-
-## Security & access
-
-**Tier: public.** This is open SDK reference a developer needs to build, so it
-is public per the tier decision tree (§3.6 of the authoring rules).
-
-**No secrets here.** No keys, mnemonics, or private endpoints appear on this
-page. Private keys are supplied at runtime via `private_key=` or the
-`CITRATE_PRIVATE_KEY` env var and must never be committed. Remote plaintext
-`http://` RPC triggers a transport-security warning by design.
-
-## Source & verification
-
-- **Source repo:** `citrate-sdk-python`
-- **Paths:** `citrate_sdk/client.py`, `citrate_sdk/learning.py`,
-  `citrate_sdk/compute.py`, `citrate_sdk/treasury.py`,
-  `citrate_sdk/farming.py`, `citrate_sdk/types.py`, `citrate_sdk/__init__.py`,
-  `pyproject.toml`, `examples/`
-- **Audited against SHA:** `0b5c642`
-- **Honest status:** Pre-Alpha, pre-audit, non-canonical (canonical SDK is
-  `citrate-js`). The `citrate` CLI surface is **declared but not implemented**.
+- Source repo: `citrate-sdk-python`.
+- Paths: `citrate_sdk/client.py`, `citrate_sdk/learning.py`, `citrate_sdk/compute.py`,
+  `citrate_sdk/treasury.py`, `citrate_sdk/farming.py`, `citrate_sdk/crypto.py`, `citrate_sdk/types.py`,
+  `citrate_sdk/models.py`, `citrate_sdk/__init__.py`, `pyproject.toml`, `examples/`, `NON_CANONICAL.md`.
+- Audited against SHA: `0b5c642`.
+- Status: Implemented, pre-audit, non-canonical (the canonical SDK is the [JavaScript SDK](/sdks/js)). The
+  `citrate` console script is Specified, not Implemented.
