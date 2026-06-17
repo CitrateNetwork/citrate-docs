@@ -1,33 +1,52 @@
 ---
 created: 2026-05-18T16:00:00Z
+updated: 2026-06-16T00:00:00Z
 branch: main
-author: monorepo-split / PSL-13
+author: monorepo-split / PSL-13; DOCS-CODEX-S0 promotion
 status: active
 ---
 
-# Audit Tier — `citrate-docs`
+# Audit Tier — `citrate-docs` (Citrate Codex)
 
-**Classification**: **Tier 3 — content review** before first stable (`v1.0.0`) release tag.
+**Classification**: **Tier 1 — full audit** (elevated from Tier 3 on 2026-06-14, DOCS-CODEX-S0).
 
 ## Rationale
 
-User-facing documentation site. Content review only — no code surface to audit.
+`citrate-docs` is no longer a static content repo — it is **Citrate Codex**, a gated, agentic documentation
+webapp that (a) ships an **auth/RBAC chokepoint** (`lib/auth/`), (b) **brokers Confidential material at
+runtime** through the `/api/content` gateway, and (c) carries an inference-backed agent. That is a real
+security surface, so it audits at Tier 1. (Prior Tier-3 rationale — "no code surface" — no longer holds.)
 
-## What this means concretely
+## Core invariant (audited)
 
-- **Content review** by a maintainer + one second reviewer before publish.
-- **No external security audit required** — there is no cryptographic, key-handling, or payment-flow surface.
-- **CI must remain green** but coverage thresholds + dependency-scan gates do not apply.
-- **Visibility flips** (PRIVATE → PUBLIC) require sign-off from `team/OPERATORS.md` operator-of-record but do not require a security audit.
+Confidential-tier content is **never** baked into the publicly-served build. It is served only at request
+time, server-side, after the entitlement check, with a disclosure acknowledgement and an access-log entry
+(`PLANSET/02_ARCHITECTURE.md` §3/§4, `03_TLA_SPECS.md` `ConfidentialNeverInBuild`). CI (`npm run
+verify:bundle`) greps the client build and fails on any Confidential sentinel.
+
+## Rule-13 visibility / Confidential-brokering sign-off
+
+> **Rule 13 (Agentile) — authorization to broker Confidential material at runtime.**
+> The repo stays `visibility = "private"`; no visibility flip is performed. This sign-off authorizes the
+> **S3 Confidential runtime gateway** (`/api/content`) to serve Confidential docs to entitled principals
+> (administrators + issued, time-gated auditors), access-logged, never in the client bundle.
+
+| Field | Value |
+|---|---|
+| Sprint | DOCS-CODEX-S3 |
+| Authorization | **Granted** |
+| Authorized by | Federation lead (Saul Loveman / @SaulBuilds) |
+| Date | 2026-06-16 |
+| Scope | `/api/content` gateway may broker tier-`confidential` content server-side, post-auth, access-logged. No repo visibility flip. Confidential bodies must not enter `.next/static` (CI-enforced). |
+| Conditions | Quarterly access review; auditor grants time-gated (`expiresAt`); every Confidential read logged; build-grep gate green on every release. |
 
 ## Decision authority
 
-Per **D6** of the May 2026 federation-split decisions, every repo audits before its first stable release. This document classifies what "audit" means for this specific repo.
-
-Tier changes require: (a) commit to this file explaining the change, AND (b) sign-off from the operator listed in this repo's CODEOWNERS file (when present) or from the federation lead.
+Tier changes require (a) a commit to this file explaining the change, and (b) sign-off from the operator
+of record / federation lead (recorded above for the S3 authorization).
 
 ## See also
 
-- `POST_SPLIT_PUNCH_LIST.md` in the [monorepo archive](https://github.com/CitrateNetwork/citrate-monorepo-archive) — PSL-13 is the source of this file.
-- Federation-wide audit posture sweep — in progress; see the archive's CATALOG.
-
+- `PLANSET/07_IMPLEMENTATION_AND_HARDENING_PLAN.md` — gateway hardening + threat model
+- `../.github/AUDIT_POSTURE.md` — federation Tier-1 obligations
+- `../citrate-federation/repos/citrate-docs/owners.md` — references this sign-off
