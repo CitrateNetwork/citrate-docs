@@ -94,7 +94,7 @@ export default function SettingsPage() {
       )}
 
       {tab === "transparency" && (
-        <Section title="Transparency — your access log">
+        <Section title="Transparency, your access log">
           <ul className="space-y-1 text-sm">
             {mockApi.getMyAccessLog(session).map((e) => (
               <li key={e.id} className="flex items-center gap-2 rounded-lg border bg-[var(--color-panel)] px-3 py-2 text-xs">
