@@ -32,7 +32,7 @@ export default function AdminPage({ params }: { params: Promise<{ section?: stri
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
-      <h1 className="mb-1 text-2xl font-bold">Admin Console</h1>
+      <h1 className="font-display mb-1 text-2xl font-bold">Admin Console</h1>
       <p className="mb-6 text-sm text-[var(--color-muted)]">Confidential · administrators only · every change is itself audit-logged.</p>
 
       <nav className="mb-6 flex flex-wrap gap-2 text-sm">

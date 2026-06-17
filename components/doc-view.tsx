@@ -35,7 +35,7 @@ export function DocView({ slug }: { slug: string }) {
       <Shell>
         <Card>
           <div className="mb-2 text-[var(--color-muted)]"><Icon name="clock" size={24} /></div>
-          <h1 className="mb-1 text-xl font-semibold">{res.title}</h1>
+          <h1 className="font-display mb-1 text-xl font-semibold">{res.title}</h1>
           <p className="text-sm text-[var(--color-muted)]">
             Held until <strong>{fmt(res.until)}</strong>. Embargoed content is withheld until its release date.
           </p>
@@ -50,7 +50,7 @@ export function DocView({ slug }: { slug: string }) {
       <Shell>
         <Card>
           <div className="mb-2 text-[var(--color-amber)]"><Icon name="lock" size={24} /></div>
-          <h1 className="mb-1 text-xl font-semibold">{res.doc.title}</h1>
+          <h1 className="font-display mb-1 text-xl font-semibold">{res.doc.title}</h1>
           <p className="text-sm text-[var(--color-muted)]">A disclosure must be acknowledged before this document renders.</p>
         </Card>
         {disclosure && (
@@ -74,7 +74,7 @@ export function DocView({ slug }: { slug: string }) {
       return (
         <Shell>
           <header className="mb-6 flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{node.title}</h1>
+            <h1 className="font-display text-2xl font-bold">{node.title}</h1>
             <TierChip tier={node.tier} />
           </header>
           <div className="rounded-2xl border border-dashed bg-[var(--color-panel)] p-6 text-sm text-[var(--color-muted)]">
@@ -95,7 +95,7 @@ export function DocView({ slug }: { slug: string }) {
       <Shell>
         <Card>
           <div className="mb-2 text-2xl">404</div>
-          <h1 className="mb-1 text-xl font-semibold">Not found</h1>
+          <h1 className="font-display mb-1 text-xl font-semibold">Not found</h1>
           <p className="text-sm text-[var(--color-muted)]">
             No document at <code>{slug}</code> for your access. (Confidential content returns 404 to the
             unentitled — existence is never revealed.)
@@ -118,7 +118,7 @@ export function DocView({ slug }: { slug: string }) {
       <header className="mb-6">
         <nav className="mb-2 text-xs text-[var(--color-muted)]">{slug}</nav>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">{doc.title}</h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight">{doc.title}</h1>
           <TierChip tier={doc.tier} />
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[var(--color-muted)]">

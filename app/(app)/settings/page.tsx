@@ -16,7 +16,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="mb-6 text-2xl font-bold">Settings</h1>
+      <h1 className="font-display mb-6 text-2xl font-bold">Settings</h1>
       <div className="mb-6 flex flex-wrap gap-2 border-b pb-2 text-sm">
         {(["access", "profile", "appearance", "keys", "transparency"] as Tab[]).map((t) => (
           <button
