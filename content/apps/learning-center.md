@@ -1,202 +1,159 @@
 ---
-title: Citrate Learning Center, School Desktop App
+title: Citrate Learning Center
 codex_slug: /apps/learning-center
 tier: academic
 org_scope: ~
-source_kind: transcluded
-source: citrate-learning-center/README.md
+source_kind: authored
+source: citrate-learning-center/{README.md, gui/, cli-school-bootstrap/, Cargo.toml}
 surfaces: [APP-learning]
 audited_against_sha: c74d371
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Learning Center, School Desktop App
+Citrate Learning Center is the classroom application for school pilots: students do their coursework,
+teachers run their classrooms, and administrators provision and oversee the school. It is a native desktop
+application, and it is built around one rule, student and guardian data stays on the school's own hardware,
+on Citrate Ground, and never leaves it for the public Citrate Network.
 
-> A Slint-native desktop application for school pilots on the Citrate Network:
-> students do coursework, teachers run classrooms, and institutional admins
-> provision and oversee an entire school or charter organization. For schools,
-> districts, and charter/management organizations (CMOs) running the Citrate
-> education stack.
+## What it is
 
-## Overview
+Learning Center is a desktop client written in Rust with a Slint interface, so it runs as a native window
+backed by a local service layer rather than a web page. A school installs it; it is not picked up ad hoc by
+individuals. The data it works with, rosters, corrections, classroom membership, lives encrypted on the
+machine it runs on. The public Citrate Network is consulted only for what genuinely belongs there: a
+participant's role is read from chain 40204 through a gateway, never asserted by the client, and students
+appear on chain only as pseudonymous identifiers, never by name.
 
-Citrate Learning Center is the education-focused desktop client. Like
-[Citrate Native](/apps/native) it is built with [Slint](https://slint.dev), so
-it runs as a native desktop window backed by a local service layer.
+The application is one of three crates in a Cargo workspace (`Cargo.toml`):
 
-The repo is a Cargo workspace with three crates
-(`citrate-learning-center/README.md`):
+- `gui/citrate_learning_center`, the desktop window and every classroom and administration screen.
+- `gui/citrate_edu_app`, the education backend: encryption, identity, roles, the roster, classroom,
+  budget, and institutional services, and the encrypted local store.
+- `cli-school-bootstrap`, a command-line tool that provisions a school before staff ever open the desktop
+  application.
 
-- `gui/citrate_learning_center` (`citrate-learning-center`), the school-pilot
-  desktop app (the window and all classroom/admin screens).
-- `gui/citrate_edu_app` (`citrate-edu-app`), the EDU backend: encryption,
-  AEAD, identity, roles, roster/classroom/budget/institutional services, and the
-  encrypted local store.
-- `cli-school-bootstrap` (`citrate-school-bootstrap`), a CLI for **provisioning
-  a school environment** before the desktop app is handed to staff.
+It is role-aware. The same window shows a different left sidebar depending on whether you sign in as a
+student, a teaching assistant, a teacher, an administrator, an IT director, or a charter-management
+operator. The role itself comes from an on-chain query, not from the interface, so hiding a sidebar item is
+never what keeps a user out of an action.
 
-The app is **role-aware**: the left sidebar (`ui/shell/sidebar.slint`) shows
-different groups depending on whether you sign in as a student, a teacher, or an
-institutional admin. Identity and roles are managed by `citrate-edu-app`
-(`src/role.rs`, `src/identity.rs`, `src/it_elevation.rs`).
+## How to use it
 
-## Who it's for
+A school is brought online in a deliberate order. An operator provisions it first, then hands the desktop
+application to staff.
 
-- **Students**, see their own Home, Assignments, and Progress.
-- **Teachers**, manage a classroom: students, assignments, and a classroom
-  home.
-- **Institutional admins / IT**, provision and run the school: institution
-  overview, classrooms, staff, finance (budget + approvals), user accounts and
-  bulk import, device fleet, and infrastructure (node status, security, getting
-  started).
-- **Charter / Management Organization (CMO) operators**, the cross-school
-  administration surfaces (the CMO dashboard/tenancy/compliance panels live in
-  the [Citrate Native](/apps/native) app for CMOSuperAdmins; Learning Center is
-  the per-school operator and end-user surface).
+1. An operator runs `cli-school-bootstrap init` to stand up the school, choosing a charter-management
+   organization, a standalone district, or a school under an existing CMO. Version 0.4 supports self-host
+   mode only; the `--hosted` path reports that it is not yet available (`cli-school-bootstrap/src/cli.rs`).
+2. The bootstrap can run a Docusign Connect receiver (`daemon`) so consent and agreement envelopes update
+   the bootstrap state as signers complete them, which can take days and survives restarts idempotently.
+3. The operator generates per-guardian setup packets from an imported roster and distributes them
+   (`generate-guardian-packets`). Guardian PII appears only inside that guardian's own packet; logs use
+   pseudonymous identifiers.
+4. Build and run the desktop application:
 
-## Institutional context
+   ```bash
+   cargo build --release -p citrate-learning-center
+   cargo run --release -p citrate-learning-center
+   ```
 
-Learning Center is meant to be deployed by an institution, not installed ad hoc
-by individuals. The intended lifecycle:
+5. Staff and students sign in. A password gate unlocks the local store, the backend decrypts the data on
+   the machine, and the role-appropriate screens appear.
 
-1. An operator runs **`cli-school-bootstrap`** to stand up the school: choose
-   whether you're setting up a CMO, a standalone district, or a school under an
-   existing CMO (`cli-school-bootstrap/src/cli.rs`, `init` command). v1 supports
-   **self-host mode only** (`--hosted` errors with "not yet available").
-2. The bootstrap can run a **Docusign Connect webhook receiver** (`daemon`
-   command) so consent/agreement envelopes update bootstrap state as signers
-   complete them (can take days; idempotent across restarts). Configuration is
-   via `DOCUSIGN_*` env vars.
-3. The operator generates **per-guardian setup packets** from an imported roster
-   and distributes them (`distribute` command; filesystem channel is the v1
-   default; `--smtp` / `--print-pdf` are reserved for v1.1).
-4. Staff and students then sign in to the **desktop app**, which decrypts local
-   data and presents the role-appropriate screens.
+## Reference
 
-This is why the app is tiered **academic**: it is education/institutional
-material tied to pilots, not a public consumer wallet.
+The screens are Slint views under `gui/citrate_learning_center/ui/`; the sidebar groups and labels below
+are quoted from `ui/shell/sidebar.slint` and are gated by the on-chain role.
 
-## Install & run
+| Role | Sidebar groups and items |
+|---|---|
+| Student, TA | Home, Assignments, Progress |
+| Teacher | CLASSROOM: Home, Students, Assignments. FINANCE: Budget |
+| Admin, SuperAdmin | INSTITUTION: Overview, Classrooms, Staff. FINANCE: Budget, Approvals |
+| IT | ACCOUNTS: User Accounts, Bulk Import. DEVICES: Fleet. INFRASTRUCTURE: Node Status, Security |
+| CMOSuperAdmin | CMO: Dashboard, Tenancy, Compliance, plus the admin views |
+| No role | Getting Started |
 
-Prerequisites (from `rust-toolchain.toml` and `README.md`):
+Settings is always present, and the shell adds onboarding and a password-gated lock screen.
 
-- A stable Rust toolchain (rustup).
-- Read access to `CitrateNetwork/citrate-chain`, three chain crates
-  (`citrate-wallet-core`, `citrate-security`, `citrate-signing`) are pulled over
-  SSH. Local builds use your personal GitHub SSH key.
-- A C/C++ toolchain and platform libraries for Slint and `rocksdb`.
+The backend services that stand behind those screens (`gui/citrate_edu_app/src/services/`):
 
-Build and run the desktop app (verbatim from `README.md` "Quick start"):
+| Service | What it does |
+|---|---|
+| `roster.rs` | Bulk import from SIS exports (Infinite Campus, PowerSchool), as CSV, TSV, or XLSX. |
+| `classroom.rs` | Classrooms, devices, and assignments. |
+| `budget.rs` | Budget allocation and cashout requests. |
+| `institutional.rs` | Vault status and the cashout approval lifecycle. |
+| `cmo_portal.rs` | Cross-school administration for charter-management operators. |
 
-```bash
-cargo build --release -p citrate-learning-center
-cargo run --release -p citrate-learning-center
-```
-
-`citrate-learning-center` is the workspace `default-members` target. Drop
-`--release` for a faster dev build.
-
-> **Honest status (from `README.md`).** The original split plan listed
-> `gui/citrate_edu_native/` and `cli-edu/` as members; neither has a `Cargo.toml`
-> and both are excluded from the workspace (planning artifacts). Build only the
-> three real crates above.
-
-### Provisioning CLI (`cli-school-bootstrap`)
-
-Run the bootstrap CLI from the same workspace. The verified subcommands
-(`cli-school-bootstrap/src/cli.rs`) are:
+The provisioning CLI subcommands (`cli-school-bootstrap/src/cli.rs`):
 
 | Command | What it does |
 |---|---|
-| `init` | Start a new bootstrap workflow (CMO / district / school-under-CMO). `--config <file>` skips prompts for scripted runs. |
+| `init` | Start a bootstrap workflow; `--config` skips prompts for scripted runs. |
 | `status` | Show which steps are complete, in progress, or next. |
-| `resume` | Resume from the last safe checkpoint (idempotent). |
-| `reset` | Destructive: delete the local state directory. Does **not** void already-sent Docusign envelopes. |
-| `daemon` | Run the Docusign Connect webhook receiver (default `127.0.0.1:8091`, localhost behind a TLS-terminating proxy). |
-| `distribute` | Generate per-guardian setup packets from a roster and distribute them. |
+| `resume` | Resume from the last checkpoint, idempotently. |
+| `reset` | Delete the local state directory. Does not void already-sent Docusign envelopes. |
+| `daemon` | Run the Docusign Connect receiver (default `127.0.0.1:8091`, behind a TLS-terminating proxy). |
+| `generate-guardian-packets` | Produce and distribute per-guardian setup packets from a roster. |
+| `revoke-guardian-packet` | Revoke a guardian's packet for a right-to-erasure request. |
 
-Global flags: `--state-dir <path>` (default `$XDG_DATA_HOME/citrate-edu-bootstrap`
-or platform equivalent) and `--self-host` (the only supported mode in v1).
+Global flags include `--state-dir` and `--hosted` (reserved for a later release). Guardian delivery over
+SMTP (`--smtp`) and as PDF (`--print-pdf`) are reserved for v1.1; the filesystem channel is the v1 default.
 
-## Key features & screens
+## Design rationale
 
-Screens are the Slint views under `gui/citrate_learning_center/ui/`; sidebar
-labels are quoted from `ui/shell/sidebar.slint`. Groups are role-gated.
+A school's most sensitive asset is its students' records, and the regulation around them is unforgiving.
+So Learning Center keeps that data where it already is, on the school's hardware, and treats the public
+network as a place for roles and proofs, not for names. Identity is pseudonymous on chain: a student
+becomes a keyed hash of their provider identifier, derived with an institution-held secret, so the chain
+can route and reward learning without ever holding a name. The role a user holds is read from chain and
+checked in the backend, which is why the sidebar is a convenience and not a control. The provisioning step
+is a separate CLI rather than a button in the application because standing up a school, with consent
+envelopes and guardian packets, is operator work that can take days and must be auditable.
 
-### Student accounts
+## Failure modes
 
-- **"Home"**, **"Assignments"**, **"Progress"**, the student's own dashboard,
-  assigned work, and learning progress.
+This application handles K-12 student and guardian data, so its boundaries fail closed.
 
-### Classroom management (teacher)
+- Local data is encrypted at rest with AES-256-GCM through `citrate-security`, with the associated data
+  bound into the GCM tag, so a swapped ciphertext fails verification rather than decrypting
+  (`src/encryption.rs`, `src/local_store.rs`). No plaintext correction lands on disk.
+- Role separation is enforced in the backend (`src/role.rs`, `src/it_elevation.rs`), not by hiding
+  sidebar items. A locked account resolves to no role. Privileged actions carry dedicated coverage tests
+  (`tests/k1_4_privileged_actions_coverage.rs`).
+- Privileged actions require a fresh password reauthentication within a 60-second window
+  (`tests/rem_g_02_fresh_password_gate.rs`). The IT-elevation bridge that lets a small-district
+  administrator act as IT is time-bounded, audited on entry and exit, and gated on the same reauth.
+- `reset` is destructive and does not cancel sent Docusign envelopes; those must be voided in the Docusign
+  tenant separately.
 
-- **CLASSROOM** group: **"Home"**, **"Students"**, **"Assignments"**, the
-  teacher's classroom view, roster, and assignment management.
+## Access and canon
 
-### Institution & finance (admin)
+Tier: academic. This is education and institutional material tied to school pilots, not a public consumer
+surface.
 
-- **INSTITUTION**: **"Overview"**, **"Classrooms"**, **"Staff"**.
-- **FINANCE**: **"Budget"** (and at admin scope, **"Approvals"**), backed by the
-  budget service (`citrate-edu-app/src/services/budget.rs`).
+US K-12 public schools have free Citrate access in perpetuity, and Learning Center is the classroom that
+access opens onto. The school runs it on its own hardware as part of Citrate Ground; student and guardian
+data, rosters, corrections, and identity mappings, stay there, encrypted at rest, and never reach the
+public Citrate Network. Students appear on chain only as pseudonymous identifiers. The compliance floor for
+schools is FERPA, COPPA, and CIPA; the right-to-erasure path for guardian records is built into the
+provisioning CLI. No secrets are reproduced here: the institution's org secret is loaded from its
+encrypted keystore in production, and Docusign credentials are operator configuration. See
+[enterprise compliance](/enterprise) for the FERPA, COPPA, and CIPA model and [Citrate Schools](/contracts/edu)
+for the program.
 
-### Accounts & devices (admin / IT)
+## Source and verification
 
-- **ACCOUNTS**: **"User Accounts"**, **"Bulk Import"**, create accounts
-  individually or import a roster in bulk (roster service:
-  `citrate-edu-app/src/services/roster.rs`; bulk import has dedicated fixtures
-  in `gui/citrate_edu_app/tests/bulk_import_fixtures.rs`).
-- **DEVICES**: **"Fleet"**, device fleet management.
-- **INFRASTRUCTURE**: **"Node Status"**, **"Security"**, **"Getting Started"**.
-
-### Shell
-
-- **Onboarding** (`ui/onboarding/onboarding.slint`), a password-gated **lock
-  screen** (`ui/shell/lock_screen.slint`), a **status bar**, and **"Settings"**.
-
-The UI is built from a shared component kit (`ui/shared/`: cards, data tables,
-forms, badges/role badges, modals, toasts, progress, skeletons, empty states).
-
-## Tutorials
-
-The runnable build tutorial for the native desktop apps is
-[Run the desktop wallet](/apps/tutorials/run-the-desktop-wallet) (Citrate Native).
-The Learning Center builds the same way, substitute
-`-p citrate-learning-center` for the package flag.
-
-## Security & access
-
-- **Tier: academic.** This is education/institutional material for school pilots
-  (per the schema's tier-3 rule for research/academic/institutional content), not
-  a public consumer surface.
-- **No secrets here.** No keys, passwords, org secrets, or Docusign credentials
-  are reproduced. The bootstrap CLI's org secret can be supplied via
-  `--org-secret-hex` or `CITRATE_ORG_SECRET_HEX`, but in production it is loaded
-  from the school's **encrypted keystore**, do not hardcode it or paste it into
-  shared docs. `DOCUSIGN_*` values are operator credentials, kept out of this
-  page.
-- **Local data is encrypted at rest** by `citrate-edu-app` (AEAD via
-  `citrate-security`; `src/encryption.rs`, `src/local_store.rs`,
-  `src/key_rotation.rs`). Student/guardian data is sensitive, follow your
-  institution's data-handling policy.
-- **Role separation is enforced in the backend** (`role.rs`, `it_elevation.rs`),
-  not by hiding sidebar items. Privileged actions have dedicated coverage tests
-  (`tests/k1_4_privileged_actions_coverage.rs`,
-  `tests/rem_g_02_fresh_password_gate.rs`).
-- **The `reset` command is destructive** and does not cancel sent Docusign
-  envelopes, void those in the Docusign tenant separately.
-
-## Source & verification
-
-- **Source repo:** `citrate-learning-center` (truth lives here; transcluded
-  reference, Rule 9).
-- **Audited against SHA:** `c74d371`
-  (`git -C citrate-learning-center rev-parse --short HEAD`).
-- **Primary files audited:** `README.md`, `Cargo.toml`, `rust-toolchain.toml`,
-  `gui/citrate_learning_center/ui/shell/sidebar.slint`, `ui/app.slint`,
-  `ui/onboarding/onboarding.slint`, `cli-school-bootstrap/src/cli.rs`,
-  `gui/citrate_edu_app/src/` (role, identity, encryption, local_store, services/).
-- **Status:** pre-1.0 (`version = 0.4.0`); v1 is self-host only, several delivery
-  channels (`--smtp`, `--print-pdf`) and `--hosted` mode are reserved for later
-  releases. Not certified.
+- Source repo: `citrate-learning-center`, audited against SHA `c74d371`.
+- Key paths: `README.md`, `Cargo.toml`, `gui/citrate_learning_center/ui/shell/sidebar.slint`,
+  `gui/citrate_edu_app/src/` (`role.rs`, `identity.rs`, `it_elevation.rs`, `encryption.rs`,
+  `local_store.rs`, `key_rotation.rs`, `services/`), `cli-school-bootstrap/src/cli.rs`,
+  `gui/citrate_learning_center/tests/`.
+- Status: Implemented (pre-audit), pre-1.0 at version 0.4.0. Version 1 is self-host only; the hosted
+  parent portal (`--hosted`) and the SMTP and PDF guardian-delivery channels are reserved for later
+  releases. The repo carries planning directories (`gui/citrate_edu_native/`, `cli-edu/`) that have no
+  `Cargo.toml` and are excluded from the workspace; build only the three real crates. Tier 1 audit applies:
+  no stable release ships without a written external attestation against an exact SHA.
