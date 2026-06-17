@@ -1,207 +1,135 @@
 ---
-title: Citrate Native, Desktop Wallet & DAG Explorer
+title: The Citrate Keyring desktop app
 codex_slug: /apps/native
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: citrate-native/README.md
+source_kind: authored
+source: citrate-native/README.md, Cargo.toml, gui/citrate_native/ui/
 surfaces: [APP-native]
 audited_against_sha: 6416447
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Native, Desktop Wallet & DAG Explorer
+The Citrate Keyring desktop app is a native desktop application that holds a Citrate Keyring account and,
+in the same window, gives you a reader for the BlockDAG. It is for anyone who wants the account and the
+network in a real desktop window rather than a browser tab.
 
-> A single Slint-native desktop app for the Citrate Network: hold and send SALT,
-> explore the BlockDAG, run AI/compute features, and, for school operators, > administer institutions. For anyone who wants the full Citrate experience as a
-> local desktop application rather than a browser tab.
+## What it is
 
-## Overview
+The app is built with Slint, a native Rust user-interface toolkit, so it opens as a desktop window with a
+local service layer behind it that talks to the chain. It is a Cargo workspace with three crates
+(`Cargo.toml`): `gui/citrate_ui_kit`, the shared interface kit; `gui/citrate_native`, the desktop
+application and its screens, which is the default build target; and `gui/citrate_desktop_app`, the backend
+service layer that holds the chain client, the account, the mempool, and the RPC.
 
-Citrate Native is the desktop client for the Citrate Network. It is built with
-[Slint](https://slint.dev) (a native Rust UI toolkit), so it runs as a real
-desktop window, not a web page, with a local backend service layer that talks
-to the chain.
+The window is organized around a left sidebar with grouped navigation (`gui/citrate_native/ui/shell/
+sidebar.slint`). A regular account sees the `BLOCKCHAIN`, `AI`, `DEVELOPER`, `LEARNING`, and `OPERATIONS`
+groups. An
+account whose identity is a school operator, a CMOSuperAdmin, additionally sees a CMO group for
+administering a charter or management organization. The mental model is one encrypted local identity that
+opens onto your account, a reader for the network, and an on-ramp to the compute and learning marketplaces.
 
-The repo is a Cargo workspace with two crates (`citrate-native/README.md`):
+The account is local-first. It is encrypted with a password you choose, and the password never leaves the
+device. The DAG view here is a local reader against your own node; the full public explorer is
+[CitrateScan](/apps/explorer), and the account abstraction it shares with the browser extension is covered
+under [passkeys](/aa/passkeys) and [guardians](/aa/guardians).
 
-- `gui/citrate_native` (`citrate-native`), the main Slint desktop application
-  (the window, screens, and view logic).
-- `gui/citrate_desktop_app` (`citrate-desktop-app`), the backend service layer
-  (chain client, wallet, mempool, RPC, marketplace, learning, edu services).
+## How to use it
 
-Everything in the app is organized around a left-hand sidebar with grouped
-navigation (`gui/citrate_native/ui/shell/sidebar.slint`). The exact groups you
-see depend on your role; a regular user sees Blockchain / AI / Developer /
-Learning / Operations, while a school operator (CMOSuperAdmin) additionally sees
-the CMO administration group.
+You build the app from source and run it. The short version is below; the full walk-through, including the
+prerequisites, is in [run the Citrate Keyring desktop app](/apps/tutorials/run-the-desktop-wallet).
 
-Mental model: the app is your **local wallet + a window onto the DAG + an
-on-ramp to Citrate's AI, compute, storage, and learning marketplaces**, all
-sharing one encrypted local identity.
-
-## Who it's for
-
-- **Everyday users** who want a desktop wallet to hold and send SALT and watch
-  the network.
-- **Builders / operators** who want to run compute, browse models, use IPFS-style
-  file storage, and manage agent operations from one place.
-- **School operators (CMO super-admins)** who manage multiple schools, tenancy,
-  and compliance from the CMO panels. (Student/teacher day-to-day classroom use
-  lives in the separate [Learning Center](/apps/learning-center) app.)
-
-## Install & run
-
-Prerequisites (from `rust-toolchain.toml` and `README.md`):
-
-- A stable Rust toolchain (the repo pins `channel = "stable"` with `rustfmt` and
-  `clippy`). Install via [rustup](https://rustup.rs).
-- Read access to the sibling `citrate-chain`, `citrate-learning-center`, and
-  `citrate-agent-runtime` repos. Local builds use **your personal GitHub SSH
-  key** (org membership grants access); the build pulls these crates over SSH.
-- A C/C++ toolchain and the system libraries Slint and `rocksdb` need for your
-  platform.
-
-Build and run (verbatim from `README.md` "Quick start"):
+1. Install a stable Rust toolchain. The repository pins `channel = "stable"` with `rustfmt` and `clippy`
+   in `rust-toolchain.toml`, so rustup picks it up.
+2. Make sure your personal GitHub SSH key can read the sibling repositories `citrate-chain`,
+   `citrate-learning-center`, and `citrate-agent-runtime`. The build pulls chain crates over SSH, and
+   organization membership grants the access.
+3. Install a C and C++ toolchain and the system libraries Slint and `rocksdb` need for your platform.
+4. Build and run:
 
 ```bash
 cargo build --release
 cargo run --release -p citrate-native
 ```
 
-`citrate-native` is the workspace `default-members` target, so `cargo run`
-without `-p` also launches it. For a faster iteration loop, omit `--release`
-(dev profile is `opt-level = 0`).
+`citrate-native` is the workspace default member, so `cargo run --release` without `-p` launches the same
+application. For a faster iteration loop, omit `--release`.
 
-> **Known issue (honest status, from `README.md`).** Some sibling chain crates
-> are referenced through SSH host-alias URLs (`github-citrate-chain`) while a few
-> repos still use plain `github.com`, so Cargo may fetch a chain crate (e.g.
-> `citrate-wallet-core`) twice. It compiles today; a Sprint-1 follow-up will
-> normalize the URLs. If you hit a type-mismatch at an API boundary, this is the
-> likely cause.
+5. On first launch the onboarding flow opens: a welcome screen, a password of at least eight characters, a
+   provisioning step that generates and shows your recovery phrase, and a confirmation that you backed the
+   phrase up. After that the app shell opens to the sidebar. If you already have an account, use the import
+   option to restore from a recovery phrase or a key.
 
-For step-by-step build/run instructions, see the tutorial:
-[Run the desktop wallet](/apps/tutorials/run-the-desktop-wallet).
+## Reference
 
-## Key features & screens
+The screens below are the Slint views under `gui/citrate_native/ui/`. Sidebar labels are quoted from
+`ui/shell/sidebar.slint`.
 
-The screens below are the Slint views under `gui/citrate_native/ui/`. Sidebar
-labels are quoted from `ui/shell/sidebar.slint`.
+| Group | Screen | What it does | Source |
+|---|---|---|---|
+| Onboarding | Onboarding | Welcome, password, provisioning with a recovery phrase, confirmation | `ui/onboarding/onboarding.slint` |
+| Shell | Lock screen | Locks the app behind your password between sessions | `ui/shell/lock_screen.slint` |
+| `BLOCKCHAIN` | Dashboard | The account and network overview | `ui/dashboard/dashboard.slint` |
+| `BLOCKCHAIN` | `Wallet` | Balances, transaction history, import | `ui/wallet/wallet.slint` |
+| `BLOCKCHAIN` | DAG Explorer | A local reader of the BlockDAG with a transaction detail modal | `ui/dag/dag_explorer.slint` |
+| AI | Chat | A chat view from the shared interface kit | `ui/app.slint` |
+| AI | Models | Browse and manage models | `ui/models/models.slint` |
+| Developer | Compute | Opt-in compute sharing, detects your hardware, shows provider status | `ui/compute/compute.slint` |
+| Developer | Files | File storage entries | `ui/storage/storage.slint` |
+| Learning | Learn | Contribution pools, your stake, and earnings in SALT | `ui/learning/learning.slint`, `ui/learning/edu_panel.slint` |
+| Operations | Agent Center | An activity trail and an approvals queue for agent operations | `ui/operations/operations_view.slint` |
+| Settings | Settings | Environment, AI config, system health, peers, node control, knowledge graph, integrations, appearance, and a danger zone | `ui/settings/` |
+| CMO | Dashboard, Tenancy, Compliance | School administration, role-gated to CMOSuperAdmin | `ui/cmo/` |
 
-### Onboarding & account management
+The send dialog (`ui/wallet/send_dialog.slint`) takes a to address and an amount in SALT, shows a review
+of recipient, amount, and gas, then sends on Confirm & Send. When your account is linked to a Citrate
+Keyring smart account, a sponsored toggle appears; with it on, the send goes from the smart account and
+the gas line reads "Sponsored by Citrate" instead of a gas figure. This is the EW-S1 sponsored-send work
+and it shows only when a linked smart account is available.
 
-- **Onboarding** (`ui/onboarding/onboarding.slint`), a step flow: Welcome →
-  create a wallet-encryption password (min 8 characters, "never leaves your
-  device") → wallet provisioning (a mnemonic is generated and shown) → security
-  confirmation (acknowledge you backed up the recovery phrase).
-- **Lock screen** (`ui/shell/lock_screen.slint`), the app locks behind your
-  password; unlock to access the wallet.
-- **Import**, you can also import an existing wallet from a mnemonic or private
-  key (`app.slint` exposes `wallet-import-mnemonic` / import-from-key callbacks).
+## Design rationale
 
-### Wallet & send
+The app is native rather than a web page so the account, the node reader, and the marketplaces share one
+local process and one encrypted identity, with the data staying on the machine. The DAG view is a local
+reader rather than a second public explorer because the device already has a node to read; when you want
+the shared, queryable view of the network you go to [CitrateScan](/apps/explorer). The marketplace and
+school-administration screens are honest about reach: they say plainly when a contract is not reachable
+and show empty states rather than inventing numbers, which is why several CMO aggregates are stubbed
+behind an environment flag until their wiring lands.
 
-- **"Wallet"** (`ui/wallet/wallet.slint`), account view with balances and
-  transaction history.
-- **Send dialog** (`ui/wallet/send_dialog.slint`), enter a TO address and an
-  amount in SALT, review (recipient / amount / gas), then **Confirm & Send**.
-  There is a toggle to **"Send from smart wallet (gas sponsored by Citrate)"**, when enabled, the send is paymaster-sponsored from your linked smart wallet
-  (EW-S1 work), so you don't pay gas yourself.
+## Failure modes
 
-### DAG Explorer
+- The account is encrypted with your password, and the password never leaves the device. There is no
+  server-side recovery; the recovery phrase shown at provisioning is the backup. Write it down and store
+  it offline.
+- The app locks between sessions. Reopening it lands on the lock screen, and you unlock with your password.
+- The Settings danger zone performs destructive actions. Read the in-app warnings before using it.
+- The build pulls chain crates over SSH using per-host aliases, while a few sibling repositories still use
+  plain `github.com`. Cargo can then fetch a chain crate such as `citrate-wallet-core` twice and treat the
+  copies as different sources. It compiles today; if you hit a type mismatch at a chain-API boundary, this
+  double-fetch is the likely cause. A Sprint 1 follow-up normalizes the URLs.
+- The CMO aggregates are demo-stubbed behind the `CITRATE_CMO_DEMO` environment flag in version 1. Treat
+  those numbers as illustrative until the wiring lands.
 
-- **"DAG Explorer"** (`ui/dag/dag_explorer.slint`), a visual view of the
-  BlockDAG with transaction rows and a transaction-detail modal. This is the
-  "window onto the network", browse blocks and inspect transactions locally.
+## Access and canon
 
-### AI
+Public. This is an end-user guide to the desktop account and its screen map. No keys, recovery phrases,
+private endpoints, or credentials appear here. The account password and the recovery phrase are created
+and held on your device. Building from source uses your own GitHub SSH access to the sibling
+repositories; the CI deploy keys named in the README are operator infrastructure, not user-facing, and
+are not reproduced here. The CMO screens are role-gated to CMOSuperAdmin identities.
 
-- **"Chat"**, an AI chat view (the shared `ChatView` from the UI kit).
-- **"Models"** (`ui/models/models.slint`), browse/manage AI models.
+## Source and verification
 
-### Developer (compute, storage)
-
-- **"Compute"** (`ui/compute/compute.slint`), opt-in GPU/CPU sharing with the
-  Citrate **compute marketplace**. Detects your hardware (GPU name, VRAM,
-  driver), shows provider-registration status, and lists recent provider
-  activity from `ComputeMarketplace` event logs. The UI is honest about whether
-  the marketplace contract is reachable.
-- **"Files"** (`ui/storage/storage.slint`), file storage (IPFS-style) entries.
-
-### Learning marketplace
-
-- **"Learn"** (`ui/learning/learning.slint` + `ui/learning/edu_panel.slint`), the learning/contribution marketplace: contribution pools, your stake, and
-  earnings claimable from `ContributionAccounting` (shown in SALT). The view
-  surfaces the on-chain contract status honestly (e.g. a warning if the
-  marketplace contract isn't reachable, "No pools created yet" when empty).
-
-### Operations
-
-- **"Agent Center"** (`ui/operations/operations_view.slint`), agent operations:
-  an activity trail and an approvals queue.
-
-### School administration (CMO)
-
-Visible only when your identity is a **CMOSuperAdmin** (`ui/shell/sidebar.slint`
-gates the CMO group). These panels manage a Charter/Management Organization that
-oversees multiple schools:
-
-- **CMO "Dashboard"** (`ui/cmo/dashboard.slint`), aggregate stat cards across
-  all schools in the CMO, a per-school table with click-to-switch, and a recent
-  CMO-events feed. (Backed by `InstitutionTreeV1` / `ContributionAccounting`;
-  several aggregates are stubbed in v1 behind the `CITRATE_CMO_DEMO` env var.)
-- **CMO "Tenancy"** (`ui/cmo/tenancy.slint`), the institution tenancy tree.
-- **CMO "Compliance"** (`ui/cmo/compliance.slint`), a per-school compliance
-  matrix.
-- Supporting UI: a **school selector** to switch the active school, a
-  **school-context banner**, and an **envelope drawer** for institutional
-  envelopes.
-
-### Settings
-
-- **"Settings"** (`ui/settings/`), environment selection, AI config, system
-  health, peer connections, node control, knowledge graph, integrations,
-  appearance, and a **danger zone** for destructive actions.
-
-## Tutorials
-
-- [Run the desktop wallet](/apps/tutorials/run-the-desktop-wallet), build the
-  app from source with cargo and open the wallet.
-
-## Security & access
-
-- **Tier: public.** This is an end-user guide to a client application a developer
-  or user needs to get started, concepts, install, and the screen map. No
-  implementation depth that would materially help a competitor clone the network
-  is included; that stays in gated material.
-- **No secrets here.** This page contains no keys, mnemonics, private endpoints,
-  or credentials. The app's encryption password and the generated mnemonic are
-  created and stored **on your device** ("never leaves your device", per the
-  onboarding copy), never share or paste your mnemonic anywhere.
-- **Local-first identity.** Your wallet is encrypted with a password you choose;
-  back up your recovery phrase offline. The "danger zone" in Settings performs
-  destructive actions, read the in-app warnings before using it.
-- **Build prerequisites are credentials you already hold.** Building from source
-  requires *your own* GitHub SSH access to the sibling repos; no shared secret is
-  documented or required to be embedded here. CI deploy keys mentioned in the
-  README are operator infrastructure, not user-facing, and are not reproduced.
-- **CMO panels are role-gated** to CMOSuperAdmin identities and are demo-stubbed
-  in v1 behind `CITRATE_CMO_DEMO`; treat aggregate numbers as illustrative until
-  the v1 wiring lands.
-
-## Source & verification
-
-- **Source repo:** `citrate-native` (truth lives here; this page is transcluded
-  reference, Rule 9).
-- **Audited against SHA:** `6416447` (`git -C citrate-native rev-parse --short HEAD`).
-- **Primary files audited:** `README.md`, `Cargo.toml`, `rust-toolchain.toml`,
-  `gui/citrate_native/ui/shell/sidebar.slint`, `ui/app.slint`,
-  `ui/onboarding/onboarding.slint`, `ui/wallet/send_dialog.slint`,
-  `ui/wallet/wallet.slint`, `ui/dag/dag_explorer.slint`,
-  `ui/compute/compute.slint`, `ui/learning/learning.slint`,
-  `ui/cmo/dashboard.slint`, `ui/operations/operations_view.slint`,
-  `ui/settings/`.
-- **Status:** pre-1.0 (`version = 0.4.0`); some marketplace/CMO surfaces are
-  scaffolding/demo-stubbed as noted above. Not certified.
+- Source repo: `citrate-native`, audited against SHA `6416447`.
+- Files read: `README.md`, `Cargo.toml`, `rust-toolchain.toml`,
+  `gui/citrate_native/ui/shell/sidebar.slint`, `ui/app.slint`, `ui/onboarding/onboarding.slint`,
+  `ui/wallet/wallet.slint`, `ui/wallet/send_dialog.slint`, `ui/dag/dag_explorer.slint`,
+  `ui/compute/compute.slint`, `ui/learning/learning.slint`, `ui/cmo/`, `ui/operations/operations_view.slint`,
+  `ui/settings/`, `gui/citrate_native/src/main.rs`, `gui/citrate_native/tests/e2e_wallet.rs`.
+- Status: Implemented, version 0.4.0, pre-1.0. Account creation, import from a recovery phrase or key,
+  the lock screen, send with the sponsored toggle, and the DAG reader are Implemented and covered by
+  end-to-end tests. Some marketplace and CMO aggregates are Specified, scaffolded or demo-stubbed as noted.
+  Not externally certified.
