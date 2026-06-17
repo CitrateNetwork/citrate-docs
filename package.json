@@ -1,8 +1,8 @@
 {
-  "name": "citrate-codex",
+  "name": "citrate-atlas",
   "version": "0.1.0",
   "private": true,
-  "description": "Citrate Codex — gated, agentic documentation webapp (S1 app shell, wired to prototype fixtures).",
+  "description": "Citrate Atlas, the gated, agentic documentation webapp for the Citrate Network federation.",
   "scripts": {
     "content": "node scripts/build-content.mjs",
     "predev": "node scripts/build-content.mjs",
