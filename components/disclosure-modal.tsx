@@ -20,7 +20,7 @@ export function DisclosureModal({
       <div role="dialog" aria-modal className="w-full max-w-lg rounded-2xl border bg-[var(--color-elevated)] p-6">
         <div className="mb-2 flex items-center gap-2">
           <Icon name="lock" size={16} />
-          <h2 className="text-lg font-semibold">{disclosure.title}</h2>
+          <h2 className="font-display text-lg font-semibold">{disclosure.title}</h2>
         </div>
         <p className="mb-4 text-sm leading-relaxed text-[var(--color-muted)]">{disclosure.body}</p>
         <label className="mb-5 flex items-start gap-2 text-sm">

@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+/* Space Grotesk (the brand display font) is packaged with the app via next/font/local (app/layout.tsx),
+   exposed as --font-space-grotesk, so it is NOT fetched from the CDN here. The other three stay on the CDN. */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ============================================================================
@@ -13,7 +15,7 @@
   --brick: #e2543f; --brick-deep: #a72414; --info: #6fb3d6;
 
   --font-sans: "Geist", "Söhne", "Inter", system-ui, -apple-system, sans-serif;
-  --font-display: "Space Grotesk", "Geist", system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), "Space Grotesk", "Geist", system-ui, sans-serif;
   --font-serif: "Source Serif 4", Georgia, serif;
   --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
@@ -106,7 +108,7 @@ body {
   .md { max-width: var(--measure); line-height: 1.62; font-size: var(--t-md); color: var(--fg-1); }
   .md h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--t-3xl); line-height: 1.15; letter-spacing: -.015em; margin: 0 0 var(--s-4); }
   .md h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--t-xl); line-height: 1.25; letter-spacing: -.01em; margin: var(--s-8) 0 var(--s-3); scroll-margin-top: 5rem; }
-  .md h3 { font-family: var(--font-sans); font-weight: 600; font-size: var(--t-lg); margin: var(--s-6) 0 var(--s-2); scroll-margin-top: 5rem; }
+  .md h3 { font-family: var(--font-display); font-weight: 600; font-size: var(--t-lg); margin: var(--s-6) 0 var(--s-2); scroll-margin-top: 5rem; }
   .md p { margin: var(--s-3) 0; }
   .md ul, .md ol { margin: var(--s-3) 0; padding-left: 1.4rem; }
   .md ul { list-style: disc; } .md ol { list-style: decimal; } .md li { margin: 4px 0; }
