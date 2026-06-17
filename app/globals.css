@@ -127,4 +127,14 @@ body {
   /* code block chrome: language label + copy mount */
   .code-block { position: relative; }
   .code-block-lang { position: absolute; top: 6px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tr-caps); text-transform: uppercase; color: var(--fg-faint); }
+
+  /* Compact Markdown for the narrow Ask Atlas drawer: smaller headings, tighter rhythm. */
+  .ask-md .md { font-size: var(--t-sm); line-height: 1.55; }
+  .ask-md .md h1, .ask-md .md h2, .ask-md .md h3 { font-family: var(--font-display); font-size: var(--t-md); font-weight: 600; line-height: 1.3; margin: var(--s-3) 0 var(--s-1); letter-spacing: 0; }
+  .ask-md .md p { margin: var(--s-2) 0; }
+  .ask-md .md ul, .ask-md .md ol { margin: var(--s-2) 0; padding-left: 1.2rem; }
+  .ask-md .md li { margin: 2px 0; }
+  .ask-md .md pre code { font-size: 11px; padding: var(--s-2); }
+  .ask-md .md table { font-size: var(--t-2xs); }
+  .ask-md .md :first-child { margin-top: 0; }
 }
