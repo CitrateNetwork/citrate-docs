@@ -6,82 +6,93 @@ org_scope: ~
 source_kind: linked
 source: citrate-docs/gradient_papers_v3/
 surfaces: [RES-papers]
-audited_against_sha: c3f8c3da
-status: draft
-created: 2026-06-15T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+audited_against_sha: cd729ed
+status: Specified
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# The Gradient Papers (v3)
+The Gradient Papers are the research corpus the Citrate Network grew from, a ten-part working
+dissertation plus a series index. This page is for researchers, engineers, and reviewers who want the
+reasoning behind the design. It indexes the papers and points each one at the surface in Atlas that
+treats it; following Rule 9, it summarizes and links the papers, it does not copy them.
 
-> A ten-part working dissertation on the Citrate Network, the thesis that
-> distributed learning and distributed consensus are the same problem under
-> different names. For researchers, engineers, and reviewers who want the
-> "why" behind the protocol. Codex **links** these papers; it does not copy them.
+## What it is
 
-## Overview
+The papers argue one thesis: a public ledger and a learning network are the same shape. A ledger is many
+machines agreeing on one view of truth; a learning network is many machines converging on one
+representation of the world. Both are gradient processes, one over disagreement, one over loss. The
+series makes that identity load-bearing, so every paper that claims to learn points at a contract that
+records contribution, and every paper that claims to reach consensus points at a finality mechanism that
+treats disagreement as data.
 
-The Gradient Papers are the canonical research corpus for Citrate, an AI-native
-Layer-1 BlockDAG (chain id 40204). The v3 revision was written in April 2026
-against the v0.5.0 testnet so that every mechanical claim is traceable to a file
-path or contract address in the source repository. v3 introduces three
-maturity tags carried in each paper's header:
+The papers are research, not a product manual. Some describe surfaces that run on testnet today, some
+describe designs written down but not yet built, and one describes a hardware direction with no code at
+all. We keep those honest by carrying a maturity tag on each paper and, in the table below, naming the
+Atlas page where the work actually lives when it has been built.
 
-- **Verified**, the claim has on-chain evidence or external audit.
-- **Practiced**, the methodology is in active use (sprints, review gates).
-- **Implemented**, code exists in `main` and is exercised by tests + benchmarks.
+The v3 revision was written in April 2026 against the v0.5.0 testnet on chain id 40204, so every
+mechanical claim traces to a file path or a public contract address in the source. The series index,
+`Gradient_Papers_No0_Series_Index_v3.md`, carries the v2 to v3 change log and the reading paths by role.
 
-The series thesis: a blockchain (machines agreeing on one view of truth) and a
-learning network (machines converging on one representation of the world) are
-the same shape, both gradient-descent processes, one over disagreement, one
-over loss. The papers make that identity load-bearing.
+## How to use it
 
-Source lives at `citrate-docs/gradient_papers_v3/`. The series index is
-`Gradient_Papers_No0_Series_Index_v3.md`, which also carries the v2→v3 change
-log and per-audience reading paths.
+Read the index first, then the paper your role calls for. The suggested orders, taken from the No.0
+index, are:
 
-## Index
+| Reader | Suggested order |
+|---|---|
+| Engineers | I, X, IV, II, III, V, VI |
+| Researchers | IX, V, II, X, III, I |
+| Operators | I, IV, X, IX, VIII |
+| Community | VIII, VII, VI, IX, I |
 
-Ten papers (No.1–No.10) plus the No.0 series index. Each row links to its
-source file; the one-line abstract is a summary, not a copy.
+When a paper has a surface in Atlas, read the Atlas page for what is built and the paper for why it is
+built that way. When a paper is theoretical, the paper is all there is, and the page says so.
 
-| No. | Paper | Maturity | Source file |
-|-----|-------|----------|-------------|
-| 0 | **Series Index**, change log, maturity tags, reading paths by audience. |, | [`Gradient_Papers_No0_Series_Index_v3.md`](../../gradient_papers_v3/Gradient_Papers_No0_Series_Index_v3.md) |
-| 1 | **Citrate: Protocol Specification for an AI-Native BlockDAG Network**, the foundational spec; a Layer-1 BlockDAG with an EVM-compatible Lattice VM and AI-native precompiles (`0x0107–0x010F`) that make models first-class on-chain assets. | Verified (testnet 40204, 38 contracts) | [`Gradient_Papers_No1_Citrate_Technical_Paper_v3.md`](../../gradient_papers_v3/Gradient_Papers_No1_Citrate_Technical_Paper_v3.md) |
-| 2 | **Paraconsistent Consensus: Federated Meta-Learning Over BlockDAG Finality**, treats disagreement as information; runs federated meta-learning on top of GhostDAG/BFT checkpoints, aggregating embedding dimensions with Belnap four-valued logic. | Specified | [`Gradient_Papers_No2_Paraconsistent_Consensus_v3.md`](../../gradient_papers_v3/Gradient_Papers_No2_Paraconsistent_Consensus_v3.md) |
-| 3 | **The Mentorship Protocol: Organizational Learning Theory for Decentralized Agent Swarm Orchestration**, the social fabric of consensus: how nodes find one another to learn from, who earns mentor status, anchored in `LearningPool`. | Specified | [`Gradient_Papers_No3_Mentorship_Protocol_v3.md`](../../gradient_papers_v3/Gradient_Papers_No3_Mentorship_Protocol_v3.md) |
-| 4 | **Behavioral Issues: BDD as Engineering Methodology for Agentic Systems**, catalogues five reproducible agent failure modes and the Behavior-Driven Development discipline (Gherkin contracts) that structurally blocks each. | Practiced | [`Gradient_Papers_No4_Behavioral_Issues_v3.md`](../../gradient_papers_v3/Gradient_Papers_No4_Behavioral_Issues_v3.md) |
-| 5 | **ATIS: Analog Token Importance Scoring for Energy-Efficient Transformer Attention Pruning**, proposes computing attention-pruning importance scores in analog hardware (FPAA) before digital Q/K projection; honest DAC-bottleneck analysis. | Theoretical (no prototype) | [`Gradient_Papers_No5_ATIS_v3.md`](../../gradient_papers_v3/Gradient_Papers_No5_ATIS_v3.md) |
-| 6 | **The Memetic Money Portal v3, Bridge Architecture and Contracted Market-Maker Model**, moving capital in/out of Citrate; replaces v2's AMM bridge with a contracted full-time market-maker governed by `MarketMakerAllocation.sol`. | Specified (Sepolia partial; MM live on testnet) | [`Gradient_Papers_No6_Memetic_Money_Portal_v3.md`](../../gradient_papers_v3/Gradient_Papers_No6_Memetic_Money_Portal_v3.md) |
-| 7 | **The Mozi Cooperative: Cooperative Capitalism and Shared Ownership of AI Infrastructure**, a third path between VC concentration and flat cooperatives: ownership proportional to contribution, tracked on-chain by `ContributionAccounting`. | Specified (7-type tracking on-chain) | [`Gradient_Papers_No7_Mozi_Cooperative_v3.md`](../../gradient_papers_v3/Gradient_Papers_No7_Mozi_Cooperative_v3.md) |
-| 8 | **The BR1J Constitution: DAO Governance Declaration and Code of Ethics**, the constitutional law of the Citrate DAO; the boundaries no proposal can cross, enforced via `TreasuryGovernor`. | Specified (Governor deployed; entity filed) | [`Gradient_Papers_No8_BR1J_Constitution_v3.md`](../../gradient_papers_v3/Gradient_Papers_No8_BR1J_Constitution_v3.md) |
-| 9 | **The Medusa Paradigm: Cnidarian Biological Architectures as Design Principles for Distributed AI**, derives Citrate's architecture from cnidarian biology (nerve nets, siphonophore colonies, *Turritopsis*); motifs map to `NematocystSlashing` and `TEEAttestationRegistry`. | Specified + Practiced | [`Gradient_Papers_No9_Medusa_Paradigm_v3.md`](../../gradient_papers_v3/Gradient_Papers_No9_Medusa_Paradigm_v3.md) |
-| 10 | **The Substrate of Verifiable Inference: Halo2-KZG, Q16 Compute, and Attestation Gates**, how on-chain verification of off-chain AI work is mechanized: Halo2-KZG proofs, Q16 deterministic compute, attestation gates. | Implemented (on testnet 40204) | [`Gradient_Papers_No10_Substrate_of_Verifiable_Inference_v3.md`](../../gradient_papers_v3/Gradient_Papers_No10_Substrate_of_Verifiable_Inference_v3.md) |
+## Reference
 
-## How to read
+Ten papers numbered No.1 through No.10, plus the No.0 series index. The maturity column is the paper's
+own header tag. The Atlas page column links to the surface that treats the work; where a paper is
+research with no built surface, that is stated instead.
 
-Suggested reading paths by role (from the No.0 index):
+| No. | Title | One line | Treated in Atlas |
+|---|---|---|---|
+| 0 | Series Index | The map: change log, maturity tags, and reading paths by role. | this page |
+| 1 | Citrate Technical Paper | The foundational specification, a Layer-1 BlockDAG with the EVM-compatible Lattice VM and AI-native precompiles that make models first-class on the ledger. | [Lattice VM](/chain/lvm), [precompiles](/chain/precompiles) |
+| 2 | Paraconsistent Consensus | Treats disagreement as information; runs federated meta-learning over GhostDAG and BFT checkpoints, combining views with Belnap four-valued logic. | [paraconsistent consensus](/research/paraconsistent) |
+| 3 | The Mentorship Protocol | The social layer of learning: how a weaker node finds a stronger one to learn from, who earns mentor standing, and how a mentorship is told apart from extraction. | [mentorship](/research/mentorship) |
+| 4 | Behavioral Issues | Catalogues five reproducible agent failure modes and the behavior-driven development discipline, Gherkin contracts, that blocks each one. | [behavior-driven development](/research/bdd) |
+| 5 | ATIS | Proposes computing transformer attention's token-importance score in analog hardware before the digital projection; carries an honest analysis of why the naive version does not pay off. | [ATIS](/research/atis) |
+| 6 | The Memetic Money Portal | Moving value in and out of the network; replaces the earlier automated bridge with a contracted market-maker model governed on the ledger. | [the bridge](/chain/bridge) |
+| 7 | The Mozi Cooperative | A third path between concentrated ownership and flat cooperatives: standing accrues in proportion to contribution, recorded on the ledger. | [marketplace economics](/contracts/economics) |
+| 8 | The BR1J Constitution | The constitutional law of the Citrate organization, the boundaries no proposal can cross, enforced through the treasury governor. | [governance](/contracts/governance) |
+| 9 | The Medusa Paradigm | Derives the architecture from cnidarian biology, nerve nets, siphonophore colonies, and Turritopsis, mapping the motifs to slashing and attestation surfaces. | research only; motifs surface in [security](/contracts/security) |
+| 10 | The Substrate of Verifiable Inference | How on-chain verification of off-chain model work is mechanized: Halo2-KZG proofs, deterministic Q16 compute, and attestation gates. | [verifiable inference](/research/verifiable-inference) |
 
-- **Engineers**, I → X → IV → II → III → V → VI
-- **Researchers**, IX → V → II → X → III → I
-- **Investors**, I → VI → VII → VIII → II
-- **Operators**, I → IV → X → IX → VIII
-- **Community**, VIII → VII → VI → IX → I
+## Design rationale
 
-Each paper opens with an Abstract and carries a `maturity:` line in its
-frontmatter stating what is implemented vs. specified vs. hypothesized. The
-honesty principle is explicit: where a claim is conjectural it is tagged
-`[Hypothesis]`; numeric claims either cite code or fail the
-`paper-claim-audit.yml` CI gate that moves a paper from `draft` → `active`.
+The series is written to be auditable, not persuasive. v3 added a Verified tag for claims with on-chain
+or audit evidence, switched code references from filenames to file and line against a pinned commit, and
+replaced hand-waved statistics with measured benchmarks. The stated honesty principle is that each paper
+says plainly whether a thing works today, is specified, or is conjectural, and a continuous-integration
+check moves a paper out of draft only once every numeric claim either cites code or is tagged as a
+hypothesis. We index them the same way: the table above does not promote a theoretical paper to a built
+feature, and the maturity column is the paper's own, not ours.
 
-## Source & verification
+## Access and canon
 
-- **Source:** `citrate-docs/gradient_papers_v3/` (this repo).
-- **Audited against SHA:** `c3f8c3da` (citrate-docs).
-- **Authorship:** Larry Klosowski, with Lauren Mendenhall (BR1J), Saul Loveman
-  (engineering), and the Claude Opus 4.x lineage.
-- **Rule 9 (link, don't copy):** this page is an annotated index. The papers
-  themselves are the truth; Codex links them and never duplicates their text.
-- **No secrets.** The papers cite public contract addresses and the public
-  testnet RPC only. No keys, mnemonics, or private endpoints appear here.
+Academic tier. The papers cite public contract addresses and the public testnet RPC only; no keys,
+recovery phrases, or private endpoints appear in them or here. The network is a public ledger paired with
+private on-premise instances, and the research describes the public half. Authorship is Larry Klosowski,
+with Lauren Mendenhall on the constitution, Saul Loveman on engineering, and the Claude Opus lineage.
+
+## Source and verification
+
+- Source: `citrate-docs/gradient_papers_v3/` in this repository, ten numbered papers plus
+  `Gradient_Papers_No0_Series_Index_v3.md`.
+- Audited against SHA: `cd729ed` (citrate-docs).
+- Rule 9: this page is an annotated index. The papers are the source of truth; Atlas links them and does
+  not duplicate their text.
+- Status: Specified. The papers are a written corpus; the maturity of each described surface is the
+  paper's own tag, shown above and detailed on the linked Atlas pages.
