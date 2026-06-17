@@ -1,93 +1,74 @@
 ---
-title: nist-agent, NIST-Compliant Agent Sidecar
+title: The air-gapped agent sidecar
 codex_slug: /apps/nist-agent
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: nist-agent/README.md
+source_kind: authored
+source: nist-agent/README.md, nist-agent/crates, nist-agent/docs/rfcs/RFC-CIT-AGENT-0001.md
 surfaces: [APP-nist]
 audited_against_sha: 5d683dc
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Specified
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# nist-agent
+This is an agent harness for environments that cannot reach the internet and have to prove what they did. It
+runs an AI agent on isolated, on-premise hardware, asks named people to sign off before the agent does
+anything sensitive, and keeps a tamper-evident record of every step.
 
-> A composable, NIST-compliant agent harness, a sidecar for the Citrate Network and other EVM chains.
-> For operators who need a compliance-first, air-gapped-by-default way to run AI agents with
-> cryptographic human-in-the-loop control.
+## What it is
 
-## Overview
+The agent runs air-gapped by default. Out of the box it makes no outbound connection at all; network access
+turns on only when a Security Officer signs a policy directive permitting it. So the starting position is
+isolation, and reaching the network is a deliberate, recorded decision rather than the default.
 
-nist-agent is a Rust-implemented agent harness, the distribution and packaging surface for
-[RFC-CIT-AGENT-0001](#the-rfc). It is built so that you "compose as a library, deploy as a daemon, embed
-as a WASM component." Its design goals:
+Three more properties define it. Every sensitive action passes a role-bound quorum: five roles, Operator,
+Reviewer, Compliance Officer, Security Officer, and Auditor, sign off using hardware-backed keys such as
+FIDO2, PIV-CAC, or a Secure Enclave or TPM. The agent's abilities load as signed bundles, called Capsules,
+whose manifest is enforced at the point where they are linked into the runtime, so a capability the manifest
+does not grant cannot be exercised. And everything the agent does lands in a hash-chained, signed audit log;
+no operator content ever reaches the public ledger, only commitments to it.
 
-- **Air-gapped by default**, zero outbound connectivity unless explicitly enabled by a signed Security
-  Officer policy directive.
-- **Tiered-risk, role-bound quorum**, every action is gated through five roles (Operator, Reviewer,
-  Compliance Officer, Security Officer, Auditor) with cryptographic sign-off from hardware-backed keys
-  (FIDO2 / PIV-CAC / Secure-Enclave-or-TPM).
-- **Capsules**, capabilities load as signed WIT/WASM Component Model bundles whose manifest is enforced
-  at the wasmtime linker. Capability enforcement is load-time, not advisory.
-- **Hash-chained, signed audit log**, four storage backends and three on-chain anchor strategies; no
-  operator content ever reaches the chain, only commitments.
-- **Formally verified control flow**, five normative TLA+ specifications cover the Approval state
-  machine, audit-chain integrity, the data-class lattice, the capsule install gate, and the break-glass
-  path.
-- **Slint operator app**, with a bundled local concierge for first-run onboarding, a HITL approval
-  queue, a Capsule Inspector, and a marketplace browser.
+It is a sidecar, not a fork. It depends on `citrate-agent-core` as a library, adds the pieces an isolated
+deployment needs, an adapter for talking to a ledger, policy bundles, pre-flight checks, the formal specs,
+and the packaged distribution, and sends core changes back upstream rather than diverging.
 
-It is a **sidecar consumer** of `citrate-agent-runtime`: it depends on `citrate-agent-core` as a Cargo
-crate, adds the EVM-chain-adapter, authors policy bundles, runs the doctor pre-flight checks, populates
-the TLA+ specs locally, and packages the signed distribution. It does **not** fork the runtime, core
-changes are done upstream and PR'd back.
+## How to use it
 
-**Status (honest):** pre-alpha. Bootstrap complete (Sprint S-0); RFC v0.1 in quorum review; Sprint S-1
-active. Not certified.
+The harness is meant to be composed as a library, deployed as a daemon, or embedded as a WASM component. A
+first deployment looks like this:
 
-## The RFC
+1. Run the doctor pre-flight, which checks that the hardware keys, the air-gap posture, and the policy
+   bundle are in the state the deployment expects before the agent starts.
+2. Install the Capsules the agent is allowed to use. Each is a signed bundle; an unsigned or unlisted
+   capability does not load.
+3. Set the roster of people who hold the five roles and their hardware keys, so quorum sign-off can happen.
+4. Operate the agent through the operator app, where requests wait in an approval queue until the required
+   roles sign, and where you can inspect a Capsule or replay the audit log.
 
-The architecture reference is **RFC-CIT-AGENT-0001** (`docs/rfcs/RFC-CIT-AGENT-0001.md`). Everything in
-the repo is downstream of it. Per-section behavior is specified as Gherkin BDD scenarios under
-`features/` (one file per RFC normative section).
+The agent stays air-gapped throughout unless a Security Officer has signed a directive opening a specific
+egress path. Tutorials for running the doctor, installing a Capsule, and configuring a generic ledger
+through a policy bundle follow under this page's tutorials.
 
-## Product spec
+## Reference
 
-The v1.0 product proposition: nist-agent runs on Citrate L1 *or any compatible EVM chain*, gating every
-agent action through a hardware-backed quorum, loading capabilities as signed Capsules, and producing a
-tamper-evident audit trail whose commitments (never content) can be anchored on chain.
+The piece that makes the harness work against more than one ledger is the chain adapter,
+`nist-agent-chain`. A single trait abstracts the contracts the harness needs, so the rest of the harness
+binds to the trait and not to any one ledger.
 
-Compliance posture is declared at the product level (the implementing details are gated, see Security &
-access):
+| Item | Path | What it is |
+|---|---|---|
+| `trait ChainClient` | `crates/nist-agent-chain/src/lib.rs` | The async, `Send + Sync` interface, used as `Arc<dyn ChainClient>`; methods include `chain_id()`, `anchor(kind, root)`, `is_anchored(root)`, and `read_clearance(agent_address)` |
+| `CitrateChainClient` | `crates/nist-agent-chain/src/citrate.rs` | The default implementation, pinned to the Citrate Network with its canonical contract addresses |
+| `GenericEvmChainClient` | `crates/nist-agent-chain/src/evm_generic.rs` | Operator-configured: contract addresses and the RPC URL come from the signed policy bundle, so an operator can run against any compatible ledger |
+| Shared types | `crates/nist-agent-chain/src/{abi,types}.rs` | ABI helpers and the shared enums `AnchorKind`, `Clearance`, `CapsuleEntry`, `ContractAddresses`, `TxHash` |
 
-- **Baseline:** NIST SP 800-171 Rev 3 + CMMC Level 3.
-- **Overlays (v1.0):** FERPA, COPPA, CIPA, HIPAA / HITECH, FedRAMP High.
-- **Overlays (v1.1):** DoD IL4 / IL5, ITAR, CJIS, IRS 1075.
-- **Default network posture:** air-gapped, opt-in egress.
+Five normative TLA+ specifications cover the safety-critical control flow: the approval state machine, the
+audit-chain integrity, the data-class lattice, the Capsule install gate, and the break-glass path. Each RFC
+normative section has a matching set of Gherkin scenarios under `features/`. The architecture reference is
+RFC-CIT-AGENT-0001, and everything in the repository is downstream of it.
 
-## Reference, the multi-chain adapter
-
-The seam that makes nist-agent chain-agnostic is `nist-agent-chain` (`crates/nist-agent-chain/`). Per
-RFC §3.2 and ADR-003, a single trait abstracts the five RFC §7.1 contracts so the rest of the harness
-binds to the trait, not a chain.
-
-- **`trait ChainClient`** (`crates/nist-agent-chain/src/lib.rs`), async, `Send + Sync` so it works as
-  `Arc<dyn ChainClient>` inside the agent loop. Methods mirror the RFC §7 contract interfaces:
-  `chain_id()`, `anchor(kind, root)`, `is_anchored(root)`, `read_clearance(agent_address)`, and the
-  remaining §7.1 reads/writes. Shared ABI helpers live in `abi.rs`; shared enums (`AnchorKind`,
-  `Clearance`, `CapsuleEntry`, `ContractAddresses`, `TxHash`) in `types.rs`.
-- **`CitrateChainClient`** (`src/citrate.rs`), the default impl, pinned to Citrate Mainnet
-  (`chain_id() == 40204`) with the five canonical contract addresses; wraps
-  `citrate_agent_core::chain::anchor::AnchorRegistryClient`.
-- **`GenericEvmChainClient`** (`src/evm_generic.rs`), operator-configured: contract addresses and RPC
-  URL come from the signed PolicyBundle, letting operators deploy against any EVM chain hosting
-  compatible contract bytecode.
-
-## Examples
-
-Bootstrap and build:
+To bootstrap and build:
 
 ```bash
 ./bootstrap.sh
@@ -95,31 +76,41 @@ cargo build --workspace --release --locked
 cargo test --workspace
 ```
 
-## Tutorials
+## Design rationale
 
-Tutorials (run the doctor pre-flight; install a signed Capsule; configure a generic EVM chain via a
-PolicyBundle) follow under `/apps/nist-agent/tutorials/`.
+A regulated, isolated environment has two needs that ordinary agent tooling ignores: it must not reach the
+network unless someone authorized it, and it must be able to show, later, exactly what happened. The default
+of air-gapped answers the first by making isolation the resting state and connectivity the exception that
+has to be signed for. The signed audit log and the hardware-backed quorum answer the second by making every
+action attributable and the record tamper-evident, while keeping operator content off the public ledger and
+publishing only commitments. Loading capabilities as signed Capsules enforced at link time, rather than
+checked by convention, means an action the policy never granted cannot run even by mistake. The cost is
+ceremony: a sensitive action waits on real people and real keys. In the settings this is built for, the
+ceremony is the point.
 
-## Security & access
+## Access and canon
 
-Tier: **public**, for the overview, the RFC, the product spec, and the multi-chain adapter surface.
+Public, for the overview, the architecture reference, the product proposition, and the chain-adapter
+surface. The compliance internals are Confidential and gated. The control mappings under `docs/compliance/`
+and the audit internals under `docs/audit/` are not written into this page; they are served at request time
+from the private repository to administrators and issued auditors only. This page documents what a developer
+or evaluator needs to understand the product, and it does not reproduce the compliance package.
 
-> **The compliance internals are Confidential and gated.** The overlay implementation detail under
-> `docs/compliance/` (CMMC L3, FERPA, COPPA, CIPA, HIPAA, FedRAMP High control mappings) and the audit
-> internals under `docs/audit/` are **not** authored into this public page. They are served at request
-> time from the private repo to admins / issued auditors only (registry tier transition `P→X`). This
-> page documents only what a developer or evaluator needs to understand the product; it does not clone
-> the compliance package.
+The declared compliance posture, with the implementing detail held in the gated material, is a baseline of
+NIST SP 800-171 Rev 3 and CMMC Level 3, with overlays for FERPA, COPPA, CIPA, HIPAA and HITECH, FedRAMP
+High, and, in a later version, additional federal regimes. The broader institutional compliance picture is
+in [enterprise compliance](/enterprise/compliance), and a customer shell that depends on an isolated agent
+like this one is described in [the Boeing customer shell](/apps/boeing). The source is Apache-2.0; a
+commercial license is available for the FedRAMP package, and the operator app's open-source distribution
+follows Slint's GPLv3 terms. This page contains no secrets, no keys, and no contract addresses.
 
-This page contains **no secrets**, no keys, no contract addresses are transcribed, no private
-endpoints, no credentials. Licensing note: source is Apache-2.0; a commercial license is available for
-the FedRAMP package per RFC §8.4; the Slint operator app's open-source distribution is GPLv3 (Slint is
-triple-licensed).
+## Source and verification
 
-## Source & verification
-
-- **Source repo:** `nist-agent`, `README.md`, `docs/rfcs/RFC-CIT-AGENT-0001.md`.
-- **Audited against SHA:** `5d683dc`.
-- **Key code paths cited:** `crates/nist-agent-chain/src/{lib,citrate,evm_generic,abi,types}.rs`,
-  `crates/` (15 nist-agent-* crates), `features/`, `docs/rfcs/`.
-- **Gated (not authored here):** `docs/compliance/`, `docs/audit/`.
+- Source repo: `nist-agent`, `README.md` and `docs/rfcs/RFC-CIT-AGENT-0001.md`.
+- Audited against SHA: `5d683dc`.
+- Key paths: `crates/nist-agent-chain/src/{lib,citrate,evm_generic,abi,types}.rs`, the fifteen
+  `nist-agent-*` crates, `features/`, `docs/rfcs/`.
+- Gated, not written here: `docs/compliance/`, `docs/audit/`.
+- Status: Specified, with bootstrap complete. The RFC is in quorum review at v0.1 and the active sprint is
+  early; the harness is pre-alpha and not certified. The compliance posture is declared, not yet
+  externally attested.

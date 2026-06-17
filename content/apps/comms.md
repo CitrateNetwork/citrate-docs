@@ -1,108 +1,82 @@
 ---
-title: citrate-comms, End-to-End-Encrypted Agentic Team Workspace
+title: Citrate Comms
 codex_slug: /apps/comms
 tier: commercial
 org_scope: ~
-source_kind: transcluded
-source: citrate-comms/README.md
+source_kind: authored
+source: citrate-comms/README.md, citrate-comms/crates, citrate-comms/PLANSET
 surfaces: [APP-comms]
-audited_against_sha: 06f21f3
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+audited_against_sha: 0a4989e
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# citrate-comms
+Citrate Comms is an end-to-end encrypted team workspace, messaging, a customer record, and project
+management in one self-hostable binary, where agents take part as ordinary members of a conversation. It is
+for any team that needs to collaborate privately, including on-premise or air-gapped, without trusting a
+server to keep their secrets.
 
-> An end-to-end-encrypted, agentic team workspace for the Citrate federation, Comms + CRM +
-> Project Management in one self-hostable binary, where AI agents participate as cryptographic
-> members rather than server-side wiretaps. For any team that needs secure collaboration on-prem
-> or airgapped.
+## What it is
 
-## Overview
+Citrate Comms is built on one boundary, and that boundary explains everything else. A relay moves messages
+between members, but it never reads them. It is trusted to keep the lights on and to put messages in order;
+it is never trusted with what the messages say.
 
-citrate-comms is the federation's secure team workspace: messaging, CRM, and project management in a
-single self-hostable binary. Login is a cryptographic handshake against `citrate-identity`; messages
-are routed by a **server-blind relay** that can never read them; and AI agents join conversations as
-**cryptographic members** of the group rather than as a privileged server-side reader.
+Concretely, members sign in with a cryptographic handshake tied to their Citrate account, and from then on
+every message is encrypted on the sending member's machine and decrypted only on the receiving members'
+machines. The relay stores and forwards ciphertext and routing information, nothing more. All plaintext, all
+group secrets, and all customer and project records live only on member clients. An agent reading a channel
+is cryptographically the same as a person reading it: there is no shadow key and no plaintext kept in escrow
+for the server.
 
-The defining property is the trust boundary:
+This server-blind property is not a promise in a policy document, it is held by the way the code is
+compiled. The relay links the core library with its message-group module switched off, so the only place
+group secrets could be handled is simply not present in the relay binary. Code in the relay that tried to
+read a group secret would fail to compile.
 
-> **The relay is trusted for *liveness and ordering*, never for *confidentiality*.** It stores and
-> forwards ciphertext plus routing metadata only. All plaintext, all group secrets, and all CRM/PM
-> records live exclusively on member clients. An agent reading a channel is cryptographically
-> identical to a human reading it, there is no shadow key and no plaintext escrow.
+## How to use it
 
-It is the first internal tool the team runs itself; if it works for us, it productizes for any team on
-the network. It runs on-prem and airgapped alongside `nist-agent`.
+Citrate Comms is one binary you run yourself, alongside the rest of your tools. The shape of using it is:
 
-**Status:** accepted into the federation (2026-06-14). **COMMS-S0 (Foundations) prototype complete**, the cryptographic + transport spine works end to end (22 tests green). Next: COMMS-S1 (WebSocket
-transport + RocksDB persistence + full channels/forums/DMs). Honest status: pre-1.0; several crates are
-in progress (see Reference).
+1. Run the relay where your team can reach it, on your own hardware, on-premise, or on an air-gapped network
+   beside an on-premise agent.
+2. Open the native client and sign in with the cryptographic handshake against your Citrate account. Your
+   account address is your identity in the workspace.
+3. Create channels, forums, and direct messages, and bring your customer records and project tracking into
+   the same encrypted space.
+4. Enroll an agent as a member when you want one. The agent holds its own keys and joins the group like any
+   other member, reachable over a local socket bridge.
 
-## Architecture
-
-```
-  citrate-identity (SIWE/OIDC)        AI agents (nist-agent / agent-runtime)
-   wallet_address = identity            join as MLS members, keys in keyring
-            │                                   │
-            ▼                                   ▼
-   ┌──────────────────────┐         ┌──────────────────────────┐
-   │  comms-client (Slint) │        │  comms-agent-bridge       │
-   │  MLS client + local   │        │  MLS client for an agent  │
-   │  encrypted store      │        │  Unix-socket JSON IPC     │
-   └──────────┬───────────┘         └───────────┬──────────────┘
-              │  opaque MLS ciphertext envelopes │
-              ▼                                  ▼
-   ┌──────────────────────────────────────────────────────────┐
-   │  comms-relay  (server-blind delivery service)             │
-   │  WS transport · per-group total order · KeyPackage dir    │
-   │  ciphertext store · BLAKE3 audit log · reads ZERO plaintext│
-   └──────────────────────────────────────────────────────────┘
-```
-
-### MLS and the cryptographic grade
-
-- **Group messaging:** MLS (RFC 9420) via OpenMLS, ciphersuite
-  `MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519` (X25519 KEM · AES-128-GCM · Ed25519 signatures, the
-  strongest standard MLS suite over the chain's X25519/Ed25519 curves).
-- **At rest:** RocksDB column families encrypted with AES-256-GCM ("chain grade"), keys wrapped by the
-  chain's PQ-hybrid `HybridKEM` (Kyber-768 + X25519, SHA3-512 combine).
-- **Audit:** BLAKE3 hash-chained append-only log, optionally anchored to chain 40204 for
-  tamper-evidence.
-
-### Server-blind relay
-
-The relay handles transport, per-group total ordering, the KeyPackage directory, the ciphertext store,
-and the audit log. It reads zero plaintext. This is **enforced by the build graph**: `comms-relay` links
-`comms-core` with `default-features = false`, so the `mls` module (the only place group secrets live) is
-not compiled into the relay, referencing `comms_core::mls` from the relay fails to compile.
-
-### Agents as members
-
-AI agents (driven by `nist-agent` / `citrate-agent-runtime`) join a conversation through
-`comms-agent-bridge` as full MLS members holding their own keys in a keyring, reachable over a
-Unix-socket JSON IPC bridge. There is no server-side wiretap and no plaintext escrow; an agent in a
-channel is cryptographically indistinguishable from a human in that channel.
+Step by step tutorials for self-hosting the relay, enrolling an agent, and anchoring an audit log to the
+Citrate Network follow as the remaining components land.
 
 ## Reference
 
-Crate layout (truth in `citrate-comms/crates/`, audited at SHA `06f21f3`):
+The workspace is a set of Rust crates. The cryptographic and transport spine is built and tested; the
+remaining crates fill in on the published plan.
 
 | Crate | Status | Role |
 |---|---|---|
-| `comms-proto` | ✅ implemented | Wire types (Envelope, GroupId, Commit/Welcome/AppMsg, RoleAssertion, AuditRecord) |
-| `comms-core` | ✅ mls/identity/audit | OpenMLS · SIWE+attestation identity · BLAKE3 audit chain; rbac/domain/store next |
-| `comms-relay` | ✅ delivery service | Server-blind DeliveryService (total order, KeyPackage dir, audit); WS+RocksDB in S1 |
-| `comms-agent-bridge` | ⏳ S3 | Unix-socket IPC to nist-agent / citrate-agent-runtime; an agent's MLS client |
-| `comms-client` | ⏳ S2 | Native Slint app (@citrate-ui-kit); houses the S0 e2e test; UI from the design package |
+| `comms-proto` | Implemented | Wire types: envelope, group id, commit, welcome, application message, role assertion, audit record |
+| `comms-core` | Implemented (mls, identity, audit) | Group messaging over OpenMLS, sign-in identity, and the audit chain; role and storage modules follow |
+| `comms-relay` | Implemented | The server-blind delivery service: total order per group, the key-package directory, the audit log |
+| `comms-agent-bridge` | Specified | A local socket bridge that lets an agent join as a member holding its own keys |
+| `comms-client` | Implemented (shell, primary channel) | The native client; the shell and the main channel screen are translated from the design handoff |
 
-Formal invariants are specified in TLA+ (`PLANSET/03_TLA_SPECS.md`): Commit-ordering and audit-chain
-contiguity. Per-capability behavior is specified as Gherkin features (`PLANSET/04_FEATURES_BDD.md`).
+The cryptography is standard and named:
 
-## Examples
+```text
+group messaging   MLS (RFC 9420) via OpenMLS
+ciphersuite       MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519
+                  X25519 key exchange, AES-128-GCM, Ed25519 signatures
+at rest           RocksDB column families encrypted with AES-256-GCM,
+                  keys wrapped by a hybrid Kyber-768 + X25519 KEM, SHA3-512 combine
+audit             BLAKE3 hash-chained append-only log,
+                  optionally anchored to the Citrate Network for tamper-evidence
+```
 
-Build and test the workspace:
+To build and test the workspace:
 
 ```bash
 cargo build --workspace --release --locked
@@ -110,22 +84,37 @@ cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-## Tutorials
+Formal invariants are written in TLA+ (commit ordering and audit-chain contiguity), and each capability is
+specified as a Gherkin feature. Agents reach the workspace through the same conversation surface they reach
+the rest of the network with, described under [chain RPC](/chain/rpc), and the research that the audit and
+verification design rests on is in [research](/research/learning).
 
-Tutorials (self-host the relay; enroll an agent as an MLS member; anchor an audit log to chain 40204)
-follow under `/apps/comms/tutorials/` as the S1–S3 crates land.
+## Design rationale
 
-## Security & access
+Most team tools put the server in the middle and trust it to behave: it can read everything, and you are
+asked to believe it will not. For a team working under a compliance regime, or on an air-gapped network, that
+trust is the thing they cannot grant. Citrate Comms removes the question by removing the server's ability to
+read, and it does so where it cannot quietly be undone, in the build graph rather than in configuration. The
+same decision is what lets an agent be a full member rather than a privileged listener: if the server cannot
+read the channel, an agent that reads it must be a member with keys, exactly like a person. The cost is that
+the relay cannot offer server-side features that depend on reading content, such as server-side search; that
+work moves to the clients, which is where the plaintext already is.
 
-Tier: **commercial**. citrate-comms is a paid-seat product surface; this page documents the public
-architecture and crate map at a pinned SHA. The page contains **no secrets**, no keys, no bearer
-tokens, no private endpoints. The relay's loopback admin and bearer-token operational details, and any
-operator deployment credentials, stay out of all tiers. The system's security rests on the protocol
-(MLS + the build-graph-enforced server-blind relay), not on obscuring this documentation.
+## Access and canon
 
-## Source & verification
+Commercial. Citrate Comms is a paid-seat product, and this page documents the public architecture and crate
+map at a pinned commit. It carries no secrets: no keys, no tokens, and no private endpoints. The relay's
+loopback administration and bearer-token operational details, and any operator deployment credentials, stay
+out of every tier. The system's security rests on the protocol and the build-graph-enforced server-blind
+relay, not on keeping this page vague. It runs on-premise and air-gapped alongside the on-premise compliance
+agent in [the air-gapped agent sidecar](/apps/nist-agent).
 
-- **Source repo:** `citrate-comms`, `README.md` and `PLANSET/`.
-- **Audited against SHA:** `06f21f3`.
-- **Key code paths cited:** `crates/comms-proto`, `crates/comms-core` (`mls`, `identity`, `audit`),
-  `crates/comms-relay`, `crates/comms-agent-bridge`, `crates/comms-client`.
+## Source and verification
+
+- Source repo: `citrate-comms`, `README.md` and `PLANSET/`.
+- Audited against SHA: `0a4989e`.
+- Key paths: `crates/comms-proto`, `crates/comms-core` (`mls`, `identity`, `audit`), `crates/comms-relay`,
+  `crates/comms-agent-bridge`, `crates/comms-client`.
+- Status: Implemented for the cryptographic and transport spine, accepted into the federation on 2026-06-14,
+  with the foundation prototype complete and 22 tests passing. It is pre-1.0; the agent bridge is Specified
+  and not yet built, and full transport and storage land in the next sprint.

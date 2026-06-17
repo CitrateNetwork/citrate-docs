@@ -4,103 +4,132 @@ codex_slug: /apps/tutorials/explore-a-transaction
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-explorer/src/app/api/tx/[hash]/route.ts
+source: citrate-explorer/src/app/api/tx/[hash]/route.ts, src/app/api/v1/route.ts, src/app/api/mcp/route.ts
 surfaces: [APP-explorer]
 audited_against_sha: cf7fa78
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Tutorial: Explore a transaction
+A short walk-through of looking up one transaction in CitrateScan, reading what it did, and confirming its
+finality the way the BlockDAG actually decides it. You can do this with your eyes in the explorer, from the
+read API, or by asking the built-in agent.
 
-> Look up a Citrate transaction, read its plain-English summary, and confirm finality the DAG-native way, in the UI and from the API.
+## What it is
 
-**Time:** ~5 minutes · **Prerequisites:** a transaction hash on Citrate (chain `40204`).
-Some steps use an API key; get one from the explorer's Developer hub. The `curl`
-commands below assume `EXPLORER` points at your CitrateScan deployment.
+A guided lookup of a single transaction on the Citrate Network, chain id 40204. You will find the
+transaction, read its plain-English summary, and confirm finality by depth rather than by a confirmation
+count. The reads here are public and write nothing.
+
+## How to use it
+
+You need a transaction hash on Citrate, a 64-hex value prefixed with `0x`. The API steps use an API key,
+which you can get from the explorer's developer hub. Set two variables so the commands stay short; point
+`EXPLORER` at your CitrateScan deployment.
 
 ```bash
 export EXPLORER="https://scan.citrate.ai"   # your CitrateScan base URL
 export TXHASH="0x<your-64-hex-tx-hash>"
 ```
 
-## Step 1, Find the transaction in the UI
+### Step 1, find the transaction in the explorer
 
 1. Open CitrateScan.
-2. Paste the transaction hash into the **omni-search** bar (or press `⌘K` to open the
-   command palette and paste it there).
-3. CitrateScan classifies the input as a tx hash and opens the **Transaction** screen.
+2. Paste the transaction hash into the search bar, or press `⌘K` to open the command palette and paste it
+   there.
+3. CitrateScan classifies the input as a transaction hash and opens the transaction screen.
 
-You land on a page that leads with a **plain-English summary** of what the transaction
-did, followed by status, value, and decoded detail.
-(Screen: `citrate-explorer/src/scan/screens/tx.tsx`.)
+You land on a page that leads with a plain-English summary of what the transaction did, followed by its
+status, value in dual units, and decoded detail. (Screen: `citrate-explorer/src/scan/screens/tx.tsx`.)
 
-## Step 2, Read the consensus context (DAG-native finality)
+### Step 2, read the consensus context
 
-On the transaction page, note the **block** the tx landed in and its **`blue_score`**.
-Citrate is a GHOSTDAG BlockDAG, so finality is **by depth**, not by a confirmation
-countdown: a block is final once
+On the transaction page, note the block the transaction landed in and that block's blue score. Citrate is a
+BlockDAG under GhostDAG, so finality is by depth, not a confirmation countdown. A block is final once:
 
-```
+```text
 current_blue_score − block.blue_score ≥ 100
 ```
 
-CitrateScan shows whether the transaction is **finalized** based on this rule, there
-is no "12 confirmations" counter to wait on.
+CitrateScan shows whether the transaction is finalized using exactly this rule. There is no "12
+confirmations" counter to wait on. For the underlying concepts, see [read the DAG](/chain/tutorials/read-the-dag).
 
-## Step 3, Fetch the same facts from the API
+### Step 3, fetch the same facts from the API
 
-The transaction detail endpoint returns the tx and receipt enriched with its block's
-`timestamp`, `blueScore`, and a `finalized` flag in one call:
+The transaction detail endpoint returns the transaction and receipt enriched with the block's `timestamp`,
+`blueScore`, and a `finalized` flag, in one call:
 
 ```bash
 curl -s "$EXPLORER/api/tx/$TXHASH" | jq
 ```
 
-You'll get the core facts the UI renders, including `finalized`, so you can confirm
-finality programmatically.
+The response carries the core facts the explorer renders, including `methodId`, `isCreate`, and
+`finalized`, so you can confirm finality from a script. If the block lookup fails, the endpoint still
+returns the transaction core without the consensus fields rather than erroring.
 (Source: `citrate-explorer/src/app/api/tx/[hash]/route.ts`.)
 
-## Step 4, Use the Etherscan-compatible API (optional)
+### Step 4, use the Etherscan-shaped API, optional
 
-If you have tooling built for Etherscan, the same lookups work through `/api/v1` with
-the familiar `{ status, message, result }` envelope. The `proxy` module is a JSON-RPC
-passthrough over allowlisted read methods:
+If you already have tooling built for the Etherscan request shape, the same lookups work through `/api/v1`
+with the `{ status, message, result }` envelope. The `proxy` module is a JSON-RPC passthrough over
+allowlisted read methods:
 
 ```bash
-# Raw transaction via the JSON-RPC proxy
+# Raw transaction through the JSON-RPC proxy
 curl -s "$EXPLORER/api/v1?module=proxy&action=eth_getTransactionByHash&txhash=$TXHASH&apikey=$CITRATE_API_KEY" | jq
 
 # Receipt status (1 = success, 0 = reverted)
 curl -s "$EXPLORER/api/v1?module=transaction&action=gettxreceiptstatus&txhash=$TXHASH&apikey=$CITRATE_API_KEY" | jq
 ```
 
-> Note: `getblockcountdown` deliberately returns an error, finality on Citrate is
-> depth-based, not a countdown. Use the DAG stats instead of waiting for a countdown.
-> (Source: `citrate-explorer/src/app/api/v1/route.ts`.)
+The `getblockcountdown` action returns an error on purpose, since finality on Citrate is depth-based, not a
+countdown. Read the DAG stats and the depth rule from step 2 instead.
+(Source: `citrate-explorer/src/app/api/v1/route.ts`.)
 
-## Step 5, Ask the agent (optional)
+### Step 5, ask the agent, optional
 
-Open **Ask CitrateScan** and ask, in plain English:
+Open Ask CitrateScan and ask, in plain English:
 
-> "Explain transaction `$TXHASH` and tell me whether it's final."
+> Explain transaction `$TXHASH` and tell me whether it is final.
 
-The agent answers using read-only on-chain tool calls and links the reads behind its
-answer. The exact same tools are available to external agents over the read-only MCP
-endpoint at `/api/mcp`, so you can do this from Claude, ChatGPT, or Cursor too.
-(Source: `citrate-explorer/src/scan/screens/agent.tsx`, `src/app/api/mcp/route.ts`.)
+The agent answers using read-only on-chain tool calls and links the reads behind its answer. The same tools
+are available to outside agents over the read-only MCP server at `/api/mcp`, so you can do this from Claude,
+ChatGPT, or Cursor as well. (Source: `citrate-explorer/src/scan/screens/agent.tsx`, `src/app/api/mcp/route.ts`.)
+
+## Reference
+
+The surfaces this tutorial touches:
+
+| Surface | What it does | Source |
+|---|---|---|
+| `/api/tx/[hash]` | Transaction and receipt with block timestamp, blue score, and `finalized`. | `src/app/api/tx/[hash]/route.ts` |
+| `/api/v1` (`proxy`, `transaction`) | Etherscan-shaped reads over allowlisted JSON-RPC and receipt status. | `src/app/api/v1/route.ts` |
+| `/api/mcp` | Read-only MCP server exposing the same tools as the in-app agent. | `src/app/api/mcp/route.ts` |
 
 ## What you learned
 
-- How to resolve a transaction in CitrateScan via omni-search / `⌘K`.
-- How to read **DAG-native finality** (`blue_score` + depth ≥ 100) instead of confirmations.
-- Three ways to get the same facts: the `/api/tx/[hash]` endpoint, the Etherscan-compatible
-  `/api/v1` surface, and the AI agent (in-app or over MCP).
+- How to resolve a transaction in CitrateScan through the search bar or `⌘K`.
+- How to read finality the DAG-native way, blue score plus depth at least 100, instead of confirmations.
+- Three ways to get the same facts: the `/api/tx/[hash]` endpoint, the Etherscan-shaped `/api/v1` surface,
+  and the agent, in the explorer or over MCP.
 
-## Source & verification
+## Failure modes
 
-- **Repo:** `citrate-explorer` (CitrateScan), audited against `cf7fa78`.
-- **Endpoints used:** `/api/tx/[hash]`, `/api/v1` (`proxy`, `transaction`), `/api/mcp`.
-- These are **read-only** public surfaces; API keys are issued in-app and must never be
-  pasted into shared docs (Rule 2, no secrets).
+- An invalid hash, anything other than a `0x`-prefixed 64-hex value, is rejected with a 400 before any
+  lookup runs.
+- A transaction the node cannot find returns a 404.
+- `getblockcountdown` on `/api/v1` returns an error by design. Use the depth rule, not a countdown.
+
+## Access and canon
+
+Public and read-only. Nothing here writes state. API keys are issued to you inside the app and must never
+be pasted into shared docs.
+
+## Source and verification
+
+- Repo: `citrate-explorer` (CitrateScan), audited against `cf7fa78`.
+- Endpoints used: `/api/tx/[hash]`, `/api/v1` (`proxy`, `transaction`), `/api/mcp`.
+- Status: Implemented (pre-audit). These are read-only public surfaces.
+
+See also [read the DAG](/chain/tutorials/read-the-dag) and the [JSON-RPC reference](/chain/rpc).
