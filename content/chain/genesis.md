@@ -1,159 +1,121 @@
 ---
-title: Citrate Chain Parameters & Genesis
+title: Chain parameters and genesis
 codex_slug: /chain/genesis
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: citrate-chain/config/, citrate-chain/node/config/, citrate-chain/node/src/genesis.rs
+source_kind: authored
+source: citrate-chain/node/config/, citrate-chain/node/src/genesis.rs
 surfaces: [CHAIN-genesis]
 audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Chain Parameters & Genesis
+These are the chain identity and genesis parameters you need to point an account or a node at the Citrate
+Network and to reason about how the network agrees on its first block. It is for builders connecting to the
+network and operators bringing up a node.
 
-> The chain identity and genesis parameters you need to connect a wallet, point
-> a node, or reason about finality. Network config lives in
-> `node/config/*.toml`; genesis construction lives in `node/src/genesis.rs` and
-> the shared `core/economics/src/genesis.rs`.
+## What it is
 
-## Overview
+The Citrate Network ships several configurations that share one chain id and one set of consensus constants
+but differ in block cadence and committee sizing. The active public network is the testnet, on chain id
+40204. A mainnet configuration exists in the tree on chain id 1, but it is pre-launch and not yet live; its
+bootstrap-node list is still a placeholder to be filled before launch. Use 40204 today.
 
-Citrate is a BlockDAG (GhostDAG ordering, ECVRF proposer election, committee BFT
-checkpoints, see [Consensus](/chain/consensus)). It ships several networks that
-share the same chain ID and consensus constants but differ in block cadence and
-committee sizing. Genesis is **deterministic**: the same config produces the
-same state root and the same genesis block hash on every node
-(`initialize_shared_genesis_state()`), which is what lets independently started
-nodes agree on block 0.
+The chain id is permanent. It is the number an account and a node check to confirm they are talking to
+Citrate and not some other network, and we do not plan to change it. Over JSON-RPC, `eth_chainId` returns
+`0x9d0c` on testnet, which is 40204 in hex.
 
-> **Mainnet is not launched.** The testnet beta (chain ID **40204**) is the
-> active public network. A mainnet config exists but is **pre-launch**: its
-> bootstrap-node list is an empty placeholder and `production_mode` is fail-closed
-> (the node refuses to start without validators configured). Use 40204.
+Genesis is deterministic. The same configuration produces the same state root and the same first-block hash
+on every node, which is what lets independently started nodes agree on block 0 without coordinating. That
+property is built from a single shared path (`core/economics/src/genesis.rs`, called by
+`node/src/genesis.rs`) rather than reconstructed separately in each binary.
+
+## How to use it
+
+1. **Connect an account.** Point it at the testnet using chain id 40204 and the currency SALT at 18
+   decimals. Fetch the current public endpoint from the testnet docs rather than copying an address out of a
+   config file, since operational endpoints change.
+2. **Confirm you reached Citrate.** Ask the node for its chain id; a correct testnet node answers `0x9d0c`.
+
+   ```bash
+   curl -s http://127.0.0.1:8545 -H 'content-type: application/json' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
+   # {"jsonrpc":"2.0","id":1,"result":"0x9d0c"}   # 0x9d0c is 40204
+   ```
+
+3. **Bring up a node on a network.** Select the matching configuration. The testnet config carries chain id
+   40204, one-second blocks, and strict VRF.
+
+   ```bash
+   citrate-node --config node/config/testnet.toml
+   ```
 
 ## Reference
 
-### Chain ID
+Chain id by configuration, verified in `node/config/*.toml`:
 
-| Network | Chain ID | Status |
+| Network | Chain id | Status |
 |---|---|---|
-| **Testnet beta** (`node/config/testnet.toml`) | **40204** | active public network |
+| Testnet (`node/config/testnet.toml`) | 40204 | active public network |
 | Team testnet (`node/config/team-testnet.toml`) | 40204 | internal |
 | Devnet (`node/config/devnet.toml`) | 40204 | local development |
-| Mainnet (`node/config/mainnet.toml`) | 1 | **pending launch** |
+| Mainnet (`node/config/mainnet.toml`) | 1 | pre-launch, not yet live |
 
-Chain ID 40204 is also the default in `node/src/genesis.rs` and the
-`testnet_beta()` / `team_testnet_genesis()` profiles in
-`core/economics/src/genesis.rs`. The README states `Chain ID: 40204 (testnet
-beta)`.
+Block cadence by configuration, verified in the same files. Consensus constants such as GhostDAG `k = 18`
+are shared across networks; see [Citrate Network consensus](/chain/consensus).
 
-### Consensus & finality parameters
-
-Consensus constants are shared across networks; cadence and committee sizing
-differ. From `node/config/*.toml`:
-
-| Param | Devnet | Testnet beta | Team testnet | Mainnet (pending) |
-|---|---|---|---|---|
-| `block_time` | 2 s | 1 s | 2 s | 5 s |
-| GhostDAG `k` | 18 | 18 | 18 | 18 |
-| `min_gas_price` | 1 Gwei | 1 Gwei | 1 Gwei | 1 Gwei |
-| Checkpoint `interval` | 50 blocks | 50 blocks | 50 blocks | TBD |
-| Committee `committee_size` | 100 | 100 | 10 | TBD |
-| `quorum_threshold` | 67 | 67 | 7 | TBD |
-| `strict_vrf` | false | true | true |, |
-
-The committee BFT checkpoint layer finalizes every 50 blocks once a quorum of
-the committee votes (2/3 + 1, i.e. 67/100 on testnet, 7/10 on team testnet);
-see [Consensus → finality](/chain/consensus#finality). GhostDAG `k = 18` and a
-max of 10 parents per block are the global consensus constants. The network
-targets ≤ 12 s finality.
-
-### Genesis block
-
-Built deterministically from the shared genesis path
-(`core/economics/src/genesis.rs`, called by `node/src/genesis.rs`):
-
-| Field | Value |
+| Network | `block_time` |
 |---|---|
-| Height | 0 |
-| Block version | 1 |
-| Canonical genesis timestamp | 2026-01-01T00:00:00Z |
-| Base fee per gas | 1 Gwei (1e9 wei) |
-| Gas limit | 30,000,000 |
-| Selected parent / merge parents | zero hash / none |
-| Blue score / pruning point | 0 / zero hash |
+| Testnet | 1 s |
+| Team testnet | 2 s |
+| Devnet | 2 s |
+| Mainnet (pre-launch) | 5 s |
 
-`initialize_shared_genesis_state()` is the single source of truth used by both
-the standalone node and the GUI-embedded node, enforcing the
-`DeterministicGenesis` invariant (same config → same state root → same block
-hash), which is also TLA+-checked
-(`specs/tla/network/GenesisSafetyAcrossNodes.tla`).
+Genesis block, built deterministically from the shared genesis path
+(`core/economics/src/genesis.rs`):
 
-### Genesis allocations
+| Field | Value | Source |
+|---|---|---|
+| Canonical timestamp | 2026-01-01T00:00:00Z | `node/src/genesis.rs` (`CANONICAL_GENESIS_TIMESTAMP`) |
+| Base fee per gas | 1 Gwei (1e9 wei) | `core/economics/src/genesis.rs` (`base_fee_per_gas`) |
+| Gas limit | 30,000,000 | `core/economics/src/genesis.rs` (`gas_limit`) |
 
-The genesis allocation categories (treasury, faucet, deployer, team/dev,
-validator, plus the remaining mining-reward pool) sum to the 1B SALT supply cap.
-The Arachnid deterministic CREATE2 deployer (`0x4e59…`) is pre-deployed at
-genesis so ERC-4337 tooling works from block 0. For the allocation *structure*
-and tokenomics, see [Economics → genesis allocations](/chain/economics). The
-specific genesis account addresses are not enumerated in public docs (see
-Security & access).
+The genesis allocation categories sum to the one billion SALT supply cap; the allocation structure is
+covered under [network economics](/chain/economics). No private keys or mnemonics appear in any
+configuration in the repository, and we do not enumerate specific genesis account addresses in public docs.
 
-### Bootstrap & connectivity
+## Design rationale
 
-Each network config lists its `bootstrap_nodes` / listen addresses in its
-`node/config/*.toml`, with `config/bootstrap-nodes.json` as a seed list. Testnet
-beta exposes JSON-RPC and WebSocket; mainnet's bootstrap list is an empty
-placeholder pending launch. For current connection endpoints use the public
-testnet docs / faucet rather than copying values from config, addresses change
-and some are operational.
+A permanent chain id and a single shared genesis path exist for the same reason: agreement should not depend
+on operators coordinating by hand. If every node derives block 0 from the same code and the same config, two
+nodes started a continent apart still land on the same first-block hash, and a misconfigured node fails
+visibly rather than quietly forking. The cost is that genesis is rigid; changing it is a deliberate,
+network-wide event, not a per-node setting. For a network meant to outlast any single operator, that
+rigidity is the point.
 
-## Examples
+## Failure modes
 
-Add Citrate testnet beta to a wallet:
+The deterministic-genesis property is the load-bearing invariant: a node that computes a different state
+root from a different config will not agree on block 0, which surfaces the misconfiguration immediately
+rather than letting it linger as a silent fork. The mainnet configuration is pre-launch; its bootstrap list
+is an empty placeholder, so a node pointed at mainnet today has nothing to connect to. Stay on 40204 until
+mainnet is announced on the [roadmap](/start/roadmap).
 
-```text
-Network name:  Citrate Testnet Beta
-Chain ID:      40204
-Currency:      SALT (18 decimals)
-RPC / Explorer: see the public testnet docs (endpoints are operational)
-```
+## Access and canon
 
-Point a node at a network by selecting its config:
+Public. Chain id, block cadence, consensus constants, and genesis block parameters are exactly what a
+builder or operator needs to connect and reason about the network. No genesis private keys or mnemonics
+exist in the repository; the code carries only public addresses, and we do not enumerate genesis account
+addresses or paste live bootstrap addresses here, fetch operational endpoints from the testnet docs.
 
-```bash
-# Uses node/config/testnet.toml (chain ID 40204, strict VRF, 1s blocks)
-citrate-node --config node/config/testnet.toml
-```
+## Source and verification
 
-## Tutorials
-
-- [Run a node](/operators/run-a-node), pick a network config and join. **Tier:
-  public.**
-
-## Security & access
-
-- **Tier: public.** Chain ID, consensus constants, block cadence, finality
-  committee sizing, and genesis block parameters are exactly what a developer or
-  operator needs to connect and reason about the network.
-- **No secrets here.** **No genesis private keys or mnemonics**, none exist in
-  the repository; the code carries only public addresses, and key material is
-  held out-of-band. We **do not enumerate genesis account addresses** in public
-  docs (allocation *structure* is on [Economics](/chain/economics)), and we do
-  not paste live bootstrap multiaddrs/IPs here, fetch operational endpoints from
-  the public testnet docs/faucet.
-
-## Source & verification
-
-- **Source repo / paths:** `citrate-chain/config/`,
-  `citrate-chain/node/config/*.toml`, `citrate-chain/node/src/genesis.rs`,
+- Source: `citrate-chain/node/config/*.toml`, `citrate-chain/node/src/genesis.rs`,
   `citrate-chain/core/economics/src/genesis.rs`.
-- **Truth documents (Rule 9):** the per-network `node/config/*.toml` and the
-  shared genesis module, this page summarizes and links.
-- **Audited against SHA:** `03d7851`
-  (`git -C citrate-chain rev-parse --short HEAD`).
-- **Honest status:** testnet beta is the active public network; **mainnet is
-  pre-launch** (placeholder bootstrap list, fail-closed `production_mode`).
+- Chain id 40204 confirmed in `node/config/testnet.toml`; mainnet chain id 1 in `node/config/mainnet.toml`;
+  `eth_chainId` returns `0x9d0c` (`core/api/src/eth_rpc.rs`, `cli/src/commands/advanced.rs`).
+- Audited against SHA: `03d7851`.
+- Status: Implemented, testnet 40204 is the active public network; mainnet is Specified but pre-launch (the
+  config exists, the network is not yet live). The path to mainnet is on the [roadmap](/start/roadmap).
