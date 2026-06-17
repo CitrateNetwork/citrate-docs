@@ -1,329 +1,323 @@
 ---
-title: Learning Center (edu) Contracts
+title: Citrate Schools contracts
 codex_slug: /contracts/edu
 tier: public
 org_scope: ~
-source_kind: transcluded
-source: citrate-chain (contracts/src/edu/, contracts/src/ClassroomRegistry.sol, contracts/src/MentorMatcher.sol, contracts/src/TestnetFarmingAccounting.sol)
-surfaces: [SC-edu-classroomRegistry, SC-edu-classroomClusterV1, SC-edu-budget, SC-edu-cashout, SC-edu-mentor, SC-edu-vault, SC-edu-testnetFarming]
-audited_against_sha: 03d7851
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+source_kind: authored
+source: citrate-chain (contracts/src/ClassroomRegistry.sol, contracts/src/edu/ClassroomClusterV1.sol, contracts/src/edu/InstitutionTreeV1.sol, contracts/src/edu/BudgetAllocation.sol, contracts/src/edu/CashoutRequest.sol, contracts/src/edu/InstitutionalVault.sol, contracts/src/MentorMatcher.sol, contracts/src/TestnetFarmingAccounting.sol)
+surfaces: [SC-edu-classroomRegistry, SC-edu-classroomClusterV1, SC-edu-institutionTreeV1, SC-edu-budget, SC-edu-cashout, SC-edu-mentor, SC-edu-vault, SC-edu-testnetFarming]
+audited_against_sha: 54d1f2c
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Learning Center (edu) Contracts
+These are the contracts behind Citrate Schools, the stack that lets a US K-12 public school run on Citrate
+while its student data stays on its own hardware. They track classrooms, roles, budgets, and teacher
+cashouts on the public ledger; the records of who learns what, and the work that went into it, stay on
+Citrate Ground. For developers and the people who integrate a school onto chain id 40204.
 
-> The on-chain contracts behind the Citrate **Learning Center**, the K-12 /
-> institutional stack: classrooms, role trees, per-classroom budgets, teacher
-> cashouts, mentor matching, the school treasury vault, and the testnet
-> contribution payout. For developers and institution integrators building on
-> Citrate (chainId **40204**).
+## What it is
 
-## Overview
+A school district is an orchard with many rows. Citrate Schools is the registry that records the rows,
+who tends each one, and what each is allowed to draw from the shared store, without ever moving the soil.
+The student records, the model outputs, and the day to day work stay in the school's own Citrate Ground
+instance. What reaches the public ledger is the structure around it: a classroom exists, this account is
+its teacher, this budget has this much left, this cashout was approved by someone other than the person who
+asked for it. US K-12 public schools have free access in perpetuity, and the on-chain stack is deliberately
+thin so that the sensitive material never has to leave the building.
 
-This page is **transcluded**: the truth lives in `citrate-chain` at the pinned
-SHA (`03d7851`). Every function and event below is audited against the `.sol`
-source cited per section, if a symbol is not listed here, it does not exist in
-the contract at this SHA. The ABI is summarized, not reproduced (Rule 9); link
-to the source for the full interface.
+Every contract here gates its sensitive operations through role checks. There are two generations of the
+classroom layer, and it matters which one you build against:
 
-> **Honest status: pre-audit.** These contracts carry formal-methods coverage
-> (TLA+ specs cited inline) and the SECREM-01 remediation has landed the fixes
-> noted in their NatSpec, but the stack has **not** completed an external
-> third-party audit. The pilot deployment is testnet-beta. Treat as
-> experimental; do not custody material value. The deployed `InstitutionalVault`
-> in particular ships with a **non-operational 2-of-3 multisig** on testnet
-> (signers not yet rotated, see Security & access).
+- **ClassroomClusterV1** is the current design. It carries scoped, multi-role access control for a whole
+  institution, and it supersedes the older ClassroomRegistry.
+- **ClassroomRegistry** is the first-generation, single-teacher design. It is still deployed and documented
+  for the simple one-teacher flow, but new institutional work should target ClassroomClusterV1.
 
-### Contract map
+Above the classroom layer, **InstitutionTreeV1** records the institutional tree itself, the path from a
+charter management organization down through a district to a school, with only HMAC hashes of the official
+identifiers on chain and no personal data. Two contracts handle money, **BudgetAllocation** and
+**CashoutRequest**, both drawing against a school treasury, the **InstitutionalVault**. **MentorMatcher**
+pairs higher-accuracy mentors with mentees in the learning network, and **TestnetFarmingAccounting** is a
+one-time payout that closes out the testnet.
 
-| Surface | Contract | Source | Tier | Deployed (40204) |
-|---|---|---|---|---|
-| SC-edu-classroomRegistry | ClassroomRegistry | `contracts/src/ClassroomRegistry.sol` | public | `0x541923570df41b307ca037fdd0fb508502885455` |
-| SC-edu-classroomClusterV1 | ClassroomClusterV1 | `contracts/src/edu/ClassroomClusterV1.sol` | public | `0xde991179021a208cf7e6caebf3a07c229aed3d0f` |
-| SC-edu-budget | BudgetAllocation | `contracts/src/edu/BudgetAllocation.sol` | public | `0x26bad758eac1bac02457f8e4544269b8b52bc5d7` |
-| SC-edu-cashout | CashoutRequest | `contracts/src/edu/CashoutRequest.sol` | public | `0xf3c58459e723d7eabe2a61c6a97776bc2f5e28ed` |
-| SC-edu-mentor | MentorMatcher | `contracts/src/MentorMatcher.sol` | public | `0x516380b0acef9a9541641c85dbe0bf89b3e56977` |
-| SC-edu-vault | InstitutionalVault | `contracts/src/edu/InstitutionalVault.sol` | **commercial** | `0xf0dca50f418acfb8917d71d8bb65393308629381` |
-| SC-edu-testnetFarming | TestnetFarmingAccounting | `contracts/src/TestnetFarmingAccounting.sol` | public | `0xd85e83cab6c5947e2cc5e77244edfce110309724` |
+## How to use it
 
-> Addresses from `contracts/DEPLOYED_ADDRESSES.md` (testnet-beta, chain 40204).
-> Always cross-verify with `eth_getCode` against `https://rpc.citrate.ai` before
-> trusting an address.
+Pick the path that matches the school you are bringing on.
 
----
+1. **A single teacher, one classroom.** Deploy or reuse ClassroomRegistry. The teacher calls
+   `createClassroom`, hands students a hashed invite code, and whitelists the models the class may reach.
+   This is the lightest path and needs no governance account.
+2. **A whole institution.** Use ClassroomClusterV1. Set a governance account at construction, grant org
+   roles (IT, Admin, SuperAdmin) to staff, then create classrooms and grant in-classroom roles (Student,
+   TA, Teacher). Account status follows a lifecycle aligned to FERPA, not a single revoke flag.
+3. **A district or a charter network.** Register the tree in InstitutionTreeV1 first, the CMO, then its
+   districts, then their schools, each keyed by an HMAC hash of its official code. Each school then runs its
+   own ClassroomClusterV1 in the shape above.
+4. **Money.** Fund the InstitutionalVault, set per-classroom limits in BudgetAllocation, and route teacher
+   withdrawals through CashoutRequest, where a teacher files and governance approves. A teacher cannot
+   approve their own request.
 
-## ClassroomRegistry
+Before you trust any address, read it back from the chain:
 
-Source: `contracts/src/ClassroomRegistry.sol` (license MIT). Backed by
-`ClassroomRegistry.tla` invariants INV-1…INV-8.
+```bash
+curl -s https://rpc.citrate.ai -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_getCode","params":["0xde991179021a208cf7e6caebf3a07c229aed3d0f","latest"]}'
+# a non-"0x" result confirms code is deployed at that address on chain 40204
+```
 
-**Purpose.** First-generation teacher-student classroom management. A teacher
-creates one classroom keyed by their address, mints a hashed invite code (with a
-TTL), enrolls students who present the code, and whitelists the models students
-may access. Enforced structurally: a student is in at most one classroom, invite
-codes are unique and expire, and a student can only reach models their teacher
-whitelisted.
+## Reference
 
-> Superseded by **ClassroomClusterV1** (LC-8) for multi-role institutional RBAC,
-> but still deployed and documented for the single-teacher flow.
+Each contract is named once with its source path. The ABI is summarized, not reproduced; read the source
+for the full interface. Symbols not listed here do not exist in the contract at this SHA.
 
-### Key functions
+| Surface | Contract | Source | Status |
+|---|---|---|---|
+| SC-edu-classroomClusterV1 | ClassroomClusterV1 | `contracts/src/edu/ClassroomClusterV1.sol` | Implemented (current) |
+| SC-edu-classroomRegistry | ClassroomRegistry | `contracts/src/ClassroomRegistry.sol` | Implemented (legacy) |
+| SC-edu-institutionTreeV1 | InstitutionTreeV1 | `contracts/src/edu/InstitutionTreeV1.sol` | Implemented |
+| SC-edu-budget | BudgetAllocation | `contracts/src/edu/BudgetAllocation.sol` | Implemented |
+| SC-edu-cashout | CashoutRequest | `contracts/src/edu/CashoutRequest.sol` | Implemented |
+| SC-edu-mentor | MentorMatcher | `contracts/src/MentorMatcher.sol` | Implemented |
+| SC-edu-vault | InstitutionalVault | `contracts/src/edu/InstitutionalVault.sol` | Implemented; multisig path Specified |
+| SC-edu-testnetFarming | TestnetFarmingAccounting | `contracts/src/TestnetFarmingAccounting.sol` | Implemented |
+
+### ClassroomClusterV1
+
+Source: `contracts/src/edu/ClassroomClusterV1.sol`. The current classroom layer, scoped multi-role access
+control for an institution. Two planes of roles run side by side. Org roles are
+`None`, `Admin`, `IT`, and `SuperAdmin`; in the access checks, Admin and SuperAdmin pass any
+`onlyAdminOrAbove` gate, while IT passes only the `onlyIT` gate (which Admin and SuperAdmin also satisfy),
+so Admin sits above IT for institution-wide actions. Per-classroom roles are `None`, `Student`, `TA`, and
+`Teacher`. A FERPA-aligned account status state machine, `Active`, `Inactive`, `Withdrawn`, `Transferred`,
+`Graduated`, `Suspended`, and `Expelled`, replaces the older binary revoke flag. Governance is a single
+account with a two-step handover, not a multisig in itself; the account is typically the InstitutionalVault.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `createClassroom(string name, uint256 maxStudents, bytes32 inviteCodeHash)` | any (becomes that classroom's teacher) | Create a classroom + initial invite code with default 7-day TTL. |
-| `enrollWithCode(bytes32 inviteCodeHash)` | any non-teacher | Enroll by presenting a valid, unexpired invite code. |
-| `unenroll()` | enrolled student | Leave current classroom. |
-| `removeStudent(address student)` | `onlyTeacher` | Teacher removes a student. |
-| `whitelistModel(bytes32 modelHash)` / `removeModel(bytes32 modelHash)` | `onlyTeacher` | Manage the per-classroom model whitelist. |
-| `rotateInviteCode(bytes32 newCodeHash)` | `onlyTeacher` | Rotate invite code (default TTL). |
-| `rotateInviteCodeWithTtl(bytes32 newCodeHash, uint64 ttlSeconds)` | `onlyTeacher` | Rotate with explicit TTL (capped at `MAX_INVITE_TTL` = 90 days). |
-| `canStudentAccessModel(address student, bytes32 modelHash)` → `bool` | view | Structural INV-6 check: enrolled **and** model whitelisted. |
+| `transferGovernance(address)` / `acceptGovernance()` / `cancelGovernanceTransfer()` | `onlyGovernance` to propose or cancel; the pending account accepts | Two-step governance handover so a mistyped key cannot lock the institution. |
+| `grantOrgRole(address, OrgRole)` | Admin or above; granting SuperAdmin requires governance | Assign an org-scope role. |
+| `revokeOrgRole(address)` | `onlyAdminOrAbove` | Revoke an org role; sets status Inactive, which is reversible. |
+| `setAccountStatus(address, AccountStatus)` | tiered: IT for Active/Inactive, Admin for Suspended/Withdrawn/Transferred, SuperAdmin or governance for Graduated/Expelled | FERPA lifecycle transitions; Graduated and Expelled are permanent. |
+| `createClassroom(string, address teacher, uint8 gradeLevel, uint16 academicYear, string section)` returns `uint256` | `onlyAdminOrAbove` | Create a classroom, returns its id. |
+| `grantClassroomRole(uint256, address, ClassroomRole)` / `revokeClassroomRole(uint256, address)` | `onlyTeacherOf`; granting Teacher needs Admin or above | Manage in-classroom roles; a teacher cannot escalate a student to teacher. |
+| `transferStudent(address, uint256 from, uint256 to)` | source teacher or Admin and above | Atomic move between classrooms. |
+| `registerDevice(bytes32, address)` / `revokeDevice(bytes32)` | `onlyIT` | Device certificate registry. |
+| `claimClassroom(address, uint256)` | pure | Migration placeholder; returns `0`, not yet implemented at this SHA. |
+| `getOrgRole`, `getClassroomRole`, `getAccountStatus`, `isActiveMember`, `isDeviceActive`, `getDeviceUser`, `getClassroomInfo`, `getClassroomName`, `getClassroomTeacher`, `getStudentCount` | view | Read accessors. |
+
+Events: `GovernanceTransferProposed`, `GovernanceTransferred`, `GovernanceTransferCancelled`,
+`AccountStatusChanged`, `OrgRoleGranted`, `OrgRoleRevoked`, `ClassroomCreated`, `ClassroomRoleGranted`,
+`ClassroomRoleRevoked`, `StudentTransferred`, `DeviceRegistered`, `DeviceRevoked`.
+
+### ClassroomRegistry
+
+Source: `contracts/src/ClassroomRegistry.sol`. The legacy single-teacher layer, superseded by
+ClassroomClusterV1 but still deployed for the simple flow. A teacher creates one classroom keyed by their
+own address, mints a hashed invite code with a time to live, enrolls students who present the code, and
+whitelists the models the class may reach. The structure enforces that a student is in at most one
+classroom, invite codes are unique and expire, and a student can only reach a model the teacher whitelisted.
+Access is governed by a single `onlyTeacher` modifier: the caller must own a classroom.
+
+| Function | Access | Purpose |
+|---|---|---|
+| `createClassroom(string, uint256 maxStudents, bytes32 inviteCodeHash)` | any caller, who becomes that classroom's teacher | Create a classroom and its first invite code, default 7-day life. |
+| `enrollWithCode(bytes32 inviteCodeHash)` | any non-teacher | Enroll by presenting a valid, unexpired code. |
+| `unenroll()` | enrolled student | Leave the current classroom. |
+| `removeStudent(address)` | `onlyTeacher` | Teacher removes a student. |
+| `whitelistModel(bytes32)` / `removeModel(bytes32)` | `onlyTeacher` | Manage the per-classroom model whitelist. |
+| `rotateInviteCode(bytes32)` | `onlyTeacher` | Rotate the invite code at the default life. |
+| `rotateInviteCodeWithTtl(bytes32, uint64 ttlSeconds)` | `onlyTeacher` | Rotate with an explicit life, capped at `MAX_INVITE_TTL`. |
+| `canStudentAccessModel(address, bytes32)` returns `bool` | view | True only when the student is enrolled and the model is whitelisted. |
 | `getClassroom`, `isStudentEnrolled`, `getStudentTeacher`, `isModelWhitelistedFor`, `getActiveInviteCode`, `classroomExists` | view | Read accessors. |
 
-Constants: `DEFAULT_INVITE_TTL = 7 days`, `MAX_INVITE_TTL = 90 days`.
+Constants: `DEFAULT_INVITE_TTL = 7 days`, `MAX_INVITE_TTL = 90 days`. Events: `ClassroomCreated`,
+`StudentEnrolled`, `StudentUnenrolled`, `ModelWhitelisted`, `ModelRemoved`, `InviteCodeRotated`,
+`InviteCodeTtlSet`.
 
-### Events
+### InstitutionTreeV1
 
-`ClassroomCreated`, `StudentEnrolled`, `StudentUnenrolled`, `ModelWhitelisted`,
-`ModelRemoved`, `InviteCodeRotated`, `InviteCodeTtlSet`.
-
----
-
-## ClassroomClusterV1
-
-Source: `contracts/src/edu/ClassroomClusterV1.sol` (license BUSL-1.1),
-`is IClassroomCluster`. Implements `ScopedRoleTree.tla` (Q-005), 8 invariants.
-
-**Purpose.** Versioned replacement for `ClassroomRegistry` (LC-8): scoped
-multi-role RBAC for an institution. Two role planes, **org roles**
-(`None / IT / Admin / SuperAdmin`) and per-classroom roles
-(`None / Student / TA / Teacher`), plus a FERPA-aligned **account status** state
-machine (`Active / Inactive / Suspended / Withdrawn / Transferred / Graduated /
-Expelled`) replacing the old binary revoke flag. Governance uses a two-step
-transfer (`transferGovernance` → `acceptGovernance`) so a lost or mistyped
-governance key cannot permanently lock the institution.
-
-### Key functions
+Source: `contracts/src/edu/InstitutionTreeV1.sol`. A four-level tenancy registry, CMO, district, school,
+that records the institutional tree above the classroom layer. Every identifier stored on chain is an
+HMAC-SHA-256 hash of the provider-supplied id (a CMO EIN, an NCES district or school code), so no personal
+data appears on chain. Each node carries an `admin` account; only that account, or the parent's admin, or
+governance can register children, and only governance can revoke a node.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `transferGovernance(address)` / `acceptGovernance()` / `cancelGovernanceTransfer()` | `onlyGovernance` / pending / `onlyGovernance` | Two-step governance handover. |
-| `grantOrgRole(address, OrgRole)` | Admin+ (SuperAdmin requires governance) | Assign an org-scope role. |
-| `revokeOrgRole(address)` | `onlyAdminOrAbove` | Revoke org role; sets status Inactive (reversible). |
-| `setAccountStatus(address, AccountStatus)` | tiered by target status | FERPA lifecycle transitions; Graduated/Expelled are permanent and need SuperAdmin/governance. |
-| `createClassroom(string name, address teacher, uint8 gradeLevel, uint16 academicYear, string section)` → `uint256` | `onlyAdminOrAbove` | Create a classroom, returns its id. |
-| `grantClassroomRole(uint256, address, ClassroomRole)` / `revokeClassroomRole(uint256, address)` | `onlyTeacherOf` (Teacher role needs Admin+) | Manage in-classroom roles; no privilege escalation. |
-| `transferStudent(address student, uint256 from, uint256 to)` | source teacher or Admin+ | Atomic move between classrooms. |
-| `registerDevice(bytes32 deviceCertHash, address)` / `revokeDevice(bytes32)` | `onlyIT` | Device cert registry. |
-| `getOrgRole`, `getClassroomRole`, `getAccountStatus`, `isActiveMember`, `isDeviceActive`, `getDeviceUser`, `getClassroomInfo`, `getClassroomName`, `getClassroomTeacher`, `getStudentCount` | view | Read accessors. |
-| `claimClassroom(address, uint256)` | pure | Migration placeholder, returns `0` (not yet implemented at this SHA). |
+| `registerCmo(bytes32 cmoIdHash, address admin, uint8 stateIdx)` | `onlyGovernance` | Register a CMO (level 1). |
+| `registerDistrict(bytes32 cmoIdHash, bytes32 districtIdHash, address admin, uint8 stateIdx)` | CMO admin or governance under a CMO; governance only for a standalone district | Register a district (level 2). |
+| `registerSchool(bytes32 districtIdHash, bytes32 schoolIdHash, address admin, uint8 stateIdx)` | district admin, parent CMO admin, or governance | Register a school (level 3). |
+| `revokeInstitution(bytes32 nodeKey)` | `onlyGovernance` | Mark a node revoked; admins cannot self-revoke. |
+| `transferGovernance(address)` / `acceptGovernance()` / `cancelGovernanceTransfer()` | `onlyGovernance`; pending account accepts | Two-step governance handover. |
+| `getNode`, `isActive`, `getInstitutionLineage`, `listDistrictsForCmo`, `listSchoolsForDistrict`, `listAllSchoolsForCmo`, `totalNodes` | view | Read accessors and tree walks. |
 
-### Events
+Events: `CmoRegistered`, `DistrictRegistered`, `SchoolRegistered`, `InstitutionRevoked`,
+`GovernanceTransferProposed`, `GovernanceTransferAccepted`, `GovernanceTransferCancelled`.
 
-`GovernanceTransferProposed`, `GovernanceTransferred`,
-`GovernanceTransferCancelled`, plus the `IClassroomCluster` events emitted:
-`AccountStatusChanged`, `OrgRoleGranted`, `OrgRoleRevoked`, `ClassroomCreated`,
-`ClassroomRoleGranted`, `ClassroomRoleRevoked`, `StudentTransferred`,
-`DeviceRegistered`, `DeviceRevoked`.
+### BudgetAllocation
 
----
-
-## BudgetAllocation
-
-Source: `contracts/src/edu/BudgetAllocation.sol` (BUSL-1.1),
-`is IBudgetAllocation`. Q-004 invariant `BudgetCannotExceedVaultBalance`.
-
-**Purpose.** Per-classroom SALT spending limits drawn against the
-`InstitutionalVault`. Each classroom has an `allocated` / `spent` / `monthlyLimit`
-budget that governance funds and refills; spends are gated so they cannot exceed
-the remaining allocation. Governance uses the two-step `proposeGovernance` /
-`acceptGovernance` pattern (closes RFI26-05).
-
-### Key functions
+Source: `contracts/src/edu/BudgetAllocation.sol`. Per-classroom SALT spending limits drawn against the
+InstitutionalVault. Each classroom carries an allocated, spent, and monthly-limit budget; spends are gated
+so they cannot exceed the remaining allocation. Governance funds and refills through a two-step transfer.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `allocateBudget(uint256 classroomId, uint256 amount, uint256 monthlyLimit)` | `onlyGovernance` | Set/raise a classroom budget and activate it. |
-| `spendFromBudget(uint256 classroomId, uint256 amount)` | any | Spend against remaining budget; reverts on overspend. |
+| `allocateBudget(uint256 classroomId, uint256 amount, uint256 monthlyLimit)` | `onlyGovernance` | Set or raise a classroom budget and activate it. |
+| `spendFromBudget(uint256 classroomId, uint256 amount)` | any caller | Spend against the remaining budget; reverts on overspend. |
 | `refillBudget(uint256 classroomId, uint256 amount)` | `onlyGovernance` | Top up an active budget. |
-| `proposeGovernance(address)` / `acceptGovernance()` | `onlyGovernance` / pending | Two-step governance transfer. |
+| `proposeGovernance(address)` / `acceptGovernance()` | `onlyGovernance` to propose; pending account accepts | Two-step governance transfer. |
 | `getRemaining`, `getAllocated`, `getSpent`, `getMonthlyLimit` | view | Read accessors. |
 
-### Events
+Events: `BudgetAllocated`, `BudgetSpent`, `BudgetExhausted`, `BudgetRefilled`, `GovernanceProposed`,
+`GovernanceAccepted`.
 
-`BudgetAllocated`, `BudgetSpent`, `BudgetExhausted`, `BudgetRefilled` (from
-`IBudgetAllocation`); `GovernanceProposed`, `GovernanceAccepted`.
+### CashoutRequest
 
----
-
-## CashoutRequest
-
-Source: `contracts/src/edu/CashoutRequest.sol` (BUSL-1.1), `is ICashoutRequest`.
-Q-004 invariants `CashoutRequiresAdminApproval`, `SelfApprovalForbidden`.
-
-**Purpose.** Teacher-initiated SALT withdrawal requests with admin (governance)
-approval. A teacher files a request (amount + hashed reason); governance approves
-or rejects; a teacher cannot approve their own request. Tracks a SALT↔USD rate
-(basis points) for display. Two-step governance transfer (RFI26-05).
-
-### Key functions
+Source: `contracts/src/edu/CashoutRequest.sol`. Teacher-initiated SALT withdrawals with governance approval.
+A teacher files a request with an amount and a hashed reason; governance approves or rejects; a teacher
+cannot approve their own request. A SALT-to-USD rate in basis points is tracked for display only.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `requestCashout(uint256 classroomId, uint256 saltAmount, bytes32 reasonHash)` → `uint256` | any (becomes requester) | File a cashout request, returns its id. |
-| `approveCashout(uint256 requestId)` | `onlyGovernance` | Approve a pending request (not the requester, `SelfApproval` revert). |
+| `requestCashout(uint256 classroomId, uint256 saltAmount, bytes32 reasonHash)` returns `uint256` | any caller, who becomes the requester | File a request, returns its id. |
+| `approveCashout(uint256 requestId)` | `onlyGovernance`, and not the requester | Approve a pending request. |
 | `rejectCashout(uint256 requestId, bytes32 rejectionReasonHash)` | `onlyGovernance` | Reject a pending request. |
-| `setSaltUsdRate(uint256 rateBasisPoints)` | `onlyGovernance` | Update the displayed SALT/USD rate. |
-| `proposeGovernance(address)` / `acceptGovernance()` | `onlyGovernance` / pending | Two-step governance transfer. |
+| `setSaltUsdRate(uint256 rateBasisPoints)` | `onlyGovernance` | Update the displayed rate. |
+| `proposeGovernance(address)` / `acceptGovernance()` | `onlyGovernance` to propose; pending account accepts | Two-step governance transfer. |
 | `getRequestStatus`, `getRequestTeacher`, `getRequestAmount`, `getSaltUsdRate` | view | Read accessors. |
 
-### Events
+Events: `CashoutRequested`, `CashoutApprovedByAdmin`, `CashoutRejectedByAdmin`, `GovernanceProposed`,
+`GovernanceAccepted`.
 
-`CashoutRequested`, `CashoutApprovedByAdmin`, `CashoutRejectedByAdmin` (from
-`ICashoutRequest`); `GovernanceProposed`, `GovernanceAccepted`.
+### MentorMatcher
 
----
-
-## MentorMatcher
-
-Source: `contracts/src/MentorMatcher.sol` (MIT). Specs:
-`MentorSelection.tla` (7 inv) and `MentorAdversarial.tla` (7 inv). RM-FL-4 / WP-4.5.
-
-**Purpose.** On-chain mentor-mentee assignment for the federated-learning
-network. Pairs higher-accuracy mentors with lower-accuracy mentees subject to a
-per-mentor capacity cap, a trust floor, and a minimum accuracy gap (all Q16.16
-fixed-point, governance-mutable). Each pairing records the mentor's accuracy **at
-pairing time** so later score changes don't retroactively void it. The matching
-predicate is a pure function so an off-chain daemon can `eth_call`
-`validatePairing` and get the exact answer the write path would.
-
-### Key functions
+Source: `contracts/src/MentorMatcher.sol`. On-chain mentor-mentee pairing for the learning network. It pairs
+higher-accuracy mentors with lower-accuracy mentees under a per-mentor capacity cap, a trust floor, and a
+minimum accuracy gap, all Q16.16 fixed-point and governance-mutable. Each pairing records the mentor's
+accuracy at pairing time, so a later score change does not retroactively void it. The matching test is a
+pure function, so an off-chain process can `eth_call` `validatePairing` and get exactly the answer the write
+path would.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `validatePairing(address mentor, address mentee, uint32 mentorAcc, uint32 menteeAcc)` → `PairingValidity` | view | Preview whether a pairing would be accepted (uses live cap/floor/gap/assignment). |
-| `assignMentees(address mentor, address[] mentees, uint32 mentorAcc, uint32[] menteeAccs, bytes32 dimension)` | any | Atomic batch-assign mentees to one mentor (reverts if any fails). |
-| `unassignMentee(address mentor, address mentee)` | mentor, mentee, or governance | Remove a pairing (tombstoned, indices stable). |
-| `recordNoQualifiedMentor(address mentee, uint256 cycleId)` | any | Emit observability event when no mentor qualifies. |
-| `getMenteeProfile(address, bytes32[] dimensions, uint256 from_, uint256 to_)` → `uint256[]` | view | Paginated per-dimension scores read from `ContributionAccounting`. |
-| `selectBestDimension(address mentor, address mentee, bytes32[] dimensions, uint256 from_, uint256 to_)` | view | Dimension with the largest mentor-mentee score gap. |
-| `setMentorCap`, `setTrustFloor`, `setMinAccuracyGap`, `setGovernance`, `setContributionAccounting` | `onlyGovernance` | Tune parameters / wire the score source. |
-| `pairingCount`, `getPairings(from_, to_)`, `getPairing(mentor, mentee)`, `isPaired(mentor, mentee)` | view | Paginated pairing reads. |
+| `validatePairing(address mentor, address mentee, uint32 mentorAcc, uint32 menteeAcc)` returns `PairingValidity` | view | Preview whether a pairing would be accepted. |
+| `assignMentees(address mentor, address[] mentees, uint32 mentorAcc, uint32[] menteeAccs, bytes32 dimension)` | any caller | Atomic batch-assign mentees to one mentor; reverts if any fails. |
+| `unassignMentee(address mentor, address mentee)` | the mentor, the mentee, or governance | Remove a pairing; the index is tombstoned and stays stable. |
+| `recordNoQualifiedMentor(address mentee, uint256 cycleId)` | any caller | Emit an observability event when no mentor qualifies. |
+| `getMenteeProfile(...)`, `selectBestDimension(...)` | view | Read scores from the wired ContributionAccounting source. |
+| `setMentorCap`, `setTrustFloor`, `setMinAccuracyGap`, `setGovernance`, `setContributionAccounting` | `onlyGovernance` | Tune parameters and wire the score source. |
+| `pairingCount`, `getPairings`, `getPairing`, `isPaired` | view | Paginated pairing reads. |
 
-Defaults: `mentorCap = 3`, `trustFloor = 19661` (≈0.30), `minAccuracyGap = 3277`
-(≈0.05).
+Defaults: `mentorCap = 3`, `trustFloor = 19661` (about 0.30), `minAccuracyGap = 3277` (about 0.05). Events:
+`MentorAssigned`, `MentorUnassigned`, `NoQualifiedMentor`, `MentorCapUpdated`, `TrustFloorUpdated`,
+`MinAccuracyGapUpdated`, `ContributionAccountingSet`.
 
-### Events
+### InstitutionalVault
 
-`MentorAssigned`, `MentorUnassigned`, `NoQualifiedMentor`, `MentorCapUpdated`,
-`TrustFloorUpdated`, `MinAccuracyGapUpdated`, `ContributionAccountingSet`.
-
----
-
-## InstitutionalVault
-
-Source: `contracts/src/edu/InstitutionalVault.sol` (BUSL-1.1),
-`is IInstitutionalVault`. Q-004 `InstitutionalVaultSafety.tla`, 9 invariants.
-
-**Tier: commercial.** Multi-sig treasury for school-controlled SALT, operator
-depth surfaced to contracted institutions, not anonymous developers. No secrets
-appear on this page.
-
-**Purpose.** A k-of-n multisig holding native SALT for an institution. Signers
-propose cashouts, which need a quorum of distinct approvals (proposer cannot
-self-approve) before execution. Any single signer can emergency-pause outflows;
-unpausing needs a quorum. Adding/removing signers and changing the threshold also
-go through a quorum-gated proposal flow.
-
-### Key functions
+Source: `contracts/src/edu/InstitutionalVault.sol`. A k-of-n multisig holding native SALT for an
+institution, the treasury that BudgetAllocation and CashoutRequest draw against. Signers propose cashouts,
+which need a quorum of distinct approvals, with the proposer barred from approving their own, before
+execution. Any single signer can pause outflows; unpausing needs a quorum. Adding or removing a signer goes
+through its own quorum-gated proposal flow. The multisig design is implemented in code, but it is **not
+operational on testnet**, see Failure modes.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `deposit()` / `receive()` | any (payable) | Fund the vault with native SALT. |
-| `proposeCashout(address to, uint256 amount, bytes32 reasonHash)` → `uint256` | `onlySigner`, not paused | Propose an outflow. |
-| `approveCashout(uint256 txId)` | `onlySigner`, not paused | Approve (not the proposer). |
-| `executeCashout(uint256 txId)` | `onlySigner`, not paused | Execute once `approvalCount >= threshold`. |
+| `deposit()` / `receive()` | any, payable | Fund the vault with native SALT. |
+| `proposeCashout(address to, uint256 amount, bytes32 reasonHash)` returns `uint256` | `onlySigner`, not paused | Propose an outflow. |
+| `approveCashout(uint256 txId)` | `onlySigner`, not paused, not the proposer | Approve a pending cashout. |
+| `executeCashout(uint256 txId)` | `onlySigner`, not paused | Execute once approvals reach the threshold. |
 | `rejectCashout(uint256 txId)` | `onlySigner` | Reject a pending cashout. |
-| `emergencyPause()` | `onlySigner` (1-of-n) | Halt outflows immediately. |
-| `unpause()` | `onlySigner` (k-of-n) | Resume after quorum. |
-| `proposeSignerChange(address target, bool isAdd)` / `approveSignerChange(uint256)` / `executeSignerChange(uint256)` / `rejectSignerChange(uint256)` | `onlySigner` | Quorum-gated signer add/remove. |
-| `setThreshold(uint256)` | `onlySigner` | Change k (0 < k ≤ n). |
+| `emergencyPause()` | `onlySigner`, one signer is enough | Halt outflows immediately. |
+| `unpause()` | `onlySigner`, needs a quorum | Resume after a quorum approves. |
+| `proposeSignerChange` / `approveSignerChange` / `executeSignerChange` / `rejectSignerChange` | `onlySigner` | Quorum-gated add or remove of a signer. |
+| `setThreshold(uint256)` | `onlySigner` | Change k, between 1 and n; this is a single-signer call and is not quorum-gated. |
 | `getBalance`, `isPaused`, `getThreshold`, `getSignerCount`, `isSigner`, `getApprovalCount`, `hasApproved`, `getSignerProposalApprovalCount`, `hasApprovedSignerChange` | view | Read accessors. |
 
-### Events
+Events: `Deposited`, `CashoutProposed`, `CashoutApproved`, `CashoutExecuted`, `CashoutRejected`,
+`EmergencyPaused`, `Unpaused`, `SignerChangeProposed`, `SignerChangeApproved`, `SignerChangeRejected`,
+`SignerAdded`, `SignerRemoved`, `ThresholdChanged`.
 
-`Deposited`, `CashoutProposed`, `CashoutApproved`, `CashoutExecuted`,
-`CashoutRejected`, `EmergencyPaused`, `Unpaused`, `SignerChangeProposed`,
-`SignerChangeApproved`, `SignerChangeRejected`, `SignerAdded`, `SignerRemoved`,
-`ThresholdChanged` (from `IInstitutionalVault`).
+### TestnetFarmingAccounting
 
----
-
-## TestnetFarmingAccounting
-
-Source: `contracts/src/TestnetFarmingAccounting.sol` (MIT),
-`is ReentrancyGuard, Governable`. Sprint ECON-2 / WP-E2.2.
-
-**Purpose.** A one-time testnet-conclusion payout. Governance snapshots every
-participant's `ContributionAccounting` score (in batches), then activates a
-stablecoin distribution pool; each participant claims a share proportional to
-their snapshot score (`pool * score / totalScore`). Snapshot is taken once and
-locked before distribution; each participant claims exactly once.
-
-### Key functions
+Source: `contracts/src/TestnetFarmingAccounting.sol`. A one-time payout that closes the testnet. Governance
+snapshots every participant's ContributionAccounting score, in batches, then activates a stablecoin pool;
+each participant claims a share proportional to their snapshot score, computed as `pool * score / totalScore`.
+The snapshot is taken once and locked before distribution, and each participant claims exactly once. Claims
+are reentrancy-guarded.
 
 | Function | Access | Purpose |
 |---|---|---|
-| `takeSnapshot(address[] participants)` | `onlyGovernance` | One-time initial snapshot of contribution scores. |
-| `takeSnapshotBatch(address[] participants)` | `onlyGovernance` | Add more participants (large sets); skips duplicates. |
-| `activateDistribution(address stablecoin, uint256 amount)` | `onlyGovernance` | Lock the pool (contract must already hold `amount`). |
-| `claim()` | any snapshotted participant | Claim proportional share (reentrancy-guarded). |
+| `takeSnapshot(address[] participants)` | `onlyGovernance` | The one-time initial snapshot of scores. |
+| `takeSnapshotBatch(address[] participants)` | `onlyGovernance` | Add more participants for large sets; skips duplicates. |
+| `activateDistribution(address stablecoin, uint256 amount)` | `onlyGovernance` | Lock the pool; the contract must already hold `amount`. |
+| `claim()` | any snapshotted participant | Claim a proportional share. |
 | `sweep(address to)` | `onlyGovernance` | Sweep unclaimed stablecoin after the window. |
-| `calculateShare(address)`, `getTopContributors(uint256)`, `snapshotParticipantCount()`, `getSnapshotPage(offset, limit)`, `remainingDistribution()` | view | Read accessors. |
-| `transferGovernance` / `acceptGovernance` | inherited from `Governable` | Two-step governance. |
+| `calculateShare`, `getTopContributors`, `snapshotParticipantCount`, `getSnapshotPage`, `remainingDistribution` | view | Read accessors. |
+| `transferGovernance` / `acceptGovernance` | inherited from Governable | Two-step governance. |
 
-### Events
+Events: `SnapshotTaken`, `SnapshotBatchAdded`, `DistributionActivated`, `Claimed`, `Swept`,
+`GovernanceTransferred`.
 
-`SnapshotTaken`, `SnapshotBatchAdded`, `DistributionActivated`, `Claimed`,
-`Swept`; `GovernanceTransferred` (from `Governable`).
+## Design rationale
 
----
+The whole stack is built to keep the sensitive material off the public ledger. A school's records and a
+student's work belong on Citrate Ground, on the school's own hardware, so what reaches the chain is the
+structure around them: a classroom exists, an account holds a role, a budget has a balance, a cashout was
+approved by a second person. That is also why ClassroomClusterV1 replaced ClassroomRegistry. A single
+`onlyTeacher` flag is enough for one teacher, but a district needs IT, administrators, and teachers with
+distinct authority, and it needs a student lifecycle that matches FERPA rather than a single revoke bit. The
+governance handovers are all two-step on purpose: a school's keys change hands as staff change, and a
+mistyped address should never be able to lock an institution out of its own records. The money path is split
+so that allocation, withdrawal, and custody are separate concerns, and no single teacher can both ask for
+funds and release them.
 
-## Tutorials
+## Failure modes
 
-- [Read a verified contract](/contracts/tutorials/read-a-contract), query any of
-  these contracts over `eth_call` / an SDK without sending a transaction.
+These contracts hold roles and, in the vault's case, value, so the ways they fail closed matter.
 
-## Security & access
+- **The vault multisig is not operational on testnet.** Per `contracts/DEPLOYED_ADDRESSES.md`, the deployed
+  InstitutionalVault was launched with `SIGNER_1` set to the deployer and `SIGNER_2` and `SIGNER_3` set to
+  throwaway addresses. The 2-of-3 multisig therefore cannot reach a real quorum and must not be relied on for
+  value on testnet. The signers are rotated at the mainnet ceremony. The code path is Implemented; the
+  operational multisig is Specified.
+- **`setThreshold` is a single-signer call.** Unlike signer add and remove, which go through a quorum-gated
+  proposal, any one signer can change the threshold k between 1 and n. Treat the threshold as trusted only as
+  far as you trust each individual signer, and confirm the signer set before depositing.
+- **Cashouts fail closed.** A cashout cannot execute without enough distinct approvals, the proposer cannot
+  self-approve, and any single signer can pause all outflows immediately. The conservative direction, halting,
+  is the easy one; resuming needs a quorum.
+- **Budgets cannot overspend.** `spendFromBudget` reverts the moment a spend would exceed the remaining
+  allocation, and an inactive budget rejects all spends.
+- **Invite codes expire.** A ClassroomRegistry invite code with no recorded life, or one past its life, will
+  not enroll a student; the teacher must rotate it.
 
-- **Tier rationale.** ClassroomRegistry, ClassroomClusterV1, BudgetAllocation,
-  CashoutRequest, MentorMatcher and TestnetFarmingAccounting are **public**, they are the open building blocks an institution integrator needs, and their
-  ABIs are inherently public on-chain. **InstitutionalVault is commercial**: it
-  is the treasury operator surface for contracted institutions; gating the
-  narrative (not the bytecode, which is public) honors the paid relationship.
-- **No secrets here.** No keys, mnemonics, private endpoints, or credentials
-  appear on this page or are required to read these contracts. Deployed addresses
-  are public testnet values.
-- **Operational caveat (testnet).** Per `DEPLOYED_ADDRESSES.md`, the deployed
-  `InstitutionalVault` was launched with `SIGNER_1 = deployer` and
-  `SIGNER_2/3 = throwaway` addresses; the 2-of-3 multisig is **non-operational**
-  until signers are rotated at the mainnet ceremony. Do not rely on it for value
-  on testnet.
-- **Pre-audit.** No external third-party audit has been completed. Formal-methods
-  coverage (the cited TLA+ specs) and SECREM-01 remediation are in place, but
-  this is not a certification.
+## Access and canon
 
-## Source & verification
+Public. These contracts are the open building blocks an integrator needs, and their ABIs are public on chain;
+no keys, mnemonics, private endpoints, or credentials appear here or are needed to read them. The deployed
+addresses are public testnet values. The sensitive material the stack exists to protect, student records and
+their work, stays on Citrate Ground and never reaches this page or the public ledger. Compliance posture for
+this stack, FERPA, COPPA, and CIPA, is documented under [K-12 and education](/enterprise/k12). The account and
+recovery surface, Citrate Keyring, is documented under [Citrate Identity](/aa/identity). The pilot timeline,
+school pilots in summer 2026, is on the [roadmap](/start/roadmap).
 
-- **Source repo:** `citrate-chain` at SHA `03d7851`.
-- **Paths:** `contracts/src/ClassroomRegistry.sol`,
-  `contracts/src/edu/ClassroomClusterV1.sol`,
-  `contracts/src/edu/BudgetAllocation.sol`,
-  `contracts/src/edu/CashoutRequest.sol`, `contracts/src/MentorMatcher.sol`,
-  `contracts/src/edu/InstitutionalVault.sol`,
-  `contracts/src/TestnetFarmingAccounting.sol`.
-- **Deployed addresses:** `contracts/DEPLOYED_ADDRESSES.md` (chain 40204).
-- Verify any address with `eth_getCode` against `https://rpc.citrate.ai`.
+This is pre-audit. The contracts carry formal-methods coverage and remediation work, but they have not
+completed an external third-party audit. The pilot deployment is testnet-beta on chain 40204; do not custody
+material value.
+
+## Source and verification
+
+- **Source repo:** `citrate-chain` at SHA `54d1f2c`.
+- **Paths:** `contracts/src/ClassroomRegistry.sol`, `contracts/src/edu/ClassroomClusterV1.sol`,
+  `contracts/src/edu/InstitutionTreeV1.sol`, `contracts/src/edu/BudgetAllocation.sol`,
+  `contracts/src/edu/CashoutRequest.sol`, `contracts/src/edu/InstitutionalVault.sol`,
+  `contracts/src/MentorMatcher.sol`, `contracts/src/TestnetFarmingAccounting.sol`. Role and enum shapes
+  verified against `contracts/src/edu/interfaces/IClassroomCluster.sol`.
+- **Deployed addresses:** `contracts/DEPLOYED_ADDRESSES.md` (chain 40204). Verify any address with
+  `eth_getCode` against `https://rpc.citrate.ai`.
+- **Status:** Implemented (testnet-beta, pre-audit) for every contract, with one exception: the
+  InstitutionalVault multisig path is Specified, not operational on testnet, until signers are rotated at the
+  mainnet ceremony.
