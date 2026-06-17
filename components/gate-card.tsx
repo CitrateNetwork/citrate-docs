@@ -11,7 +11,7 @@ export function GateCard({ gate }: { gate: GateCardData }) {
         <Icon name="lock" size={20} />
       </div>
       <div className="mb-2 flex items-center justify-center gap-2">
-        <h1 className="text-xl font-semibold">{gate.title}</h1>
+        <h1 className="font-display text-xl font-semibold">{gate.title}</h1>
         <TierChip tier={gate.requiredTier} />
       </div>
       <p className="mx-auto mb-6 max-w-md text-sm text-[var(--color-muted)]">{gate.summary}</p>
