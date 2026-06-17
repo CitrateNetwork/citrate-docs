@@ -3,131 +3,209 @@ title: Citrate Agent Runtime
 codex_slug: /compute/agent-runtime
 tier: academic
 org_scope: ~
-source_kind: transcluded
-source: citrate-agent-runtime (agent/cli/, agent/core/)
+source_kind: authored
+source: citrate-agent-runtime (agent/cli/, agent/core/, agent-cron/, agent-chain/)
 surfaces: [OPS-agent-runtime]
 audited_against_sha: 560c11a
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Citrate Agent Runtime
+The agent runtime is how an agent runs on an operator's own machine without acting unsupervised.
+It records every action in a tamper-evident log, holds risky tool calls behind a human approval
+gate, and ships a diagnostic that refuses to clear a node when those safeguards are missing. It
+is for researchers and operators studying how agents can act on the network while staying
+accountable.
 
-> The execution harness for Citrate agent capsules, with chain-anchored audit
-> recording and human-in-the-loop tool approval. This page documents the
-> `citrate-agent` CLI (`doctor`), the `RecorderClient` signing surface, and the
-> `ApprovalQueue`. For researchers and operators studying the agent runtime on
-> chainId **40204**.
+## What it is
 
-## Overview
+The safety posture is the whole point, so it comes first. An agent here does not run free. Three
+things hold at once. Every action it takes is written to an append-only audit chain, where each
+record carries the hash of the one before it, so a deleted or altered record breaks the chain
+and shows. Every tool call the agent wants to make passes through an approval queue, and the
+calls that matter wait for a human, or a quorum of humans, to sign off before they run. And the
+whole thing runs on the operator's own hardware, the on-premise default that holds across the
+network; the only writes that reach the public ledger are the ones the runtime is told to anchor.
 
-`citrate-agent-runtime` is the core harness for agent-driven on-chain actions:
-sandboxed capsule dispatch, a cron daemon for recurring jobs (tripwires/SOPs),
-chain-anchored audit recording, and human approval flows. This page is
-**transcluded**, truth lives in the crates at SHA `560c11a`.
+The runtime is several crates in the `citrate-agent-runtime` workspace. The pieces that carry
+the safety story are these.
 
-> **Honest status.** Pre-stable (v0.x). The repo classifies itself Tier 1
-> (full external audit) before any `v1.0.0` tag; no stable release without
-> written attestation. `RecorderClient` key custody is pilot-grade.
+- A diagnostic, run as `citrate-agent doctor`, that checks the safeguards are intact and emits a
+  signed report.
+- A recorder, `RecorderClient`, the single surface that signs and writes to the chain. Nothing
+  else holds the key.
+- An approval queue, `ApprovalQueue`, the human-in-the-loop gate that risky tool calls pass
+  through.
+- A cron daemon that runs recurring checks, the tripwires and standing procedures, on a
+  schedule, and records what they find.
+- A capsule loader that verifies an agent's signed package against its manifest before it runs,
+  and grants it only the capabilities the manifest declares.
 
-## Install / Setup
+## How to use it
 
-The chain dependency uses an SSH host alias (`github-citrate-chain`); configure
-it via `citrate-federation/scripts/bootstrap.sh` before building.
-
-```bash
-cargo build --release
-cargo run --release --bin citrate-agent-cli -- --help
-```
-
-## Reference
-
-### `citrate-agent doctor`, `agent/cli/src/doctor_cmd.rs`
-
-Runs the RFC §10.2 health/integrity checks and emits a signed TOML report.
-
-```bash
-citrate-agent doctor --config doctor.toml [--seed seed.bin] [--output report.toml] [--check <name>]
-```
-
-Exit codes: `0` Pass/Warn · `1` Blocker · `2` config/IO error. Config schema in
-`agent/cli/src/config.rs`. The 11 checks (`agent/core/src/doctor/checks.rs`):
-
-| Check | Severity behavior |
-|---|---|
-| `audit-chain-integrity` | Verifies audit hash-chain; Blocker on corruption. |
-| `audit-file-permissions` | Warn if audit file not 0600 (Unix). |
-| `approval-queue-depth` | Warn over threshold (default 100). |
-| `pending-break-glass` | Blocker if "Surfaced"; Warn if "Unaffirmed". |
-| `runtime-presence` | Warn if no tokio runtime. |
-| `capsule-manifest-reverify` | Blocker on load fail; Warn on bad signature. |
-| `wasm-linker-recheck` | Blocker on linker/WIT mismatch. |
-| `policy-bundle-hash` | Blocker on SHA-256 drift. |
-| `tla-spec-ci-status` | Blocker if failing specs; Warn if stale (>48h). |
-| `retention-age` | Warn if audit file older than max (default 90d). |
-| `anchor-reconciliation` | Reports unanchored on-chain roots. |
-
-### `RecorderClient`, `agent/core/src/audit/recorder.rs`
-
-The **only** signing surface for on-chain writes. Owns a secp256k1 key + RPC
-client + chain ID (40204). Loads its key via `from_env()` (`DEPLOYER_PRIVATE_KEY`
-env, then `.env.testnet` fallback). Key methods:
-
-- `send_tx(to, calldata, gas)` / `send_tx_and_wait(...)`, sign + broadcast (+ await receipt).
-- `record_decision(registry, params)`, writes to `AgentDecisionRegistryV2` (Approved/Rejected/AutoApproved).
-- `fire_tripwire(...)` / `acknowledge_tripwire(...)` / `resolve_tripwire(...)`, `TripwireRegistry` ops.
-- `encode_register_model(...)`, `AIModelRegistryPortable.registerModel()` calldata.
-
-### `ApprovalQueue`, `agent/core/src/hitl/mod.rs`
-
-FIFO tool-approval queue with auto-grant fast-path and per-call timeout
-(auto-grant TTL 30 min; pending timeout 5 min).
-
-- Simple track: `submit(call)`, `approve()`, `reject()`, `add_grant(tool)`, `peek()`, `depth()`.
-- Role-aware track: `with_signer_roster(roster)` (production must set this, release builds fail closed without it), `submit_for_action(call, payload, quorum, proposer)`, `add_signature(call_id, sig)`.
-- Separation-of-duties enforced: Auditor cannot approve, proposer cannot self-approve, no duplicate signers, no role-pair conflicts, signatures verified against canonical payload and pubkey roster.
-
-### Environment variables
-
-| Variable | Default | Required | Purpose |
-|---|---|---|---|
-| `DEPLOYER_PRIVATE_KEY` |, | tripwire daemon: yes | secp256k1 key for `RecorderClient`. **Never commit.** |
-| `CITRATE_TRIPWIRE_PROM_URL` | `http://127.0.0.1:9090` | No | Prometheus base for tripwire metrics. |
-| `CITRATE_TRIPWIRE_RPC_URL` | `https://rpc.citrate.ai` | No | JSON-RPC for chain queries. |
-| `CITRATE_TRIPWIRE_REGISTRY` / `_TENANT` / `_ROLE_ESCALATION` / `_MULTISIG` | (contract defaults) | No | Tripwire contract addresses. |
-| `CITRATE_TRIPWIRE_SCOPE` | `keccak256("boeing-root")` | No | bytes32 scope. |
-| `CITRATE_CAPSULE_SIGNING_SEED` |, | No | ed25519 seed for capsule packing. **Never commit.** |
-
-## Examples
+1. Configure the chain dependency before you build. The runtime pulls a chain crate over an SSH
+   host alias, `github-citrate-chain`, that must resolve in your `~/.ssh/config`. The simplest
+   path is to run `citrate-federation/scripts/bootstrap.sh`, which sets the alias up for you. A
+   fresh machine without it fails the build with `Could not resolve hostname
+   github-citrate-chain`.
+2. Build the workspace. `cargo build --release`, then `cargo run --release --bin
+   citrate-agent-cli -- --help` to confirm the CLI.
+3. Write a `doctor.toml` naming the agent and pointing at the audit log and the policy files you
+   want checked.
+4. Run the diagnostic against a node before you trust it. `citrate-agent doctor` exits 0 on pass
+   or warn, 1 on a blocker, and 2 on a configuration or IO error before it could run.
+5. For the recorder and the cron daemon, supply the signing key from your own secret store
+   through the environment. The key is never a value on this page or in the tree.
 
 ```bash
 citrate-agent doctor --config doctor.toml --output report.toml
 ```
 
 ```toml
-# doctor.toml (minimal)
+# doctor.toml, minimal
 [doctor]
-agent_did = "did:citrate:agent:0x…"
+agent_did = "did:citrate:agent:0x..."
 ```
 
-## Tutorials
+## Reference
 
-- [Run a node](/operators/run-a-node)
+### The diagnostic, `citrate-agent doctor`
 
-## Security & access
+The command lives in `agent/cli/src/doctor_cmd.rs`; its config schema is in
+`agent/cli/src/config.rs`. It runs eleven checks defined in `agent/core/src/doctor/checks.rs`,
+each returning Pass, Warn, or Blocker (`agent/core/src/doctor/report.rs`). With a seed file it
+signs the report. The flags are `--config`, `--output`, `--check <name>` to run a subset, and
+`--seed` for the signing key.
 
-Tier **academic**: this surface is research/formal-methods oriented (TLA+ CI
-gating, capsule capability verification, the doctor compliance harness). The
-runtime itself is Tier 1 for audit purposes.
+| Check | Behavior |
+|---|---|
+| `audit-chain-integrity` | Walks the audit hash-chain. Blocker if a record was altered or deleted. |
+| `audit-file-permissions` | Warn if the audit file is not mode 0600 on Unix. |
+| `approval-queue-depth` | Warn when pending approvals pass a threshold, default 100. |
+| `pending-break-glass` | Blocker if a break-glass case is surfaced, Warn if it is unaffirmed. |
+| `runtime-presence` | Warn if no async runtime is present. |
+| `capsule-manifest-reverify` | Blocker if a capsule fails to load, Warn on a bad signature. |
+| `wasm-linker-recheck` | Blocker on a linker or interface mismatch. |
+| `policy-bundle-hash` | Blocker if a policy file's SHA-256 has drifted. |
+| `tla-spec-ci-status` | Blocker on failing specs, Warn if the status is stale past the window. |
+| `retention-age` | Warn if the audit file is older than the retention maximum, default 90 days. |
+| `anchor-reconciliation` | Reports on-chain roots that have not been anchored. |
 
-No secrets here. `DEPLOYER_PRIVATE_KEY` and `CITRATE_CAPSULE_SIGNING_SEED` are
-named only as the variables to set from your own secret store, no values are
-shown, and the `.env.testnet` / `.capsule-signing-key.env` fallbacks are
-gitignored. If you find a real key in the tree, flag it; do not transcribe it.
+### The recorder, `RecorderClient`
 
-## Source & verification
+In `agent/core/src/audit/recorder.rs`. It is the only surface that signs on-chain writes: it
+owns a secp256k1 key, an RPC client, and the chain id 40204. It loads its key with `from_env`,
+which reads `DEPLOYER_PRIVATE_KEY` and falls back to a gitignored `.env.testnet`. Its writes go
+through `send_tx` and `wait_for_receipt`. Every approve or reject the runtime makes is written
+as a decision record to the on-chain `AgentDecisionRegistryV2`. The audit chain itself is
+`AuditChain` in `agent/core/src/audit/chain.rs`, which mints a genesis record, appends each new
+record with a contiguity check against the previous hash, and can walk the whole chain to verify
+its integrity. Records are written through an `AuditSink`; the filesystem sink and the
+chain-anchor sink are present, the object-store and write-once sinks are not yet shipped.
 
-- Source repo: `citrate-agent-runtime` (`agent/cli/`, `agent/core/`)
-- Audited against SHA: `560c11a`
-- Pre-stable (v0.x); full audit required before v1.0.0.
+### The approval gate, `ApprovalQueue`
+
+In `agent/core/src/hitl/mod.rs`. Tool calls enter the queue and wait. Low-risk calls can be
+auto-granted on a fast path with a time-to-live, default 30 minutes; a pending call that no one
+answers times out, default 5 minutes. The risk tier of a call decides how many signatures it
+needs (`agent/core/src/hitl/quorum.rs`): low auto-approves, medium needs one signer from the
+required set, high needs two, and critical needs a fixed set of officer roles. Separation of
+duties is enforced in `agent/core/src/hitl/roles.rs`: the Auditor role can never approve, the
+Compliance Officer and Security Officer roles cannot both stand for the same approval, and no
+signer counts twice. Signatures are verified against a canonical payload and a known signer
+roster (`agent/core/src/hitl/signing.rs`); a production build fails closed if no roster is set.
+
+There is a break-glass path in `agent/core/src/hitl/break_glass.rs` for emergencies, and it is
+built to be hard to abuse: an invocation notifies all roles, must be affirmed by a quorum within
+a 72-hour window, and is blocked outright for ITAR-classed actions. Its state machine and the
+audit chain's integrity property are both checked in TLA+.
+
+### The cron daemon and tripwires
+
+In `agent-cron/`. A `CronScheduler` (`agent-cron/src/scheduler.rs`) runs recurring jobs on cron
+schedules, each carrying a snapshot of the capabilities it was granted. A standing-procedure
+engine (`agent-cron/src/sop.rs`) runs multi-step procedures on a trigger. The tripwire daemon
+(`agent-cron/src/bin/tripwire_daemon.rs`) runs a set of compliance tripwires that read metrics
+from Prometheus and events from the chain, and fire through the recorder when a threshold is
+crossed. Its environment is below.
+
+### The capsule loader
+
+In `agent/core/src/capsule/`. An agent ships as a capsule: a signed archive with a manifest. The
+loader (`mod.rs`) verifies the content hash, checks the publisher's signature against a key
+registry keyed by signing tier (`tiers.rs`), cross-checks the declared capabilities against the
+component's interface (`verify.rs`), and builds a linker that exposes only the capabilities the
+manifest declares, failing closed when an undeclared import is needed. The manifest
+(`manifest.rs`) declares the capsule's data classes, its risk tier, the roles required to
+approve it, and whether it is break-glass eligible.
+
+### Environment variables
+
+| Variable | Default | Required | Purpose |
+|---|---|---|---|
+| `DEPLOYER_PRIVATE_KEY` | none | tripwire daemon: yes | secp256k1 key for `RecorderClient`. Never commit it. |
+| `CITRATE_TRIPWIRE_PROM_URL` | `http://127.0.0.1:9090` | no | Prometheus base for tripwire metrics. |
+| `CITRATE_TRIPWIRE_RPC_URL` | `https://rpc.citrate.ai` | no | JSON-RPC for chain queries. |
+| `CITRATE_TRIPWIRE_REGISTRY` and the `_TENANT`, `_ROLE_ESCALATION`, `_MULTISIG` addresses | contract defaults | no | Tripwire contract addresses. |
+| `CITRATE_TRIPWIRE_SCOPE` | `keccak256("boeing-root")` | no | bytes32 scope. |
+| `CITRATE_CAPSULE_SIGNING_SEED` | none | no | ed25519 seed for capsule packing. Never commit it. |
+
+## Design rationale
+
+The runtime puts the key in exactly one place on purpose. `RecorderClient` is the only thing
+that can sign an on-chain write, so the audit chain and the approval gate cannot be bypassed by
+some other code path signing its own transaction; if it went to the chain, it went through the
+recorder, and it is in the log. The audit log is a hash-chain rather than a plain file so that
+tampering is detectable rather than silent, and the diagnostic treats a broken chain as a
+blocker, not a warning. The approval gate scales the number of human signatures to the risk of
+the call rather than asking for approval on everything, which is what keeps the gate usable
+instead of ignored. The cost of all this is that the agent is slower and more bounded than one
+that simply acts; for actions that change state on a shared network, that is the trade we want.
+
+## Failure modes
+
+The runtime is built to fail closed. A production build with no signer roster will not start the
+role-aware approval path; it refuses rather than approving on trust. An undeclared capability in
+a capsule fails instantiation rather than being granted quietly. A break-glass invocation for an
+ITAR-classed action is blocked outright, and any break-glass case that is surfaced turns the
+diagnostic into a blocker. The recorder's key custody is honest about its limits: loading the
+key from an environment variable is pilot-grade, fit for testnet and controlled pilots, and is
+the part most in need of hardening before a stable release. If you ever find a real key in the
+tree, flag it; do not transcribe it.
+
+## Access and canon
+
+Tier academic: this surface is oriented to research and formal methods, the TLA+ checks on the
+audit chain and the break-glass machine, capsule capability verification, and the diagnostic
+itself. The runtime is classified for a full external audit before any v1.0.0 tag
+(`AUDIT_TIER.md`); there is no stable release without a written attestation against an exact
+commit. Every operator account on the public network is identity-checked through CLEAR. No
+secrets appear here: `DEPLOYER_PRIVATE_KEY` and `CITRATE_CAPSULE_SIGNING_SEED` are named only as
+variables to set, and the `.env.testnet` and capsule signing-key fallbacks are gitignored.
+
+This page connects to [run a node](/operators/run-a-node) for the operator who hosts the
+runtime, to [research](/research) for the agent-safety work behind it, and to the
+[governance contracts](/contracts/governance), where the recorder writes its decisions to the
+`AgentDecisionRegistry`.
+
+## Source and verification
+
+- Source repo: `citrate-agent-runtime`.
+- Files: `agent/cli/src/doctor_cmd.rs`, `agent/cli/src/config.rs`,
+  `agent/core/src/doctor/{checks.rs,report.rs}`, `agent/core/src/audit/{recorder.rs,chain.rs}`,
+  `agent/core/src/hitl/{mod.rs,quorum.rs,roles.rs,signing.rs,break_glass.rs}`,
+  `agent/core/src/capsule/{mod.rs,manifest.rs,tiers.rs,verify.rs}`,
+  `agent-cron/src/{scheduler.rs,sop.rs,bin/tripwire_daemon.rs}`, `AUDIT_TIER.md`.
+- Audited against SHA: `560c11a`.
+- Status by component:
+  - `doctor` and its eleven checks, `RecorderClient`, `AuditChain`, `ApprovalQueue`, the quorum
+    and role rules, break-glass, the cron scheduler, the standing-procedure engine, the tripwire
+    daemon, and the capsule loader: Implemented.
+  - The audit-chain integrity property, the approval state machine, and the break-glass state
+    machine: Verified in TLA+.
+  - `RecorderClient` key custody (environment-loaded key, no nonce cache): Implemented but
+    pilot-grade, flagged for hardening.
+  - Object-store and write-once audit sinks, and hardware-backed signing surfaces: Specified,
+    not yet shipped.
+  - Full external audit before v1.0.0: required, not yet performed; pre-stable (v0.x).
