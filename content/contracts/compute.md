@@ -1,5 +1,5 @@
 ---
-title: Compute Contracts — Marketplace, Pools, Pricing, Bulk & Verification
+title: Compute Contracts, Marketplace, Pools, Pricing, Bulk & Verification
 codex_slug: /contracts/compute
 tier: commercial
 org_scope: ~
@@ -23,11 +23,11 @@ author: Claude Opus 4.8 (1M context)
 > **Rule 9 / transclusion.** The canonical truth is the Solidity source in
 > `citrate-chain/contracts/src/`. This page summarises the audited public/external
 > surface at a pinned SHA; the final Codex wiring pulls signatures from the source
-> repo. ABIs come from `@CitrateNetwork/contracts-abi` — do not hand-copy them.
+> repo. ABIs come from `@CitrateNetwork/contracts-abi`, do not hand-copy them.
 
 > **Tier: commercial** (except [ComputeVerifier](#computeverifier), which is
 > **academic**). These contracts are open on-chain, but their full lifecycle
-> design is paid-seat / contracted implementation depth — see
+> design is paid-seat / contracted implementation depth, see
 > [Security & access](#security--access).
 
 ## Overview
@@ -55,7 +55,7 @@ BulkComputeGateway ──credits──┐                │
 
 ## ComputeMarketplace
 
-`src/ComputeMarketplace.sol` — `contract ComputeMarketplace is ReentrancyGuard, Governable`.
+`src/ComputeMarketplace.sol`, `contract ComputeMarketplace is ReentrancyGuard, Governable`.
 
 Implements the full single-provider job lifecycle:
 `Posted → Bidding → Assigned → Executing → Verifying → Completed`, with escrow in
@@ -114,14 +114,14 @@ setters: `setTreasury`, `setSlashingContract`, `setBurner`, `setBulkGateway`,
 `DISPUTE_BOND = 10 ether`, `TIMEOUT_SLASH_BPS = 500`, `BPS = 10000`.
 
 > **Pre-audit note.** `timeoutJob` currently **refunds** escrow to the requester
-> rather than holding it for reassignment — there is no reassignment path in this
+> rather than holding it for reassignment, there is no reassignment path in this
 > state yet (deviates from the stated TimeoutEscrowHeld invariant). The
 > execution-deadline derivation in `assignBestBid` is a heuristic default. The
 > `RM-B1 / SOL-08/15/19` tags in source are *remediated* findings, not open ones.
 
 ## ComputePool
 
-`src/ComputePool.sol` — `contract ComputePool is ReentrancyGuard, Governable`.
+`src/ComputePool.sol`, `contract ComputePool is ReentrancyGuard, Governable`.
 
 Multi-provider GPU pools (`InferencePool` / `DataParallel` / `PipelineParallel`)
 with per-GPU staking, GPU-proportional payment distribution, SLA-violation
@@ -174,7 +174,7 @@ slashing, and a VRF-style coordinator election/reassignment scheme.
 
 ## ComputePoolTraining
 
-`src/ComputePoolTraining.sol` — `contract ComputePoolTraining is ReentrancyGuard, Governable`.
+`src/ComputePoolTraining.sol`, `contract ComputePoolTraining is ReentrancyGuard, Governable`.
 
 DataParallel distributed-training lifecycle: recruit workers → per-epoch Merkle
 root commitments → fraud-proof step challenges → finalize. Only per-epoch roots
@@ -213,14 +213,14 @@ are stored on-chain; individual step commitments live off-chain.
 `CommitteeUpdated`.
 
 > **Pre-audit note.** Merkle hashing is domain-separated (leaf prefix `0x00`,
-> internal prefix `0x01`) per audit SOL-20 — **off-chain proof generators must
+> internal prefix `0x01`) per audit SOL-20, **off-chain proof generators must
 > match this scheme** or proofs will be rejected. The flat worker-list design is
 > cheap for small pools only. Per-epoch VRF coordinator rotation is deferred to a
 > future sprint.
 
 ## ComputePricingOracle
 
-`src/ComputePricingOracle.sol` — `contract ComputePricingOracle is IComputePricingOracle, Governable`.
+`src/ComputePricingOracle.sol`, `contract ComputePricingOracle is IComputePricingOracle, Governable`.
 
 BFT-quorum oracle that maps compute cost (USD cents per PFLOP-hour) and SALT price
 (USD cents) via a 67%-quorum committee vote, rate-limited to a 10% change per
@@ -256,11 +256,11 @@ multipliers (Commitment 1.0×, ZK 1.5×, TEE 2.0×).
 > **Pre-audit note.** Membership changes bump `computePriceNonce` (invalidating
 > in-flight compute proposals) but **not** `saltPriceNonce`, and the
 > `votesNeeded` floor-to-1 guard is present on the compute path but not the SALT
-> path — flag both asymmetries for audit.
+> path, flag both asymmetries for audit.
 
 ## BulkComputeGateway
 
-`src/BulkComputeGateway.sol` — `contract BulkComputeGateway is ReentrancyGuard, Governable`.
+`src/BulkComputeGateway.sol`, `contract BulkComputeGateway is ReentrancyGuard, Governable`.
 
 Lets institutions buy compute credits (PFLOP-hours) with stablecoins routed to a
 `StablecoinTreasury`, priced via the oracle; authorized spenders (e.g.
@@ -292,11 +292,11 @@ transfers with a `token.code.length > 0` check.
 
 ## ComputeVerifier
 
-`src/ComputeVerifier.sol` — `contract ComputeVerifier is ReentrancyGuard, Governable`.
+`src/ComputeVerifier.sol`, `contract ComputeVerifier is ReentrancyGuard, Governable`.
 
 > **Tier: academic.** Tiered output-verification dispatcher for compute jobs:
 > Tier 1 Commitment, Tier 2 ZKProof (via the live `0x0108` Halo2-KZG inference
-> precompile), Tier 3 TEE attestation — plus a bisection-bounded dispute flow.
+> precompile), Tier 3 TEE attestation, plus a bisection-bounded dispute flow.
 > All entry points are **marketplace-only** (`onlyMarketplace`).
 
 **Constructor:** `constructor(address _marketplace)` (marketplace must be non-zero;
@@ -341,7 +341,7 @@ Key constants: `VALUE_THRESHOLD = 10 ether` (jobs above must use ZK/TEE),
 
 ## Deployed addresses (chain 40204)
 
-> Public on-chain data — re-verify with `eth_getCode`. **Testnet-beta; pre-audit.**
+> Public on-chain data, re-verify with `eth_getCode`. **Testnet-beta; pre-audit.**
 > Source: `citrate-chain/contracts/DEPLOYED_ADDRESSES.md`.
 
 | Contract | Address |
@@ -377,8 +377,7 @@ buyer walkthroughs.
 
 ## Security & access
 
-- **Tier: commercial** for the marketplace, pools, oracle, and gateway —
-  open on-chain, but the full lifecycle/scoring/settlement design is paid-seat
+- **Tier: commercial** for the marketplace, pools, oracle, and gateway, open on-chain, but the full lifecycle/scoring/settlement design is paid-seat
   implementation depth. **ComputeVerifier is academic** (formal-methods / proof
   surface).
 - **No secrets here.** No private keys, mnemonics, internal hostnames, or
@@ -391,7 +390,7 @@ buyer walkthroughs.
 
 ## Source & verification
 
-- Source: `citrate-chain/contracts/src/` — `ComputeMarketplace.sol`,
+- Source: `citrate-chain/contracts/src/`, `ComputeMarketplace.sol`,
   `ComputePool.sol`, `ComputePoolTraining.sol`, `ComputePricingOracle.sol`,
   `BulkComputeGateway.sol`, `ComputeVerifier.sol`.
 - Audited against `citrate-chain` SHA **`03d7851`**.

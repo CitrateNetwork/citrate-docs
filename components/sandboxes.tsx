@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { Icon } from "./icons";
 
 /**
  * S5 — live testnet sandboxes (chain 40204). Each widget calls a read-only server route
@@ -23,7 +24,7 @@ function Frame({ title, blurb, source, children }: { title: string; blurb: strin
 function Result({ state }: { state: { status: "idle" | "loading" | "ok" | "error"; data?: unknown; error?: string } }) {
   if (state.status === "idle") return null;
   if (state.status === "loading") return <Panel tone="muted">calling testnet…</Panel>;
-  if (state.status === "error") return <Panel tone="error">⚠ {state.error || "fail-closed"}</Panel>;
+  if (state.status === "error") return <Panel tone="error"><span className="inline-flex items-center gap-1.5"><Icon name="warning" size={14} /> {state.error || "fail-closed"}</span></Panel>;
   return (
     <Panel tone="ok">
       <pre className="overflow-x-auto text-xs">{JSON.stringify(state.data, null, 2)}</pre>
@@ -80,7 +81,7 @@ function DagSandbox() {
           {(d.currentTips as string[]).map((t) => <div key={t} className="font-mono break-all text-[var(--color-citrate-deep)]">{t}</div>)}
         </div>
       ) : null}
-      {s.status === "error" && <Panel tone="error">⚠ {s.error}</Panel>}
+      {s.status === "error" && <Panel tone="error"><span className="inline-flex items-center gap-1.5"><Icon name="warning" size={14} /> {s.error}</span></Panel>}
     </Frame>
   );
 }

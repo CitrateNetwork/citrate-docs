@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Tutorial: Read a Verified Contract
 
-> Query a live Citrate contract's state **without sending a transaction** — using
+> Query a live Citrate contract's state **without sending a transaction**, using
 > `eth_call` over raw JSON-RPC, then the same call via an SDK. Read-only, gasless,
 > safe to run against the public testnet. ~10 minutes.
 
@@ -26,7 +26,7 @@ author: Claude Opus 4.8 (1M context)
    on **LiquidStakingPool**).
 4. Do the same with an SDK (viem) so you don't hand-encode calldata.
 
-Everything here is a **view/pure** call — no key, no gas, no signature. You are
+Everything here is a **view/pure** call, no key, no gas, no signature. You are
 just reading the chain.
 
 ## Prerequisites
@@ -38,7 +38,7 @@ just reading the chain.
 | Tools | `curl` + [`cast`](https://book.getfoundry.sh/cast/) (Foundry), or Node ≥ 18 with `viem` |
 
 Contract addresses used below (from `contracts/DEPLOYED_ADDRESSES.md`, chain
-40204 testnet-beta — always re-verify with step 1):
+40204 testnet-beta, always re-verify with step 1):
 
 | Contract | Address |
 |---|---|
@@ -51,11 +51,10 @@ Contract addresses used below (from `contracts/DEPLOYED_ADDRESSES.md`, chain
 
 ---
 
-## Step 1 — Confirm the contract is real (`eth_getCode`)
+## Step 1, Confirm the contract is real (`eth_getCode`)
 
 A "verified contract" starts with: there *is* deployed bytecode at the address.
-If `eth_getCode` returns `0x` (empty), the address is an EOA or nothing —
-**stop**, you have the wrong address.
+If `eth_getCode` returns `0x` (empty), the address is an EOA or nothing, **stop**, you have the wrong address.
 
 ```bash
 curl -s https://rpc.citrate.ai \
@@ -71,7 +70,7 @@ means a contract lives there.
 
 ---
 
-## Step 2 — Read `symbol()` with raw `eth_call`
+## Step 2, Read `symbol()` with raw `eth_call`
 
 `eth_call` runs a function against the latest state and returns the result
 without mining a transaction. The `data` field is the 4-byte function selector
@@ -108,7 +107,7 @@ cast call 0xad7c3135c1b9b3189208fd617b6b058c1c0469f3 \
 
 ---
 
-## Step 3 — Read values, including one with an argument
+## Step 3, Read values, including one with an argument
 
 `LiquidStakingPool.getSharePrice()` returns SALT-per-stSALT scaled by 1e18
 (returns `1e18` when the pool is empty). `balanceOf(address)` returns the SALT
@@ -130,14 +129,14 @@ cast call 0x8951ae72e5479cae28ef7bb3caa4207d5719e24b \
 
 The address argument is ABI-encoded into the calldata for you. Note this
 `balanceOf` returns the **SALT value of shares** (Lido-style), not a raw token
-balance — read the contract's NatSpec before assuming a signature's meaning.
+balance, read the contract's NatSpec before assuming a signature's meaning.
 
 ---
 
-## Step 4 — The same, from an SDK (viem)
+## Step 4, The same, from an SDK (viem)
 
 Hand-encoding selectors is error-prone. An SDK takes a human-readable ABI
-fragment and does the encoding/decoding. This is read-only — no private key, no
+fragment and does the encoding/decoding. This is read-only, no private key, no
 `walletClient`.
 
 ```bash
@@ -147,7 +146,7 @@ npm install viem
 ```
 
 ```ts
-// read.ts  —  run with: npx tsx read.ts   (or compile + node)
+// read.ts, run with: npx tsx read.ts   (or compile + node)
 import { createPublicClient, http, formatUnits } from "viem";
 
 const citrate = {
@@ -162,7 +161,7 @@ const client = createPublicClient({ chain: citrate, transport: http() });
 const wSALT = "0xad7c3135c1b9b3189208fd617b6b058c1c0469f3" as const;
 const pool  = "0x8951ae72e5479cae28ef7bb3caa4207d5719e24b" as const;
 
-// Minimal ABI: only the view functions we call (Rule 9 — summarize, don't dump).
+// Minimal ABI: only the view functions we call (Rule 9, summarize, don't dump).
 const wsaltAbi = [
   { type: "function", name: "symbol",   stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },
@@ -190,7 +189,7 @@ npx tsx read.ts
 # stSALT share price: 1 SALT      (1.0 on an empty/new pool)
 ```
 
-`readContract` issues an `eth_call` under the hood — exactly what you did by hand
+`readContract` issues an `eth_call` under the hood, exactly what you did by hand
 in steps 2–3, but type-safe and decoded.
 
 ---
@@ -198,18 +197,18 @@ in steps 2–3, but type-safe and decoded.
 ## What you learned
 
 - **`eth_getCode`** proves a contract is actually deployed at an address.
-- **`eth_call`** runs view/pure functions for free, against live state — the
+- **`eth_call`** runs view/pure functions for free, against live state, the
   selector + ABI-encoded args go in `data`.
 - **`cast` / viem** encode and decode for you so you work in human-readable
   signatures instead of raw hex.
-- The signature alone doesn't tell you the semantics — read the contract's
+- The signature alone doesn't tell you the semantics, read the contract's
   NatSpec (e.g. `LiquidStakingPool.balanceOf` returns SALT value, not shares).
 
 ## Next steps
 
 - Browse the full read surface: [edu contracts](/contracts/edu),
   [economics contracts](/contracts/economics).
-- To **write** (send transactions), you need a wallet and gas — see the chain CLI
+- To **write** (send transactions), you need a wallet and gas, see the chain CLI
   and SDK pages. Writing is out of scope for this read-only tutorial.
 
 ## Security & access

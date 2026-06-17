@@ -119,7 +119,7 @@ export default function AdminPage({ params }: { params: Promise<{ section?: stri
               <Td className="text-xs">{e.sub}</Td>
               <Td className="font-mono text-xs">{e.docSlug}</Td>
               <Td><TierChip tier={e.tier} /></Td>
-              <Td>{e.disclosureAck ? "✓" : "—"}</Td>
+              <Td>{e.disclosureAck ? "yes" : "no"}</Td>
               <Td className="text-xs">{new Date(e.at).toISOString().slice(0, 16).replace("T", " ")}</Td>
             </tr>
           ))}

@@ -22,7 +22,7 @@ author: Claude Opus 4.8 (1M context)
 
 You sell compute by running the **node agent** as a daemon. The agent watches the
 marketplace, decides which jobs to bid on per your policy, proves it is alive with
-a heartbeat, and drives jobs to completion. The agent **holds no keys** — every
+a heartbeat, and drives jobs to completion. The agent **holds no keys**, every
 on-chain write is emitted as an unsigned `SignatureRequest` that your **external
 signer** signs and broadcasts. Plan for two roles: the agent (decisions) and the
 signer (key custody).
@@ -39,7 +39,7 @@ This is an **authored** SOP; the surface reference it relies on is transcluded a
 
 ## Procedure (end to end)
 
-### 1. Write your participation policy — `compute.json`
+### 1. Write your participation policy, `compute.json`
 
 ```json
 { "enabled": true, "allocation_percent": 50, "schedule": "always" }
@@ -91,7 +91,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/pause   # 
 curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/resume
 ```
 
-`pause` stops new bids but lets in-flight jobs finish — use it for maintenance.
+`pause` stops new bids but lets in-flight jobs finish, use it for maintenance.
 
 ### 6. Understand bidding (so your jobs win and stay profitable)
 
@@ -114,7 +114,7 @@ Tier **commercial.kyc**: operator-depth marketplace know-how, gated on KYC.
 
 **No secrets here.** The supervision token is generated locally (mode 0600) and
 never transcribed; bind the supervision API to loopback only. Use HTTPS for your
-RPC endpoint — **never** set `CITRATE_NODE_AGENT_ALLOW_INSECURE_OUTBOUND` on a
+RPC endpoint, **never** set `CITRATE_NODE_AGENT_ALLOW_INSECURE_OUTBOUND` on a
 production node (it's a dev-only LAN escape hatch that exposes you to MITM of
 chain truth, oracle prices, and job state). Keep key custody in your external
 signer; the agent never holds keys.

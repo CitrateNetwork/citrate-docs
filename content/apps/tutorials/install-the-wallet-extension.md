@@ -19,8 +19,8 @@ author: Claude Opus 4.8 (1M context)
 
 This is a runnable tutorial. It targets the **Citrate SALT testnet** (chain id `40204`).
 
-> **Heads up — prerelease software (v0.2.0), audit pending.** Use small testnet values only. There is
-> **no seed-phrase recovery** — if you forget your password you lose the account.
+> **Heads up, prerelease software (v0.2.0), audit pending.** Use small testnet values only. There is
+> **no seed-phrase recovery**, if you forget your password you lose the account.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ This is a runnable tutorial. It targets the **Citrate SALT testnet** (chain id `
 - The release ZIP `citrate-wallet-extension.zip` and its checksum `citrate-wallet-extension.zip.sha256`
   from the project's GitHub Releases.
 
-There is **no build step** — the extension ships as source files plus a prebuilt, signed WASM crypto
+There is **no build step**, the extension ships as source files plus a prebuilt, signed WASM crypto
 binary (see `.github/workflows/release.yml`).
 
 ## Steps
@@ -40,7 +40,7 @@ Download `citrate-wallet-extension.zip` and `citrate-wallet-extension.zip.sha256
 ### 2. Verify the checksum
 
 ```bash
-# macOS / Linux — run in the download directory
+# macOS / Linux, run in the download directory
 shasum -a 256 -c citrate-wallet-extension.zip.sha256
 ```
 
@@ -53,7 +53,7 @@ mkdir -p ~/citrate-wallet-extension
 unzip citrate-wallet-extension.zip -d ~/citrate-wallet-extension
 ```
 
-Keep this folder — the browser loads the extension from disk, so don't delete or move it afterward.
+Keep this folder, the browser loads the extension from disk, so don't delete or move it afterward.
 
 ### 4. Open the extensions page
 
@@ -75,14 +75,14 @@ Click **Load unpacked** and select the unzipped folder (the one containing `mani
 1. Open the extension popup.
 2. Choose **Create New Wallet** and set a strong password.
 3. Your address is generated and stored encrypted (AES-256-GCM under an Argon2id v2 KDF). Note: there is
-   no seed phrase to back up in this version — your password is the only way in.
+   no seed phrase to back up in this version, your password is the only way in.
 
 ## Verify it works
 
 - The popup shows your new address and the network as **Citrate SALT testnet (40204)**.
 - Visit a Citrate dApp (e.g. Citrate Chat); it should detect the provider (`window.ethereum`) and prompt
   a per-origin **connection approval** popup. Approve it, then confirm that any transaction or signature
-  triggers its own approval dialog — there is no silent signing.
+  triggers its own approval dialog, there is no silent signing.
 
 ## Troubleshooting
 

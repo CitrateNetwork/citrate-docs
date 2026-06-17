@@ -14,7 +14,7 @@ author: Claude Opus 4.8 (1M context)
 
 # Compute Marketplace (Buyer)
 
-> The buyer side of the Citrate Compute Marketplace — browse providers and pools, post a job, pay per call with x402, and track the result to settlement.
+> The buyer side of the Citrate Compute Marketplace, browse providers and pools, post a job, pay per call with x402, and track the result to settlement.
 
 ## Overview
 
@@ -26,7 +26,7 @@ payment protocol settled in wSALT on chain `40204`.
 
 Payment is real and bounded by design: jobs submit through `@citratenetwork/marketplace-sdk`,
 and the wallet's per-round auto-pay is capped (default ceiling 1 SALT) and restricted to
-a single allowed pay token (wSALT) on the Citrate chain — a challenge naming any other
+a single allowed pay token (wSALT) on the Citrate chain, a challenge naming any other
 token/chain is rejected. (Source: `citrate-buyer-webapp/app/page.tsx`,
 `app/design/DesignMount.tsx`, `lib/submitJob.ts`, `lib/marketplace.ts`.)
 
@@ -44,15 +44,15 @@ The SPA's screens (in `app/design/DesignApp.jsx`) cover the buyer journey:
 |---|---|---|
 | **Marketplace / browse** | Browse models (with provider/pool counts and per-1K pricing), providers (reputation, stake, region, supported verification tiers, live status), and compute pools (mode, GPUs, throughput, price). | `app/design/DesignApp.jsx` |
 | **Provider detail** | Inspect a single provider's reputation, capacity/load, supported models, and verification tiers. | `app/design/DesignApp.jsx` |
-| **Post a job** | Choose a model and verification tier — **Standard** (commitment, 1.0×), **Cryptographic proof** (ZK Groth16, 1.5×), or **Secure enclave** (TEE attestation, 2.0×) — set a max price, and post on-chain into the auction. | `app/design/DesignApp.jsx`, `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/submitTrainingJob.ts` |
+| **Post a job** | Choose a model and verification tier, **Standard** (commitment, 1.0×), **Cryptographic proof** (ZK Groth16, 1.5×), or **Secure enclave** (TEE attestation, 2.0×), set a max price, and post on-chain into the auction. | `app/design/DesignApp.jsx`, `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/submitTrainingJob.ts` |
 | **Track results** | Follow a job through its lifecycle: Posted → Bidding → Assigned → Executing → Verifying → Completed, plus terminal states (Expired/refunded, Timed out/slashed, Failed/refunded, Disputed/bisection). | `app/design/DesignApp.jsx` |
 | **Pay (x402)** | Pay per call with bounded auto-pay in wSALT; the SDK enforces the per-round ceiling and the allowed token/chain. | `lib/submitJob.ts`, `lib/buyCredits.ts`, `lib/creditsClient.ts` |
 | **Copilot (chat)** | An in-app assistant that streams from the Citrate gateway (OpenAI-compatible) to answer marketplace/chain questions. | `app/api/chat/route.ts` |
 
 ### Browse providers & pools
 
-The marketplace surfaces models, providers, and pools with their economics — reputation,
-stake, region, load/capacity, throughput, and per-1K pricing — and which verification
+The marketplace surfaces models, providers, and pools with their economics, reputation,
+stake, region, load/capacity, throughput, and per-1K pricing, and which verification
 tiers each provider supports. A server-side `MarketplaceClient` (viem + the marketplace
 SDK) backs live reads against chain `40204`. (Source: `lib/marketplace.ts`,
 `lib/poolsClient.ts`.)
@@ -79,7 +79,7 @@ invalid, refunded), and Disputed (resolved by bisection). (Source:
 1. Open the app and browse the **Marketplace** to compare models, providers, and pools.
 2. Open a provider to check reputation, load, and supported verification tiers.
 3. **Post a job:** pick a model, choose a verification tier, set a max price, and submit.
-4. Approve the **x402** payment in your wallet (Privy-connected) — auto-pay stays within
+4. Approve the **x402** payment in your wallet (Privy-connected), auto-pay stays within
    the bounded ceiling and only pays in wSALT.
 5. **Track** the job through Bidding → Assigned → Executing → Verifying → Completed; on a
    bad outcome you're refunded (or the provider is slashed).
@@ -92,8 +92,8 @@ invalid, refunded), and Disputed (resolved by bisection). (Source:
 
 ## Security & access
 
-**Tier: commercial.** This is paid marketplace operation — job posting, provider
-economics, and payment — intended for contracted buyers; access is gated through the
+**Tier: commercial.** This is paid marketplace operation, job posting, provider
+economics, and payment, intended for contracted buyers; access is gated through the
 Codex chokepoint (`PLANSET/02_ARCHITECTURE.md` §4).
 
 - **Bounded auto-pay:** the wallet never signs an unbounded x402 amount; a finite
@@ -117,5 +117,5 @@ Codex chokepoint (`PLANSET/02_ARCHITECTURE.md` §4).
   submission (via `@citratenetwork/marketplace-sdk`), credits, the gateway-backed
   copilot, and the server-side `MarketplaceClient`. Treat catalog figures in the UI as
   illustrative until live indexing is fully wired. This page mirrors code at the pinned
-  SHA (Rule 9 — link, don't copy); the repo README is monorepo-split boilerplate, so
+  SHA (Rule 9, link, don't copy); the repo README is monorepo-split boilerplate, so
   screens here are audited against the app code, not the README.

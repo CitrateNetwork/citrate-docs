@@ -7,6 +7,7 @@ import { filterNav, mockApi, NavNode } from "@/prototype/fixtures";
 import { MERGED_NAV } from "@/lib/codex-nav";
 import { useViewer } from "./providers";
 import { TierChip } from "./tier-chip";
+import { Icon } from "./icons";
 import { cn } from "@/lib/cn";
 
 /** Tier-aware sidebar (DESIGN_BRIEF §3/§5.3). Renders the filtered IA; locked leaves show as locked. */
@@ -36,7 +37,7 @@ export function Sidebar() {
                 {group.title}
                 {group.tier !== "public" && <TierChip tier={group.tier} />}
               </span>
-              <span aria-hidden className="text-[10px]">{closed.has(group.id) ? "▸" : "▾"}</span>
+              <Icon name={closed.has(group.id) ? "chevRight" : "chevDown"} size={13} />
             </button>
             {!closed.has(group.id) && (
               <ul className="mt-1 space-y-0.5">
@@ -80,13 +81,13 @@ function Leaf({
       )}
     >
       <span className="flex items-center gap-2 truncate">
-        {isTut && <span aria-hidden className="text-[var(--color-citrate)]">›</span>}
-        {isSandbox && <span aria-hidden>▷</span>}
+        {isTut && <Icon name="arrowRight" size={12} style={{ color: "var(--accent-text)" }} />}
+        {isSandbox && <Icon name="play" size={12} />}
         <span className={cn("truncate", isTut && "text-[var(--color-muted)]")}>{node.title}</span>
       </span>
       <span className="flex items-center gap-1">
         {node.tier !== "public" && <TierChip tier={node.tier} />}
-        {locked && <span aria-hidden title="locked">🔒</span>}
+        {locked && <Icon name="lock" size={12} />}
       </span>
     </Link>
   );

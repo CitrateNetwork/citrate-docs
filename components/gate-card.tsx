@@ -1,13 +1,14 @@
 import React from "react";
 import { GateCard as GateCardData } from "@/prototype/fixtures";
 import { TierChip } from "./tier-chip";
+import { Icon } from "./icons";
 
 /** Visible-locked state for Commercial/Academic content (DESIGN_BRIEF §5.3). Never shows the body. */
 export function GateCard({ gate }: { gate: GateCardData }) {
   return (
     <div className="mx-auto max-w-2xl rounded-2xl border bg-[var(--color-panel)] p-8 text-center">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border bg-[var(--color-canvas)] text-xl">
-        🔒
+        <Icon name="lock" size={20} />
       </div>
       <div className="mb-2 flex items-center justify-center gap-2">
         <h1 className="text-xl font-semibold">{gate.title}</h1>

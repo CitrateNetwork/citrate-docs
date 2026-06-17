@@ -15,12 +15,14 @@ const OUT_DIR = path.join(CONTENT_DIR, "_generated");
 const OUT_FILE = path.join(OUT_DIR, "content.ts");
 
 const TIER_RANK = { public: 0, commercial: 1, academic: 2, confidential: 3 };
+// Product-surface names (Citrate brand spec) carry Title Case; generic sections are sentence case.
 const SECTION_LABEL = {
-  start: "Start Here", chain: "Chain Core", contracts: "Smart Contracts", sdks: "SDKs & APIs",
-  aa: "Account Abstraction & Identity", compute: "Compute & Inference", apps: "Apps & dApps",
-  operators: "Node Operators", research: "Federated Learning & Research", methodology: "Methodology & SOPs",
+  start: "Start here", chain: "Citrate Network", contracts: "Smart contracts", sdks: "SDKs & APIs",
+  aa: "Citrate Keyring & identity", compute: "Citrate Market", apps: "Apps & dapps",
+  operators: "Citrate Node", research: "Citrate Orchard", enterprise: "Enterprise & Citrate Ground",
+  methodology: "Methodology",
 };
-const SECTION_ORDER = ["start", "chain", "contracts", "sdks", "aa", "compute", "apps", "operators", "research", "methodology"];
+const SECTION_ORDER = ["start", "chain", "contracts", "sdks", "aa", "compute", "operators", "apps", "research", "enterprise", "methodology"];
 
 function walk(dir) {
   const out = [];

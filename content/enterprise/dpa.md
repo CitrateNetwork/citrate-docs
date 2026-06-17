@@ -22,7 +22,7 @@ disclosures as part of its enterprise contracting package. Because Citrate ships
 **on-premise** and the vendor performs **no data services** (see
 [Procurement](/enterprise/procurement) and [Compliance posture](/enterprise/compliance)),
 the data-handling boundary sits with the customer; these documents define that boundary
-contractually. The full DPA/SLA/subprocessor terms are **commercial-gated** — surfaced to
+contractually. The full DPA/SLA/subprocessor terms are **commercial-gated**, surfaced to
 contracted / KYC'd principals, not authored in this public docs tree. No terms, SLAs, or
 subprocessor identities are reproduced here.
 

@@ -9,6 +9,7 @@ import { Markdown } from "@/lib/md";
 import { TierChip } from "./tier-chip";
 import { GateCard } from "./gate-card";
 import { DisclosureModal } from "./disclosure-modal";
+import { Icon } from "./icons";
 import { findNavBySlug } from "@/lib/nav-util";
 import { cn } from "@/lib/cn";
 
@@ -33,7 +34,7 @@ export function DocView({ slug }: { slug: string }) {
     return (
       <Shell>
         <Card>
-          <div className="mb-2 text-2xl">⏳</div>
+          <div className="mb-2 text-[var(--color-muted)]"><Icon name="clock" size={24} /></div>
           <h1 className="mb-1 text-xl font-semibold">{res.title}</h1>
           <p className="text-sm text-[var(--color-muted)]">
             Held until <strong>{fmt(res.until)}</strong>. Embargoed content is withheld until its release date.
@@ -48,7 +49,7 @@ export function DocView({ slug }: { slug: string }) {
     return (
       <Shell>
         <Card>
-          <div className="mb-2 text-2xl">🔒</div>
+          <div className="mb-2 text-[var(--color-amber)]"><Icon name="lock" size={24} /></div>
           <h1 className="mb-1 text-xl font-semibold">{res.doc.title}</h1>
           <p className="text-sm text-[var(--color-muted)]">A disclosure must be acknowledged before this document renders.</p>
         </Card>
@@ -111,7 +112,7 @@ export function DocView({ slug }: { slug: string }) {
     <Shell>
       {confidential && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_oklab,var(--color-amber)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-amber)_8%,transparent)] px-3 py-2 text-xs text-[var(--color-amber)]">
-          🔒 Confidential · access-logged · acknowledged · served at request time (never in the build).
+          <Icon name="lock" size={13} /> Confidential · access-logged · acknowledged · served at request time (never in the build).
         </div>
       )}
       <header className="mb-6">

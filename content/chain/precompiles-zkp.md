@@ -1,5 +1,5 @@
 ---
-title: Confidential precompiles — ZKP, inference, attestation (overview)
+title: Confidential precompiles, ZKP, inference, attestation (overview)
 codex_slug: /chain/precompiles-zkp
 tier: public
 org_scope: ~
@@ -12,7 +12,7 @@ created: 2026-06-14T00:00:00Z
 author: Claude Opus 4.8 (1M context) + Saul Loveman
 ---
 
-# Confidential precompiles — ZKP, inference, attestation (overview)
+# Confidential precompiles, ZKP, inference, attestation (overview)
 
 > A **public, high-level** description of three Citrate precompile families
 > whose implementation detail is Confidential. This page tells you *what they
@@ -25,7 +25,7 @@ Citrate ships three precompile families that let on-chain contracts trust
 off-chain AI work without re-running it, and that gate non-deterministic
 inference. The **interfaces and addresses are public**; the **implementation
 depth is Confidential** (registry tier X, `source_kind: gated`) and is served
-at request time from the private home repo to authorized principals — it is
+at request time from the private home repo to authorized principals, it is
 never built into the public Codex.
 
 | Family | Addresses | What it does (high level) |
@@ -39,15 +39,15 @@ never built into the public Codex.
 At a high level, these three precompiles let a contract check off-chain AI work
 trustlessly:
 
-- **`0x0107` TENSOR_COMMIT** — produces a commitment over a canonical-format
+- **`0x0107` TENSOR_COMMIT**, produces a commitment over a canonical-format
   tensor (returns a 32-byte field element).
-- **`0x0108` INFERENCE_PROOF_VERIFY** — verifies an inference proof; returns a
+- **`0x0108` INFERENCE_PROOF_VERIFY**, verifies an inference proof; returns a
   32-byte boolean.
-- **`0x0109` MERKLE_VERIFY_TENSOR** — verifies a tensor element is part of a
+- **`0x0109` MERKLE_VERIFY_TENSOR**, verifies a tensor element is part of a
   committed tensor via a Merkle path; returns a 32-byte boolean.
 
 All three are deterministic by construction (hash + pairing + integer math).
-Their **byte-level output is frozen** — drift would fork the chain and
+Their **byte-level output is frozen**, drift would fork the chain and
 invalidate prior commitments. The tensor wire format these consume is the
 public v1 format documented in [Precompiles](/chain/precompiles#tensor).
 
@@ -73,13 +73,13 @@ against an attested TEE-hosted model; that verifier is **not** yet enabled.
 ## Security & access
 
 **This overview page is PUBLIC and contains no confidential bodies and no
-secrets** — only the public address map, the input/output *shapes* (e.g.
+secrets**, only the public address map, the input/output *shapes* (e.g.
 "returns a 32-byte boolean"), and plain-English behavior.
 
 The **implementation detail of all three families is Confidential** (registry
 tier X): circuit construction, prover/verifier internals, the inference
 runtime, attestation-verification logic, key/ceremony material, and exact
-ABIs. Per schema §0/§4 these are **gated** — served at runtime from the
+ABIs. Per schema §0/§4 these are **gated**, served at runtime from the
 private source repo to admins / issued auditors / contracted principals, and
 **never built into the public Codex**. Access is enforced by the protocol
 chokepoint, not by obscurity. No keys, ceremony secrets, or credentials appear

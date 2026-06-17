@@ -15,7 +15,7 @@ author: Claude Opus 4.8 (1M context)
 # Your first 10 minutes
 
 > A copy-paste tour: confirm you're on Citrate (chain id **40204**), read the
-> **BlockDAG**, peek at the **SALT** token, and run an **on-chain AI** call — then
+> **BlockDAG**, peek at the **SALT** token, and run an **on-chain AI** call, then
 > point yourself at the right next page. Everything here uses methods that exist
 > in `citrate-chain` at federation SHA `cd729ed`. No wallet, no SALT, no signup
 > needed for the read-only steps.
@@ -24,7 +24,7 @@ author: Claude Opus 4.8 (1M context)
 
 - A reachable Citrate JSON-RPC endpoint. A local node serves
   `http://127.0.0.1:8545`. (No node yet? Use the live
-  [RPC explorer sandbox](/sandboxes/rpc) instead — same methods, in the browser.)
+  [RPC explorer sandbox](/sandboxes/rpc) instead, same methods, in the browser.)
 - `curl`, and optionally `jq` for pretty output.
 
 ```bash
@@ -36,7 +36,7 @@ rpc () {
 }
 ```
 
-## Step 1 — Confirm you're on Citrate (~1 min)
+## Step 1, Confirm you're on Citrate (~1 min)
 
 ```bash
 rpc eth_chainId
@@ -48,7 +48,7 @@ printf '%d\n' 0x9d0c   # 40204
 a different network. (Why a number, and why 40204? See
 [What Citrate is](/start/what-is-citrate).)
 
-## Step 2 — Read the BlockDAG (~2 min)
+## Step 2, Read the BlockDAG (~2 min)
 
 ```bash
 rpc citrate_getDagStats | jq
@@ -64,13 +64,13 @@ rpc citrate_getDagStats | jq
 }
 ```
 
-Notice **`maxBlueScore`** — that's the DAG's ordering clock, not `height`. Notice
-**`tipsCount` > 1** — multiple tips at once is normal on a BlockDAG; GhostDAG
+Notice **`maxBlueScore`**, that's the DAG's ordering clock, not `height`. Notice
+**`tipsCount` > 1**, multiple tips at once is normal on a BlockDAG; GhostDAG
 merges them into one order. New to those words? Read the
 [mental-models primer](/start/primer) (blue score, merge parents, finality by
 depth).
 
-## Step 3 — Read the SALT token (~1 min)
+## Step 3, Read the SALT token (~1 min)
 
 ```bash
 rpc citrate_getToken | jq
@@ -80,7 +80,7 @@ rpc citrate_getToken | jq
 **SALT**, 18 decimals, hard-capped at 1B. This is the unit fees and rewards are
 counted in. Detail: [Economics](/chain/economics).
 
-## Step 4 — Run on-chain AI (~2 min)
+## Step 4, Run on-chain AI (~2 min)
 
 Citrate ships AI as RPC, not as a service you trust. Generate an embedding with
 the genesis model:
@@ -98,9 +98,9 @@ rpc citrate_semanticSearch \
 # [{ "index": 1, "score": 0.82, "text": "an AI-native BlockDAG" }]
 ```
 
-(Inputs cap at 256 per call — a DoS guard.)
+(Inputs cap at 256 per call, a DoS guard.)
 
-## Step 5 — Pick your next 5 minutes
+## Step 5, Pick your next 5 minutes
 
 | If you want to… | Go to |
 |---|---|
@@ -113,16 +113,16 @@ rpc citrate_semanticSearch \
 
 ## Troubleshooting
 
-- **`Connection refused`** — no node on `$RPC` (default `127.0.0.1:8545`). Use the
+- **`Connection refused`**, no node on `$RPC` (default `127.0.0.1:8545`). Use the
   [RPC sandbox](/sandboxes/rpc) instead.
-- **`-32601 Method not found`** — a typo, or an unsupported method on that node.
+- **`-32601 Method not found`**, a typo, or an unsupported method on that node.
   The chain/DAG/AI methods above don't need an economics manager.
-- **Wrong chain id** — anything other than `0x9d0c` / `40204` is not Citrate.
+- **Wrong chain id**, anything other than `0x9d0c` / `40204` is not Citrate.
 
 ## Security & access
 
 Public, read-only. No keys or credentials needed; nothing here writes state.
-Example outputs are illustrative — exact values depend on the node's state.
+Example outputs are illustrative, exact values depend on the node's state.
 
 ## Source & verification
 

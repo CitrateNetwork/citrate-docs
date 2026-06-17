@@ -20,7 +20,7 @@ export default function SandboxesPage() {
         {SANDBOXES.map((s) => (
           <li key={s.id}>
             <Link href={`/sandboxes/${s.id}`} className="block h-full rounded-2xl border bg-[var(--color-panel)] p-4 hover:bg-[var(--color-elevated)]">
-              <div className="mb-1 font-medium">▷ {s.title}</div>
+              <div className="mb-1 font-medium">{s.title}</div>
               <p className="text-sm text-[var(--color-muted)]">{s.blurb}</p>
             </Link>
           </li>

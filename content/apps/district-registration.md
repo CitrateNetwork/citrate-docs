@@ -14,20 +14,19 @@ author: Claude Opus 4.8 (1M context)
 
 # District registration
 
-> The self-service onboarding flow for US K-12 school districts to join the Citrate Learning Center —
-> register, pass identity verification (KYC), get approved, and download a signed district bundle.
+> The self-service onboarding flow for US K-12 school districts to join the Citrate Learning Center, > register, pass identity verification (KYC), get approved, and download a signed district bundle.
 
 ## Overview
 
 District Registration is a Next.js 14 web app where a district's IT director registers their district,
-completes **KYC identity verification** through CLEAR, and — once approved — receives a district-specific
+completes **KYC identity verification** through CLEAR, and, once approved, receives a district-specific
 deployment bundle. The site itself handles registration, verification, approval, and bundle delivery;
 the on-chain ceremony and node setup happen later, inside the bundle's CLI (not in this app).
 
 Mental model: a guided intake → verify → approve → download pipeline. You **do not** set up wallet keys
 here; the bundle does that.
 
-> **Status — in progress, not yet deployed.** Core flow is built and tested (248 tests as of
+> **Status, in progress, not yet deployed.** Core flow is built and tested (248 tests as of
 > 2026-06-11), but several surfaces still await a security sign-off and the app is not yet in
 > production. See "Honest status".
 
@@ -56,7 +55,7 @@ Source: `app/`.
    `GET /api/nces/[code]`.
 2. Complete the contact, signing-official, and board-chair fields and submit
    (`app/register/actions.ts`). Submissions are rate-limited per IP.
-3. You're taken into the CLEAR hosted KYC flow. **Citrate never sees your ID images** — CLEAR handles
+3. You're taken into the CLEAR hosted KYC flow. **Citrate never sees your ID images**, CLEAR handles
    all biometric data (`lib/clear/client.ts`).
 4. Wait on the pending screen. When CLEAR reports back, the approval engine
    (`lib/approval/decide.ts`) either auto-approves (public district + enrollment > 0 + verified +
@@ -75,8 +74,8 @@ Source: `app/`.
 verifies real institutional identity, and the implementation depth is contracted-builder material, not
 anonymous reference.
 
-**No secrets in this doc or repo.** All credentials — CLEAR API key/webhook secret, bundle signing key,
-GitHub token, PII encryption key, auth secret — live in Vercel environment variables; only `.env.example`
+**No secrets in this doc or repo.** All credentials, CLEAR API key/webhook secret, bundle signing key,
+GitHub token, PII encryption key, auth secret, live in Vercel environment variables; only `.env.example`
 (no real values) is committed. Verified against `.gitignore` and history.
 
 User-facing privacy: contact/email/phone fields are encrypted at rest; ID/biometric data stays with
