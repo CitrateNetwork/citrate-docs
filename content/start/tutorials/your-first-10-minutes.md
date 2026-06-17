@@ -4,28 +4,30 @@ codex_slug: /start/tutorials/your-first-10-minutes
 tier: public
 org_scope: ~
 source_kind: authored
-source: codex
+source: citrate-chain core/api
 surfaces: [START-what-is-citrate, CHAIN-rpc-eth, CHAIN-rpc-citrate]
-audited_against_sha: cd729ed
-status: draft
-created: 2026-06-14T00:00:00Z
-author: Claude Opus 4.8 (1M context)
+audited_against_sha: 03d7851
+status: Implemented
+created: 2026-06-17T00:00:00Z
+author: Citrate team
 ---
 
-# Your first 10 minutes
+A short, copy-paste tour. You will confirm you are on Citrate, read the BlockDAG, look at the SALT token,
+and run a model call on the chain, then point yourself at the right next page. Every method here exists in
+`citrate-chain`. The read-only steps need no account, no SALT, and no signup.
 
-> A copy-paste tour: confirm you're on Citrate (chain id **40204**), read the
-> **BlockDAG**, peek at the **SALT** token, and run an **on-chain AI** call, then
-> point yourself at the right next page. Everything here uses methods that exist
-> in `citrate-chain` at federation SHA `cd729ed`. No wallet, no SALT, no signup
-> needed for the read-only steps.
+## What it is
 
-## Prerequisites
+A ten-minute orientation against a live node. Nothing here writes state, so you can run it against any
+Citrate endpoint you can reach without risk.
 
-- A reachable Citrate JSON-RPC endpoint. A local node serves
-  `http://127.0.0.1:8545`. (No node yet? Use the live
-  [RPC explorer sandbox](/sandboxes/rpc) instead, same methods, in the browser.)
-- `curl`, and optionally `jq` for pretty output.
+## How to use it
+
+You will need a reachable Citrate JSON-RPC endpoint. A local node serves `http://127.0.0.1:8545`. If you do
+not have one, use the [RPC sandbox](/sandboxes/rpc) instead: same methods, in the browser. You will also
+want `curl`, and `jq` for readable output.
+
+Set up a small helper so the steps stay short:
 
 ```bash
 export RPC=http://127.0.0.1:8545
@@ -36,7 +38,7 @@ rpc () {
 }
 ```
 
-## Step 1, Confirm you're on Citrate (~1 min)
+### Step 1, confirm you are on Citrate
 
 ```bash
 rpc eth_chainId
@@ -44,11 +46,9 @@ rpc eth_chainId
 printf '%d\n' 0x9d0c   # 40204
 ```
 
-`0x9d0c` == **40204** is canonical Citrate. Anything else means you're pointed at
-a different network. (Why a number, and why 40204? See
-[What Citrate is](/start/what-is-citrate).)
+`0x9d0c` is 40204, and 40204 is Citrate. Anything else means you are pointed at a different network.
 
-## Step 2, Read the BlockDAG (~2 min)
+### Step 2, read the BlockDAG
 
 ```bash
 rpc citrate_getDagStats | jq
@@ -64,25 +64,23 @@ rpc citrate_getDagStats | jq
 }
 ```
 
-Notice **`maxBlueScore`**, that's the DAG's ordering clock, not `height`. Notice
-**`tipsCount` > 1**, multiple tips at once is normal on a BlockDAG; GhostDAG
-merges them into one order. New to those words? Read the
-[mental-models primer](/start/primer) (blue score, merge parents, finality by
-depth).
+Two things to notice. `maxBlueScore` is the DAG's ordering clock, not `height`. And `tipsCount` above one
+is normal: several tips can exist at once on a BlockDAG, and GhostDAG merges them into a single order. If
+those words are new, read the [primer](/start/primer).
 
-## Step 3, Read the SALT token (~1 min)
+### Step 3, read the SALT token
 
 ```bash
 rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-**SALT**, 18 decimals, hard-capped at 1B. This is the unit fees and rewards are
-counted in. Detail: [Economics](/chain/economics).
+SALT has 18 decimals and a one-billion cap. It is the unit fees and rewards are counted in. Detail:
+[economics](/chain/economics).
 
-## Step 4, Run on-chain AI (~2 min)
+### Step 4, run a model call on the chain
 
-Citrate ships AI as RPC, not as a service you trust. Generate an embedding with
+Citrate runs inference as a chain operation, not as an outside service you trust. Generate an embedding with
 the genesis model:
 
 ```bash
@@ -90,42 +88,54 @@ rpc citrate_getTextEmbedding '["the quick brown fox"]' | jq '.result | length'
 # 1024
 ```
 
-Or semantic-search a short corpus:
+Or rank a short corpus by meaning:
 
 ```bash
 rpc citrate_semanticSearch \
-  '["best chain for AI", ["a payments chain","an AI-native BlockDAG","a meme coin"], 1]' | jq
-# [{ "index": 1, "score": 0.82, "text": "an AI-native BlockDAG" }]
+  '["best network for AI compute", ["a payments network","a substrate for AI compute","a meme coin"], 1]' | jq
+# [{ "index": 1, "score": 0.82, "text": "a substrate for AI compute" }]
 ```
 
-(Inputs cap at 256 per call, a DoS guard.)
+A single call accepts at most 256 inputs, which is a denial-of-service guard (`MAX_EMBEDDING_INPUTS`).
 
-## Step 5, Pick your next 5 minutes
+### Step 5, pick your next five minutes
 
-| If you want to… | Go to |
+| If you want to | Go to |
 |---|---|
-| Understand the words you just saw | [Mental-models primer](/start/primer) |
+| Understand the words you just saw | [the primer](/start/primer) |
 | See every RPC method | [JSON-RPC reference](/chain/rpc) |
-| Go deeper on the same calls | [Call the Citrate RPC](/chain/tutorials/call-citrate-rpc) |
-| Deploy a contract | [Deploy with the CLI](/chain/tutorials/deploy-a-contract-with-the-cli) |
-| Get a smart wallet with no seed phrase | [Sign in with a passkey](/aa/tutorials/sign-in-with-a-passkey) |
-| Learn how the project is run | [Agentile primer](/start/agentile) |
+| Go deeper on these same calls | [call the Citrate RPC](/chain/tutorials/call-citrate-rpc) |
+| Deploy a contract | [deploy with the CLI](/chain/tutorials/deploy-a-contract-with-the-cli) |
+| Get an account with no seed phrase | [sign in with a passkey](/aa/tutorials/sign-in-with-a-passkey) |
+| Learn how the project is run | [the Agentile primer](/start/agentile) |
 
-## Troubleshooting
+## Reference
 
-- **`Connection refused`**, no node on `$RPC` (default `127.0.0.1:8545`). Use the
+The methods used above, with their source files in `citrate-chain`:
+
+| Method | What it returns | Source |
+|---|---|---|
+| `eth_chainId` | the chain id, `0x9d0c` | `core/api/src/eth_rpc_simple.rs` |
+| `citrate_getDagStats` | tips, blue score, GhostDAG params | `core/api/src/` |
+| `citrate_getToken` | SALT name, decimals, supply | `core/api/src/economics_rpc.rs` |
+| `citrate_getTextEmbedding` | an embedding vector | `core/api/src/ai_rpc.rs` |
+| `citrate_semanticSearch` | corpus entries ranked by meaning | `core/api/src/ai_rpc.rs` |
+
+## Failure modes
+
+- **`Connection refused`** means no node is listening on `$RPC` (the default is `127.0.0.1:8545`). Use the
   [RPC sandbox](/sandboxes/rpc) instead.
-- **`-32601 Method not found`**, a typo, or an unsupported method on that node.
-  The chain/DAG/AI methods above don't need an economics manager.
-- **Wrong chain id**, anything other than `0x9d0c` / `40204` is not Citrate.
+- **`-32601 Method not found`** is a typo or a method the node does not serve. The chain, DAG, and model
+  methods above do not require an economics manager to be configured.
+- **A chain id other than `0x9d0c`** means you are not on Citrate.
 
-## Security & access
+## Access and canon
 
-Public, read-only. No keys or credentials needed; nothing here writes state.
-Example outputs are illustrative, exact values depend on the node's state.
+Public and read-only. No keys or credentials are needed, and nothing here writes state. The example outputs
+are illustrative; exact values depend on the node's current state.
 
-## Source & verification
+## Source and verification
 
-Authored tutorial. Methods verified against `citrate-chain` via the
-[JSON-RPC reference](/chain/rpc) and [Call the Citrate RPC](/chain/tutorials/call-citrate-rpc)
-tutorial. Federation SHA `cd729ed`.
+Methods verified against `citrate-chain` at `03d7851` (`core/api/src/ai_rpc.rs`, `economics_rpc.rs`,
+`eth_rpc_simple.rs`), and surfaced in full on the [JSON-RPC reference](/chain/rpc). Status: Implemented
+(testnet).
