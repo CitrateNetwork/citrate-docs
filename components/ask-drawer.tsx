@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { mockApi } from "@/prototype/fixtures";
 import { useViewer } from "./providers";
@@ -18,40 +18,16 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
   const tier = mockApi.resolveTier(session);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
-  const [streaming, setStreaming] = useState(false);
+  const [pending, setPending] = useState(false);
   const [showTrace, setShowTrace] = useState(false);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const animate = (full: string, citations: Cite[], tools: { tool: string; backing: string }[]) => {
-    const words = full.split(/(\s+)/);
-    let i = 0;
-    timer.current = setInterval(() => {
-      i++;
-      const partial = words.slice(0, i).join("");
-      setMsgs((m) => {
-        const c = [...m];
-        c[c.length - 1] = { role: "assistant", content: partial };
-        return c;
-      });
-      if (i >= words.length) {
-        if (timer.current) clearInterval(timer.current);
-        setStreaming(false);
-        setMsgs((m) => {
-          const c = [...m];
-          c[c.length - 1] = { role: "assistant", content: full, citations, tools };
-          return c;
-        });
-      }
-    }, 16);
-  };
 
   const send = async () => {
-    if (!input.trim() || streaming) return;
+    if (!input.trim() || pending) return;
     const q = input.trim();
     setInput("");
-    setMsgs((m) => [...m, { role: "user", content: q }]);
-    setStreaming(true);
-    setMsgs((m) => [...m, { role: "assistant", content: "" }]);
+    // Add the question + an empty assistant placeholder (rendered as "Thinking…" until the answer lands).
+    setMsgs((m) => [...m, { role: "user", content: q }, { role: "assistant", content: "" }]);
+    setPending(true);
     try {
       // Real tier-aware RAG: the server filters retrieval to the caller's tier BEFORE answering, so the
       // citations returned can never be above tier (AgentRespectsTier). Dev mode passes the viewer header.
@@ -63,15 +39,20 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
       const data = (await res.json()) as {
         answer: string; citations: Cite[]; tools: { tool: string; backing: string }[];
       };
-      animate(data.answer ?? "", data.citations ?? [], data.tools ?? []);
+      // Render the full answer as Markdown at once (no raw-text typewriter phase).
+      setMsgs((m) => {
+        const c = [...m];
+        c[c.length - 1] = { role: "assistant", content: data.answer ?? "", citations: data.citations ?? [], tools: data.tools ?? [] };
+        return c;
+      });
     } catch {
-      if (timer.current) clearInterval(timer.current);
-      setStreaming(false);
       setMsgs((m) => {
         const c = [...m];
         c[c.length - 1] = { role: "assistant", content: "The agent is unavailable right now." };
         return c;
       });
+    } finally {
+      setPending(false);
     }
   };
 
@@ -98,10 +79,10 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
           <div key={i} className={cn(m.role === "user" ? "text-[var(--color-fg)]" : "text-[var(--color-fg)]")}>
             <div className="mb-1 text-[10px] uppercase tracking-wide text-[var(--color-muted)]">{m.role}</div>
             {m.role === "assistant" ? (
-              streaming && i === msgs.length - 1 ? (
-                <div className="codex-cursor whitespace-pre-wrap">{m.content}</div>
-              ) : (
+              m.content ? (
                 <div className="ask-md"><Markdown source={m.content} /></div>
+              ) : (
+                <div className="codex-cursor text-[var(--color-muted)]">Thinking…</div>
               )
             ) : (
               <div className="whitespace-pre-wrap">{m.content}</div>
@@ -142,8 +123,8 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
             placeholder="Ask…"
             className="flex-1 resize-none rounded-lg border bg-[var(--color-panel)] px-2 py-1.5 text-sm"
           />
-          <button onClick={send} disabled={streaming} className="rounded-lg bg-[var(--color-citrate)] px-3 py-2 text-sm font-medium text-[var(--color-citrate-fg)] disabled:opacity-40">
-            {streaming ? "…" : "Send"}
+          <button onClick={send} disabled={pending} className="rounded-lg bg-[var(--color-citrate)] px-3 py-2 text-sm font-medium text-[var(--color-citrate-fg)] disabled:opacity-40">
+            {pending ? "…" : "Send"}
           </button>
         </div>
       </div>
