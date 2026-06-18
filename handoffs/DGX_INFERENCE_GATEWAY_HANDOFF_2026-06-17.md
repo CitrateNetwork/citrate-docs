@@ -19,6 +19,12 @@ a local extractive answer because no gateway is reachable).
 If the explorer's Ask already works against `infer.citrate.ai`, this is almost a no-op: Atlas needs the same
 base URL, the same model id, and its own key.
 
+> **Confirmed state (probed 2026-06-17):** the gateway is live at `https://infer.citrate.ai/v1`
+> (142.93.58.145) and is key-gated, `GET /v1/models` and `POST /v1/chat/completions` both return
+> `401 {"error":{"message":"missing api key"}}` without a key. So there is **no infra to stand up**: the
+> only blocker is issuing Atlas an API key. Atlas is already pointed at this URL by default and currently
+> falls back to extractive answers purely because no key is set.
+
 ## TL;DR (what we need from you)
 
 1. **Base URL**: confirm the OpenAI-compatible endpoint is `https://infer.citrate.ai/v1` (so
