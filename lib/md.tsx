@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -8,8 +8,9 @@ import { Icon } from "@/components/icons";
 
 /**
  * Citrate Atlas markdown renderer. Real GFM (tables, code, nested lists, anchors) via react-markdown +
- * remark-gfm. Code blocks get a language label and a copy button. The leading H1 is stripped so the page
- * title (rendered by the reader chrome) never prints twice.
+ * remark-gfm. Fenced code gets a language label and a copy button; ```mermaid blocks render as diagrams.
+ * The leading H1 is stripped so the page title (rendered by the reader chrome) never prints twice. Used by
+ * both the docs reader and Ask Atlas.
  */
 
 function CopyButton({ text }: { text: string }) {
@@ -38,6 +39,44 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
   );
 }
 
+/** Render a ```mermaid block as a diagram. Mermaid is dynamically imported (kept out of the main bundle),
+ *  theme-matched to the active data-theme, and sandboxed (securityLevel: strict) since the source can come
+ *  from the model. On a parse error (e.g. an incomplete diagram) it falls back to the raw code block. */
+let mermaidSeq = 0;
+function Mermaid({ code }: { code: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        const dark = document.documentElement.dataset.theme !== "light";
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: dark ? "dark" : "neutral",
+          securityLevel: "strict",
+          fontFamily: "var(--font-sans)",
+        });
+        mermaidSeq += 1;
+        const id = `mmd-${mermaidSeq}`;
+        const { svg } = await mermaid.render(id, code);
+        if (!cancelled && ref.current) {
+          ref.current.innerHTML = svg;
+          setFailed(false);
+        }
+      } catch {
+        if (!cancelled) setFailed(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [code]);
+
+  if (failed) return <CodeBlock lang="mermaid" code={code} />;
+  return <div className="mermaid-diagram" ref={ref} aria-label="diagram" />;
+}
+
 /** Drop a single leading H1 (the reader chrome shows the title). */
 export function stripLeadingH1(md: string): string {
   return md.replace(/^﻿?\s*#[^\n#][^\n]*\n+/, "");
@@ -55,6 +94,7 @@ export function Markdown({ source }: { source: string }) {
             const m = /language-(\w+)/.exec(className || "");
             const text = String(children).replace(/\n$/, "");
             if (!m) return <code className="md-code">{children}</code>;
+            if (m[1] === "mermaid") return <Mermaid code={text} />;
             return <CodeBlock lang={m[1]} code={text} />;
           },
           a: ({ href, children }) => (
