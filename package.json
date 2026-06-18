@@ -18,6 +18,8 @@
     "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^2.0.48",
+    "ai": "^6.0.193",
     "jose": "^6.2.3",
     "next": "^16.0.0",
     "react": "^19.0.0",

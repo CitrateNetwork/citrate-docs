@@ -6,6 +6,7 @@ import { mockApi } from "@/prototype/fixtures";
 import { useViewer } from "./providers";
 import { tierLabel, TierChip } from "./tier-chip";
 import { Icon, CitrateMark } from "./icons";
+import { Markdown } from "@/lib/md";
 import { cn } from "@/lib/cn";
 
 type Cite = { slug: string; title: string; tier: "public" | "commercial" | "academic" | "confidential" };
@@ -96,7 +97,15 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         {msgs.map((m, i) => (
           <div key={i} className={cn(m.role === "user" ? "text-[var(--color-fg)]" : "text-[var(--color-fg)]")}>
             <div className="mb-1 text-[10px] uppercase tracking-wide text-[var(--color-muted)]">{m.role}</div>
-            <div className={cn(m.role === "assistant" && streaming && i === msgs.length - 1 && "codex-cursor")}>{m.content}</div>
+            {m.role === "assistant" ? (
+              streaming && i === msgs.length - 1 ? (
+                <div className="codex-cursor whitespace-pre-wrap">{m.content}</div>
+              ) : (
+                <div className="ask-md"><Markdown source={m.content} /></div>
+              )
+            ) : (
+              <div className="whitespace-pre-wrap">{m.content}</div>
+            )}
             {m.tools && (
               <button onClick={() => setShowTrace((s) => !s)} className="mt-2 text-[10px] text-[var(--color-muted)] underline">
                 {showTrace ? "hide" : "show"} tool trace ({m.tools.length})

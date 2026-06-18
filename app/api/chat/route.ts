@@ -3,6 +3,10 @@ import { resolveRequestSession } from "@/lib/auth/request-session";
 import { retrieve } from "@/lib/ai/corpus";
 import { answer } from "@/lib/ai/provider";
 
+// Gateway inference can be slow on a cold/CPU model (first token). Give it room (Vercel Fluid Compute).
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 /**
  * S4 — Ask Codex. Tier-aware RAG: resolve the caller → retrieve docs they may read (filter-before-
  * retrieval) → ground an answer in those excerpts → return answer + citations + tool trace. Citations are
