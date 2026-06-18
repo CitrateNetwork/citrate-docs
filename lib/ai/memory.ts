@@ -112,44 +112,46 @@ interface MemHit {
   title: string;
 }
 
-// Lines look like: `  4628f59d98 0.730 [commit] test(consensus): Property-based tests…`
-const HIT_RE = /^\s+([0-9a-f]{6,})\s+([\d.]+)\s+\[([^\]]+)\]\s+(.*)$/;
+// search lines:  `  4628f59d98 0.730 [commit] test(consensus): Property-based tests…`
+const SEARCH_RE = /^\s+([0-9a-f]{6,})\s+([\d.]+)\s+\[([^\]]+)\]\s+(.*)$/;
+// recall lines (no score): `  01b5a444f9 [doc] citrate-federation`
+const RECALL_RE = /^\s+([0-9a-f]{6,})\s+\[([^\]]+)\]\s+(.*)$/;
 
-function parseHits(repo: string, text: string): MemHit[] {
+async function callTool(
+  baseUrl: string, sub: string, token: string, name: string,
+  args: Record<string, unknown>, signal: AbortSignal
+): Promise<string> {
+  const res = await fetch(`${baseUrl.replace(/\/$/, "")}/mcp/u/${encodeURIComponent(sub)}`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } }),
+    signal,
+  });
+  if (!res.ok) return "";
+  const json = (await res.json()) as { result?: { content?: Array<{ text?: string }> } };
+  return json.result?.content?.map((c) => c.text ?? "").join("\n") ?? "";
+}
+
+/** Relevance hits for a repo (memory.search). */
+async function searchRepo(baseUrl: string, sub: string, token: string, repo: string, query: string, budget: number, signal: AbortSignal): Promise<MemHit[]> {
+  const text = await callTool(baseUrl, sub, token, "memory.search", { repo, query, budget }, signal);
   const out: MemHit[] = [];
   for (const line of text.split("\n")) {
-    const m = HIT_RE.exec(line);
-    if (!m) continue;
-    out.push({ repo, id: m[1], score: Number(m[2]), kind: m[3], title: m[4].trim() });
+    const m = SEARCH_RE.exec(line);
+    if (m) out.push({ repo, id: m[1], score: Number(m[2]), kind: m[3], title: m[4].trim() });
   }
   return out;
 }
 
-async function searchRepo(
-  baseUrl: string,
-  sub: string,
-  token: string,
-  repo: string,
-  query: string,
-  budget: number,
-  signal: AbortSignal
-): Promise<MemHit[]> {
-  const body = {
-    jsonrpc: "2.0",
-    id: 1,
-    method: "tools/call",
-    params: { name: "memory.search", arguments: { repo, query, budget } },
-  };
-  const res = await fetch(`${baseUrl.replace(/\/$/, "")}/mcp/u/${encodeURIComponent(sub)}`, {
-    method: "POST",
-    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-    body: JSON.stringify(body),
-    signal,
-  });
-  if (!res.ok) return [];
-  const json = (await res.json()) as { result?: { content?: Array<{ text?: string }> } };
-  const text = json.result?.content?.map((c) => c.text ?? "").join("\n") ?? "";
-  return parseHits(repo, text);
+/** Recent-history storyline for a repo (memory.recall), scored below search hits so relevance leads. */
+async function recallRepo(baseUrl: string, sub: string, token: string, repo: string, budget: number, signal: AbortSignal): Promise<MemHit[]> {
+  const text = await callTool(baseUrl, sub, token, "memory.recall", { repo, budget }, signal);
+  const out: MemHit[] = [];
+  for (const line of text.split("\n")) {
+    const m = RECALL_RE.exec(line);
+    if (m) out.push({ repo, id: m[1], score: 0.05, kind: m[2], title: m[3].trim() });
+  }
+  return out;
 }
 
 /**
@@ -168,8 +170,12 @@ export async function searchMemory(
   if (!baseUrl || !secret || !query.trim()) return [];
 
   const sub = process.env.MEM_SERVICE_SUB || "svc:atlas";
-  const perRepo = Math.max(1, Number(process.env.MEM_SEARCH_PER_REPO ?? 3));
-  const topK = Math.max(1, Number(process.env.MEM_SEARCH_TOPK ?? 5));
+  const perRepo = Math.max(1, Number(process.env.MEM_SEARCH_PER_REPO ?? 4));
+  const topK = Math.max(1, Number(process.env.MEM_SEARCH_TOPK ?? 12));
+  // Optional recent-history storyline: comma-list of repos to also pull via memory.recall (helps
+  // "history of the project" questions). Off by default to keep specific questions precise.
+  const recallRepos = (process.env.MEM_RECALL_REPOS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const recallBudget = Math.max(1, Number(process.env.MEM_RECALL_BUDGET ?? 4));
 
   // filter-before-retrieval: only query repos the caller is entitled to read.
   const readable = repos().filter((r) =>
@@ -182,17 +188,28 @@ export async function searchMemory(
   const timeout = setTimeout(() => controller.abort(), Number(process.env.MEM_SEARCH_TIMEOUT_MS ?? 12000));
   let hits: MemHit[] = [];
   try {
-    const perRepoHits = await Promise.all(
-      readable.map((r) =>
-        searchRepo(baseUrl, sub, token, r, query, perRepo, controller.signal).catch(() => [])
-      )
+    const searches = readable.map((r) =>
+      searchRepo(baseUrl, sub, token, r, query, perRepo, controller.signal).catch(() => [])
     );
-    hits = perRepoHits.flat();
+    // Recall only the configured repos that the caller may read.
+    const recalls = recallRepos
+      .filter((r) => readable.includes(r))
+      .map((r) => recallRepo(baseUrl, sub, token, r, recallBudget, controller.signal).catch(() => []));
+    const all = await Promise.all([...searches, ...recalls]);
+    hits = all.flat();
   } finally {
     clearTimeout(timeout);
   }
 
-  return hits
+  // Dedupe by repo+id (a node can surface from both search and recall); keep the higher score.
+  const byId = new Map<string, MemHit>();
+  for (const h of hits) {
+    const key = `${h.repo}:${h.id}`;
+    const prev = byId.get(key);
+    if (!prev || h.score > prev.score) byId.set(key, h);
+  }
+
+  return [...byId.values()]
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
     .map((h) => ({

@@ -137,4 +137,8 @@ body {
   .ask-md .md pre code { font-size: 11px; padding: var(--s-2); }
   .ask-md .md table { font-size: var(--t-2xs); }
   .ask-md .md :first-child { margin-top: 0; }
+
+  /* Mermaid diagrams (```mermaid blocks). Centered, fit-to-width, themed by mermaid itself. */
+  .md .mermaid-diagram { margin: var(--s-4) 0; overflow-x: auto; text-align: center; }
+  .md .mermaid-diagram svg { max-width: 100%; height: auto; }
 }
