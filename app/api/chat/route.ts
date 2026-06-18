@@ -1,6 +1,7 @@
 import { resolveTier } from "@/prototype/fixtures";
 import { resolveRequestSession } from "@/lib/auth/request-session";
 import { retrieve } from "@/lib/ai/corpus";
+import { searchMemory } from "@/lib/ai/memory";
 import { answer } from "@/lib/ai/provider";
 
 // Gateway inference can be slow on a cold/CPU model (first token). Give it room (Vercel Fluid Compute).
@@ -11,6 +12,11 @@ export const maxDuration = 300;
  * S4 — Ask Codex. Tier-aware RAG: resolve the caller → retrieve docs they may read (filter-before-
  * retrieval) → ground an answer in those excerpts → return answer + citations + tool trace. Citations are
  * guaranteed ≤ caller tier ∧ org because retrieval already filtered (PLANSET/03 `AgentRespectsTier`).
+ *
+ * Live-memory extension: alongside the frozen docs, ground answers in the live
+ * citrate-memories DAG via the mem-gateway MCP (`searchMemory`). It is tier-filtered
+ * the same way — only repos the caller may read are queried — so confidential graph
+ * content never reaches an unauthorized asker.
  */
 export async function POST(req: Request) {
   let query = "";
@@ -24,18 +30,26 @@ export async function POST(req: Request) {
   const tier = resolveTier(session);
   const now = Date.now();
 
-  const chunks = retrieve(session, query, 5, now);
-  const { text, backend } = await answer(query, chunks);
+  // Frozen docs + live federation memory, both filtered to what this caller may read.
+  const docChunks = retrieve(session, query, 5, now);
+  const memChunks = await searchMemory(session, query, now);
+  const grounded = [...docChunks, ...memChunks];
+  const { text, backend } = await answer(query, grounded);
 
   return Response.json(
     {
       answer: text,
       tier,
       backend,
-      citations: chunks.map((c) => ({ slug: c.slug, title: c.title, tier: c.tier })),
+      citations: grounded.map((c) => ({ slug: c.slug, title: c.title, tier: c.tier })),
       tools: [
         { tool: "searchDocs", args: { query, tier }, backing: "DOCS" },
-        ...(chunks[0] ? [{ tool: "getSurface", args: { id: chunks[0].slug }, backing: "DOCS" }] : []),
+        ...(docChunks[0]
+          ? [{ tool: "getSurface", args: { id: docChunks[0].slug }, backing: "DOCS" }]
+          : []),
+        ...(memChunks.length
+          ? [{ tool: "searchMemory", args: { query, hits: memChunks.length }, backing: "MEMORY" }]
+          : []),
       ],
     },
     { headers: { "cache-control": "no-store" } }
