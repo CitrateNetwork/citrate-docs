@@ -120,7 +120,7 @@ sprint: DOCS-CODEX-S1
 | id | surface | type | repo / code_path | tier | source_kind | codex_slug | status |
 |---|---|---|---|---|---|---|---|
 | ID-oidc | OIDC issuer + claim shapes (sub/wallet_address/email) | api | citrate-identity · src/server.ts | P | transcluded | /aa/identity | draft |
-| ID-kyc | KYC status model (CLEAR/Sumsub) | api | citrate-identity · src/kyc-pg.ts | X | gated | /aa/identity#kyc | draft |
+| ID-kyc | KYC status model (in-house server-blind, VERI) | api | citrate-identity · src/kyc-pg.ts | X | gated | /aa/identity#kyc | draft |
 | ID-guardians | Guardian nomination / recovery | api | citrate-identity · src/aa/guardians.ts | C | transcluded | /aa/guardians | draft |
 | ID-entitlement | The `entitlement` claim (Codex tiers) | spec | citrate-identity (S2, new) | A | authored | /aa/identity#entitlement | draft |
 | AA-passkeys | Passkeys / WebAuthn / Kernel UserOps | primitive | citrate-sdk-js src/aa/ + contracts/src/aa/ | P | authored | /aa/passkeys | draft |
@@ -213,7 +213,7 @@ sprint: DOCS-CODEX-S1
 2026-06-14 · SDK-JS-* · note · BUG to flag (not a registry field): exported `VERSION` constant in `src/index.ts` is `0.1.1`, stale vs `package.json` `0.2.0`. (citrate-sdk-js@bc5a830)
 2026-06-14 · ID-entitlement · status/notes · (row unchanged) · VERIFIED NOT YET IN CODE — no `entitlement` scope/claim in `citrate-identity/src/config.ts`@4aa869c (scopes: openid/profile/wallet/kyc/offline_access). Documented conceptually only on /aa/identity#entitlement, marked "planned". Row already says `code_path: citrate-identity (S2, new)` + `source_kind: authored`, which correctly reflects this. No edit; flagged for accuracy.
 2026-06-14 · ID-guardians · code_path · `src/aa/guardians.ts` → note: HTTP surface (`POST /auth/guardians`, `GET /aa/guardians`) lives in `src/aa/guardian-routes.ts`; `guardians.ts` is the pure nomination logic. (citrate-identity@4aa869c) (note only)
-2026-06-14 · ID-kyc · code_path · `src/kyc-pg.ts` is accurate for the claim-record store (NO PII: status+dates+opaque vendor_ref, ADR-2026-06-03); the gated vendor wiring (CLEAR/Sumsub) + webhook live in `src/kyc.ts` / `src/kyc-routes.ts`. Internals correctly kept gated. (citrate-identity@4aa869c) (note only)
+2026-06-14 · ID-kyc · code_path · `src/kyc-pg.ts` is accurate for the claim-record store (NO PII: status+dates+opaque vendor_ref, ADR-2026-06-03); the gated verification wiring (in-house VERI; replaced Sumsub, VERI-S5) + webhook live in `src/kyc.ts` / `src/kyc-routes.ts`. Internals correctly kept gated. (citrate-identity@4aa869c) (note only)
 2026-06-14 · AA-passkeys/AA-paymaster · note · published package name is `citrate-js` (NOT `@citrate/sdk`); AA helpers are re-exported via the root `citrate-js` index from `src/aa/`. AA docs use `citrate-js`. (citrate-sdk-js@bc5a830)
 2026-06-14 · API-BUNDLER · note · bundler README §"Public endpoints" shows `POST https://bundler.citrate.ai/` but the SDK `BundlerClient` (src/aa/bundler.ts) + `citrate_getUserAddress` doc both use `/rpc`. Caddyfile routes `/` to the gate→bundler. Likely README drift; AA docs use the SDK default `/rpc`. (citrate-bundler@a3287de / citrate-sdk-js@bc5a830)
 2026-06-14 · SDK-PY-cli · notes · BROKEN ENTRY POINT — `citrate_sdk/cli.py` does NOT exist @0b5c642; `pyproject.toml [project.scripts] citrate = "citrate_sdk.cli:main"` resolves to a missing module (ModuleNotFoundError on `citrate`). Documented honestly on /sdks/python#cli; recommend implementing or removing the entry point. (citrate-sdk-python@0b5c642)

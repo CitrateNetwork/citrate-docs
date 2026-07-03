@@ -247,7 +247,7 @@ WHAT THE PLATFORM DOES                    WHAT THE PLATFORM NEVER DOES
 ```
 1. User connects wallet to PatentMint
 2. User clicks "Verify Identity"
-3. Redirected to third-party KYC provider (Sumsub, Persona, Jumio, or Onfido)
+3. Redirected to an identity-verification provider (Citrate's in-house KYC, or a third-party such as Persona, Jumio, or Onfido)
    ├── Upload government-issued ID / passport
    ├── Liveness check (selfie video, anti-spoofing)
    ├── Address verification (utility bill / bank statement)
@@ -291,7 +291,7 @@ WHAT IS STORED ON-CHAIN              WHAT IS NEVER ON-CHAIN OR IPFS
 
 | Provider | Coverage | Liveness | Business KYC | API Quality | Notes |
 |----------|----------|----------|--------------|-------------|-------|
-| **Sumsub** | 220+ countries | Yes | Yes | Strong | Good pricing, recommended |
+| **Citrate (in-house)** | US-focused | Yes | Yes | Strong | Server-blind, recommended for Citrate apps |
 | **Persona** | Global | Yes | Yes | Strong | Flexible workflows |
 | **Jumio** | 200+ countries | Yes | Yes | Strong | Enterprise-grade, pricier |
 | **Onfido** | 195+ countries | Yes | Limited | Good | Strong AI fraud detection |
