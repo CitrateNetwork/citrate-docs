@@ -77,7 +77,7 @@ Grouped by domain (≈39 contracts; ABIs published as `@CitrateNetwork/contracts
 - Passkeys / WebAuthn-P256, EOA enrollment, Kernel v3 UserOps · `P`
 - Paymaster policy (daily/recovery/first-op caps), bundler topology · `C`
 - Guardians & social recovery (2–7 of N; Citrate never a guardian) · `P`/`C`
-- **citrate-identity** — OIDC issuer (`auth.citrate.ai`), claim shapes (`sub`, `wallet_address`, `email`), SIWE, device grant · overview `P`; KYC store/vendor wiring (CLEAR/Sumsub) `X`
+- **citrate-identity** — OIDC issuer (`auth.citrate.ai`), claim shapes (`sub`, `wallet_address`, `email`), SIWE, device grant · overview `P`; KYC store/engine wiring (in-house server-blind, VERI) `X`
 - The **`entitlement` claim** (this project) — tier/org/role/milestone · spec `A`, impl `X`
 - **Tutorials:** sign in with a passkey · sponsor a tx via paymaster · nominate guardians · `P`
 
