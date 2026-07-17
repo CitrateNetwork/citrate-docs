@@ -4,7 +4,8 @@ branch: main
 author: Saul Loveman + Claude Opus 4.7 (1M context)
 status: active
 repo: citrate-docs
-tier: T3
+tier: T1
+last_updated: 2026-07-16
 ---
 
 # Agent Entry — citrate-docs
@@ -17,7 +18,10 @@ tier: T3
 
 Public docs, gradient papers, developer-facing material.
 
-Repo tier: **T3** — see scope definitions in
+Repo tier: **T1 — full audit** (elevated from T3 on 2026-06-14, DOCS-CODEX-S0,
+because Atlas brokers Confidential material at runtime behind an auth/RBAC
+chokepoint). The authoritative tier record is [`AUDIT_TIER.md`](../AUDIT_TIER.md)
+in this repo; see also scope definitions in
 [`audits/2026-05/2026-05-19-federation-split-audit/01_SCOPE.md`](../../citrate-agentile-archive/audits/2026-05/2026-05-19-federation-split-audit/01_SCOPE.md)
 in the archive.
 
