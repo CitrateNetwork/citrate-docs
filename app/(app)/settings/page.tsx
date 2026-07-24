@@ -35,7 +35,8 @@ export default function SettingsPage() {
             <p className="text-sm text-[var(--color-muted)]">You are browsing as a guest (Public tier). Sign in to unlock more.</p>
           ) : (
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              <Field k="Resolved tier" v={<TierChip tier={tier} />} />
+              {/* TierChip renders nothing for Public (§5.1), so name the tier in words or the field reads blank. */}
+              <Field k="Resolved tier" v={tier === "public" ? tierLabel(tier) : <TierChip tier={tier} />} />
               <Field k="Organization / sector" v={ent?.orgId ?? "—"} />
               <Field k="Role" v={ent?.citrateRole ?? "—"} />
               <Field k="Milestone" v={ent?.milestone ?? "—"} />
