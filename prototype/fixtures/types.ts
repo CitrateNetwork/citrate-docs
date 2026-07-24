@@ -20,6 +20,27 @@ export const TIER_RANK: Record<Tier, number> = {
   confidential: 3,
 };
 
+/**
+ * The authority's tier vocabulary is WIDER than Atlas's (citrate-identity `EntitlementClaim["tier"]`
+ * adds `commercial.kyc`, the tier auto-granted to every KYC-verified principal — see
+ * citrate-identity/src/entitlements.ts KYC_BASELINE_TIER). An unmapped tier reaching the UI is not a
+ * cosmetic bug: `TIER_META[tier]` / `TIER_RANK[tier]` are `undefined`, which crashed the app shell and
+ * made `canRead` reject even Public docs. Normalize at every boundary where a tier arrives from off-app.
+ *
+ * `commercial.kyc` maps to `public`: passing KYC opens ecosystem *transactions*, it does not buy a docs
+ * seat. Commercial docs stay behind an explicit `commercial` grant ("per-seat/enterprise + KYC").
+ * Anything unrecognized also collapses to `public` — never escalate an unknown tier.
+ */
+const AUTHORITY_TIER_ALIASES: Record<string, Tier> = {
+  "commercial.kyc": "public",
+};
+
+export function normalizeTier(value: unknown): Tier {
+  if (typeof value !== "string") return "public";
+  if (value in TIER_RANK) return value as Tier;
+  return AUTHORITY_TIER_ALIASES[value] ?? "public";
+}
+
 /** Resolved entitlement claim (minted by citrate-identity, cached by Codex). */
 export interface Entitlement {
   tier: Tier;
