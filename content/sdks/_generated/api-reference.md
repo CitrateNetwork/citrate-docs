@@ -15,9 +15,9 @@ stays in sync with the code. It is the exported public surface; the narrative re
 examples lives in [identity](/sdks/identity), [entitlements](/sdks/entitlements), and the
 [JavaScript](/sdks/js) and [Python](/sdks/python) pages.
 
-Sources: `citrate-sdk-js@326d856`, `citrate-sdk-python@b7c43d6`.
+Sources: `citrate-sdk-js@8ca3a83`, `citrate-sdk-python@6697447`.
 
-## JavaScript, @citratenetwork/sdk
+## JavaScript, @citratelabs/sdk
 
 ### identity
 

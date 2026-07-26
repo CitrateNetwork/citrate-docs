@@ -19,7 +19,7 @@ builders working buyer-side.
 
 ## What it is
 
-`@citratenetwork/marketplace-sdk` (version `0.1.0`) wraps the on-chain compute marketplace into a typed API
+`@citratelabs/marketplace-sdk` (version `0.1.0`) wraps the on-chain compute marketplace into a typed API
 so a buyer-side app can list providers, estimate cost, pay for inference, and post jobs without hand-rolling
 calldata. It is built on [viem](https://viem.sh) (`^2.21.0`, a direct dependency) and presents four surfaces:
 
@@ -51,7 +51,7 @@ pinned hashes only), event subscription on a posted job, and key export from the
    (`https://npm.pkg.github.com`) and needs Node 20 or newer.
 
    ```bash
-   npm install @citratenetwork/marketplace-sdk viem
+   npm install @citratelabs/marketplace-sdk viem
    ```
 
 2. Build a read-only client. Contract addresses for testnet (`40204`) are vendored, so `defaultAddresses()`
@@ -59,7 +59,7 @@ pinned hashes only), event subscription on a posted job, and key export from the
 
    ```ts
    import { createPublicClient, http } from "viem";
-   import { MarketplaceClient, defaultAddresses } from "@citratenetwork/marketplace-sdk";
+   import { MarketplaceClient, defaultAddresses } from "@citratelabs/marketplace-sdk";
 
    const publicClient = createPublicClient({ transport: http("<citrate-rpc-url>") });
    const market = new MarketplaceClient({ publicClient, addresses: defaultAddresses() });
@@ -69,7 +69,7 @@ pinned hashes only), event subscription on a posted job, and key export from the
    `maxPayWei` is required and the client signs at most once per request.
 
    ```ts
-   import { X402Client, unlockWallet } from "@citratenetwork/marketplace-sdk";
+   import { X402Client, unlockWallet } from "@citratelabs/marketplace-sdk";
 
    const account = await unlockWallet(userPassphrase); // key stays in the browser
    const x402 = new X402Client({
