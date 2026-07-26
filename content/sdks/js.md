@@ -12,14 +12,14 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-`@citratenetwork/sdk` is the canonical TypeScript SDK for building on Citrate Network. It wraps the chain's JSON-RPC,
+`@citratelabs/sdk` is the canonical TypeScript SDK for building on Citrate Network. It wraps the chain's JSON-RPC,
 the model and inference operations, and the account-abstraction stack into a typed API, so a Node or browser
 app can talk to Citrate without hand-rolling calldata. This page is for the developer writing that app.
 
 ## What it is
 
 The SDK is the typed front door to Citrate Network from JavaScript and TypeScript. The package is named
-`@citratenetwork/sdk` (formerly `citrate-js`, retained as a deprecated alias) and the version of record is
+`@citratelabs/sdk` (formerly `citrate-js`, retained as a deprecated alias) and the version of record is
 `0.2.0` in `package.json`. It is the canonical SDK; the other language SDKs follow it and stay non-canonical
 until a pilot integrator needs parity.
 
@@ -57,7 +57,7 @@ API.
 1. Install the package.
 
    ```bash
-   npm install @citratenetwork/sdk
+   npm install @citratelabs/sdk
    ```
 
    The runtime dependencies are `ethers ^6.8`, `axios ^1.7`, and `eventemitter3 ^5`. The React hooks need
@@ -67,7 +67,7 @@ API.
 2. Construct a client. The defaults for testnet, chain id `40204`, live in `src/utils/constants.ts`.
 
    ```typescript
-   import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from '@citratenetwork/sdk';
+   import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from '@citratelabs/sdk';
 
    const client = new CitrateClient({
      // DEFAULT_RPC_URLS[40204] is ['https://rpc.citrate.ai']. An array
@@ -120,7 +120,7 @@ The constructor takes a `CitrateClientConfig`: `rpcUrl` as a string or string ar
 
 ### Account abstraction, `src/aa/`
 
-Imported as a namespace, `import { aa } from '@citratenetwork/sdk'`; the module index is `src/aa/index.ts`. The flow
+Imported as a namespace, `import { aa } from '@citratelabs/sdk'`; the module index is `src/aa/index.ts`. The flow
 it documents is: derive a userId, predict the address, enroll a validator, then build, sign, and send a
 UserOperation. The market side of this is covered in [the marketplace SDK](/sdks/marketplace).
 
@@ -170,7 +170,7 @@ The hooks are not re-exported from the package root, because React is an optiona
 from the build path; each hook throws if React is not installed.
 
 ```typescript
-import { useCitrateClient } from '@citratenetwork/sdk/react/hooks';
+import { useCitrateClient } from '@citratelabs/sdk/react/hooks';
 ```
 
 The hooks are `useCitrateClient`, `useModelDeployment`, `useInference`, `useModelInfo`, and `useModelList`.
@@ -220,7 +220,7 @@ SDK itself holds no such data.
 
 ## Source and verification
 
-- Source repo: `citrate-sdk-js`, package `@citratenetwork/sdk@0.2.0` (`package.json`; `citrate-js` retained as a deprecated alias).
+- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`package.json`; `citrate-js` retained as a deprecated alias).
 - Audited against SHA: `bc5a830` (client/aa/crypto); DevX identity/entitlements/gateway surfaces added 2026-07-25.
 - Audited paths: `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
   `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler,types}.ts`,
