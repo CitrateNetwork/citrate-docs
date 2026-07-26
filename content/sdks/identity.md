@@ -15,7 +15,7 @@ author: Citrate team
 The identity module is the turnkey authorization spine for Citrate Network. It lets an app sign a user in
 against `auth.citrate.ai`, verify the resulting token safely, give that user a Citrate Keyring account they own
 without ever handling a private key, and read their entitlement, all from one typed surface. It ships in both
-the TypeScript SDK (`@citratenetwork/sdk`, the `identity` namespace) and the Python SDK (`citrate_sdk.identity`),
+the TypeScript SDK (`@citratelabs/sdk`, the `identity` namespace) and the Python SDK (`citrate_sdk.identity`),
 with the same behavior and the same account address on both.
 
 ## What it is
@@ -38,7 +38,7 @@ contract, so nothing is hand-typed and nothing goes stale against a chain reroll
 ### Sign in with OIDC (PKCE)
 
 ```typescript
-import { identity } from '@citratenetwork/sdk';
+import { identity } from '@citratelabs/sdk';
 
 const client = new identity.IdentityClient({
   clientId: 'your-app',
@@ -70,7 +70,7 @@ An app never derives the address from the authority's `/aa/address` endpoint. It
 and verifies it against the factory, which is the deployer and therefore the only ground truth.
 
 ```typescript
-import { identity } from '@citratenetwork/sdk';
+import { identity } from '@citratelabs/sdk';
 
 const userId = identity.uuidToUserId(tokens.claims.sub);   // keccak256(utf8(lowercase uuid))
 const address = identity.predictWalletAddress(userId);      // local, offline
@@ -97,7 +97,7 @@ info.walletAddress;              // the Keyring account, if the claim carried on
 
 ## Reference
 
-Each name below is exported from `@citratenetwork/sdk` (`identity` namespace) and mirrored in
+Each name below is exported from `@citratelabs/sdk` (`identity` namespace) and mirrored in
 `citrate_sdk.identity`.
 
 ### Sign-in

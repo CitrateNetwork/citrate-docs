@@ -15,7 +15,7 @@ author: Citrate team
 Citrate Identity mints a signed entitlement claim, `https://citrate.ai/entitlement`, that carries one of five
 tiers: `public`, `commercial`, `commercial.kyc`, `academic`, `confidential`. The SDK ships one canonical way to
 read that claim so relying parties stop disagreeing about what a tier means. It is available in the TypeScript
-SDK (`@citratenetwork/sdk`, the `entitlements` namespace) and the Python SDK (`citrate_sdk.entitlements`).
+SDK (`@citratelabs/sdk`, the `entitlements` namespace) and the Python SDK (`citrate_sdk.entitlements`).
 
 ## What it is
 
@@ -32,7 +32,7 @@ content seat. `commercial.kyc` is not above `commercial`; it carries the same co
 ## How to use it
 
 ```typescript
-import { entitlements } from '@citratenetwork/sdk';
+import { entitlements } from '@citratelabs/sdk';
 
 entitlements.normalizeTier('made-up');                        // "public", unknown never escalates
 entitlements.capabilities('commercial.kyc').ecosystemTx;      // true

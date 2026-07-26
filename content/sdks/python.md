@@ -27,7 +27,7 @@ client's RPC callable and the relevant contract addresses.
 
 Two facts about maturity belong up front, because the package states them about itself. The SDK is
 non-canonical: its own `pyproject.toml` description and its `NON_CANONICAL.md` say the canonical SDK is the
-JavaScript `@citratenetwork/sdk`, that features land there first, and that Python may lag by an unbounded amount. And
+JavaScript `@citratelabs/sdk`, that features land there first, and that Python may lag by an unbounded amount. And
 it is early: the `pyproject.toml` classifier is `Development Status :: 2 - Pre-Alpha`. Treat every surface
 here as pre-audit and subject to change. New work should start on the [JavaScript SDK](/sdks/js); reach for
 Python when a Python codebase is the reason you are here.
