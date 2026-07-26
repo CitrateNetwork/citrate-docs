@@ -33,14 +33,14 @@ You will need Node 20 or newer, a Citrate testnet RPC URL, and a small SALT bala
 install the SDK and viem:
 
 ```bash
-npm install @citratenetwork/marketplace-sdk viem
+npm install @citratelabs/marketplace-sdk viem
 ```
 
 ### Step 1, set up clients
 
 ```ts
 import { createPublicClient, http } from "viem";
-import { MarketplaceClient, defaultAddresses, CITRATE_TESTNET_CHAIN_ID } from "@citratenetwork/marketplace-sdk";
+import { MarketplaceClient, defaultAddresses, CITRATE_TESTNET_CHAIN_ID } from "@citratelabs/marketplace-sdk";
 
 const RPC_URL = process.env.CITRATE_RPC_URL!;          // never hardcode
 const publicClient = createPublicClient({ transport: http(RPC_URL) });
@@ -62,7 +62,7 @@ console.log(`${providers.length} active providers`, providers.map(p => p.endpoin
 ### Step 3, estimate cost
 
 ```ts
-import { VerificationTier, grainsToSaltDisplay } from "@citratenetwork/marketplace-sdk";
+import { VerificationTier, grainsToSaltDisplay } from "@citratelabs/marketplace-sdk";
 
 const cost = await market.estimateCost({
   modelHash,
@@ -79,7 +79,7 @@ Use a passphrase-encrypted keystore that stays in the local key store. The passp
 environment, never from source. This is the Citrate Keyring integration; the code symbol is `CitrateWallet`.
 
 ```ts
-import { CitrateWallet } from "@citratenetwork/marketplace-sdk";
+import { CitrateWallet } from "@citratelabs/marketplace-sdk";
 import { defineChain } from "viem";
 
 const citrate = defineChain({
@@ -97,7 +97,7 @@ const account = (await CitrateWallet.unlockWallet(process.env.WALLET_PASSPHRASE!
 ### Step 5, build job calldata and submit
 
 ```ts
-import { postJobCalldata, PaymentMethod } from "@citratenetwork/marketplace-sdk";
+import { postJobCalldata, PaymentMethod } from "@citratelabs/marketplace-sdk";
 
 const { data, inputHash } = postJobCalldata({
   modelHash,
@@ -121,7 +121,7 @@ console.log("posted job:", txHash, "inputHash:", inputHash);
 
 ```ts
 const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
-const { parseJobEvents } = await import("@citratenetwork/marketplace-sdk");
+const { parseJobEvents } = await import("@citratelabs/marketplace-sdk");
 console.log(parseJobEvents(receipt.logs));
 ```
 
@@ -133,7 +133,7 @@ id and the relevant addresses.
 Instead of posting an on-chain job, you can call a paid gateway route and settle a single request over x402:
 
 ```ts
-import { X402Client } from "@citratenetwork/marketplace-sdk";
+import { X402Client } from "@citratelabs/marketplace-sdk";
 
 const x402 = new X402Client({
   signer: account,

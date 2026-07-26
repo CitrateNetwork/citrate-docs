@@ -99,7 +99,7 @@ examples lives in [identity](/sdks/identity), [entitlements](/sdks/entitlements)
 
 Sources: \`citrate-sdk-js@${jsSha}\`, \`citrate-sdk-python@${pySha}\`.
 
-## JavaScript, @citratenetwork/sdk
+## JavaScript, @citratelabs/sdk
 `;
 
 body += section("identity", [

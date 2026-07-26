@@ -146,7 +146,7 @@ network is identity-checked through CLEAR; that envelope is described in
   `app/api/chat/route.ts`, `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/marketplace.ts`,
   `lib/buyCredits.ts`, `lib/gatewayAllowlist.ts`, `lib/chatGuard.ts`, `DESIGN_HANDOFF.md`.
 - Status: **Implemented (pre-audit).** The x402 job submission, credits, server-side
-  `MarketplaceClient` reads via `@citratenetwork/marketplace-sdk`, and the gateway-backed copilot are
+  `MarketplaceClient` reads via `@citratelabs/marketplace-sdk`, and the gateway-backed copilot are
   wired and run against chain 40204. The browse catalog renders live SDK reads when a default model
   hash is configured and otherwise falls back to sample provider data, which the UI labels as
   `source: 'sample'` so the screen stays honest. Treat catalog figures as illustrative until live
