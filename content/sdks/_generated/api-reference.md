@@ -3,7 +3,7 @@ title: SDK API reference (generated)
 codex_slug: /sdks/api-reference
 tier: public
 org_scope: ~
-source_kind: generated
+source_kind: transcluded
 source: scripts/gen-api-refs.mjs
 status: Implemented
 created: 2026-07-26T00:00:00Z
