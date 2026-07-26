@@ -1,5 +1,5 @@
 import React from "react";
-import { Tier } from "@/prototype/fixtures";
+import { Tier, normalizeTier } from "@/prototype/fixtures";
 import { Icon } from "./icons";
 import { cn } from "@/lib/cn";
 
@@ -16,8 +16,12 @@ const TIER_META: Record<Tier, { label: string; cls: string; icon: string }> = {
 };
 
 export function TierChip({ tier, className }: { tier: Tier; className?: string }) {
-  const m = TIER_META[tier];
-  if (tier === "public") return null; // Public needs no chip (DESIGN_BRIEF §5.1)
+  // `tier` reaches here from the session/nav JSON, so it is Tier only by convention. Normalize before
+  // the TIER_META lookup — an unmapped value used to yield `undefined` and throw on `m.cls`, taking the
+  // whole app shell (TopBar → AppLayout) down with it. A chip must never be able to do that.
+  const t = normalizeTier(tier);
+  const m = TIER_META[t];
+  if (t === "public") return null; // Public needs no chip (DESIGN_BRIEF §5.1)
   return (
     <span
       className={cn(
@@ -34,5 +38,5 @@ export function TierChip({ tier, className }: { tier: Tier; className?: string }
 }
 
 export function tierLabel(tier: Tier): string {
-  return TIER_META[tier].label;
+  return TIER_META[normalizeTier(tier)].label;
 }

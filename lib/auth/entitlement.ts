@@ -12,7 +12,7 @@
  * PLANSET/07_IMPLEMENTATION_AND_HARDENING_PLAN.md §2. The shape and the chokepoint are identical
  * either way; only this lookup is swapped.
  */
-import { Entitlement, PRINCIPALS } from "@/prototype/fixtures";
+import { Entitlement, PRINCIPALS, normalizeTier } from "@/prototype/fixtures";
 
 type Claims = Record<string, unknown>;
 
@@ -27,7 +27,17 @@ export function resolveEntitlement(
   const minted = claims[ENTITLEMENT_CLAIM];
   if (minted && typeof minted === "object") {
     const m = minted as Partial<Entitlement>;
-    if (m.tier) return { tier: m.tier, orgId: m.orgId ?? null, citrateRole: m.citrateRole, milestone: m.milestone, expiresAt: m.expiresAt ?? null };
+    // The issuer's tier vocabulary is wider than Atlas's — normalize it here, at the trust boundary,
+    // so no unmapped tier string can reach TIER_RANK/TIER_META downstream.
+    if (m.tier) {
+      return {
+        tier: normalizeTier(m.tier),
+        orgId: m.orgId ?? null,
+        citrateRole: m.citrateRole,
+        milestone: m.milestone,
+        expiresAt: m.expiresAt ?? null,
+      };
+    }
   }
 
   // 2. Look up the entitlements source by sub / wallet / email (prototype: fixtures PRINCIPALS).

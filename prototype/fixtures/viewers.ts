@@ -6,7 +6,7 @@
  * PLANSET/02_ARCHITECTURE.md §4 — keep this logic identical to the server when you wire in.
  */
 
-import { AuthSession, Entitlement, NavNode, NodeVisibility, Tier, TIER_RANK, Viewer } from "./types";
+import { AuthSession, Entitlement, NavNode, NodeVisibility, Tier, TIER_RANK, Viewer, normalizeTier } from "./types";
 
 const NOW = 1_780_000_000_000; // fixed epoch-ms so fixtures are deterministic (no Date.now()).
 export const FIXED_NOW = NOW;
@@ -124,7 +124,10 @@ export function resolveTier(s: AuthSession, now = NOW): Tier {
   const e: Entitlement | undefined = s.entitlement;
   if (!e) return "public";
   if (e.expiresAt != null && now >= e.expiresAt) return "public";
-  return e.tier;
+  // The session is JSON off the wire, so `e.tier` is only Tier by convention. Normalize: an unmapped
+  // string would make TIER_RANK[tier] undefined, and `undefined >= 0` is false — which silently denies
+  // Public docs to a signed-in reader instead of granting them.
+  return normalizeTier(e.tier);
 }
 
 /** Org scope check: a node tagged to an org is only readable by that org (or an admin). */

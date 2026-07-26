@@ -27,7 +27,7 @@ client's RPC callable and the relevant contract addresses.
 
 Two facts about maturity belong up front, because the package states them about itself. The SDK is
 non-canonical: its own `pyproject.toml` description and its `NON_CANONICAL.md` say the canonical SDK is the
-JavaScript `citrate-js`, that features land there first, and that Python may lag by an unbounded amount. And
+JavaScript `@citratenetwork/sdk`, that features land there first, and that Python may lag by an unbounded amount. And
 it is early: the `pyproject.toml` classifier is `Development Status :: 2 - Pre-Alpha`. Treat every surface
 here as pre-audit and subject to change. New work should start on the [JavaScript SDK](/sdks/js); reach for
 Python when a Python codebase is the reason you are here.
@@ -134,12 +134,28 @@ model types (`ModelConfig`, `ModelDeployment`, `InferenceResult`, `ModelType`, `
 
 ### The citrate console script
 
-`pyproject.toml` declares a console script under `[project.scripts]`, `citrate = "citrate_sdk.cli:main"`.
-That entry point does not resolve. At the audited SHA there is no `citrate_sdk/cli.py` and no `main()`
-anywhere in the package, and no `argparse` or `click` dependency. Installing the package and running
-`citrate` raises `ModuleNotFoundError: No module named 'citrate_sdk.cli'`. The CLI is declared but not
-implemented; until a CLI module lands, use the `CitrateClient` API directly. Status for this surface:
-Specified, not Implemented.
+`pyproject.toml` declares a console script under `[project.scripts]`, `citrate = "citrate_sdk.cli:main"`,
+and it now resolves. `citrate_sdk/cli.py` implements `main()` over the standard-library `argparse`, with four
+command groups, each reading the generated federation contract so addresses and endpoints are never hand-typed:
+
+- `citrate contract [--section all|chain|aa|identity|gateway|entitlements]`, print the canonical table.
+- `citrate wallet predict (--user-id 0x… | --uuid <uuid>) [--verify]`, the embedded smart-account address;
+  `--verify` checks it against the on-chain factory.
+- `citrate entitlement capabilities|normalize --tier <tier>`, the canonical capability set for a tier.
+- `citrate gateway models|health|chat --model M --message TEXT [--api-key KEY]`, the inference gateway.
+
+For example, `citrate wallet predict --user-id 0x4242…4242` prints the same address the on-chain factory
+deploys. Status for this surface: Implemented.
+
+## Identity, entitlements, and gateway
+
+Beyond the on-chain client, the Python SDK ships the same identity spine, embedded Keyring account, entitlement
+capabilities, and inference-gateway client as the JavaScript SDK, at full parity. `citrate_sdk.identity`
+covers OIDC PKCE and SIWE sign-in, hardened ID-token verification, and smart-account address prediction that
+matches the on-chain factory byte-for-byte; `citrate_sdk.entitlements` is the canonical `normalize_tier` and
+capability map; `citrate_sdk.gateway` is an OpenAI-compatible client for `infer.citrate.ai`. These use only
+existing dependencies (`cryptography`, `eth_utils`, `requests`). See [identity and the embedded Keyring account](/sdks/identity)
+and [entitlements](/sdks/entitlements) for the shared reference; the examples there include Python.
 
 ## Design rationale
 

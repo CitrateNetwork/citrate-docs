@@ -12,23 +12,31 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-`citrate-js` is the canonical TypeScript SDK for building on Citrate Network. It wraps the chain's JSON-RPC,
+`@citratenetwork/sdk` is the canonical TypeScript SDK for building on Citrate Network. It wraps the chain's JSON-RPC,
 the model and inference operations, and the account-abstraction stack into a typed API, so a Node or browser
 app can talk to Citrate without hand-rolling calldata. This page is for the developer writing that app.
 
 ## What it is
 
 The SDK is the typed front door to Citrate Network from JavaScript and TypeScript. The package is named
-`citrate-js` and the version of record is `0.2.0` in `package.json`. It is the canonical SDK; the other
-language SDKs follow it and stay non-canonical until a pilot integrator needs parity.
+`@citratenetwork/sdk` (formerly `citrate-js`, retained as a deprecated alias) and the version of record is
+`0.2.0` in `package.json`. It is the canonical SDK; the other language SDKs follow it and stay non-canonical
+until a pilot integrator needs parity.
 
-Four surfaces sit behind one import, and most apps only ever touch the first:
+Several surfaces sit behind one import, and most apps only ever touch the first:
 
 - The client, `CitrateClient` and `WebSocketClient`, for reading chain state, deploying models, and running
   inference against the chain (`src/client/`).
 - The account-abstraction helpers, exported under the `aa` namespace, for Citrate Keyring accounts built on
   Kernel v3 and ERC-4337 v0.7: counterfactual address derivation, passkey and EOA signing, UserOperation
   building, guardian recovery, and a bundler client (`src/aa/`).
+- The **identity spine and embedded Keyring account**, exported under the `identity` namespace: OIDC PKCE and
+  SIWE sign-in, hardened ID-token verification, and smart-account address prediction verified against the
+  on-chain factory. See [identity and the embedded Keyring account](/sdks/identity).
+- The **entitlement capabilities**, exported under the `entitlements` namespace: the canonical `normalizeTier`
+  and capability map. See [entitlements](/sdks/entitlements).
+- The **inference gateway client**, exported under the `gateway` namespace: an OpenAI-compatible client for
+  `infer.citrate.ai`.
 - The cryptography utilities, `CryptoManager`, `KeyManager`, and Shamir secret sharing (`src/crypto/`).
 - The optional React hooks (`src/react/hooks.ts`), which are not re-exported from the package root.
 
@@ -38,9 +46,8 @@ can sponsor, instead of a raw key-pair account. Passkeys are covered under [pass
 sponsorship under [the paymaster](/aa/paymaster).
 
 The `aa` module is labeled EW-S1 WP-7 in source and points at infrastructure that is live but still moving
-(`bundler.citrate.ai`, `auth.citrate.ai`). Treat it as in development. One stale detail to know up front: the
-exported `VERSION` constant reads `0.1.1` (`src/index.ts`), which trails `package.json`. Use `package.json`
-as the version of record.
+(`bundler.citrate.ai`, `auth.citrate.ai`). Treat it as in development. The exported `VERSION` constant now
+reads `0.2.0` (`src/index.ts`), matching `package.json`.
 
 ## How to use it
 
@@ -50,7 +57,7 @@ API.
 1. Install the package.
 
    ```bash
-   npm install citrate-js
+   npm install @citratenetwork/sdk
    ```
 
    The runtime dependencies are `ethers ^6.8`, `axios ^1.7`, and `eventemitter3 ^5`. The React hooks need
@@ -60,7 +67,7 @@ API.
 2. Construct a client. The defaults for testnet, chain id `40204`, live in `src/utils/constants.ts`.
 
    ```typescript
-   import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from 'citrate-js';
+   import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from '@citratenetwork/sdk';
 
    const client = new CitrateClient({
      // DEFAULT_RPC_URLS[40204] is ['https://rpc.citrate.ai']. An array
@@ -113,7 +120,7 @@ The constructor takes a `CitrateClientConfig`: `rpcUrl` as a string or string ar
 
 ### Account abstraction, `src/aa/`
 
-Imported as a namespace, `import { aa } from 'citrate-js'`; the module index is `src/aa/index.ts`. The flow
+Imported as a namespace, `import { aa } from '@citratenetwork/sdk'`; the module index is `src/aa/index.ts`. The flow
 it documents is: derive a userId, predict the address, enroll a validator, then build, sign, and send a
 UserOperation. The market side of this is covered in [the marketplace SDK](/sdks/marketplace).
 
@@ -163,7 +170,7 @@ The hooks are not re-exported from the package root, because React is an optiona
 from the build path; each hook throws if React is not installed.
 
 ```typescript
-import { useCitrateClient } from 'citrate-js/dist/react/hooks';
+import { useCitrateClient } from '@citratenetwork/sdk/react/hooks';
 ```
 
 The hooks are `useCitrateClient`, `useModelDeployment`, `useInference`, `useModelInfo`, and `useModelList`.
@@ -213,12 +220,13 @@ SDK itself holds no such data.
 
 ## Source and verification
 
-- Source repo: `citrate-sdk-js`, package `citrate-js@0.2.0` (`package.json`).
-- Audited against SHA: `bc5a830`.
+- Source repo: `citrate-sdk-js`, package `@citratenetwork/sdk@0.2.0` (`package.json`; `citrate-js` retained as a deprecated alias).
+- Audited against SHA: `bc5a830` (client/aa/crypto); DevX identity/entitlements/gateway surfaces added 2026-07-25.
 - Audited paths: `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
   `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler,types}.ts`,
   `src/crypto/{CryptoManager,KeyManager,FiniteField}.ts`, `src/react/hooks.ts`, `src/utils/constants.ts`, and
   `src/errors/CitrateError.ts`.
 - Status: Implemented (pre-audit). The client and cryptography surfaces are built and run against testnet 40204.
-  The `aa` module is Implemented but in development (EW-S1 WP-7), depends on still-moving bundler and auth
-  infrastructure, and the exported `VERSION` constant is stale relative to `package.json`.
+  The `aa` module is Implemented but in development (EW-S1 WP-7) and depends on still-moving bundler and auth
+  infrastructure. The `identity`, `entitlements`, and `gateway` namespaces (DevX, 2026-07-25) are Implemented
+  and unit-tested; account-address prediction is verified byte-for-byte against the on-chain factory.
