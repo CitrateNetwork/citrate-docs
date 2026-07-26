@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "verify:bundle": "node scripts/check-no-confidential.mjs",
     "content-lint": "node scripts/content-lint.mjs",
-    "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json"
+    "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json",
+    "docs:api": "node scripts/gen-api-refs.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",
