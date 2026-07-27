@@ -19,7 +19,7 @@ this page when Python is where your work already is, and expect it to lag.
 
 ## What it is
 
-`citrate-ai-sdk` is a thin Python layer over a Citrate node's JSON-RPC. You create one `CitrateClient`,
+`citrate-labs-sdk` is a thin Python layer over a Citrate node's JSON-RPC. You create one `CitrateClient`,
 bound to an RPC endpoint and, for writes, a private key. The client speaks JSON-RPC to the node and exposes
 the model, inference, and account methods directly. The economic and education surfaces, learning, staking,
 classroom, compute, treasury, and farming, are separate manager classes you construct yourself, passing the
@@ -34,10 +34,10 @@ Python when a Python codebase is the reason you are here.
 
 ## How to use it
 
-1. Install the package. The distribution is `citrate-ai-sdk`; the import name is `citrate_sdk`.
+1. Install the package. The distribution is `citrate-labs-sdk`; the import name is `citrate_sdk`.
 
    ```bash
-   pip install citrate-ai-sdk
+   pip install citrate-labs-sdk
    ```
 
 2. Point the client at a node. Without a private key the client is read-only, which is all you need for
@@ -83,7 +83,7 @@ The full install-to-inference walkthrough is in [Python quickstart](/sdks/python
 
 ## Reference
 
-The surface below is verified against `citrate-sdk-python` at `0b5c642`. Distribution name `citrate-ai-sdk`,
+The surface below is verified against `citrate-sdk-python` at `0b5c642`. Distribution name `citrate-labs-sdk`,
 version `0.5.0`, `requires-python >= 3.10`. Runtime dependencies, from `pyproject.toml`: `requests~=2.33`,
 `cryptography~=46.0`, `eth-account~=0.9`, `web3~=7.15`, `numpy~=2.0`, `typing-extensions~=4.0`. Optional
 extras: `dev`, `docs`. Configuration reads `CITRATE_RPC_URL`, `CITRATE_CHAIN_ID`, and `CITRATE_PRIVATE_KEY`
