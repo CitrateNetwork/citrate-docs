@@ -80,7 +80,7 @@ AI-first, supercharge, intelligent (as a product claim).
 - The chain is a BlockDAG written in Rust, GhostDAG consensus: k = 18, finality depth 100, a 100-validator
   BFT committee at a 67% threshold, a checkpoint every 50 blocks. Chain id 40204 is testnet.
 - Mainnet is targeted for Q1 2027; school pilots run the prior summer.
-- Every node operator and machine on the public network is KYC'd through CLEAR. Citrate holds no sensitive
+- Every node operator and machine on the public network is identity-verified through Citrate's in-house verification (VERI). Citrate holds no sensitive
   personal data from that check.
 - SALT settles work performed. It is not the product and not a speculative instrument. Avoid naming it
   unless a page genuinely requires it.
@@ -111,7 +111,7 @@ that repeats the title. Body sections, in order (omit a section only when it gen
 4. **Reference.** The audited surface (methods, commands, fields, screens), each item citing its code path.
 5. **Design rationale.** Why it is built this way; the trade-off taken. Keep it short and specific.
 6. **Failure modes.** Where the surface is security relevant: what can go wrong, how the system fails closed.
-7. **Access & canon.** The tier, and the on-prem / KYC-via-CLEAR / compliance notes that belong here.
+7. **Access & canon.** The tier, and the on-prem / in-house VERI identity / compliance notes that belong here.
 8. **Source & verification.** Source repo + path, the SHA audited against, and the status label(s).
 
 Tutorials keep a numbered-step structure and link the relevant sandbox.
