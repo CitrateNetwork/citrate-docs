@@ -180,7 +180,7 @@ Tier academic: this surface is oriented to research and formal methods, the TLA+
 audit chain and the break-glass machine, capsule capability verification, and the diagnostic
 itself. The runtime is classified for a full external audit before any v1.0.0 tag
 (`AUDIT_TIER.md`); there is no stable release without a written attestation against an exact
-commit. Every operator account on the public network is identity-checked through CLEAR. No
+commit. Every operator account on the public network is identity-verified through VERI, Citrate's in-house verification. No
 secrets appear here: `DEPLOYER_PRIVATE_KEY` and `CITRATE_CAPSULE_SIGNING_SEED` are named only as
 variables to set, and the `.env.testnet` and capsule signing-key fallbacks are gitignored.
 

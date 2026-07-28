@@ -31,7 +31,7 @@ contract surface in [compute contracts](/contracts/compute).
 
 ### Step 1, get identity-verified
 
-Every operator and machine on Citrate Network is identity-verified through CLEAR before they can sell.
+Every operator and machine on Citrate Network is identity-verified through VERI, Citrate's in-house verification before they can sell.
 Complete verification through [verified identity](/aa). Citrate keeps the verification result, not the
 personal data behind it. You cannot register as a provider without it.
 
@@ -191,7 +191,7 @@ deadline that the slash protects.
 Tier commercial.kyc. No secrets in this tutorial: the supervision token is generated locally at mode 0600
 and read from its file, keys live only in your external signer, and the dev-only insecure-outbound flag is
 called out as forbidden in production. Every operator and machine on Citrate Network is identity-verified
-through CLEAR, and Citrate holds the verification result, not the personal data behind it. Compute is sold
+through VERI, and Citrate holds the verification result, not the personal data behind it. Compute is sold
 from your own hardware, on-premise by default, and SALT settles the work performed; it is the unit you
 count in, not a product to hold. The agent holds no keys.
 

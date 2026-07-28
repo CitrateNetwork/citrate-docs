@@ -110,7 +110,7 @@ claimable reaches `CITRATE_CLAIM_THRESHOLD_WEI`. Treat this path as experimental
 | The on-chain marketplace functions | [compute contracts](/contracts/compute) |
 | Reputation, scoring, and slashing-protection | [rewards and reputation](/operators/rewards) |
 | Bringing the node online | [run a node](/operators/run-a-node) |
-| Identity verification through CLEAR | [verified identity](/aa) |
+| Identity verification through VERI | [verified identity](/aa) |
 
 ## Design rationale
 
@@ -135,8 +135,8 @@ and without taking on work it cannot finish before a slashable deadline.
 
 ## Access and canon
 
-Tier commercial.kyc: operator-depth marketplace know-how, gated on identity verification through CLEAR, not
-on a seat. Every operator and machine on Citrate Network is identity-verified through CLEAR, and Citrate
+Tier commercial.kyc: operator-depth marketplace know-how, gated on identity verification through Citrate's in-house verification (VERI), not
+on a seat. Every operator and machine on Citrate Network is identity-verified through VERI, and Citrate
 holds the verification result, not the personal data behind it. Compute is sold from your own hardware,
 on-premise by default, and SALT settles the work performed; it is the unit you count in, not a product to
 hold. No secrets here: the supervision token is generated locally at mode 0600 and never transcribed, bind
