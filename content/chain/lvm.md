@@ -90,10 +90,10 @@ Conflicts are detected by `AccessSet::conflicts_with` (`parallel/conflict.rs`), 
 read-write, and write-read overlaps. The default extractor marks the sender as a writer, for nonce and
 balance, and derives recipient access from the transaction type.
 
-The executor benchmark (`benches/tps_parallel.rs`, 2026-04-21) records about 773K tx/s at 8 workers against
-about 321K at 1 worker, a 2.41 times speedup, on a disjoint-senders workload. That is a ceiling for the
-executor alone. Real throughput is bound by RPC and signature checking and sits well below it. Treat the
-figure as informational, not a guarantee.
+The executor benchmark (`benches/tps_parallel.rs`, 2026-04-21) records about a 2.41 times parallel speedup
+at 8 workers over a single worker on a disjoint-senders microbench. That is a property of the executor
+alone; real throughput is bound by RPC and signature checking and sits well below it. Network throughput is
+5,000 TPS sustained, 10,000 ceiling. Treat the microbench as informational, not a guarantee.
 
 ## Design rationale
 

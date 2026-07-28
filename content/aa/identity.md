@@ -32,10 +32,10 @@ The service knows a person by one of two subject shapes, resolved in `findAccoun
   for that person exists as a prediction, a CREATE2 address derived from the user id, until they first
   transact. See [Passkeys](/aa/passkeys).
 - An **EIP-55 address**, for accounts that sign in by proving control of a key, the EIP-4361 flow we call
-  SIWE. Here the key is the identity, and a CLEAR verification result is keyed on the address.
+  SIWE. Here the key is the identity, and a VERI verification result is keyed on the address.
 
 The service stores almost nothing about a person. It holds sign-in records, the set of addresses a person
-has linked, and a CLEAR verification result that is a status and two dates, never the documents behind it.
+has linked, and a VERI verification result that is a status and two dates, never the documents behind it.
 The person's sensitive personal data stays with the verification vendor, who remains its controller. This
 follows the on-premise default that holds across the network: the public ledger, and the authority in
 front of it, see only what they must.
@@ -109,7 +109,7 @@ Sign-in routes mounted in `src/server.ts`:
 ### Verification status, Implemented
 
 The `kyc` scope releases `kyc_status`, with `kyc_verified_at` and `kyc_expires_at`. The status is one of
-`verified`, `pending`, `revoked`, `expired`, or `none`. A person reaches `verified` after a CLEAR check; if
+`verified`, `pending`, `revoked`, `expired`, or `none`. A person reaches `verified` after a VERI check; if
 the recorded `expires_at` has passed, the same record reads as `expired` and prompts a re-check. The stored
 record is a closed type (`src/kyc.ts`): a status, two dates, and an opaque vendor reference, and nothing
 else. There is no field where a name, a document, or an identifier could be added. The verification vendor
@@ -160,7 +160,7 @@ life of a token.
 Public. The OIDC issuer and the claim shapes are what a relying party needs to integrate, and they are
 standard. The verification internals are gated to operators. The `entitlement` claim is described at the
 academic tier and only as a design, since it is not yet built. Every person on the public network is
-identity-checked through CLEAR, and Citrate keeps the verification result, not the personal data behind it.
+identity-verified through VERI, Citrate's in-house verification, and Citrate keeps the verification result, not the personal data behind it.
 
 ## Source and verification
 

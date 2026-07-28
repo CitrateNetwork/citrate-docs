@@ -135,7 +135,7 @@ Commercial. This is paid marketplace operation: job posting, provider economics,
 intended for contracted buyers, and gated through the Codex chokepoint (`PLANSET/02_ARCHITECTURE.md`
 section 4). Market participation settles in SALT, which pays for work and is not treated here as
 anything to hold. The wider network is on-premise by default and every node operator on the public
-network is identity-checked through CLEAR; that envelope is described in
+network is identity-verified through VERI, Citrate's in-house verification; that envelope is described in
 [what Citrate is](/start/what-is-citrate).
 
 ## Source and verification

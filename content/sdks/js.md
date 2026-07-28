@@ -215,7 +215,7 @@ Public. This is open SDK reference a developer needs to build on Citrate Network
 Private keys, mnemonics, and bundler API keys are never inline; they come from the caller's environment
 (`config.privateKey`, `BundlerClientOptions.apiKey`). The hostnames named here, `rpc.citrate.ai`,
 `bundler.citrate.ai`, and `auth.citrate.ai`, are public production endpoints already shipped as defaults in
-the source, not credentials. The chain on testnet is identity-checked through CLEAR for node operators; the
+the source, not credentials. The chain on testnet is identity-verified through VERI, Citrate's in-house verification for node operators; the
 SDK itself holds no such data.
 
 ## Source and verification

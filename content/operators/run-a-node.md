@@ -21,7 +21,7 @@ A Citrate Node is built from the `citrate-node` binary in the `citrate-chain` wo
 execution, a mempool, peer management, and the RPC service into one process: a RocksDB-backed state store,
 an EVM-compatible executor, the GhostDAG consensus engine, and a JSON-RPC, WebSocket, and REST surface with
 Prometheus metrics. You run it on your own machine, on-premise by default, and it talks to other nodes over
-libp2p. Operators on the public network are identity-verified through CLEAR; the node software itself is the
+libp2p. Operators on the public network are identity-verified through VERI, Citrate's in-house verification; the node software itself is the
 same whether you run a local instance or join testnet.
 
 The node binds its RPC surface to loopback by default, so the read and write surface is something you expose
@@ -197,7 +197,7 @@ This is where running a node is security relevant, so the defaults fail closed.
 ## Access and canon
 
 Public. Running a node is public-good operator material, and the front door of the network. On the public
-network, operators are identity-verified through CLEAR, and the node runs on hardware you control; Citrate
+network, operators are identity-verified through VERI, Citrate's in-house verification, and the node runs on hardware you control; Citrate
 keeps the verification result, not the personal data behind it. No secrets, operator tokens, or private node
 addresses appear here. The public RPC hostname `https://rpc.citrate.ai` is the only network endpoint named.
 For genesis and the network layout, see [the network](/chain/network) and [genesis](/chain/genesis).

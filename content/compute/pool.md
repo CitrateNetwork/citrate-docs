@@ -194,7 +194,7 @@ that is specified but not yet built.
 
 Tier commercial: this is paid-seat marketplace operation, where operators sell pooled compute
 under a service level. Every member account on the public network is identity-checked through
-CLEAR; Citrate keeps the verification result, not the personal data behind it. Keys, data, and
+VERI; Citrate keeps the verification result, not the personal data behind it. Keys, data, and
 model weights stay on the operator's hardware, and the only things the pool publishes are the
 dispatch record, the completion, and the payment. No secrets appear on this page: keystore
 passphrases and private keys come from your own secret store and are never printed.

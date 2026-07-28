@@ -186,7 +186,7 @@ The calls used above, with their source in `citrate-sdk-python`:
 
 Public. The write steps touch state and need a funded account; the read steps do not. No keys appear here:
 they come from `CITRATE_PRIVATE_KEY` at runtime, or from a locally generated `KeyManager`. Every machine on
-the public network is identity-checked through CLEAR before it takes part.
+the public network is identity-verified through VERI, Citrate's in-house verification before it takes part.
 
 ## Source and verification
 

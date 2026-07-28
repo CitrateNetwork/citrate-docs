@@ -162,10 +162,10 @@ The executor schedules disjoint transactions in parallel using a
 
 Measured speedup (v0.4.0, `benchmarks/parallel_tps_verified_2026_04_21.md`):
 
-| Workers | TPS (disjoint transfers) | Speedup |
-|--------:|-------------------------:|--------:|
-| 1 | 321,000 | 1.00× |
-| 8 | 773,000 | 2.41× |
+| Workers | Parallel speedup (disjoint microbench) |
+|--------:|---------------------------------------:|
+| 1 | 1.00× |
+| 8 | 2.41× |
 
 The "apples-to-apples" speedup against single-threaded REVM with
 identical workloads is **2.02×** at 8 workers. Real-world TPS is
@@ -264,7 +264,6 @@ scores, and finalized heights load from RocksDB on boot. Source:
 | Finality | ≤ 12 s | **≤ 12 s** (BFT checkpoint @ 50 blocks × 0.5–1s) |
 | Block time | 1–2 s | **~0.5–1 s typical** |
 | DAG width | 100+ parallel blocks | Supported |
-| Executor ceiling (disjoint) | — | **773K tx/s @ 8 workers** |
 | Parallel speedup | ≥ 2× | **2.02× apples-to-apples** |
 
 Sources: `benchmarks/benchmark_2026_03_20.md`,
