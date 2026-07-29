@@ -15,7 +15,7 @@ stays in sync with the code. It is the exported public surface; the narrative re
 examples lives in [identity](/sdks/identity), [entitlements](/sdks/entitlements), and the
 [JavaScript](/sdks/js) and [Python](/sdks/python) pages.
 
-Sources: `citrate-sdk-js@8ca3a83`, `citrate-sdk-python@6697447`.
+Sources: `citrate-sdk-js@328bdea`, `citrate-sdk-python@850b3c1`.
 
 ## JavaScript, @citratelabs/sdk
 
@@ -45,7 +45,7 @@ Sources: `citrate-sdk-js@8ca3a83`, `citrate-sdk-python@6697447`.
 | `capabilities` | function | Capabilities for a raw tier value (normalized first) |
 | `can` | function | Whether a claim grants a capability. Applies the same fail-safe + role-bypass semantics as |
 
-## Python, citrate-ai-sdk
+## Python, citrate-labs-sdk
 
 ### citrate_sdk.identity
 
