@@ -194,7 +194,7 @@ published openly. There are no secrets here, no keys, no credentials, and no pri
 addresses are public on-chain data and are verifiable with `eth_getCode`.
 
 This surface ties to the rest of Atlas at three points. The identity result `KYCRegistry` holds comes from
-the CLEAR identity check that gates every account on the public network, covered under [accounts and
+the VERI identity check that gates every account on the public network, covered under [accounts and
 identity](/aa); Citrate keeps the verification result, not the personal data. The compliance posture these
 gates serve, FERPA, HIPAA, SOC 2, and the rest by deployment context, is covered under
 [enterprise](/enterprise). Slashing and finality as consensus concerns are covered under [Citrate Network

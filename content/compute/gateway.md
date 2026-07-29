@@ -179,7 +179,7 @@ Commercial tier. This is operator and deployment depth, the configuration and se
 needs to stand up a gateway. The client-facing REST surface that calls it is public and lives on the
 [client page](/sdks/inference-gateway).
 
-Operators are identity-verified through CLEAR on the public network, and the gateway runs on hardware you
+Operators are identity-verified through VERI, Citrate's in-house verification on the public network, and the gateway runs on hardware you
 control. No API keys, treasury addresses, or operator account material appear here; that material is loaded
 from a keystore or a KMS reference and is never documented. The repository contains no hardcoded credentials
 at the audited SHA.

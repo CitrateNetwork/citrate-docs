@@ -216,7 +216,7 @@ Commercial tier. This is the implementation depth a competitor would want to clo
 fail-closed sponsorship, per-surface validators, and recovery, so it is gated to contracted builders. No
 secrets appear here: `identitySigner`, `registrar`, and `owner` are roles, not keys, and no private keys,
 mnemonics, or internal endpoints are present. The identity authority is named as an operator role. Every
-node operator and machine on the public network is identity-checked through CLEAR; Citrate keeps the
+node operator and machine on the public network is identity-verified through VERI, Citrate's in-house verification; Citrate keeps the
 verification result, not the personal data behind it.
 
 ## Source and verification
