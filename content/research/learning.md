@@ -89,7 +89,7 @@ Most learning systems move the data to the model. For a school or a hospital tha
 
 ## Access and canon
 
-Academic tier. The learning engine is a research contribution and its on-chain orchestration is not yet a finished product surface, which is why this page sits here rather than under a public surface. No keys, endpoints, or credentials appear on this page. The on-premise default holds: a node publishes embeddings only when its operator has chosen to take part, and identity on the public network is checked through CLEAR.
+Academic tier. The learning engine is a research contribution and its on-chain orchestration is not yet a finished product surface, which is why this page sits here rather than under a public surface. No keys, endpoints, or credentials appear on this page. The on-premise default holds: a node publishes embeddings only when its operator has chosen to take part, and identity on the public network is verified through VERI, Citrate's in-house verification.
 
 ## Source and verification
 

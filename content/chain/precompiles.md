@@ -140,7 +140,7 @@ verify tomorrow.
 
 This page is staged commercial. It documents implementation depth, precompile ABIs and gas economics, that
 a contracted, identity-verified builder should have but that we would rather not have vacuumed up
-anonymously. Every node operator on the public network is identity-checked through CLEAR, and Citrate keeps
+anonymously. Every node operator on the public network is identity-verified through VERI, Citrate's in-house verification, and Citrate keeps
 the verification result, not the personal data behind it. Nothing here is secret: addresses, public ABIs,
 gas constants, and type hashes are all observable on-chain. The genuinely sensitive precompiles, the
 inference, proof-verification, and attestation internals, are not on this page; see

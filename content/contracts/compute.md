@@ -278,7 +278,7 @@ can read them; the full lifecycle, scoring, and settlement design is paid-seat d
 
 No secrets appear on this page. There are no private keys, mnemonics, internal hostnames, or
 credentials. The only hardcoded address is the public protocol precompile `0x0108`. Every operator on
-the public network is identity-checked through CLEAR before they can register and stake; Citrate keeps
+the public network is identity-verified through VERI, Citrate's in-house verification before they can register and stake; Citrate keeps
 the verification result, not the personal data behind it.
 
 ## Source and verification

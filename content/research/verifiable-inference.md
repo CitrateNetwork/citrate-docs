@@ -93,7 +93,7 @@ proving-system internals are gated and Confidential: circuit construction, prove
 any structured reference string or setup material, and the exact proof wire formats are served at runtime to
 authorized principals from the private repo, and never built into these docs. No setup seed, ceremony
 material, keys, or credentials appear on this page or in any tier. Every node operator on the public network
-is identity-checked through CLEAR, and Citrate keeps the verification result, not the personal data behind
+is identity-verified through VERI, Citrate's in-house verification, and Citrate keeps the verification result, not the personal data behind
 it. If you are an authorized principal and need the internals, request the gated `CHAIN-pre-zkp`,
 `CHAIN-pre-inference`, or `CHAIN-pre-attestation` surfaces.
 

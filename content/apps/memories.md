@@ -124,7 +124,7 @@ This surface holds client memory, so it is built to fail closed.
 Commercial. This is paid, contracted, multi-Org product depth, and memory is client property isolated
 per Org. The store reuses pieces of the Citrate Network engine, and its audit roots are designed to
 anchor periodically to the public ledger; the federated-learning surface it sits alongside is
-[Citrate Orchard](/research/learning). On-premise sovereignty and identity-checking through CLEAR hold
+[Citrate Orchard](/research/learning). On-premise sovereignty and in-house identity verification (VERI) hold
 across Citrate, as described in [what Citrate is](/start/what-is-citrate).
 
 ## Source and verification

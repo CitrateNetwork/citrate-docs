@@ -96,7 +96,7 @@ The implementation detail of all three families is confidential: circuit constru
 internals, the inference runtime, the attestation-verification logic, any ceremony material, and the exact
 ABIs. Those are gated, served at runtime from the private source repo to admins, issued auditors, and
 contracted principals, and never built into the public docs. Access is enforced at the protocol chokepoint,
-not by obscurity. Every node operator on the public network is identity-checked through CLEAR, and Citrate
+not by obscurity. Every node operator on the public network is identity-verified through VERI, Citrate's in-house verification, and Citrate
 keeps the verification result, not the personal data behind it. No keys, ceremony secrets, or credentials
 appear on this page or in any tier.
 

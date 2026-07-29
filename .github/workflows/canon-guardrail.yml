@@ -1,0 +1,18 @@
+name: Canon guardrail
+
+# CC-1 — keep retired claims (CLEAR/Sumsub, 773K, veteran-owned/SDVOSB) off this
+# public surface. Definition + allowlist live in the shared reusable workflow.
+# Complements the repo-local scripts/no-clear-no-773.sh content tripwire.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guardrail:
+    uses: CitrateNetwork/.github/.github/workflows/reusable-canon-guardrail.yml@main

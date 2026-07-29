@@ -251,8 +251,7 @@ staking design.
 
 No secrets appear on this page. There are no private keys, mnemonics, internal hostnames, or
 credentials. The only hardcoded addresses are public protocol precompiles: `0x1000`, `0x1001`, `0x0101`,
-`0x0106`, and `0x0108`. Operators who serve inference on the public network are identity-checked through
-CLEAR before they stake; Citrate keeps the verification result, not the personal data behind it.
+`0x0106`, and `0x0108`. Operators who serve inference on the public network are identity-verified through Citrate's in-house verification (VERI) before they stake; Citrate keeps the verification result, not the personal data behind it.
 
 ## Source and verification
 

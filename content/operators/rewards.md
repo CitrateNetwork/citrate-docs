@@ -160,7 +160,7 @@ The honest invariant here is that rewards and penalties settle work, not promise
 
 Commercial tier, operator implementation depth. SALT settles the work the network performs; reputation and
 slashing reward contribution and penalize misbehavior, and none of them is a speculative instrument. On the
-public network, operators are identity-verified through CLEAR, and a node runs on hardware the operator
+public network, operators are identity-verified through VERI, Citrate's in-house verification, and a node runs on hardware the operator
 controls. No keys appear here: rewards accrue to the operator's account, and the node-agent holds no keys,
 emitting unsigned requests for a separate signing surface to sign.
 
