@@ -65,7 +65,7 @@ function cliHelp() {
     const help = execSync("python3 -m citrate_sdk.cli --help", { cwd: PY }).toString().trim();
     return "\n### citrate (Python)\n\n```text\n" + help + "\n```\n";
   } catch {
-    return "\n### citrate (Python)\n\nRun `citrate --help` after `pip install citrate-ai-sdk`.\n";
+    return "\n### citrate (Python)\n\nRun `citrate --help` after `pip install citrate-labs-sdk`.\n";
   }
 }
 
@@ -111,7 +111,7 @@ body += section("identity", [
 body += section("entitlements", jsSymbols(path.join(JS, "src/entitlements/capabilities.ts")));
 body += section("gateway", jsSymbols(path.join(JS, "src/gateway/client.ts")));
 
-body += `\n## Python, citrate-ai-sdk\n`;
+body += `\n## Python, citrate-labs-sdk\n`;
 body += section("citrate_sdk.identity", [
   ...pySymbols(path.join(PY, "citrate_sdk/identity/wallet.py")),
   ...pySymbols(path.join(PY, "citrate_sdk/identity/pkce.py")),

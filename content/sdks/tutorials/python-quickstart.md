@@ -33,10 +33,10 @@ RPC endpoint, and, for the write steps, a funded account's private key supplied 
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install citrate-ai-sdk
+pip install citrate-labs-sdk
 ```
 
-The distribution is `citrate-ai-sdk`; the import name is `citrate_sdk`.
+The distribution is `citrate-labs-sdk`; the import name is `citrate_sdk`.
 
 ### Step 2, set the environment
 
