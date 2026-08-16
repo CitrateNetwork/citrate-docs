@@ -31,7 +31,7 @@ function CopyButton({ text }: { text: string }) {
 
 function CodeBlock({ lang, code }: { lang: string; code: string }) {
   return (
-    <div className="code-block">
+    <div className="code-block" translate="no">
       {lang && lang !== "text" && <span className="code-block-lang">{lang}</span>}
       <CopyButton text={code} />
       <pre><code>{code}</code></pre>
@@ -93,7 +93,7 @@ export function Markdown({ source }: { source: string }) {
           code({ className, children }) {
             const m = /language-(\w+)/.exec(className || "");
             const text = String(children).replace(/\n$/, "");
-            if (!m) return <code className="md-code">{children}</code>;
+            if (!m) return <code className="md-code" translate="no">{children}</code>;
             if (m[1] === "mermaid") return <Mermaid code={text} />;
             return <CodeBlock lang={m[1]} code={text} />;
           },

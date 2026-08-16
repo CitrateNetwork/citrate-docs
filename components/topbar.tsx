@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useTheme, useViewer } from "./providers";
 import { ViewerSwitcher } from "./viewer-switcher";
+import { LanguagePicker } from "./language-picker";
 import { TierChip } from "./tier-chip";
 import { Icon, CitrateMark } from "./icons";
 import { mockApi } from "@/prototype/fixtures";
@@ -16,7 +17,7 @@ export function TopBar({ onToggleAsk }: { onToggleAsk: () => void }) {
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-[var(--color-canvas)] px-4">
-      <Link href="/" className="flex items-center gap-2 font-semibold">
+      <Link href="/" className="flex items-center gap-2 font-semibold" translate="no">
         <CitrateMark size={18} color="var(--accent-text)" />
         Atlas
       </Link>
@@ -49,6 +50,8 @@ export function TopBar({ onToggleAsk }: { onToggleAsk: () => void }) {
         ) : (
           <ViewerSwitcher />
         )}
+
+        <LanguagePicker />
 
         <button onClick={toggle} className="rounded-lg border px-2 py-1.5 text-sm" title="Toggle theme" aria-label="Toggle theme">
           <Icon name={theme === "dark" ? "moon" : "sun"} size={16} />
