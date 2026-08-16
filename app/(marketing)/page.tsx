@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { CHAIN_STATUS } from "@/prototype/fixtures";
 import { Footer } from "@/components/footer";
+import { LanguagePicker } from "@/components/language-picker";
 
 /** Splash / front door (DESIGN_BRIEF §6.1). */
 export default function Splash() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col">
+    <div className="absolute right-4 top-4 z-40">
+      <LanguagePicker />
+    </div>
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-6 py-20 text-center">
       <div className="mb-4 flex items-center gap-2 text-sm text-[var(--color-muted)]">
         <span className="inline-flex h-2 w-2 rounded-full bg-[var(--color-citrate)]" />
