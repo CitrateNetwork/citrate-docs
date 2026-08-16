@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { CookieConsent } from "@/components/cookie-consent";
+import { LanguageBoot } from "@/components/language-boot";
 
 // Space Grotesk, the brand display font, is packaged WITH the app (next/font/local reads the bundled
 // woff2) so every title and header loads reliably with no runtime CDN dependency. Variable weight
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="dark" className={spaceGrotesk.variable} suppressHydrationWarning>
       <body>
         <Providers>{children}</Providers>
+        <LanguageBoot />
         <CookieConsent />
       </body>
     </html>
