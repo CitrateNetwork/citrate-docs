@@ -13,18 +13,12 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { AuthSession } from "@/prototype/fixtures";
 import { ID_COOKIE, cookieValue } from "./cookies";
 import { resolveEntitlement } from "./entitlement";
+import { type AuthMode, resolveAuthMode } from "./auth-mode";
 
-export type ServerAuthMode = "oidc" | "mock" | "mock-disabled";
-
-export function resolveServerAuthMode(env = process.env): ServerAuthMode {
-  const requested = env.NEXT_PUBLIC_AUTH_MODE;
-  if (requested === "oidc") return "oidc";
-  if (requested === "mock") {
-    if (env.NODE_ENV === "production" && env.ALLOW_MOCK_AUTH !== "1") return "mock-disabled";
-    return "mock";
-  }
-  return "oidc"; // fail closed onto the verifying path
-}
+// Kept as a stable alias for existing callers. The resolution itself lives in the shared, client+server
+// module lib/auth/auth-mode.ts so the browser provider cannot diverge from the server (DOC-B-002).
+export type ServerAuthMode = AuthMode;
+export const resolveServerAuthMode = resolveAuthMode;
 
 const MODE = resolveServerAuthMode();
 
