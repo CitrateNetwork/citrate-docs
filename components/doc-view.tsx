@@ -140,10 +140,12 @@ export function DocView({ slug }: { slug: string }) {
           )}
         </div>
       </header>
-      {doc.sourceKind === "gated"
-        ? <GatedBody doc={doc} viewerId={viewerId} />
-        : doc.body
-          ? <Markdown source={doc.body} />
+      {doc.body != null
+        ? <Markdown source={doc.body} />
+        : doc.sourceKind === "gated" || doc.tier !== "public"
+          // Body absent client-side by design (DOC-B-001): every gated body is served at request time
+          // from the /api/content gateway after the server re-verifies the session — never bundled.
+          ? <GatedBody doc={doc} viewerId={viewerId} />
           : <p className="text-sm text-[var(--color-muted)]">No body.</p>}
     </Shell>
   );
