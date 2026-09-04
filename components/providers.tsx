@@ -2,17 +2,25 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { AuthSession, DEFAULT_VIEWER, mockApi, VIEWERS } from "@/prototype/fixtures";
+import { resolveAuthMode } from "@/lib/auth/auth-mode";
 
 /**
  * Prototype providers. Two auth modes (S2):
- *  - "dev"  (default, NEXT_PUBLIC_AUTH_MODE unset/"mock"): the dev tier-switcher cycles fixture viewers
- *    so every access state is demoable without a live IdP.
- *  - "oidc" (NEXT_PUBLIC_AUTH_MODE="oidc"): the real session comes from citrate-identity via
- *    GET /api/auth/session (server-verified JWT → AuthSession + entitlement). login/logout redirect
- *    through /api/auth/{login,logout}. The chokepoint (canRead) is unchanged — only the SESSION SOURCE.
+ *  - "dev"  (ONLY when NEXT_PUBLIC_AUTH_MODE="mock" in a non-production build): the dev tier-switcher
+ *    cycles fixture viewers so every access state is demoable without a live IdP.
+ *  - "oidc" (the fail-closed default — unset/"dev"/"oidc"/unknown all resolve here): the real session
+ *    comes from citrate-identity via GET /api/auth/session (server-verified JWT → AuthSession +
+ *    entitlement). login/logout redirect through /api/auth/{login,logout}. The chokepoint (canRead) is
+ *    unchanged — only the SESSION SOURCE.
+ *
+ * DOC-B-002: the mode is resolved by the SHARED lib/auth/auth-mode.ts resolver, identical to the server,
+ * and it fails CLOSED. The fixture tier-switcher activates only for the explicit, non-production "mock"
+ * flag — never for the production default — so an unset/"dev"/garbage env can never grant the switcher.
  */
 
-const AUTH_MODE: "dev" | "oidc" = process.env.NEXT_PUBLIC_AUTH_MODE === "oidc" ? "oidc" : "dev";
+// resolveAuthMode() → "mock" only for NEXT_PUBLIC_AUTH_MODE="mock" in a non-production build; everything
+// else (unset/"dev"/"oidc"/"OIDC"/garbage, or "mock" in production) resolves onto the verifying oidc path.
+const AUTH_MODE: "dev" | "oidc" = resolveAuthMode() === "mock" ? "dev" : "oidc";
 const ANON: AuthSession = { required: AUTH_MODE === "oidc", authenticated: false, kycStatus: "none" };
 
 type ViewerCtx = {
@@ -40,8 +48,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    const v = localStorage.getItem("codex.viewer");
-    if (v) setViewerIdState(v);
+    // The persisted fixture viewer is honored ONLY in the dev switcher mode. In oidc mode the session
+    // comes solely from the server (/api/auth/session), so a stashed codex.viewer must never take effect
+    // (DOC-B-002: no localStorage-driven tier/role elevation on the real auth path).
+    if (AUTH_MODE === "dev") {
+      const v = localStorage.getItem("codex.viewer");
+      if (v) setViewerIdState(v);
+    }
     const t = localStorage.getItem("codex.theme");
     if (t === "light" || t === "dark") setTheme(t);
   }, []);
