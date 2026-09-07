@@ -1,6 +1,7 @@
 import { canRead, type AuthSession } from "@/prototype/fixtures";
 import { retrieve, getSurface } from "@/lib/ai/corpus";
 import { resolveMcpKeyCap, extractApiKey, type McpKeyCap } from "@/lib/auth/mcp-keys";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 /**
  * S4 — Codex as an MCP server. External agents call the docs toolbox over JSON-RPC. The API key sets an
@@ -32,6 +33,10 @@ const rpcErr = (id: unknown, code: number, message: string) => Response.json({ j
 
 export async function POST(req: Request) {
   const now = Date.now();
+  // DOC-B-007: throttle the MCP toolbox (keyed per API key when present, else per IP).
+  const limited = enforceRateLimit(req, "mcp", { limit: 30 }, extractApiKey(req));
+  if (limited) return limited;
+
   const cap = resolveMcpKeyCap(extractApiKey(req), now);
   const session = syntheticSession(cap);
   let body: { id?: unknown; method?: string; params?: { name?: string; arguments?: Record<string, unknown> } };

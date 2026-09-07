@@ -1,5 +1,11 @@
+import { enforceRateLimit } from "@/lib/security/rate-limit";
+
 /** S5 — inference-gateway call (OpenAI-compatible). Fail-closed without a configured gateway + key. */
 export async function POST(req: Request) {
+  // DOC-B-007: throttle this credentialed, unauthenticated gateway proxy before spending credits.
+  const limited = enforceRateLimit(req, "sandbox:infer", { limit: 20 });
+  if (limited) return limited;
+
   let prompt = "Say hello from Citrate.";
   try {
     const b = (await req.json()) as { prompt?: string };
