@@ -62,7 +62,7 @@ function gateCardFor(slug: string, doc?: import("./types").Doc): GateCard {
 }
 
 /** The single doc-gate evaluation — mirrors the sidebar's visibility exactly. */
-function evaluateDoc(session: AuthSession, doc: import("./types").Doc, now = FIXED_NOW): DocResponse {
+function evaluateDoc(session: AuthSession, doc: import("./types").Doc, now: number): DocResponse {
   const vis = visibility(session, doc, now);
   if (vis === "hidden") return { kind: "not_found" }; // Confidential or wrong-org → 404
   if (vis === "locked") return { kind: "gate", gate: gateCardFor(doc.slug, doc) };
@@ -84,24 +84,26 @@ export const mockApi = {
   getSession(viewerId: string): AuthSession {
     return (VIEWERS_BY_ID[viewerId] ?? DEFAULT_VIEWER).session;
   },
-  resolveTier(session: AuthSession, now = FIXED_NOW): Tier {
+  // DOC-B-005: `now` is REQUIRED on every gated method — no FIXED_NOW default. Live callers pass
+  // Date.now(); deterministic fixture snapshots pass FIXED_NOW explicitly.
+  resolveTier(session: AuthSession, now: number): Tier {
     return resolveTier(session, now);
   },
 
   /* ── navigation ─────────────────────────────────────────────────────────── */
-  getNav(session: AuthSession, now = FIXED_NOW): NavNode[] {
+  getNav(session: AuthSession, now: number): NavNode[] {
     return filterNav(NAV, session, now);
   },
 
   /* ── content (the gate lives here) ──────────────────────────────────────── */
-  getDoc(session: AuthSession, slug: string, now = FIXED_NOW): DocResponse {
+  getDoc(session: AuthSession, slug: string, now: number): DocResponse {
     const doc = DOCS[slug];
     if (!doc) return { kind: "not_found" };
     return evaluateDoc(session, doc, now);
   },
 
   /** Run any Doc (fixture OR content-pipeline) through the access gate. Same chokepoint either way. */
-  evaluateDoc(session: AuthSession, doc: import("./types").Doc, now = FIXED_NOW): DocResponse {
+  evaluateDoc(session: AuthSession, doc: import("./types").Doc, now: number): DocResponse {
     return evaluateDoc(session, doc, now);
   },
 
@@ -114,7 +116,7 @@ export const mockApi = {
   },
 
   /* ── search (no above-tier hits) ────────────────────────────────────────── */
-  search(session: AuthSession, _q: string, now = FIXED_NOW): SearchResult[] {
+  search(session: AuthSession, _q: string, now: number): SearchResult[] {
     return SEARCH_RESULTS.filter((r) => canRead(session, { tier: r.tier, orgId: docOrg(r.slug) }, now));
   },
 
@@ -123,7 +125,7 @@ export const mockApi = {
     return session.authenticated ? THREADS : []; // anonymous = ephemeral, no saved history
   },
   /** Returns a canned stream with citations re-filtered to the caller's tier (AgentRespectsTier). */
-  ask(session: AuthSession, _question: string, now = FIXED_NOW) {
+  ask(session: AuthSession, _question: string, now: number) {
     const citations = SAMPLE_STREAM.citations.filter((c) =>
       canRead(session, { tier: c.tier, orgId: docOrg(c.slug) }, now)
     );

@@ -14,7 +14,7 @@ import { cn } from "@/lib/cn";
 export function Sidebar() {
   const { session } = useViewer();
   const pathname = usePathname();
-  const nav = useMemo(() => filterNav(MERGED_NAV, session), [session]);
+  const nav = useMemo(() => filterNav(MERGED_NAV, session, Date.now()), [session]); // DOC-B-005: real clock
   const [closed, setClosed] = useState<Set<string>>(new Set());
 
   const toggle = (id: string) =>
@@ -66,7 +66,7 @@ function Leaf({
   active: boolean;
   session: ReturnType<typeof useViewer>["session"];
 }) {
-  const vis = mockApi.visibility(session, node);
+  const vis = mockApi.visibility(session, node, Date.now()); // DOC-B-005: real clock
   const locked = vis === "locked";
   const isTut = node.kind === "tutorials";
   const isSandbox = node.kind === "sandbox";

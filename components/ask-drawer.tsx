@@ -15,7 +15,7 @@ type Msg = { role: "user" | "assistant"; content: string; citations?: Cite[]; to
 /** Ask Codex drawer (DESIGN_BRIEF §10). S1 replays a canned, tier-filtered stream; S4 wires the real harness. */
 export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { session, viewerId } = useViewer();
-  const tier = mockApi.resolveTier(session);
+  const tier = mockApi.resolveTier(session, Date.now()); // DOC-B-005: real clock, not FIXED_NOW
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);

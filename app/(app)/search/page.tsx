@@ -10,7 +10,7 @@ import { TierChip } from "@/components/tier-chip";
 export default function SearchPage() {
   const { session } = useViewer();
   const [q, setQ] = useState("");
-  const results = useMemo(() => mockApi.search(session, q), [session, q]);
+  const results = useMemo(() => mockApi.search(session, q, Date.now()), [session, q]); // DOC-B-005: real clock
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">

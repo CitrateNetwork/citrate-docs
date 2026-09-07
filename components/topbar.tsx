@@ -13,7 +13,7 @@ import { mockApi } from "@/prototype/fixtures";
 export function TopBar({ onToggleAsk }: { onToggleAsk: () => void }) {
   const { session, authMode, login, logout } = useViewer();
   const { theme, toggle } = useTheme();
-  const tier = mockApi.resolveTier(session);
+  const tier = mockApi.resolveTier(session, Date.now()); // DOC-B-005: real clock, not FIXED_NOW
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-[var(--color-canvas)] px-4">
