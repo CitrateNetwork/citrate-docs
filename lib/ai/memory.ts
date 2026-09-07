@@ -163,7 +163,7 @@ async function recallRepo(baseUrl: string, sub: string, token: string, repo: str
 export async function searchMemory(
   session: AuthSession,
   query: string,
-  now?: number
+  now: number // DOC-B-005: required — the tier filter must evaluate against the real clock.
 ): Promise<Chunk[]> {
   const baseUrl = process.env.MEM_GATEWAY_URL;
   const secret = process.env.MEM_CONNECT_SECRET;

@@ -11,7 +11,7 @@ type Tab = "access" | "profile" | "appearance" | "keys" | "transparency";
 export default function SettingsPage() {
   const { session } = useViewer();
   const [tab, setTab] = useState<Tab>("access");
-  const tier = mockApi.resolveTier(session);
+  const tier = mockApi.resolveTier(session, Date.now()); // DOC-B-005: real clock, not FIXED_NOW
   const ent = session.entitlement;
 
   return (

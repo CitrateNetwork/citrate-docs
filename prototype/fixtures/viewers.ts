@@ -12,6 +12,13 @@ const NOW = 1_780_000_000_000; // fixed epoch-ms so fixtures are deterministic (
 export const FIXED_NOW = NOW;
 const DAY = 86_400_000;
 
+// DOC-B-005: the demo-viewer expiries below must be anchored to the REAL wall clock, not to the frozen
+// FIXED_NOW (which is now in the past). Otherwise, once the access helpers evaluate against Date.now()
+// (as every live path must — see the required `now` params below), the "live 30-day auditor" grant would
+// read as already expired and the dev-switcher demo of EntitlementExpiry would be meaningless. FIXED_NOW
+// stays reserved for deterministic fixture *snapshots*, passed explicitly — never as an access-time clock.
+const DEMO_NOW = Date.now();
+
 function session(partial: Partial<AuthSession> & { kycStatus: AuthSession["kycStatus"] }): AuthSession {
   return { required: false, authenticated: false, ...partial };
 }
@@ -88,7 +95,7 @@ export const VIEWERS: Viewer[] = [
         orgId: "audit:2026-06",
         citrateRole: "auditor_tob",
         milestone: "security-audit-fieldwork",
-        expiresAt: NOW + 30 * DAY,
+        expiresAt: DEMO_NOW + 30 * DAY,
       },
     }),
   },
@@ -105,7 +112,7 @@ export const VIEWERS: Viewer[] = [
         tier: "confidential",
         orgId: "audit:2026-06",
         citrateRole: "auditor_tob",
-        expiresAt: NOW - 1 * DAY,
+        expiresAt: DEMO_NOW - 1 * DAY,
       },
     }),
   },
@@ -119,8 +126,15 @@ export function isAdmin(s: AuthSession): boolean {
   return role === "admin" || role === "exec";
 }
 
-/** Effective tier after expiry collapse (EntitlementExpiry). Mirror the server exactly. */
-export function resolveTier(s: AuthSession, now = NOW): Tier {
+/**
+ * Effective tier after expiry collapse (EntitlementExpiry). Mirror the server exactly.
+ *
+ * DOC-B-005: `now` is REQUIRED — there is deliberately no default. A default of FIXED_NOW meant every
+ * client call-site that omitted it evaluated expiry against a frozen (past) clock, so an expired grant
+ * kept reading as live forever. Making omission a type error forces every caller to pass Date.now()
+ * (live paths) or FIXED_NOW (deterministic fixture snapshots) explicitly.
+ */
+export function resolveTier(s: AuthSession, now: number): Tier {
   const e: Entitlement | undefined = s.entitlement;
   if (!e) return "public";
   if (e.expiresAt != null && now >= e.expiresAt) return "public";
@@ -141,7 +155,7 @@ function orgOk(s: AuthSession, nodeOrg?: string | null): boolean {
 export function canRead(
   s: AuthSession,
   node: { tier: Tier; orgId?: string | null },
-  now = NOW
+  now: number // DOC-B-005: required — no frozen-clock default (see resolveTier).
 ): boolean {
   const viewerRank = TIER_RANK[resolveTier(s, now)];
   return viewerRank >= TIER_RANK[node.tier] && orgOk(s, node.orgId);
@@ -157,7 +171,7 @@ export function canRead(
 export function visibility(
   s: AuthSession,
   node: { tier: Tier; orgId?: string | null },
-  now = NOW
+  now: number // DOC-B-005: required — no frozen-clock default (see resolveTier).
 ): NodeVisibility {
   if (canRead(s, node, now)) return "visible";
   if (node.tier === "confidential") return "hidden";
@@ -166,7 +180,7 @@ export function visibility(
 }
 
 /** Filter a nav tree for a viewer: drop hidden nodes, keep locked (rendered as locked), recurse. */
-export function filterNav(nodes: NavNode[], s: AuthSession, now = NOW): NavNode[] {
+export function filterNav(nodes: NavNode[], s: AuthSession, now: number): NavNode[] {
   return nodes
     .map((n) => {
       const vis = visibility(s, n, now);

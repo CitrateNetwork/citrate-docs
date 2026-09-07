@@ -38,7 +38,7 @@ function terms(q: string): string[] {
   return q.toLowerCase().split(/[^a-z0-9_]+/).filter((t) => t.length > 2 && !STOP.has(t));
 }
 
-export function retrieve(session: AuthSession, query: string, k = 5, now?: number): Chunk[] {
+export function retrieve(session: AuthSession, query: string, k: number, now: number): Chunk[] {
   const ts = terms(query);
   // TIER-AWARE FILTER — before any scoring. This is the control, not the prompt.
   const readable = corpus().filter((c) => canRead(session, { tier: c.tier, orgId: c.orgId }, now));
