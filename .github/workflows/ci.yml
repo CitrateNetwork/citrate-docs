@@ -23,6 +23,8 @@ jobs:
       - run: npm ci
       - name: Typecheck
         run: npm run typecheck
+      - name: Unit tests (access-control chokepoint — vitest)
+        run: npm test
       - name: Build (prebuild=content, postbuild=verify:bundle)
         run: npm run build
       - name: Confidential-never-in-build gate

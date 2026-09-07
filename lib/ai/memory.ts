@@ -61,7 +61,7 @@ const DEFAULT_REPOS = [
  * the graph for everyone while internal/audit/deal/compliance memory stays gated.
  * Override the whole map with `MEMORY_REPO_TIERS` (JSON: {"repo":"tier"}).
  */
-const DEFAULT_REPO_TIERS: Record<string, Tier> = {
+export const DEFAULT_REPO_TIERS: Record<string, Tier> = {
   "citrate-security": "confidential", // audit findings, vulnerability reports
   "citrate-commercial": "confidential", // deal packages
   "citrate-compliance": "confidential", // compliance corpus
@@ -74,20 +74,50 @@ function repos(): string[] {
   return DEFAULT_REPOS;
 }
 
-function repoTierMap(): Record<string, Tier> {
-  const raw = process.env.MEMORY_REPO_TIERS;
+/**
+ * Resolve the effective repo→tier map from an optional `MEMORY_REPO_TIERS` JSON override.
+ *
+ * DOC-B-009: the override is MERGED OVER the confidential defaults, never used as a whole-map
+ * REPLACEMENT. A partial or mistyped override therefore cannot silently DEMOTE a declared
+ * confidential repo (`citrate-security`/`-commercial`/`-compliance`/`-federation`) to public;
+ * it can only add/raise entries or (deliberately, explicitly) lower one it names. Malformed
+ * JSON falls back to the safe defaults.
+ */
+export function resolveRepoTiers(raw: string | undefined = process.env.MEMORY_REPO_TIERS): Record<string, Tier> {
   if (raw && raw.trim()) {
     try {
-      return JSON.parse(raw) as Record<string, Tier>;
+      const parsed = JSON.parse(raw) as Record<string, Tier>;
+      return { ...DEFAULT_REPO_TIERS, ...parsed };
     } catch {
       /* fall through to default on malformed JSON */
     }
   }
-  return DEFAULT_REPO_TIERS;
+  return { ...DEFAULT_REPO_TIERS };
+}
+
+/** Tier for one repo against an already-resolved map (unknown repo → configured default). */
+export function repoTierFrom(map: Record<string, Tier>, repo: string): Tier {
+  return map[repo] ?? ((process.env.MEM_DEFAULT_TIER as Tier) || "public");
 }
 
 function repoTier(repo: string): Tier {
-  return repoTierMap()[repo] ?? ((process.env.MEM_DEFAULT_TIER as Tier) || "public");
+  return repoTierFrom(resolveRepoTiers(), repo);
+}
+
+/**
+ * Boot-time floor assertion (DOC-B-009 tripwire): every repo declared confidential in
+ * DEFAULT_REPO_TIERS must still resolve confidential under the live config, or we throw and
+ * fail closed rather than serve federation memory with a silently-demoted repo.
+ */
+export function assertConfidentialFloor(map: Record<string, Tier> = resolveRepoTiers()): void {
+  const demoted = Object.entries(DEFAULT_REPO_TIERS)
+    .filter(([repo, tier]) => tier === "confidential" && repoTierFrom(map, repo) !== "confidential")
+    .map(([repo]) => repo);
+  if (demoted.length) {
+    throw new Error(
+      `MEMORY_REPO_TIERS demotes confidential repo(s) below their declared tier: ${demoted.join(", ")}`
+    );
+  }
 }
 
 function b64url(b: Buffer): string {
@@ -169,6 +199,11 @@ export async function searchMemory(
   const secret = process.env.MEM_CONNECT_SECRET;
   if (!baseUrl || !secret || !query.trim()) return [];
 
+  // DOC-B-009: fail closed rather than serve federation memory under a config that has silently
+  // demoted a declared-confidential repo below its floor.
+  const tierMap = resolveRepoTiers();
+  assertConfidentialFloor(tierMap);
+
   const sub = process.env.MEM_SERVICE_SUB || "svc:atlas";
   const perRepo = Math.max(1, Number(process.env.MEM_SEARCH_PER_REPO ?? 4));
   const topK = Math.max(1, Number(process.env.MEM_SEARCH_TOPK ?? 12));
@@ -179,7 +214,7 @@ export async function searchMemory(
 
   // filter-before-retrieval: only query repos the caller is entitled to read.
   const readable = repos().filter((r) =>
-    canRead(session, { tier: repoTier(r), orgId: null }, now)
+    canRead(session, { tier: repoTierFrom(tierMap, r), orgId: null }, now)
   );
   if (!readable.length) return [];
 

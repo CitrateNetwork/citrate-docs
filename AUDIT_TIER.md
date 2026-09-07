@@ -21,8 +21,14 @@ security surface, so it audits at Tier 1. (Prior Tier-3 rationale — "no code s
 
 Confidential-tier content is **never** baked into the publicly-served build. It is served only at request
 time, server-side, after the entitlement check, with a disclosure acknowledgement and an access-log entry
-(`PLANSET/02_ARCHITECTURE.md` §3/§4, `03_TLA_SPECS.md` `ConfidentialNeverInBuild`). CI (`npm run
-verify:bundle`) greps the client build and fails on any Confidential sentinel.
+(`PLANSET/02_ARCHITECTURE.md` §3/§4, `03_TLA_SPECS.md` `ConfidentialNeverInBuild`).
+
+The **enforcement** of this invariant is `import "server-only"` on every gated body store
+(`lib/content/confidential-store.ts`, `content/_generated/content-bodies.ts`): the build fails if a client
+module imports them, so no gated body can enter the bundle in the first place. CI (`npm run verify:bundle`)
+is the **defense-in-depth structural check** on top of that — it probes every NON-public body (confidential,
+commercial and academic — not just the confidential sentinel string) against `.next/static` and fails on any
+verbatim leak (CIT-DOCS-003 / DOC-B-001/004). It is a canary that can and does fail; it is not the sole guard.
 
 ## Rule-13 visibility / Confidential-brokering sign-off
 

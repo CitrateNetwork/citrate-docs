@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
 import { DocView } from "@/components/doc-view";
 import { CONTENT_DOCS } from "@/content/_generated/content";
-
-/** Derive a clean ~155-char description from the first prose paragraph of a doc body. */
-function describe(body: string): string {
-  const firstPara = body
-    .replace(/^#.*$/gm, "")          // drop any heading lines
-    .split(/\n\s*\n/)
-    .map((s) => s.replace(/\s+/g, " ").trim())
-    .find((s) => s.length > 0);
-  if (!firstPara) return "Documentation for the Citrate Network.";
-  return firstPara.length > 155 ? firstPara.slice(0, 152).trimEnd() + "..." : firstPara;
-}
+import { docDescription } from "@/lib/seo/doc-metadata";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -19,7 +9,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const doc = CONTENT_DOCS[path];
   if (!doc) return { title: "Not found", robots: { index: false, follow: false } };
 
-  const description = describe(doc.body ?? "");
+  // DOC-B-008: gated tiers never emit body-derived prose in the server-rendered metadata.
+  const description = docDescription(doc);
   const isPublic = doc.tier === "public";
   return {
     title: doc.title,
