@@ -1,5 +1,6 @@
 import { resolveTier } from "@/prototype/fixtures";
 import { resolveRequestSession } from "@/lib/auth/request-session";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { retrieve } from "@/lib/ai/corpus";
 import { searchMemory } from "@/lib/ai/memory";
 import { answer } from "@/lib/ai/provider";
@@ -19,6 +20,10 @@ export const maxDuration = 300;
  * content never reaches an unauthorized asker.
  */
 export async function POST(req: Request) {
+  // DOC-B-007: Ask Codex fans out to the paid gateway + up to 29 memory repos per call — throttle it.
+  const limited = enforceRateLimit(req, "chat", { limit: 20 });
+  if (limited) return limited;
+
   let query = "";
   try {
     const body = (await req.json()) as { query?: string; message?: string };

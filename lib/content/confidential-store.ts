@@ -1,5 +1,5 @@
 import "server-only";
-import type { Doc, Tier } from "@/prototype/fixtures";
+import { canRead, type AuthSession, type Doc, type Tier } from "@/prototype/fixtures";
 
 /**
  * S3, the SERVER-ONLY Confidential content store.
@@ -20,6 +20,14 @@ export interface ConfidentialDoc {
   title: string;
   tier: Tier; // always "confidential"
   orgId: string | null;
+  /**
+   * CIT-DOCS-004: per-doc principal scoping. When set, ONLY a session whose `citrateRole` is in this
+   * allowlist may read the doc — even though it holds a valid confidential grant. `undefined` means the
+   * doc is readable by any confidential principal (the flat-compartment default). This keeps the most
+   * sensitive material (funding / data room) served "only to named principals" as its own text claims,
+   * rather than to every holder of an engagement-scoped confidential credential.
+   */
+  allowedRoles?: string[];
   source: string; // the private home repo/path prod fetches from
   disclosureRequired: boolean;
   disclosureId?: string;
@@ -49,6 +57,9 @@ export const CONFIDENTIAL_DOCS: Record<string, ConfidentialDoc> = {
   },
   "/internal/funding": {
     slug: "/internal/funding", title: "Funding / data room", tier: "confidential", orgId: null,
+    // CIT-DOCS-004: FOUNDER-CONFIDENTIAL — named principals only, NOT every confidential grant
+    // (e.g. a time-gated security-engagement auditor must not read the data room / cap table).
+    allowedRoles: ["admin", "exec"],
     source: "funding/docs/", disclosureRequired: true, disclosureId: "audit-nda",
     body:
       "# Funding / data room" + sentinel +
@@ -103,4 +114,23 @@ export function confidentialMeta(): Record<string, Pick<Doc, "slug" | "title" | 
     };
   }
   return out;
+}
+
+/**
+ * The confidential authorization chokepoint (CIT-DOCS-004). A confidential grant clears the tier/org/
+ * expiry gate via `canRead`; on top of that, a doc carrying `allowedRoles` is served ONLY to a session
+ * whose `citrateRole` is in that allowlist. Fail-closed: a doc scoped to roles is denied to a session
+ * with no role. Returns true only when BOTH checks pass.
+ */
+export function authorizeConfidentialRead(
+  session: AuthSession,
+  doc: Pick<ConfidentialDoc, "tier" | "orgId" | "allowedRoles">,
+  now: number
+): boolean {
+  if (!canRead(session, { tier: doc.tier, orgId: doc.orgId }, now)) return false;
+  if (doc.allowedRoles && doc.allowedRoles.length) {
+    const role = session.entitlement?.citrateRole;
+    if (!role || !doc.allowedRoles.includes(role)) return false;
+  }
+  return true;
 }
