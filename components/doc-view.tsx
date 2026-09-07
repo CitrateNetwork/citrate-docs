@@ -18,11 +18,15 @@ export function DocView({ slug }: { slug: string }) {
   const { session, viewerId } = useViewer();
   const [ackTick, setAckTick] = useState(0);
 
-  const nav = useMemo(() => filterNav(MERGED_NAV, session), [session]);
+  const nav = useMemo(() => filterNav(MERGED_NAV, session, Date.now()), [session]); // DOC-B-005: real clock
   // Content-pipeline docs (content/**) take precedence; fixtures cover the demo-only states.
   const contentDoc = CONTENT_DOCS[slug];
   const res = useMemo(
-    () => (contentDoc ? mockApi.evaluateDoc(session, contentDoc) : mockApi.getDoc(session, slug)),
+    // DOC-B-005: evaluate the gate against the real clock so expired grants collapse to their base tier.
+    () =>
+      contentDoc
+        ? mockApi.evaluateDoc(session, contentDoc, Date.now())
+        : mockApi.getDoc(session, slug, Date.now()),
     [session, slug, ackTick, contentDoc]
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

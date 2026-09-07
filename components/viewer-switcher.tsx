@@ -11,7 +11,7 @@ import { mockApi } from "@/prototype/fixtures";
  */
 export function ViewerSwitcher() {
   const { viewerId, setViewerId, viewers, session } = useViewer();
-  const tier = mockApi.resolveTier(session);
+  const tier = mockApi.resolveTier(session, Date.now()); // DOC-B-005: real clock, not FIXED_NOW
   return (
     <label className="flex items-center gap-2 text-xs">
       <span className="hidden text-[var(--color-muted)] sm:inline">view as</span>

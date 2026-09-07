@@ -27,8 +27,8 @@ export async function POST(req: Request) {
     /* empty */
   }
   const session = await resolveRequestSession(req);
-  const tier = resolveTier(session);
   const now = Date.now();
+  const tier = resolveTier(session, now); // DOC-B-005: real clock, not FIXED_NOW
 
   // Frozen docs + live federation memory, both filtered to what this caller may read.
   const docChunks = retrieve(session, query, 5, now);
