@@ -1,6 +1,6 @@
 import { canRead } from "@/prototype/fixtures";
 import { resolveRequestSession } from "@/lib/auth/request-session";
-import { CONFIDENTIAL_DISCLOSURES, CONFIDENTIAL_DOCS } from "@/lib/content/confidential-store";
+import { CONFIDENTIAL_DISCLOSURES, CONFIDENTIAL_DOCS, authorizeConfidentialRead } from "@/lib/content/confidential-store";
 import { recordAccess } from "@/lib/content/access-log";
 import { CONTENT_DOCS } from "@/content/_generated/content";
 import { CONTENT_BODIES } from "@/content/_generated/content-bodies";
@@ -24,7 +24,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     const session = await resolveRequestSession(req);
     const now = Date.now();
     // Not-readable → 404. Never reveal that a Confidential doc exists to an unentitled caller.
-    if (!canRead(session, { tier: doc.tier, orgId: doc.orgId }, now)) {
+    // CIT-DOCS-004: per-doc `allowedRoles` scoping on top of the tier/org gate (funding = named
+    // principals only), so a confidential grant is NOT a key to every confidential compartment.
+    if (!authorizeConfidentialRead(session, doc, now)) {
       return json({ error: "not_found" }, 404);
     }
     if (doc.embargoUntil && now < doc.embargoUntil) {
@@ -37,14 +39,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       }
     }
 
-    // Authorized. Record the read, then serve the body (prod: fetched from doc.source at request time).
-    recordAccess({
+    // Authorized. Record the read FIRST; DOC-B-010: a Confidential read that cannot be logged must
+    // not be served, and `accessLogged` reflects the actual write result rather than a literal.
+    const logged = recordAccess({
       sub: session.sub ?? "unknown", docSlug: path, tier: doc.tier, orgId: doc.orgId,
       disclosureAck: Boolean(doc.disclosureRequired), at: now,
     });
+    if (!logged) return json({ error: "access_log_unavailable" }, 503);
     return json({
       slug: path, title: doc.title, tier: doc.tier, body: doc.body,
-      source: doc.source, accessLogged: true, acknowledgedAt: doc.disclosureRequired ? now : undefined,
+      source: doc.source, accessLogged: logged, acknowledgedAt: doc.disclosureRequired ? now : undefined,
     });
   }
 
@@ -72,12 +76,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const body = CONTENT_BODIES[path];
   if (body == null) return json({ error: "not_found" }, 404);
 
-  recordAccess({
+  const logged = recordAccess({
     sub: session.sub ?? "unknown", docSlug: path, tier: meta.tier, orgId: meta.orgId ?? null,
     disclosureAck: Boolean(meta.disclosureRequired), at: now,
   });
+  if (!logged) return json({ error: "access_log_unavailable" }, 503);
   return json({
     slug: path, title: meta.title, tier: meta.tier, body,
-    source: meta.source, accessLogged: true, acknowledgedAt: meta.disclosureRequired ? now : undefined,
+    source: meta.source, accessLogged: logged, acknowledgedAt: meta.disclosureRequired ? now : undefined,
   });
 }
