@@ -1,6 +1,11 @@
 /** S5 — gasless EIP-2771 relay demo. Wired for a configured relay; fail-closed otherwise (the docs app
  *  custodies no keys and submits no transactions on its own — by design). */
+import { enforceRateLimit } from "@/lib/security/rate-limit";
+
 export async function POST(req: Request) {
+  const limited = enforceRateLimit(req, "sandbox:relay", { limit: 10 }); // DOC-B-007
+  if (limited) return limited;
+
   const relay = process.env.CITRATE_RELAY_URL;
   if (!relay) {
     return Response.json(

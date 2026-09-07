@@ -1,6 +1,11 @@
+import { enforceRateLimit } from "@/lib/security/rate-limit";
+
 /** S5 — x402 walkthrough: request a metered resource and surface the HTTP 402 challenge. Fail-closed
  *  when no x402 endpoint is reachable. Read-only: it captures the challenge, it does not settle/pay. */
-export async function POST() {
+export async function POST(req: Request) {
+  const limited = enforceRateLimit(req, "sandbox:x402", { limit: 20 }); // DOC-B-007
+  if (limited) return limited;
+
   const url = process.env.CITRATE_X402_URL || `${(process.env.CITRATE_GATEWAY_URL || "https://infer.citrate.ai/v1").replace(/\/$/, "")}/chat/completions`;
   try {
     const ctrl = new AbortController();

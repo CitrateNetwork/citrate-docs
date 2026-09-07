@@ -1,7 +1,11 @@
 import { rpcCall } from "@/lib/sandbox/rpc";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 /** S5 — RPC method explorer: run an allowlisted read-only call against chain 40204. */
 export async function POST(req: Request) {
+  const limited = enforceRateLimit(req, "sandbox:rpc", { limit: 30 }); // DOC-B-007
+  if (limited) return limited;
+
   let method = "eth_chainId";
   let params: unknown[] = [];
   try {
