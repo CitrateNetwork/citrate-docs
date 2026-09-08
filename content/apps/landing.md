@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-landing/README.md, citrate-landing/src/app, citrate-landing/src/lib
 surfaces: [APP-landing]
-audited_against_sha: d4f4a64
+audited_against_sha: 63adc44
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -19,8 +19,9 @@ into a form is encrypted before it is written down.
 ## What it is
 
 The marketing site is a plain website with one unusual property. It is built on Next.js 16 with the App
-Router, backed by Neon Postgres through Drizzle, and runs on Vercel. Nine pages, ported from the original
-design prototype, describe the network and the institutions it is built for. Three forms let you reach us.
+Router, backed by Neon Postgres through Drizzle, and runs on Vercel. Around twenty pages describe the
+network and the institutions it is built for, from the core marketing surfaces to the American Learning
+Federation, Groves, membership, join, and desktop-download flows. Three contact forms let you reach us.
 
 The property worth knowing is that the site never keeps what you type in readable form. Every form
 submission is encrypted with AES-256-GCM before it reaches the database, so the stored columns are
@@ -32,8 +33,10 @@ no claim of its own beyond that.
 
 You read the pages, and if you want to talk to us, you submit a form.
 
-1. Browse the nine pages: home, solutions, technology, host-compute, compliance, constitution, about,
-   resources, and legal. Each is a server-rendered page under `src/app/`.
+1. Browse the pages: the core surfaces are home, solutions, technology, compliance, constitution, about,
+   products, enterprise, resources, FAQ, and legal, with further pages for the American Learning Federation,
+   Groves, membership, the join flow, open source, and the desktop download. Each is a server-rendered page
+   under `src/app/`.
 2. Choose the form that fits. Contact is for general inquiries, host-compute is to apply to run hardware on
    the network, and verification-packet is to request our compliance and security documentation.
 3. Fill in the fields and submit. You receive a confirmation, and the team is notified by email and follows
@@ -43,19 +46,25 @@ There is no account to create and nothing to install. The site is read and submi
 
 ## Reference
 
-The pages and the three form endpoints, each citing its path in `citrate-landing`.
+The core pages and the three form endpoints, each citing its path in `citrate-landing`.
 
 | Page | Route | What it covers |
 |---|---|---|
 | Home | `/` | Hero, the network at a glance, the sectors and public doors |
 | Solutions | `/solutions` | What you can build and run on the network |
 | Technology | `/technology` | The substrate, consensus, and on-premise model |
-| Host-compute | `/host-compute` | Running hardware on the public network |
-| Compliance | `/compliance` | The compliance posture by deployment context |
+| Compliance | `/solutions/compliance` | The compliance posture by deployment context |
 | Constitution | `/constitution` | Network governance |
+| Products | `/products` | The applications and surfaces on the network |
+| Enterprise | `/enterprise` | The on-premise enterprise offering |
 | About | `/about` | The team and the mission |
 | Resources | `/resources` | Documentation and reading |
 | Legal | `/legal` | Terms and policies |
+
+Further pages cover the American Learning Federation (`/alf`), Groves (`/groves`), membership
+(`/membership`), the join flow (`/join`), open source (`/open-source`), and the desktop download
+(`/download/desktop`, `/download/get`). The host-compute application posts to `/api/host-compute`; it has no
+dedicated page.
 
 | Form endpoint | Method | Purpose |
 |---|---|---|
@@ -89,7 +98,7 @@ only, and the single plaintext use is the team's reply.
 ## Source and verification
 
 - Source repo: `citrate-landing`, `README.md`.
-- Audited against SHA: `d4f4a64`.
+- Audited against SHA: `63adc44`.
 - Key paths: `src/lib/encryption.ts`, `src/lib/schemas.ts`, `src/app/api/contact/route.ts`,
   `src/app/api/host-compute/route.ts`, `src/app/api/verification-packet/route.ts`,
   `src/app/api/challenge/route.ts`, `src/app/` (nine pages).

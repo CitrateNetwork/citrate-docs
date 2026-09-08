@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-memories
 surfaces: [APP-memories]
-audited_against_sha: 5a972d9
+audited_against_sha: a616e75
 status: Specified
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -87,7 +87,7 @@ The system runs as three parts, described in `PLANSET/07_IMPLEMENTATION_AND_HARD
 | Part | Role | Source |
 |---|---|---|
 | Webapp | The browser front end and OIDC relying party. | `webapp/` |
-| Gateway | Authentication, Org resolution, authorization, the HTTP and JSON API, and the SSE stream. | `crates/mem-gateway/` (`org.rs`, `authz.rs`, `oidc.rs`, `http.rs`) |
+| Gateway | Authentication, Org resolution, authorization, the HTTP and JSON API, and the SSE stream. | `crates/mem-gateway/` (`auth.rs`, `control.rs`, `oidc.rs`, `http.rs`) and the `crates/mem-authz/` policy crate |
 | Engine | The memory store and vector index. | the engine crates |
 
 ## Design rationale
@@ -111,13 +111,10 @@ This surface holds client memory, so it is built to fail closed.
   outside the grant is denied, and the denial is recorded.
 - The audit log is a hash chain. A break in the chain is detectable, and the Org view shows whether
   the chain is intact.
-- Memory content is encrypted at rest with XChaCha20-Poly1305, with a master key per Org.
+- Memory content is encrypted at rest with XChaCha20-Poly1305, with a per-tenant data key sealed under a
+  per-Org keyring.
 - The platform operator role has no access to memory content by design.
 - No secrets appear in this page. None of the OIDC, capability, or encryption keys are reproduced here.
-
-> Repo hygiene, flagged and not transcribed: the working tree carries `webapp/.env.local` holding a
-> live Neon Postgres connection string and a Vercel OIDC token. These should be rotated and the file
-> removed from version control. Neither is reproduced here.
 
 ## Access and canon
 
@@ -131,9 +128,10 @@ across Citrate, as described in [what Citrate is](/start/what-is-citrate).
 
 - Source repo: `citrate-memories`. The product is named Memrizz; an earlier working codename still
   lingers in some spec and crate comments and is not used in Atlas.
-- Audited against: `5a972d9`.
-- Key paths: `crates/mem-mcp/src/lib.rs`, `crates/mem-gateway/` (`org.rs`, `authz.rs`, `oidc.rs`,
-  `http.rs`), `crates/mem-store/src/shred.rs`, `PLANSET/00`–`07`, `webapp/`, `README.md`.
+- Audited against: `a616e75`.
+- Key paths: `crates/mem-mcp/src/lib.rs`, `crates/mem-gateway/` (`auth.rs`, `control.rs`, `oidc.rs`,
+  `http.rs`), `crates/mem-authz/`, `crates/mem-store/src/shred.rs`, `PLANSET/00` to `07`, `webapp/`,
+  `README.md`.
 - Status by area:
   - Security foundation (milestone M0, landed 2026-06-14): **Implemented (pre-audit).** Org
     control-plane and isolation, OIDC verification, capability-grant authorization, the HTTP read and

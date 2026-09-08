@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: linked
 source: AGENTILE.md
 surfaces: [START-agentile, METH-rules, METH-workflow]
-audited_against_sha: cd729ed
+audited_against_sha: a43a354
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -21,7 +21,7 @@ file differ, the file wins.
 Agentile is the methodology we use to keep planning, governance, audit posture, and cross-repo state
 coherent across the federation. It is three things working together:
 
-- a small set of **13 rules** that constrain what can ship;
+- a small set of **14 rules**, numbered 0 through 13, that constrain what can ship;
 - a **sprint-driven workflow** that constrains when and how things ship;
 - a **single-source-of-truth** convention: every document is dated and branch-stamped, each topic lives in
   exactly one place, and the agents that do the work follow the same rules and leave the same file-based
@@ -41,7 +41,7 @@ you are auditing, it is why the evidence sits on disk rather than in memory. The
 
 ## Reference
 
-The 13 rules, in brief. The full statement is on [the rules page](/methodology/rules).
+The 14 rules, numbered 0 through 13, in brief. The full statement is on [the rules page](/methodology/rules).
 
 | # | Rule |
 |---|---|
@@ -75,5 +75,5 @@ secrets. Internal-only procedures, such as incident response and access review, 
 ## Source and verification
 
 Linked page. The canonical sources are `AGENTILE.md`, `docs/AGENTILE_RULES.md`, and
-`docs/AGENTILE_WORKFLOW.md` at the federation root, at SHA `cd729ed`. Per Rule 9, this page summarizes and
+`docs/AGENTILE_WORKFLOW.md` at the federation root, at SHA `a43a354`. Per Rule 9, this page summarizes and
 the canonical files govern. Status: Implemented.

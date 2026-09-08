@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-identity/src/aa (guardians.ts, guardian-routes.ts, install-data.ts) + contracts/src/aa/recovery/GuardianRecoveryModule.sol
 surfaces: [ID-guardians, SC-aa-guardian]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9664fa8
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -161,8 +161,8 @@ guardian role and no spare key.
 | Recovery module | `contracts/src/aa/recovery/GuardianRecoveryModule.sol` | Implemented (pre-audit) |
 | End-to-end recovery | `test/aa/GuardianRecoveryE2E.t.sol` | Verified (testnet 40204) |
 
-Off-chain surfaces verified against `citrate-identity` at `4aa869c`; the recovery contract and its
-end-to-end test verified against the contracts repo at `54d1f2c`. The "Citrate is never a guardian"
+Off-chain surfaces verified against `citrate-identity` at `9664fa8`; the recovery contract and its
+end-to-end test verified against the `citrate-chain` contracts repo at `9d5959e`. The "Citrate is never a guardian"
 invariant is enforced in `guardians.ts` and in the contract install. The stack has shipped and is exercised
 end to end, deploy through M-of-N recovery through a fresh-key operation, but has not had an external audit.
 Re-verify against the SHAs before relying on this page.

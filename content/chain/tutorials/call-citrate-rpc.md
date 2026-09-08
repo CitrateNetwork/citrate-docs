@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain core/api
 surfaces: [CHAIN-rpc-eth, CHAIN-rpc-citrate, CHAIN-rpc-econ]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -99,7 +99,7 @@ rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-SALT has 18 decimals and a one-billion cap. It is the unit fees and rewards are counted in, not a product. For
+SALT has 18 decimals and a one-trillion cap. It is the unit fees and rewards are counted in, not a product. For
 the live economic snapshot, blocks height, gas price, staked amount, and treasury, call
 `citrate_getEconomicState`:
 
@@ -142,12 +142,12 @@ The methods used above, with their source files in `citrate-chain`:
 
 | Method | What it returns | Source |
 |---|---|---|
-| `eth_chainId` | the chain id, `0x9d0c` | `core/api/src/eth_rpc_simple.rs` |
+| `eth_chainId` | the chain id, `0x9d0c` | `core/api/src/eth_rpc.rs` |
 | `chain_getHeight` | the current height as a number | `core/api/src/server.rs` |
 | `citrate_getDagStats` | tips, blue score, GhostDAG params | `core/api/src/eth_rpc.rs` |
 | `citrate_getToken` | SALT name, decimals, supply | `core/api/src/economics_rpc.rs` |
 | `citrate_getEconomicState` | live economic snapshot | `core/api/src/economics_rpc.rs` |
-| `eth_getCode` | the code at an address | `core/api/src/eth_rpc_simple.rs` |
+| `eth_getCode` | the code at an address | `core/api/src/eth_rpc.rs` |
 
 ## Failure modes
 
@@ -167,8 +167,8 @@ testnet. The example outputs are illustrative; exact values depend on the node's
 
 ## Source and verification
 
-Methods verified against `citrate-chain` at `03d7851`: `eth_chainId` and `eth_getCode` in
-`core/api/src/eth_rpc_simple.rs`, `chain_getHeight` in `core/api/src/server.rs`, `citrate_getDagStats` in
+Methods verified against `citrate-chain` at `9d5959e`: `eth_chainId` and `eth_getCode` in
+`core/api/src/eth_rpc.rs`, `chain_getHeight` in `core/api/src/server.rs`, `citrate_getDagStats` in
 `core/api/src/eth_rpc.rs`, and `citrate_getToken` and `citrate_getEconomicState` in
 `core/api/src/economics_rpc.rs`. The full surface is on the [JSON-RPC reference](/chain/rpc). Status:
 Implemented (testnet 40204), pre external audit.

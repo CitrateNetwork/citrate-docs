@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/network/
 surfaces: [CHAIN-net-p2p]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -101,5 +101,5 @@ Noise identity, and nothing is hardcoded in these docs.
 - Source: `citrate-chain/core/network/` (`noise.rs`, `discovery.rs`, `bootnode.rs`, `gossip.rs`,
   `block_propagation.rs`, `sync.rs`, `nat.rs`, `ai_handler.rs`, `learning_messages.rs`).
 - Operator path: [run a node](/operators/run-a-node); block ordering: [consensus](/chain/consensus).
-- Audited against SHA: `03d7851`.
+- Audited against SHA: `9d5959e`.
 - Status: Implemented (testnet), internally tested, pre external audit.

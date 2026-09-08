@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/economics/
 surfaces: [CHAIN-econ]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -21,7 +21,7 @@ it pays, and how supply behaves over the long view.
 
 SALT is the credit the network counts in. When a transaction pays a fee, when a node earns a reward for
 sealing a block, or when stake is placed and returned, the amount is denominated in SALT. The supply is
-fixed at genesis: one billion SALT, never more. The smallest unit is wei-style, so one SALT divides into
+fixed at genesis: one trillion SALT, never more. The smallest unit is wei-style, so one SALT divides into
 10^18 base units, the same granularity a developer already expects from an account balance.
 
 The economics live in one crate, `core/economics/`. It holds the token itself (`token.rs`), the per-block
@@ -32,8 +32,8 @@ network running, and it shrinks on a fixed cadence so that early seasons are mor
 A block reward is built from a base reward plus four bonus pools, each expressed as a percentage of that
 base reward. The four pools recognise four kinds of contribution: validator performance, AI contribution,
 network health, and long-term staking. A node that does more of the work the network values earns a larger
-share of the pools. The base reward halves every 2,100,000 blocks, roughly four years at the testnet
-cadence, so issuance tapers toward zero over the network's life rather than running flat forever.
+share of the pools. The base reward halves every 2,100,000 blocks, about 24 days at the one-second
+testnet cadence, so issuance tapers toward zero over the network's life rather than running flat forever.
 
 ## How to use it
 
@@ -57,11 +57,11 @@ Token constants, verified in `core/economics/src/lib.rs` and `core/economics/src
 |---|---|---|
 | Symbol (`TOKEN_SYMBOL`) | `SALT` | `lib.rs` |
 | Name (`TOKEN_NAME`) | `Citrate` | `lib.rs` |
-| Total supply (`TOTAL_SUPPLY`) | 1,000,000,000 (one billion) | `lib.rs` |
+| Total supply (`TOTAL_SUPPLY`) | 1,000,000,000,000 (one trillion) | `lib.rs` |
 | Decimals (`DECIMALS`) | 18 | `token.rs` |
 
-Total supply in base units is `1_000_000_000 × 10^18`. The token tracks balances, total minted, and total
-burned; circulating supply is minted minus burned, and minting is capped at the one billion ceiling.
+Total supply in base units is `1_000_000_000_000 × 10^18`. The token tracks balances, total minted, and total
+burned; circulating supply is minted minus burned, and minting is capped at the one trillion ceiling.
 
 Block reward schedule, verified in `core/economics/src/enhanced_rewards.rs`:
 
@@ -72,7 +72,7 @@ Block reward schedule, verified in `core/economics/src/enhanced_rewards.rs`:
 | AI contribution pool | percentage of the base reward | `enhanced_rewards.rs` (`ai_contribution_pool`) |
 | Network health pool | percentage of the base reward | `enhanced_rewards.rs` (`network_health_pool`) |
 | Long-term staking pool | percentage of the base reward | `enhanced_rewards.rs` (`staking_bonus_pool`) |
-| Halving interval | 2,100,000 blocks (~4 years at testnet cadence) | `enhanced_rewards.rs` (`halving_interval`) |
+| Halving interval | 2,100,000 blocks (~24 days at the 1 s testnet cadence) | `enhanced_rewards.rs` (`halving_interval`) |
 
 The base reward and the four pool percentages are defaults in the source; we describe the base as a
 configurable base reward rather than asserting a fixed number, since governance can move it. What does not
@@ -83,7 +83,7 @@ use citrate_economics::*;
 
 // Token fundamentals are constants:
 assert_eq!(TOKEN_SYMBOL, "SALT");
-assert_eq!(TOTAL_SUPPLY, 1_000_000_000); // 18 decimals; base units = value × 10^18
+assert_eq!(TOTAL_SUPPLY, 1_000_000_000_000); // 18 decimals; base units = value × 10^18
 ```
 
 ## Design rationale
@@ -97,7 +97,7 @@ moving parts to reason about; the benefit is that incentives point at the work r
 
 ## Failure modes
 
-The supply cap is enforced at mint: an attempt to mint past one billion SALT is rejected, so no path
+The supply cap is enforced at mint: an attempt to mint past one trillion SALT is rejected, so no path
 through the reward schedule can inflate beyond the ceiling. Burned credits are tracked separately, so
 circulating supply stays an honest minted-minus-burned figure rather than drifting. Because the base reward
 and pool percentages are governance-configurable, the load-bearing invariant is the supply cap and the
@@ -117,6 +117,6 @@ here.
   `src/enhanced_rewards.rs`.
 - Live state over JSON-RPC: `citrate_getEconomicState` and `citrate_getToken`
   (`core/api/src/economics_rpc.rs`); see [chain RPC](/chain/rpc).
-- Audited against SHA: `03d7851`.
+- Audited against SHA: `9d5959e`.
 - Status: Implemented (testnet), internally tested, pre external audit. The base reward and pool
   percentages are configurable defaults in source, not certified values.

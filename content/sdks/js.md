@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-js/src/index.ts
 surfaces: [SDK-JS-CitrateClient, SDK-JS-aa, SDK-JS-crypto, SDK-JS-react]
-audited_against_sha: bc5a830
+audited_against_sha: 2f8da46
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -37,6 +37,9 @@ Several surfaces sit behind one import, and most apps only ever touch the first:
   and capability map. See [entitlements](/sdks/entitlements).
 - The **inference gateway client**, exported under the `gateway` namespace: an OpenAI-compatible client for
   `infer.citrate.ai`.
+- The **memory client**, exported under the `memory` namespace: a typed client for a `citrate-memories`
+  gateway (`src/memory/client.ts`), with `MemoryClient` over the OIDC REST surface (recall, search, neighbors,
+  verify, review, assert) and `ByomMemoryClient` for the bring-your-own-model MCP path.
 - The cryptography utilities, `CryptoManager`, `KeyManager`, and Shamir secret sharing (`src/crypto/`).
 - The optional React hooks (`src/react/hooks.ts`), which are not re-exported from the package root.
 
@@ -60,7 +63,7 @@ API.
    npm install @citratelabs/sdk
    ```
 
-   The runtime dependencies are `ethers ^6.8`, `axios ^1.7`, and `eventemitter3 ^5`. The React hooks need
+   The runtime dependencies are `ethers ^6.17`, `axios ^1.20`, and `eventemitter3 ^5.0`. The React hooks need
    `react >=16.8` and `react-dom >=16.8`, which are optional peer dependencies; install them only if you use
    the hooks.
 
@@ -221,12 +224,13 @@ SDK itself holds no such data.
 ## Source and verification
 
 - Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`package.json`; `citrate-js` retained as a deprecated alias).
-- Audited against SHA: `bc5a830` (client/aa/crypto); DevX identity/entitlements/gateway surfaces added 2026-07-25.
+- Audited against SHA: `2f8da46`.
 - Audited paths: `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
   `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler,types}.ts`,
-  `src/crypto/{CryptoManager,KeyManager,FiniteField}.ts`, `src/react/hooks.ts`, `src/utils/constants.ts`, and
+  `src/crypto/{CryptoManager,KeyManager,FiniteField}.ts`, `src/identity/`, `src/entitlements/capabilities.ts`,
+  `src/gateway/client.ts`, `src/memory/client.ts`, `src/react/hooks.ts`, `src/utils/constants.ts`, and
   `src/errors/CitrateError.ts`.
 - Status: Implemented (pre-audit). The client and cryptography surfaces are built and run against testnet 40204.
   The `aa` module is Implemented but in development (EW-S1 WP-7) and depends on still-moving bundler and auth
-  infrastructure. The `identity`, `entitlements`, and `gateway` namespaces (DevX, 2026-07-25) are Implemented
-  and unit-tested; account-address prediction is verified byte-for-byte against the on-chain factory.
+  infrastructure. The `identity`, `entitlements`, `gateway`, and `memory` namespaces are Implemented and
+  unit-tested; account-address prediction is verified byte-for-byte against the on-chain factory.

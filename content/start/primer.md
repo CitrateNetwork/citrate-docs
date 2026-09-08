@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain consensus + economics + keyring
 surfaces: [START-primer]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -60,7 +60,7 @@ guardians. The account is a contract, the key is a passkey, and someone else can
 
 ### SALT, the unit you count in
 
-SALT has 18 decimals and a one-billion supply cap, and it settles fees, block rewards, and staking. Amounts
+SALT has 18 decimals and a one-trillion supply cap, and it settles fees, block rewards, and staking. Amounts
 in the API are integers in the smallest unit, where 10^18 is one SALT, and supply is minted minus burned,
 held under the cap. SALT measures the work the network does; it is not a product to hold. See
 [economics](/chain/economics).
@@ -91,6 +91,6 @@ behind GhostDAG and finality are academic-tier and live on the linked Citrate Ne
 ## Source and verification
 
 The numbers (k = 18, finality depth 100, SALT 18 decimals and 1B cap, chain id 40204) are verified against
-`citrate-chain` at `03d7851`: `core/consensus/src/types.rs` and `core/api/src/economics_rpc.rs`, surfaced
+`citrate-chain` at `9d5959e`: `core/consensus/src/types.rs` and `core/api/src/economics_rpc.rs`, surfaced
 through the [consensus](/chain/consensus) and [economics](/chain/economics) pages. Status: Implemented
 (testnet).

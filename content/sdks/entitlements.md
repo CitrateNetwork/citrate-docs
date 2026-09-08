@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-js/src/entitlements/capabilities.ts
 surfaces: [SDK-entitlements]
-audited_against_sha: devx-2026-07-25
+audited_against_sha: 9664fa8
 status: Implemented
 created: 2026-07-25T00:00:00Z
 author: Citrate team

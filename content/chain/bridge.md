@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/bridge/ (internals gated)
 surfaces: [CHAIN-bridge]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Specified
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -41,6 +41,6 @@ endpoints, thresholds, or mechanism internals appear on this page.
 
 - Source: `citrate-chain/core/bridge/`, internals gated; this public page does not transclude or summarise
   them.
-- Audited against SHA: `03d7851`.
+- Audited against SHA: `9d5959e`.
 - Status: Specified, pre-alpha. Runs in a development configuration only; no external audit has been
   completed and the mainnet ceremony is not yet scheduled.

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-buyer-webapp
 surfaces: [APP-buyer]
-audited_against_sha: 573da03
+audited_against_sha: 7d44b29
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -141,7 +141,7 @@ network is identity-verified through VERI, Citrate's in-house verification; that
 ## Source and verification
 
 - Source repo: `citrate-buyer-webapp`, split from the Citrate monorepo on 2026-05-18.
-- Audited against: `573da03`.
+- Audited against: `7d44b29`.
 - Key paths: `app/page.tsx`, `app/design/DesignApp.jsx`, `app/design/sdkBridge.ts`,
   `app/api/chat/route.ts`, `lib/submitJob.ts`, `lib/submitDirectJob.ts`, `lib/marketplace.ts`,
   `lib/buyCredits.ts`, `lib/gatewayAllowlist.ts`, `lib/chatGuard.ts`, `DESIGN_HANDOFF.md`.

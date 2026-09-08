@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/node/config/, citrate-chain/node/src/genesis.rs
 surfaces: [CHAIN-genesis]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -82,7 +82,7 @@ Genesis block, built deterministically from the shared genesis path
 | Base fee per gas | 1 Gwei (1e9 wei) | `core/economics/src/genesis.rs` (`base_fee_per_gas`) |
 | Gas limit | 30,000,000 | `core/economics/src/genesis.rs` (`gas_limit`) |
 
-The genesis allocation categories sum to the one billion SALT supply cap; the allocation structure is
+The genesis allocation categories sum to the one trillion SALT supply cap; the allocation structure is
 covered under [network economics](/chain/economics). No private keys or mnemonics appear in any
 configuration in the repository, and we do not enumerate specific genesis account addresses in public docs.
 
@@ -116,6 +116,6 @@ addresses or paste live bootstrap addresses here, fetch operational endpoints fr
   `citrate-chain/core/economics/src/genesis.rs`.
 - Chain id 40204 confirmed in `node/config/testnet.toml`; mainnet chain id 1 in `node/config/mainnet.toml`;
   `eth_chainId` returns `0x9d0c` (`core/api/src/eth_rpc.rs`, `cli/src/commands/advanced.rs`).
-- Audited against SHA: `03d7851`.
+- Audited against SHA: `9d5959e`.
 - Status: Implemented, testnet 40204 is the active public network; mainnet is Specified but pre-launch (the
   config exists, the network is not yet live). The path to mainnet is on the [roadmap](/start/roadmap).

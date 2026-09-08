@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{WrappedSALT,LiquidStakingPool,IPFSIncentives,ContributionAccounting,StablecoinTreasury,MarketMakerAllocation}.sol
 surfaces: [SC-econ-wrappedSALT, SC-econ-staking, SC-econ-ipfs, SC-econ-contrib, SC-econ-stable, SC-econ-mm]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -131,8 +131,9 @@ the accrued SALT.
 
 Events: `PinReported`, `RewardClaimed`, `BaseRewardUpdated`, `RewardsDeposited`. Two later designs exist in
 the tree, a sealed proof-of-replication mechanism (`IPFSIncentivesV2.sol`) and a commit-reveal extension of
-it (`IPFSIncentivesV3.sol`). Neither is in the canonical registry at this SHA, so neither is documented as a
-live surface here; see the source and verification note for which version is current.
+it (`IPFSIncentivesV3.sol`) with a grief-slashable wrong-CommD challenge. Both are now listed in the
+canonical registry (`contracts/addresses/40204.json`); this page documents version one's surface, and the
+source and verification note points to the later versions.
 
 ### ContributionAccounting
 
@@ -244,15 +245,15 @@ these contracts. The deployed addresses are public testnet values.
 
 ## Source and verification
 
-- Source repo: `citrate-chain` at SHA `54d1f2c`.
+- Source repo: `citrate-chain` at SHA `9d5959e`.
 - Files: `contracts/src/WrappedSALT.sol`, `contracts/src/LiquidStakingPool.sol`,
   `contracts/src/IPFSIncentives.sol`, `contracts/src/ContributionAccounting.sol`,
   `contracts/src/StablecoinTreasury.sol`, `contracts/src/MarketMakerAllocation.sol`.
 - Addresses: the canonical registry is `contracts/addresses/40204.json` for chain 40204. At this SHA it
-  lists `IPFSIncentives` (version one) and not `IPFSIncentivesV2` or `IPFSIncentivesV3`; the deploy script
-  `contracts/script/DeployAll.s.sol` deploys version one as well. The earlier `contracts/DEPLOYED_ADDRESSES.md`
-  note carries a different `IPFSIncentives` address than the canonical registry, so resolve from
-  `addresses/40204.json` and confirm with `eth_getCode` before sending value.
+  lists all three, `IPFSIncentives` (version one), `IPFSIncentivesV2`, and `IPFSIncentivesV3`; the deploy
+  script `contracts/script/DeployAll.s.sol` deploys version one, and V2 and V3 are deployed and registered
+  separately. The superseded `contracts/DEPLOYED_ADDRESSES.md` is no longer the source of truth, so resolve
+  from `addresses/40204.json` and confirm with `eth_getCode` before sending value.
 - Status: Implemented, pre-audit. The contracts run on testnet 40204 and carry remediations from the
   SECREM-01 and re-audit sprints in their source comments, with Foundry invariant suites in places, but no
   external third-party audit has been completed. Treat as experimental.

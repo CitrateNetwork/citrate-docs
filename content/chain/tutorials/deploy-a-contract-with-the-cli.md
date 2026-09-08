@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain cli/src/commands/contract.rs
 surfaces: [CHAIN-cli-citrate, CHAIN-cli-contract]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -194,7 +194,7 @@ the local keystore at `~/.citrate/keystore`; the Citrate Keyring, not a hosted s
 
 ## Source and verification
 
-Commands verified against `citrate-chain` at `03d7851`. Contract operations are in
+Commands verified against `citrate-chain` at `9d5959e`. Contract operations are in
 `cli/src/commands/contract.rs`, with the subcommands `deploy`, `call`, `read`, `code`, `verify`, `verify-get`,
 and `verify-list`. Config defaults are in `cli/src/config.rs`, the global `--rpc` flag and the top-level
 subcommands are in `cli/src/main.rs`, account operations are in `cli/src/commands/account.rs`, and the

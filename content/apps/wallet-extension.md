@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-wallet-extension/manifest.json, js/, popup/
 surfaces: [APP-wallet-ext]
-audited_against_sha: 543017d
+audited_against_sha: 930594c
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -71,12 +71,13 @@ Manifest V3 permissions, from `manifest.json`:
 | `storage` | Store the encrypted account and settings in `chrome.storage.local` |
 | `activeTab` | Interact with the page the user is on |
 | `identity` | Run the Citrate Keyring identity sign-in through `chrome.identity.launchWebAuthFlow` |
+| `alarms` | Drive the service-worker lock and session timers |
 
 Content scripts inject only on `https://*/*`, `http://localhost/*`, and `http://127.0.0.1/*`, so the
 provider never appears on `chrome://` pages or `file://` URLs. The content security policy `connect-src`
 limits the worker's network reach to the Citrate RPC, faucet, auth, and bundler hosts plus localhost. The
-worker enforces the same set in `RPC_URL_ALLOWLIST` (`js/background.js`), and a CI parity check holds the
-allow-list as a subset of the manifest policy.
+worker enforces a stricter allow-list in `RPC_URL_ALLOWLIST` (`js/background.js`), and a CI parity check
+holds that allow-list as a subset of the manifest policy.
 
 Provider methods, handled in `js/background.js`:
 
@@ -90,7 +91,7 @@ Provider methods, handled in `js/background.js`:
 | `wallet_switchEthereumChain`, `wallet_addEthereumChain` | Handled, but the chain is fixed to 40204 |
 | `eth_call`, `eth_getBalance`, `eth_blockNumber`, and other reads | Forwarded to the allow-listed node for an approved origin |
 | `eth_sign` | Disabled; it is an arbitrary-data signing primitive |
-| `eth_signTypedData`, `eth_signTypedData_v4` | Not yet supported (Specified), use `personal_sign` |
+| `eth_signTypedData`, `eth_signTypedData_v3`, `eth_signTypedData_v4` | Not yet supported (Specified), use `personal_sign` |
 
 Account creation derives a 32-byte key, computes the address as the keccak256 of the public key in EIP-55
 checksum form, and stores it encrypted with AES-256-GCM under an Argon2id key derivation (version 2,
@@ -140,7 +141,7 @@ first stable release, in `AUDIT_TIER.md`. Use small testnet values while the aud
 
 ## Source and verification
 
-- Source repo: `citrate-wallet-extension`, audited against SHA `543017d`.
+- Source repo: `citrate-wallet-extension`, audited against SHA `930594c`.
 - Files read: `manifest.json`, `js/background.js`, `js/provider.js`, `js/content.js`, `js/crypto.js`,
   `js/aa.js`, `popup/`, `.github/workflows/release.yml`, `.github/workflows/ci.yml`, `wasm/build.md`,
   `AUDIT_TIER.md`, `README.md`.

@@ -5,7 +5,7 @@ tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/README.md, citrate-chain/docs/OPERATIONS.md, citrate-chain/node-app/README.md, citrate-chain/docker-compose.yml, citrate-chain/config/
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -29,12 +29,12 @@ deliberately behind your own reverse proxy, not by accident. The settlement and 
 how a node earns SALT for the work it performs, is covered in [rewards](/operators/rewards); selling that
 capacity into the marketplace is covered in [sell compute](/operators/sell-compute).
 
-Network parameters, verified against the chain README at SHA `03d7851`:
+Network parameters, verified against the chain README at SHA `9d5959e`:
 
 | Parameter | Value |
 |---|---|
 | Chain id | 40204 (testnet beta) |
-| Token | SALT, one billion supply, 18 decimals |
+| Token | SALT, one trillion supply, 18 decimals |
 | Consensus | GhostDAG, k = 18, max-parents 10 |
 | Proposer election | ECVRF-P256-SHA256 (RFC 9381) |
 | Finality | committee BFT checkpoints, 100 validators, 67 quorum, 50-block interval |
@@ -47,7 +47,8 @@ Network parameters, verified against the chain README at SHA `03d7851`:
 
 Follow these steps to bring up a node and confirm it is healthy.
 
-1. **Install the toolchain.** You need a Rust toolchain; the Docker build pins Rust 1.93.0. Clone the
+1. **Install the toolchain.** You need a Rust toolchain; the repository pins Rust 1.96.0 in
+   `rust-toolchain.toml`, and the Docker build tracks that channel with `rust:stable`. Clone the
    `citrate-chain` workspace.
 
 2. **Build the binary.** From the workspace root:
@@ -207,7 +208,7 @@ For genesis and the network layout, see [the network](/chain/network) and [genes
 - Source: `citrate-chain`. Network parameters in `README.md`; the operator runbook and producer-memory
   thresholds in `docs/OPERATIONS.md`; environment variables in `node-app/README.md`; run profiles and port
   mappings in `docker-compose.yml`; bootstrap peers and institutional parameters in `config/`.
-- Audited against SHA: `03d7851`.
+- Audited against SHA: `9d5959e`.
 - Status: Implemented (testnet). The node, the run modes, the producer-memory guards, and the monitoring
   profile exist and run; the chain is live on testnet at chain id 40204 and has not had an external audit.
   Note: there is no `docs/PRIVATE_NETWORK.md` at this SHA; the canonical runbook is `docs/OPERATIONS.md`.

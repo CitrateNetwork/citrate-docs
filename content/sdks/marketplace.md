@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-marketplace/src/index.ts
 surfaces: [SDK-MKT-client, SDK-MKT-x402, SDK-MKT-account, SDK-MKT-abi]
-audited_against_sha: 41211bd
+audited_against_sha: 5cc1f39
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -21,7 +21,7 @@ builders working buyer-side.
 
 `@citratelabs/marketplace-sdk` (version `0.1.0`) wraps the on-chain compute marketplace into a typed API
 so a buyer-side app can list providers, estimate cost, pay for inference, and post jobs without hand-rolling
-calldata. It is built on [viem](https://viem.sh) (`^2.21.0`, a direct dependency) and presents four surfaces:
+calldata. It is built on [viem](https://viem.sh) (`^2.56.0`, a direct dependency) and presents four surfaces:
 
 - `MarketplaceClient`, read-only marketplace queries (`src/client.ts`).
 - `X402Client`, an auto-pay-on-402 HTTP client and the x402 payment codec (`src/x402.ts`).
@@ -47,8 +47,8 @@ pinned hashes only), event subscription on a posted job, and key export from the
 
 ## How to use it
 
-1. Install the package and its peer. It is published to the GitHub npm registry
-   (`https://npm.pkg.github.com`) and needs Node 20 or newer.
+1. Install the package and its peer. It is published to the public npm registry
+   (`https://registry.npmjs.org/`, per `publishConfig` in `package.json`) and needs Node 20 or newer.
 
    ```bash
    npm install @citratelabs/marketplace-sdk viem
@@ -91,7 +91,7 @@ pinned hashes only), event subscription on a posted job, and key export from the
 
 ## Reference
 
-Verified against `citrate-sdk-marketplace` at `41211bd`. The public surface is re-exported from
+Verified against `citrate-sdk-marketplace` at `5cc1f39`. The public surface is re-exported from
 `src/index.ts`.
 
 ### MarketplaceClient
@@ -225,6 +225,6 @@ extension. Do not paste a key, passphrase, or mnemonic into any example.
 - Source repo: `citrate-sdk-marketplace`.
 - Paths: `src/index.ts` (public surface), `src/client.ts`, `src/x402.ts`, `src/wallet/`, `src/contracts.ts`,
   `src/jobs.ts`, `src/credits.ts`, `src/training.ts`, `src/types.ts`, `src/format.ts`, `AUDIT_TIER.md`.
-- Audited against SHA: `41211bd`.
+- Audited against SHA: `5cc1f39`.
 - Status: Implemented, pre-audit (Tier 1; a full external audit is required before any `v1.0.0` stable
   release).

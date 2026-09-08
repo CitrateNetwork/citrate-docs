@@ -4,9 +4,9 @@ codex_slug: /chain/rpc
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-chain/core/api/src/{eth_rpc.rs,eth_rpc_simple.rs,server.rs,ai_rpc.rs,economics_rpc.rs,methods/}
+source: citrate-chain/core/api/src/{eth_rpc.rs,server.rs,ai_rpc.rs,economics_rpc.rs,methods/}
 surfaces: [CHAIN-rpc-eth, CHAIN-rpc-citrate, CHAIN-rpc-ai, CHAIN-rpc-econ]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -27,7 +27,7 @@ Ethereum uses:
 { "jsonrpc": "2.0", "id": 1, "method": "eth_chainId", "params": [] }
 ```
 
-There are roughly eighty-five methods, registered across three namespaces:
+There are roughly ninety methods, registered across three namespaces:
 
 - `eth_*` is the Ethereum-compatible surface, so existing Solidity tooling and signing libraries work
   unchanged.
@@ -193,7 +193,7 @@ models only, and gated models require the signature binding.
 
 ## Source and verification
 
-Methods verified against `citrate-chain` at `03d7851` by enumerating every `add_sync_method("...")`
-registration in `core/api/src/eth_rpc.rs`, `eth_rpc_simple.rs`, `server.rs`, `ai_rpc.rs`, and
-`economics_rpc.rs`. Chain id `0x9d0c` confirmed in `eth_rpc.rs`; the 256-input cap (`MAX_EMBEDDING_INPUTS`)
+Methods verified against `citrate-chain` at `9d5959e` by enumerating every `add_sync_method("...")`
+registration in `core/api/src/eth_rpc.rs`, `server.rs`, `ai_rpc.rs`, `economics_rpc.rs`, and the
+`methods/` module. Chain id `0x9d0c` confirmed in `eth_rpc.rs`; the 256-input cap (`MAX_EMBEDDING_INPUTS`)
 in `ai_rpc.rs`. The network is live on testnet 40204. Status: Implemented (testnet, pre-audit).

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain + Citrate mission
 surfaces: [START-what-is-citrate]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -90,7 +90,7 @@ audience that needs them.
 
 ## Source and verification
 
-Chain facts verified against `citrate-chain` at `03d7851`: chain id 40204 (`eth_chainId` returns `0x9d0c`,
+Chain facts verified against `citrate-chain` at `9d5959e`: chain id 40204 (`eth_chainId` returns `0x9d0c`,
 see `cli/src/config.rs` and `cli/src/commands/advanced.rs`), GhostDAG parameters in
 `core/consensus/src/types.rs`, SALT supply in `core/api/src/economics_rpc.rs`. The network is live on
 testnet; mainnet is targeted for Q1 2027, with school pilots the prior summer. Status: Implemented

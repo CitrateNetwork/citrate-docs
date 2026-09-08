@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-native/README.md, Cargo.toml, rust-toolchain.toml, gui/citrate_native/ui/
 surfaces: [APP-native]
-audited_against_sha: 6416447
+audited_against_sha: bc0e8ba
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -66,7 +66,7 @@ cargo build --release
 The first build compiles the whole dependency tree, the chain crates, Slint, and `rocksdb`, so it takes
 several minutes. For a faster, unoptimized iteration build, drop `--release`. If you hit a type-mismatch
 error at a chain-API boundary, it is the known double-fetch issue documented in the README, a chain crate
-pulled through both an SSH host alias and plain `github.com`. It is tracked for a Sprint 1 fix.
+pulled through both an SSH host alias and plain `github.com`. It is tracked as a planned follow-up.
 
 ### Step 6, run
 
@@ -122,8 +122,8 @@ compile.
 - A native window does not open, or the build fails at link time: confirm the C and C++ toolchain and the
   Slint and `rocksdb` system libraries from step 3 are installed.
 - A type mismatch at a chain-API boundary: this is the README's double-fetch issue from step 5, a chain
-  crate pulled twice through different URL conventions. It compiles today and is tracked for a Sprint 1
-  fix.
+  crate pulled twice through different URL conventions. It compiles today and is tracked as a planned
+  follow-up.
 - The app opens locked on a later run: that is expected. Unlock with your password. There is no
   server-side recovery, the phrase from onboarding is the only backup.
 
@@ -135,7 +135,7 @@ GitHub SSH access to the sibling repositories; no shared credential is needed or
 
 ## Source and verification
 
-- Source repo: `citrate-native`, audited against SHA `6416447`.
+- Source repo: `citrate-native`, audited against SHA `bc0e8ba`.
 - Files read: `README.md` Quick start (the build and run commands), `Cargo.toml` (default member),
   `rust-toolchain.toml` (toolchain), `gui/citrate_native/ui/onboarding/onboarding.slint` (onboarding steps),
   `gui/citrate_native/ui/shell/sidebar.slint` (the shell).

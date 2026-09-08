@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-python/citrate_sdk/
 surfaces: [SDK-PY-client, SDK-PY-managers, SDK-PY-cli]
-audited_against_sha: 0b5c642
+audited_against_sha: 869694b
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -83,9 +83,9 @@ The full install-to-inference walkthrough is in [Python quickstart](/sdks/python
 
 ## Reference
 
-The surface below is verified against `citrate-sdk-python` at `0b5c642`. Distribution name `citrate-labs-sdk`,
-version `0.5.0`, `requires-python >= 3.10`. Runtime dependencies, from `pyproject.toml`: `requests~=2.33`,
-`cryptography~=46.0`, `eth-account~=0.9`, `web3~=7.15`, `numpy~=2.0`, `typing-extensions~=4.0`. Optional
+The surface below is verified against `citrate-sdk-python` at `869694b`. Distribution name `citrate-labs-sdk`,
+version `0.6.1`, `requires-python >= 3.10`. Runtime dependencies, from `pyproject.toml`: `requests~=2.33`,
+`cryptography>=48.0.1,<51`, `eth-account~=0.9`, `web3~=7.15`, `numpy~=2.0`, `typing-extensions~=4.0`. Optional
 extras: `dev`, `docs`. Configuration reads `CITRATE_RPC_URL`, `CITRATE_CHAIN_ID`, and `CITRATE_PRIVATE_KEY`
 in the examples and tests.
 
@@ -142,10 +142,12 @@ command groups, each reading the generated federation contract so addresses and 
 - `citrate wallet predict (--user-id 0x… | --uuid <uuid>) [--verify]`, the embedded smart-account address;
   `--verify` checks it against the on-chain factory.
 - `citrate entitlement capabilities|normalize --tier <tier>`, the canonical capability set for a tier.
-- `citrate gateway models|health|chat --model M --message TEXT [--api-key KEY]`, the inference gateway.
+- `citrate gateway models|health|chat --model M --message TEXT [--api-key-file PATH]`, the inference gateway.
+  The gateway key is read from `$CITRATE_GATEWAY_API_KEY` or `--api-key-file` (a path, or `-` for stdin); it
+  is never accepted as a value on `argv`, so it cannot leak through `ps` or shell history (SPY-B-012).
 
 For example, `citrate wallet predict --user-id 0x4242…4242` prints the same address the on-chain factory
-deploys. Status for this surface: Implemented.
+deploys. Status for this surface: Implemented (`citrate_sdk/cli.py`).
 
 ## Identity, entitlements, and gateway
 
@@ -156,6 +158,10 @@ matches the on-chain factory byte-for-byte; `citrate_sdk.entitlements` is the ca
 capability map; `citrate_sdk.gateway` is an OpenAI-compatible client for `infer.citrate.ai`. These use only
 existing dependencies (`cryptography`, `eth_utils`, `requests`). See [identity and the embedded Keyring account](/sdks/identity)
 and [entitlements](/sdks/entitlements) for the shared reference; the examples there include Python.
+
+The SDK also ships a memory client for a `citrate-memories` gateway. `MemoryClient` (OIDC REST: recall,
+search, neighbors, verify, review, assert) and `ByomMemoryClient` (the bring-your-own-model MCP path), with
+`MemoryError`, live in `citrate_sdk/memory.py` and are re-exported from `citrate_sdk/__init__.py`.
 
 ## Design rationale
 
@@ -177,7 +183,8 @@ and we say so rather than paper over it.
   no account.
 - A remote `http://` RPC endpoint raises a cleartext-transport warning. Use `https://`, or set
   `allow_insecure_http=True` only when you intend plaintext to a remote host.
-- Running the `citrate` console script raises `ModuleNotFoundError`; the CLI is not implemented.
+- The `citrate gateway` command refuses a key passed as a plain `argv` value. Supply it through
+  `$CITRATE_GATEWAY_API_KEY` or `--api-key-file`, or the command reads no key at all (SPY-B-012).
 
 ## Access and canon
 
@@ -190,8 +197,10 @@ identity-verified through VERI, Citrate's in-house verification before it can ta
 
 - Source repo: `citrate-sdk-python`.
 - Paths: `citrate_sdk/client.py`, `citrate_sdk/learning.py`, `citrate_sdk/compute.py`,
-  `citrate_sdk/treasury.py`, `citrate_sdk/farming.py`, `citrate_sdk/crypto.py`, `citrate_sdk/types.py`,
-  `citrate_sdk/models.py`, `citrate_sdk/__init__.py`, `pyproject.toml`, `examples/`, `NON_CANONICAL.md`.
-- Audited against SHA: `0b5c642`.
+  `citrate_sdk/treasury.py`, `citrate_sdk/farming.py`, `citrate_sdk/crypto.py`, `citrate_sdk/cli.py`,
+  `citrate_sdk/memory.py`, `citrate_sdk/identity/`, `citrate_sdk/entitlements.py`, `citrate_sdk/gateway.py`,
+  `citrate_sdk/types.py`, `citrate_sdk/models.py`, `citrate_sdk/__init__.py`, `pyproject.toml`, `examples/`,
+  `NON_CANONICAL.md`.
+- Audited against SHA: `869694b`.
 - Status: Implemented, pre-audit, non-canonical (the canonical SDK is the [JavaScript SDK](/sdks/js)). The
-  `citrate` console script is Specified, not Implemented.
+  `citrate` console script is Implemented (`citrate_sdk/cli.py`).

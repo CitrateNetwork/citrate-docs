@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-explorer/README.md, src/scan/screens, src/app/api
 surfaces: [APP-explorer]
-audited_against_sha: cf7fa78
+audited_against_sha: 6faab8a
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -136,7 +136,7 @@ must never be pasted into shared docs.
 ## Source and verification
 
 - Source repo: `citrate-explorer` (brand: CitrateScan), Apache-2.0, Citrate Foundation.
-- Audited against: `cf7fa78`.
+- Audited against: `6faab8a`.
 - Key paths: `src/app/page.tsx`, `src/scan/screens/`, `src/app/api/v1/route.ts`,
   `src/app/api/mcp/route.ts`, `src/app/api/tx/[hash]/route.ts`, `src/lib/ai/tools.ts`. Reference specs:
   `README.md`, `EXPLORER_SPEC.md`.

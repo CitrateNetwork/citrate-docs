@@ -4,9 +4,9 @@ codex_slug: /aa/passkeys
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-sdk-js/src/aa/ + citrate-chain-laneB/contracts/src/aa/
+source: citrate-sdk-js/src/aa/ + citrate-chain/contracts/src/aa/
 surfaces: [AA-passkeys, SDK-JS-aa, SC-aa-validators, SC-aa-factory]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -16,7 +16,7 @@ How a Citrate user signs in with a passkey and sends transactions with no seed p
 EOA path for users who already hold a signer. This is the builder reference for Citrate Keyring: the
 WebAuthn-P256 validator on chain, the Kernel v3 account, the address that is known before deployment, and
 the first operation that deploys the account. For the on-chain contract reference see
-[account-abstraction contracts](/contracts/aa); for the runnable walkthrough see
+[account-abstraction contracts](/aa/contracts); for the runnable walkthrough see
 [sign in with a passkey](/aa/tutorials/sign-in-with-a-passkey).
 
 ## What it is
@@ -186,8 +186,8 @@ paymaster policy, caps, and the bundler authentication topology are commercial t
 ## Source and verification
 
 - SDK: `citrate-sdk-js/src/aa/` at SHA `bc5a830`.
-- Contracts: `citrate-chain-laneB/contracts/src/aa/` at SHA `54d1f2c`.
-- End to end: `citrate-chain-laneB/contracts/test/aa/` (operation-hash, WebAuthn, and guardian vectors); the
+- Contracts: `citrate-chain/contracts/src/aa/` at SHA `9d5959e`.
+- End to end: `citrate-chain/contracts/test/aa/` (operation-hash, WebAuthn, and guardian vectors); the
   SDK pins the address and operation-hash helpers against the live factory and EntryPoint v0.7 on chain
   40204 in `citrate-sdk-js/tests/unit/`.
 

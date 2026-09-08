@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (ComputeMarketplace.sol, ComputePool.sol, ComputePoolTraining.sol, ComputeVerifier.sol, BulkComputeGateway.sol, ComputePricingOracle.sol, interfaces/IComputePricingOracle.sol)
 surfaces: [SC-compute-marketplace, SC-compute-pool, SC-compute-training, SC-compute-verifier, SC-compute-bulk, SC-compute-oracle]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -286,7 +286,7 @@ the verification result, not the personal data behind it.
 - Source: `citrate-chain/contracts/src/`, in `ComputeMarketplace.sol`, `ComputePool.sol`,
   `ComputePoolTraining.sol`, `ComputeVerifier.sol`, `BulkComputeGateway.sol`, `ComputePricingOracle.sol`,
   and the interface `interfaces/IComputePricingOracle.sol`.
-- Audited against `citrate-chain` SHA `54d1f2c`.
+- Audited against `citrate-chain` SHA `9d5959e`.
 - Status: Implemented, pre-audit, on testnet 40204. The timeout-reassignment gap, the off-chain
   coordinator-seed dependency, and the assumed 6-decimal stablecoins are open items noted above and not
   yet externally audited. Re-verify deployed bytecode with `eth_getCode` if the chain has been re-rolled.

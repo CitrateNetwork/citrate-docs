@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-learning-center/{README.md, gui/, cli-school-bootstrap/, Cargo.toml}
 surfaces: [APP-learning]
-audited_against_sha: c74d371
+audited_against_sha: a34f976
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -73,10 +73,11 @@ are quoted from `ui/shell/sidebar.slint` and are gated by the on-chain role.
 | Teacher | CLASSROOM: Home, Students, Assignments. FINANCE: Budget |
 | Admin, SuperAdmin | INSTITUTION: Overview, Classrooms, Staff. FINANCE: Budget, Approvals |
 | IT | ACCOUNTS: User Accounts, Bulk Import. DEVICES: Fleet. INFRASTRUCTURE: Node Status, Security |
-| CMOSuperAdmin | CMO: Dashboard, Tenancy, Compliance, plus the admin views |
 | No role | Getting Started |
 
-Settings is always present, and the shell adds onboarding and a password-gated lock screen.
+Settings is always present, and the shell adds onboarding and a password-gated lock screen. The
+`CMOSuperAdmin` role exists on chain and drives cross-school administration through the CMO portal service,
+but this build renders no distinct CMO sidebar group; a CMOSuperAdmin sees the administrator views.
 
 The backend services that stand behind those screens (`gui/citrate_edu_app/src/services/`):
 
@@ -147,13 +148,13 @@ for the program.
 
 ## Source and verification
 
-- Source repo: `citrate-learning-center`, audited against SHA `c74d371`.
+- Source repo: `citrate-learning-center`, audited against SHA `a34f976`.
 - Key paths: `README.md`, `Cargo.toml`, `gui/citrate_learning_center/ui/shell/sidebar.slint`,
   `gui/citrate_edu_app/src/` (`role.rs`, `identity.rs`, `it_elevation.rs`, `encryption.rs`,
   `local_store.rs`, `key_rotation.rs`, `services/`), `cli-school-bootstrap/src/cli.rs`,
   `gui/citrate_learning_center/tests/`.
 - Status: Implemented (pre-audit), pre-1.0 at version 0.4.0. Version 1 is self-host only; the hosted
   parent portal (`--hosted`) and the SMTP and PDF guardian-delivery channels are reserved for later
-  releases. The repo carries planning directories (`gui/citrate_edu_native/`, `cli-edu/`) that have no
-  `Cargo.toml` and are excluded from the workspace; build only the three real crates. Tier 1 audit applies:
+  releases. The repo carries a planning directory (`cli-edu/`) that has no `Cargo.toml` and is excluded
+  from the workspace; build only the three real crates. Tier 1 audit applies:
   no stable release ships without a written external attestation against an exact SHA.

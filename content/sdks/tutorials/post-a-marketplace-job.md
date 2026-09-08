@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-marketplace/src/index.ts
 surfaces: [SDK-MKT-client, SDK-MKT-x402, SDK-MKT-account, SDK-MKT-abi]
-audited_against_sha: 41211bd
+audited_against_sha: 5cc1f39
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -15,7 +15,7 @@ author: Citrate team
 A runnable, end-to-end walkthrough. You will pick a model, estimate its cost, build job calldata, and submit
 it to Citrate Market on chain id `40204` with the [Marketplace SDK](/sdks/marketplace), then optionally pay
 for a single inference over the x402 path instead. For integrators building buyer-side. Every API used here
-exists in `citrate-sdk-marketplace` at `41211bd`.
+exists in `citrate-sdk-marketplace` at `5cc1f39`.
 
 ## What it is
 
@@ -190,5 +190,5 @@ Web3 v3 keystore. Run against testnet `40204` only.
 - Source repo: `citrate-sdk-marketplace`.
 - Built against `src/index.ts`, `src/client.ts`, `src/jobs.ts`, `src/x402.ts`, `src/wallet/`,
   `src/contracts.ts`, `src/types.ts`, `src/format.ts`.
-- Audited against SHA: `41211bd`.
+- Audited against SHA: `5cc1f39`.
 - Status: Implemented, pre-audit (Tier 1). Run on testnet only with a throwaway account.

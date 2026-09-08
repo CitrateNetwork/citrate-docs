@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-node-agent (README.md, crates/)
 surfaces: [NODE-sell]
-audited_against_sha: 38bc9d1
+audited_against_sha: 0e63363
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -145,7 +145,7 @@ keys.
 
 ## Source and verification
 
-Verified against `citrate-node-agent` at `38bc9d1` (`README.md` and `crates/`). The policy fields against
+Verified against `citrate-node-agent` at `0e63363` (`README.md` and `crates/`). The policy fields against
 `crates/config`, the bidder gates and cost-plus pricing against `crates/bidder`, the lifecycle and unsigned
 signing seam against `crates/lifecycle`, the supervision routes against `crates/supervision`, and the
 marketplace scoring and fee split against `ComputeMarketplace.sol`. Status: SELL-S1 (settings, bidder,

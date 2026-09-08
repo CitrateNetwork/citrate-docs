@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{TreasuryGovernor,DisputeResolution,AgentDecisionRegistry,SpecRegistry}.sol
 surfaces: [SC-gov-treasury, SC-gov-dispute, SC-gov-agentDecision, SC-gov-spec]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -44,8 +44,10 @@ treasury spend and a compute dispute.
 
 1. **Move treasury funds.** Acquire the voting power, `PROPOSAL_THRESHOLD` is 10,000 SALT, then call
    `proposeTreasurySpend`. Voters call `castVote` over the voting window. After the window, call `queue`,
-   wait out `EXECUTION_DELAY`, then call `execute`. Only a `TreasurySpend` proposal executes on-chain, by
-   calling `treasury.distribute`; the other proposal types emit an event for an off-chain multisig to act on.
+   wait out `EXECUTION_DELAY`, then call `execute`. Two proposal types execute on-chain: `TreasurySpend`
+   calls `treasury.distribute`, and `Call` performs a generic `(target, value, calldata)` call so the
+   governor can drive any governance function on a target it controls. `ParameterChange`, `OracleUpdate`,
+   and `Emergency` emit an event for an off-chain multisig to act on.
 2. **Dispute a compute result.** As the challenger, call `initiateDispute` with the job and the step range,
    posting the bond. The defender calls `acknowledgeDispute` with a matching bond. The challenger narrows
    the range with `bisect` each round, the defender commits a step with `respond`, and the governance
@@ -72,7 +74,7 @@ fixed as constants and match `core/economics/src/governance.rs`.
 | Constant | Value | Meaning |
 |---|---|---|
 | `PROPOSAL_THRESHOLD` | 10,000 SALT | Minimum voting power to open a proposal |
-| `VOTING_PERIOD` | 50,400 blocks | Roughly seven days |
+| `VOTING_PERIOD` | 50,400 blocks | Voting window, measured in blocks (wall-clock depends on block time) |
 | `EXECUTION_DELAY` | 7,200 blocks | Timelock before a queued proposal can execute |
 | `QUORUM_BPS` | 1,000 (10%) | Quorum as basis points of total supply |
 | `APPROVAL_BPS` | 6,000 (60%) | Approval threshold as basis points of votes cast |
@@ -84,6 +86,7 @@ Proposal creation, each `payable`, each returning a `proposalId`:
 - `proposeTreasurySpend(title, description, stablecoin, recipients[], amounts[])`
 - `proposeParameterChange(title, description, parameterKey, parameterValue)`
 - `proposeOracleUpdate(title, description, target, newOracle)`
+- `proposeCall(title, description, target, value, data)`, generic on-chain execution against a governed target
 - `proposeEmergency(title, description)`, which requires three times the threshold
 
 Voting and lifecycle:
@@ -224,7 +227,7 @@ live under [research](/research). Slashing and finality are covered under
   `DisputeResolution.sol`, `AgentDecisionRegistry.sol`, `SpecRegistry.sol`, plus
   `contracts/src/rbac/AgentDecisionRegistryV2.sol` for the V2 note and `contracts/src/lib/Governable.sol`
   for the ownership mixin.
-- Audited against `citrate-chain` SHA `54d1f2c`.
+- Audited against `citrate-chain` SHA `9d5959e`.
 - Status by contract: `TreasuryGovernor` Implemented, pre-audit; `DisputeResolution` Implemented and TLA+
   specified (`DisputeResolution.tla`, `AdversarialCompute.tla`), pre-audit; `AgentDecisionRegistry`
   Implemented, pre-audit, with `AgentDecisionRegistryV2` Implemented and TLA+ specified

@@ -4,9 +4,9 @@ codex_slug: /aa/contracts
 tier: commercial
 org_scope: ~
 source_kind: authored
-source: citrate-chain-laneB/contracts/src/aa/* (+ contracts/src/edu/Forwarder.sol)
+source: citrate-chain/contracts/src/aa/* (+ contracts/src/edu/Forwarder.sol)
 surfaces: [SC-aa-wallet, SC-aa-factory, SC-aa-paymaster, SC-aa-validators, SC-aa-guardian]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -103,26 +103,35 @@ over a 95-byte minimal proxy. Immutable: `implementation`. State: `identitySigne
 ### CitratePaymaster
 
 `contracts/src/aa/paymaster/CitratePaymaster.sol`, extending `@account-abstraction` `BasePaymaster`. Per
-`ADR-2026-06-05-ew-paymaster-policy` it sponsors gas in three categories, selected by a one-byte tag at
-offset 52 of `paymasterAndData`, right after the standard ERC-4337 v0.7 prefix of paymaster address and two
-packed gas limits: `0x00` standard, `0x01` recovery, `0x02` first-op. Only accounts the registrar has
-registered can be sponsored.
+`ADR-2026-06-05-ew-paymaster-policy` it sponsors gas in three categories, and every sponsored operation
+carries a signed suffix on `paymasterAndData` after the ERC-4337 v0.7 prefix of paymaster address and two
+packed gas limits: a one-byte category at offset 52 (`0x00` standard, `0x01` recovery, `0x02` first-op), a
+`[validAfter, validUntil]` window, and a 65-byte ECDSA signature from the paymaster's `sponsorSigner`. The
+signature binds the chain id, this paymaster, the sender, the category, the window, and the operation nonce,
+so it is single-use for one operation. Standard and recovery operations additionally require a registered
+account; first-op is authorized by the signature alone, so a counterfactual account's first operation is
+sponsorable before registration. All budgets are denominated in WEI.
 
 | Surface | Members |
 |---|---|
 | Hooks (override) | `_validatePaymasterUserOp`, `_postOp` |
-| Admin (owner) | `setRegistrar`, `setPaused`, `setDailyCap`, `setRecoveryEventCap`, `setFirstOpCap` |
+| Admin (owner) | `setRegistrar`, `setSponsorSigner`, `setPaused`, `setDailyCap`, `setRecoveryEventCap`, `setFirstOpCap`, `setRecoveryDailyCountCap`, `setMaxFeePerGasCeiling`, `setGlobalDailyCap` |
 | Registrar only | `registerWallet(account)`, `unregisterWallet(account)` |
-| Views | `todayKey()`, `remainingStandard(account)`, plus `dailyUsage`, `isRegistered`, `hasUsedFirstOp`, `registrar`, `paused`, `dailyCap`, `recoveryEventCap`, `firstOpCap` |
+| Views | `todayKey()`, `remainingStandard(account)`, `sponsorDigest(...)`, plus `dailyUsage`, `isRegistered`, `hasUsedFirstOp`, `registrar`, `sponsorSigner`, `paused`, `dailyCap`, `recoveryEventCap`, `firstOpCap`, `recoveryDailyCountCap`, `maxFeePerGasCeiling`, `globalDailyCap` |
 
-`_validatePaymasterUserOp` fails closed: it reverts when paused, when the account is not registered, when
-the category tag is missing or unknown, or when the relevant budget cannot cover the EntryPoint-reported
-`maxCost`. A standard operation draws from a per-account daily gas allowance that resets at the next UTC
-day; recovery draws a per-event budget that never touches the daily counter; the first operation is
-sponsored once per account under a per-call cap. `_postOp` records actual gas against the daily counter for
-standard operations and flips the first-op flag. Events: `WalletRegistered`, `WalletUnregistered`,
-`RegistrarSet`, `SponsorshipUsed`, `PausedSet`, `DailyCapSet`, `RecoveryEventCapSet`, `FirstOpCapSet`.
-The full policy and the bundler topology are on [paymaster](/aa/paymaster).
+`_validatePaymasterUserOp` fails closed: it reverts when paused, when the sponsor signature is missing or
+does not recover to `sponsorSigner`, when the current time is outside the signed window, when the operation's
+`maxFeePerGas` exceeds `maxFeePerGasCeiling`, when the day's aggregate spend would exceed `globalDailyCap`,
+when a standard or recovery account is not registered, when the category tag is missing or unknown, or when
+the relevant per-account budget cannot cover the EntryPoint-reported `maxCost`. Every budget is reserved
+during validation so that same-bundle sibling operations cannot each pass against a stale counter. A standard
+operation draws from a per-account daily WEI allowance that resets at the next UTC day; recovery draws a
+per-event budget, bounded by a per-account daily recovery-op count, that never touches the daily counter; the
+first operation is sponsored once per account under a per-call cap. `_postOp` trues the reserved cost up to
+the actual gas cost and flips the first-op flag. Events: `WalletRegistered`, `WalletUnregistered`,
+`RegistrarSet`, `SponsorSignerSet`, `SponsorshipUsed`, `PausedSet`, `DailyCapSet`, `RecoveryEventCapSet`,
+`FirstOpCapSet`, `RecoveryDailyCountCapSet`, `MaxFeePerGasCeilingSet`, `GlobalDailyCapSet`. The full policy
+and the bundler topology are on [paymaster](/aa/paymaster).
 
 ### CitrateECDSAValidator
 
@@ -221,11 +230,11 @@ verification result, not the personal data behind it.
 
 ## Source and verification
 
-Source repo `citrate-chain-laneB`, files under `contracts/src/aa/`: `wallet/CitrateWallet.sol`,
+Source repo `citrate-chain`, files under `contracts/src/aa/`: `wallet/CitrateWallet.sol`,
 `factory/CitrateWalletFactory.sol`, `paymaster/CitratePaymaster.sol`,
 `validators/CitrateECDSAValidator.sol`, `validators/WebAuthnP256Validator.sol`,
 `recovery/GuardianRecoveryModule.sol`, and `lib/webauthn/{WebAuthn,P256,Base64URL}.sol`. The EIP-2771
-forwarder is `contracts/src/edu/Forwarder.sol`. Audited against SHA `54d1f2c`.
+forwarder is `contracts/src/edu/Forwarder.sol`. Audited against SHA `9d5959e`.
 
 Status: Implemented, pre-audit. The contracts exist and pass an end-to-end Forge test under
 `contracts/test/aa/`, but have not had a final external audit and are not yet deployed at listed addresses.

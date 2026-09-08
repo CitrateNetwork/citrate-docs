@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/consensus/src/types.rs, citrate-chain/core/consensus/src/ghostdag.rs, citrate-chain/core/consensus/src/ecvrf.rs, citrate-chain/core/consensus/src/finality.rs, citrate-chain/core/consensus/src/checkpoint.rs
 surfaces: [CHAIN-consensus-ghostdag, CHAIN-consensus-ecvrf, CHAIN-consensus-finality]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -32,7 +32,7 @@ The default parameters are network constants.
 | `pruning_window` | 100000 | how far back the DAG retains full detail |
 | `finality_depth` | 100 | the depth at which depth-based finality applies |
 
-Block target time is about two seconds. For where these blocks come from, see [the sequencer](/chain/sequencer); for the broader picture, see [the primer](/start/primer).
+Block target time is about one second on the active testnet and is set per network configuration; see [chain parameters and genesis](/chain/genesis) for the cadence of each. For where these blocks come from, see [the sequencer](/chain/sequencer); for the broader picture, see [the primer](/start/primer).
 
 ## How to use it
 
@@ -73,7 +73,7 @@ Proposer eligibility uses an elliptic-curve verifiable random function over NIST
 
 ### Depth-based finality, `src/finality.rs`
 
-`FinalityTracker` marks a block final once it sits under enough confirmations, `finality_depth = 100` by default (`FinalityConfig`, `src/finality.rs:42`). `FinalityStatus` is `Finalized`, `PendingFinalization`, or `Unfinalized`. A finalized block is protected from reorg: a reorganization that would rewrite it is refused at admission by `ChainSelector` (`src/chain_selection.rs:25`).
+`FinalityTracker` marks a block final once it sits under enough confirmations, `confirmation_depth = 100` by default (`FinalityConfig`, `src/finality.rs:42`). `FinalityStatus` is `Finalized`, `PendingFinalization`, or `Unfinalized`. A finalized block is protected from reorg: a reorganization that would rewrite it is refused at admission by `ChainSelector` (`src/chain_selection.rs:25`).
 
 ### Committee checkpoint finality, `src/checkpoint.rs`
 
@@ -107,7 +107,7 @@ let finalized = tracker.update_finality(&tip_hash, tip_height).await?;
 
 ## Design rationale
 
-A graph orders work better than a line under load. When two proposers produce blocks at nearly the same moment, a single-parent chain has to discard one; a BlockDAG keeps both as parents and lets GhostDAG decide their order later. That is why blocks may name up to ten parents and why the target time can sit near two seconds without the orphan waste a line would suffer.
+A graph orders work better than a line under load. When two proposers produce blocks at nearly the same moment, a single-parent chain has to discard one; a BlockDAG keeps both as parents and lets GhostDAG decide their order later. That is why blocks may name up to ten parents and why the target time can sit near one second without the orphan waste a line would suffer.
 
 Two choices guard the ledger. Blue score is recomputed rather than trusted, so a block cannot lie its way to the front by claiming a large score. And finality is layered: depth-based finality settles in over one hundred blocks for every block automatically, while committee checkpoints give a faster, signed, deterministic guarantee every fifty blocks. The cost is a checkpoint committee that must be selected and must sign; the benefit is that a settled block is settled by both depth and signature.
 
@@ -124,5 +124,5 @@ Public. The GhostDAG model, the parameters, and the audited surface are protocol
 ## Source and verification
 
 - Source files: `core/consensus/src/types.rs`, `src/ghostdag.rs`, `src/ecvrf.rs`, `src/vrf.rs`, `src/finality.rs`, `src/chain_selection.rs`, `src/checkpoint.rs`.
-- Audited against SHA `03d7851`.
+- Audited against SHA `9d5959e`.
 - Status: Implemented, pre external audit. The crate is internally tested and TLA+-checked in several areas; it has not completed a third-party audit, so read "tested" as tested, not certified.

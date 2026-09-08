@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/precompiles/
 surfaces: [CHAIN-pre-zkp, CHAIN-pre-inference, CHAIN-pre-attestation]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -111,7 +111,7 @@ attestation-verification design, request the gated `CHAIN-pre-zkp`, `CHAIN-pre-i
   `core/execution/src/precompiles/{verify.rs,inference.rs,attestation/}`,
   `core/execution/src/zkp/{poseidon_bn254.rs,halo2/}`, dispatch in
   `core/execution/src/precompiles/mod.rs`
-- Audited against SHA: `03d7851`
+- Audited against SHA: `9d5959e`
 - Status: Implemented (pre-audit) for the deterministic verification path on testnet 40204. The
   attestation gate is Implemented in its always-reject default; live attestation verification is Specified,
   not yet enabled.

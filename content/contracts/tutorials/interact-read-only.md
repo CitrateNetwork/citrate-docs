@@ -4,9 +4,9 @@ codex_slug: /contracts/tutorials/interact-read-only
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-chain-laneB/contracts/src/NematocystSlashing.sol
+source: citrate-chain/contracts/src/NematocystSlashing.sol
 surfaces: [SC-abi, SC-sec-slashing]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -22,7 +22,7 @@ The examples read the slashing contract in the security family, which records ho
 
 ## How to use it
 
-You need a reachable Citrate JSON-RPC endpoint. The public one is `https://rpc.citrate.ai`. You will want `curl`, and the `cast` command from [Foundry](https://book.getfoundry.sh/) for the encode-free path. Read the slashing contract's address from `contracts/DEPLOYED_ADDRESSES.md`, the canonical record described on the [contracts reference](/contracts/reference), and confirm it with step 1 before trusting it.
+You need a reachable Citrate JSON-RPC endpoint. The public one is `https://rpc.citrate.ai`. You will want `curl`, and the `cast` command from [Foundry](https://book.getfoundry.sh/) for the encode-free path. Read the slashing contract's address from `contracts/addresses/40204.json`, the canonical record described on the [contracts reference](/contracts/reference), and confirm it with step 1 before trusting it.
 
 Set up the helper from [your first 10 minutes](/start/tutorials/your-first-10-minutes):
 
@@ -106,7 +106,7 @@ The same reads in viem, using the published ABI so you work in function names ra
 
 ```ts
 import { createPublicClient, http, defineChain } from "viem";
-import NematocystSlashing from "@CitrateNetwork/contracts-abi/NematocystSlashing.json";
+import NematocystSlashing from "./abi/NematocystSlashing.json"; // regenerated via `forge build`
 
 const citrate = defineChain({
   id: 40204,
@@ -145,7 +145,7 @@ For encoding a single call step by step, see [read a contract](/contracts/tutori
 
 ## Failure modes
 
-- A `0x` result from `eth_getCode` means no contract is at the address. Re-read it from `DEPLOYED_ADDRESSES.md`; the chain may have been re-rolled.
+- A `0x` result from `eth_getCode` means no contract is at the address. Re-read it from `contracts/addresses/40204.json`; the chain may have been re-rolled.
 - `-32601 Method not found` means the RPC method is misspelled or not served by the node.
 - An empty `eth_getLogs` response can mean the block range is wrong, the topic hash is wrong, or no such event has been emitted. Widen the range to test, then narrow it back.
 - A very wide `eth_getLogs` range can be refused or return a large payload. Page through narrow ranges instead.
@@ -157,6 +157,6 @@ Public and read-only. Every step here is a read against public on-chain data; no
 
 ## Source and verification
 
-Functions and events verified against `citrate-chain-laneB` at SHA `54d1f2c`: `contracts/src/NematocystSlashing.sol`. The ABI ships in `@CitrateNetwork/contracts-abi`. Addresses live in `contracts/DEPLOYED_ADDRESSES.md`, chain 40204, testnet beta. Status: Implemented, testnet beta, pre-audit.
+Functions and events verified against `citrate-chain` at SHA `9d5959e`: `contracts/src/NematocystSlashing.sol`. Regenerate the ABI with `forge build` (the `.abi` key of `out/NematocystSlashing.sol/NematocystSlashing.json`). Addresses live in `contracts/addresses/40204.json`, chain 40204, testnet beta. Status: Implemented, testnet beta, pre-audit.
 
 See also [chain RPC](/chain/rpc) and the [chain CLI](/chain/cli).

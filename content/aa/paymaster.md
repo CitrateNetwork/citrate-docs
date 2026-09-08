@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: contracts/src/aa/paymaster/CitratePaymaster.sol + citrate-bundler (gate/src, README, Caddyfile)
 surfaces: [AA-paymaster, SC-aa-paymaster, API-BUNDLER]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -23,11 +23,19 @@ There is no native gas-sponsorship operation on the network; sponsorship is done
 contract. Sponsorship has two layers.
 
 The authoritative layer is `CitratePaymaster`, an ERC-4337 v0.7 paymaster that extends `BasePaymaster`. It
-enforces a per-account budget: every sponsored operation passes its `_validatePaymasterUserOp` check and
-settles in `_postOp`. The edge layer is the bundler: a self-hosted eth-infinitism reference bundler behind
-Caddy, fronted by a thin Citrate gate that does key authorization, rate limiting, and a paymaster pre-check,
-so an operation that is certain to fail is refused at the edge instead of taking a bundle slot. The edge is
-an optimization; the contract re-validates everything.
+enforces per-account WEI budgets: every sponsored operation carries a sponsor-signer signature and a
+category in `paymasterAndData`, passes its `_validatePaymasterUserOp` check, and settles in `_postOp`. The
+edge layer is the bundler: a self-hosted eth-infinitism reference bundler behind Caddy, fronted by a thin
+Citrate gate that does key authorization, rate limiting, and a paymaster pre-check, so an operation that is
+certain to fail is refused at the edge instead of taking a bundle slot. The edge is an optimization; the
+contract re-validates everything.
+
+Every sponsored operation is authorized by an ECDSA signature from the paymaster's own `sponsorSigner`, not
+by registration alone. The signature covers a digest that binds the chain id, this paymaster, the sender,
+the category, a `[validAfter, validUntil]` window, and the operation `nonce` (`sponsorDigest`), so a
+signature is single-use for exactly one operation and cannot be replayed across accounts, chains, paymasters,
+categories, or operations. Because verifying it touches only the paymaster's own storage and `ecrecover`, a
+counterfactual account's first operation is mempool-legal under ERC-7562.
 
 A related but separate mechanism serves the education stack. There, sponsored student actions go through an
 EIP-2771 forwarder (`contracts/src/edu/Forwarder.sol`), a meta-transaction relay where a relayer pays gas
@@ -45,65 +53,92 @@ For an integrator the steps are: tag the operation, send it, watch the budget.
 3. **Watch.** Read `remainingStandard(account)` on the paymaster to show a person how much of their daily
    sponsorship is left.
 
-A new account's first operation is unconditional, within its cap, so a person can deploy and act without
-SALT. After that, ordinary operations draw from a daily allowance, and recovery operations draw from their
-own budget so recovery is never blocked by a spent daily allowance.
+A new account's first operation is sponsored under the first-op budget on the strength of the sponsor
+signature, before the account is registered, so a person can deploy and act without SALT. After that,
+ordinary operations draw from a daily allowance, and recovery operations draw from their own budget so
+recovery is never blocked by a spent daily allowance.
 
 ## Reference
 
 ### Categories
 
-The bundler embeds a one-byte category at offset 52 of `paymasterAndData`, right after the ERC-4337 v0.7
-prefix of `paymaster(20) | verificationGasLimit(16) | postOpGasLimit(16)`. The contract reads it at
-`PMD_TAG_OFFSET`.
+The bundler assembles a signed suffix on `paymasterAndData` after the ERC-4337 v0.7 prefix of
+`paymaster(20) | verificationGasLimit(16) | postOpGasLimit(16)`. The full layout the contract reads:
+
+```
+[0:20]    address paymaster
+[20:36]   uint128 paymasterVerificationGasLimit
+[36:52]   uint128 paymasterPostOpGasLimit
+[52]      uint8   category      (0 standard / 1 recovery / 2 first-op)
+[53:59]   uint48  validUntil
+[59:65]   uint48  validAfter
+[65:130]  bytes65 sponsorSigner ECDSA signature (r || s || v)
+```
+
+The category byte lives at `PMD_TAG_OFFSET` (52); the sponsor signature is the 65-byte tail. All three
+category budgets are denominated in WEI (spend, not gas units), since `requiredPreFund` is `requiredGas ×
+maxFeePerGas`.
 
 | Tag | Category | Budget behavior |
 |---|---|---|
-| `0x00` | Standard | draws from the per-account daily gas-unit allowance, `dailyCap`; the counter resets at the first sponsored operation of a new UTC day |
-| `0x01` | Recovery | draws from a per-event budget, `recoveryEventCap`, that does not touch the daily counter, so recovery works even when the daily allowance is spent |
-| `0x02` | First-op | one unconditional sponsorship for an account's first operation, bounded by `firstOpCap`; the `hasUsedFirstOp` flag then flips so it cannot be reused |
+| `0x00` | Standard | draws from the per-account daily WEI allowance, `dailyCap`; the counter resets at the first sponsored operation of a new UTC day. Requires the account to be registered |
+| `0x01` | Recovery | draws from a per-event WEI budget, `recoveryEventCap`, that does not touch the daily counter, so recovery works even when the daily allowance is spent, bounded by a per-account daily recovery-op count cap. Requires the account to be registered |
+| `0x02` | First-op | one sponsorship for an account's first operation, bounded by `firstOpCap`; authorized by the sponsor signature rather than registration, so a counterfactual account can spend it; the `hasUsedFirstOp` flag then flips so it cannot be reused |
 
 ### Caps and accounting
 
-The caps live in `CitratePaymaster` as owner-settable values. The as-deployed defaults, set in
+The caps live in `CitratePaymaster` as owner-settable WEI values. The as-deployed defaults, set in
 `script/aa/DeployAA.s.sol`, are:
 
 | Cap | Default | Set with |
 |---|---|---|
-| `dailyCap` | 100,000 gas units | `setDailyCap` |
-| `recoveryEventCap` | 200,000 gas units | `setRecoveryEventCap` |
-| `firstOpCap` | 300,000 gas units | `setFirstOpCap` |
+| `dailyCap` | 0.01 ether | `setDailyCap` |
+| `recoveryEventCap` | 0.01 ether | `setRecoveryEventCap` |
+| `firstOpCap` | 0.02 ether | `setFirstOpCap` |
+| `globalDailyCap` | 5 ether | `setGlobalDailyCap` |
+| `maxFeePerGasCeiling` | 20 gwei | `setMaxFeePerGasCeiling` |
 
-Setting any cap to `0` disables that category. Standard usage is recorded against the daily counter in
-`_postOp` with a saturating add; the day key is `block.timestamp / 86400`, so the counter resets at the UTC
-day boundary. Recovery and first-op need no running counter. `remainingStandard(account)` returns what is
-left of the daily allowance for dashboards and the SDK. An operator may change any of these on-chain, so
-treat the numbers above as the shipped defaults, not guarantees.
+Setting any per-account cap to `0` disables that category. `globalDailyCap` is an aggregate deposit-spend
+backstop across every account, a drain guard; `maxFeePerGasCeiling` bounds the fee a single operation may
+claim, so a generous WEI cap cannot be drained by one inflated-fee operation. Every budget is reserved
+during validation, not only in `_postOp`, so that several operations from one sender in the same bundle
+cannot each validate against a stale counter; `_postOp` then trues the reservation from `maxCost` up to the
+actual gas cost. The day key is `block.timestamp / 86400`, so counters reset at the UTC day boundary.
+`remainingStandard(account)` returns what is left of the daily allowance for dashboards and the SDK. An
+operator may change any of these on-chain, so treat the numbers above as the shipped defaults, not
+guarantees.
 
-If the relevant budget cannot cover the cost the EntryPoint reports, validation reverts with a precise
+If the signature, the fee ceiling, or the relevant budget check fails, validation reverts with a precise
 error rather than sponsoring anyway. It fails closed.
 
 | Error | Reverts when |
 |---|---|
 | `Paused()` | sponsorship is paused |
-| `NotARegisteredCitrateWallet(account)` | the account is not registered |
+| `InvalidSponsorSignature()` | the sponsor-signer signature is missing or does not recover to `sponsorSigner` |
+| `SponsorshipExpired()` | the current time is outside the signed `[validAfter, validUntil]` window |
+| `MaxFeePerGasCeilingExceeded(maxFeePerGas, ceiling)` | the operation's `maxFeePerGas` exceeds `maxFeePerGasCeiling` |
+| `GlobalDailyCapExceeded(spentToday, cap, wouldSpend)` | the day's aggregate spend would exceed `globalDailyCap` |
+| `NotARegisteredCitrateWallet(account)` | a standard or recovery operation is from an unregistered account |
 | `StandardCapExceeded(account, used, cap, wouldUse)` | a standard operation would exceed `dailyCap`, or `dailyCap` is 0 |
 | `RecoveryCapExceeded(account, cap, wouldUse)` | a recovery operation would exceed `recoveryEventCap`, or it is 0 |
+| `RecoveryDailyCountExceeded(account, usedToday, maxPerDay)` | the account has spent its per-day recovery-op count |
 | `FirstOpAlreadyUsed(account)` | the account already used its first-op sponsorship |
 | `FirstOpCapExceeded(cap, wouldUse)` | a first operation would exceed `firstOpCap`, or it is 0 |
 | `UnknownCategory(tag)` | the category byte is greater than 2 |
-| `MissingCategoryTag()` | `paymasterAndData` has no category byte |
+| `MissingCategoryTag()` | `paymasterAndData` is shorter than the signed layout requires |
 
 ### Eligibility, the registrar gate
 
-Only registered accounts can be sponsored. A single `registrar` address, typically the account factory,
-calls `registerWallet(account)` after a successful deploy; `unregisterWallet(account)` reverses it. Any
-sponsored operation from an unregistered account reverts `NotARegisteredCitrateWallet`. The owner can rotate
-the registrar with `setRegistrar` and halt all sponsorship with `setPaused(true)` for incident response.
+Standard and recovery operations require a registered account. A single `registrar` address, typically the
+account factory, calls `registerWallet(account)`; `unregisterWallet(account)` reverses it. A standard or
+recovery operation from an unregistered account reverts `NotARegisteredCitrateWallet`. First-op is the
+exception: it is authorized by the sponsor signature rather than registration, so a counterfactual account's
+very first operation is sponsorable before it is registered and with no cross-entity storage write. The
+owner can rotate the registrar with `setRegistrar`, rotate the sponsor signer with `setSponsorSigner`, and
+halt all sponsorship with `setPaused(true)` for incident response.
 
-An operator wiring the factory as registrar should confirm the factory actually calls `registerWallet` on
-deploy, or first-operation sponsorship will revert for new accounts. This registrar wiring is tracked as an
-open item in the EW-S1 handoffs.
+Registration now happens outside the validation phase (an owner passthrough on the factory), not inside
+`deployFor`, so a strict ERC-7562 tracer sees the paymaster touch only its own storage during validation.
 
 ### Bundler topology
 
@@ -183,7 +218,7 @@ a product to hold.
 | EIP-2771 forwarder (education stack) | `contracts/src/edu/Forwarder.sol` | Implemented (pre-audit) |
 | Bundler gate, pre-check, routing | `citrate-bundler/gate/src`, `README.md`, `Caddyfile` | Implemented (pre-audit) |
 
-Paymaster and forwarder verified against the contracts repo at `54d1f2c`; the bundler verified against
-`citrate-bundler` at `a3287de`. The caps shown are the as-deployed defaults and an operator may change them
-on-chain. The stack has shipped and runs on testnet 40204; it has not had an external audit. Re-verify the
-on-chain cap values and the source symbols against the SHAs before relying on this page.
+Paymaster and forwarder verified against the contracts repo at `9d5959e`; the bundler verified against
+`citrate-bundler` at `a3287de`. The caps shown are the as-deployed WEI defaults and an operator may change
+them on-chain. The stack has shipped and runs on testnet 40204; it has not had an external audit. Re-verify
+the on-chain cap values and the source symbols against the SHAs before relying on this page.

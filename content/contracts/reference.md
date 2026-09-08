@@ -4,9 +4,9 @@ codex_slug: /contracts/reference
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-chain-laneB/contracts (DEPLOYED_ADDRESSES.md, src/, broadcast/)
+source: citrate-chain/contracts (addresses/40204.json, src/)
 surfaces: [SC-abi]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -24,17 +24,15 @@ Two facts shape how you should treat this page. First, addresses drift: the chai
 
 You need three things to call a Citrate contract: its address, its ABI, and the confidence that the address is what you think it is.
 
-1. Get the addresses. The deployed set is recorded in `contracts/DEPLOYED_ADDRESSES.md` in the chain repo, and the source of truth behind that file is the Forge broadcast JSON under `contracts/broadcast/<Script>.s.sol/40204/run-latest.json`, aggregated into `contracts/broadcast/_address_table/30_address_table.json`. Read the addresses from there rather than copying them into your code by hand. The broadcast files update when the chain is re-rolled; the documentation may lag.
-
-2. Get the ABIs. They ship in the `@CitrateNetwork/contracts-abi` package. Install it rather than copying ABI fragments, which drift out of sync with the source.
+1. Get the addresses. The canonical record of what is deployed is `contracts/addresses/40204.json` in the chain repo, the single table every consumer reads. The same set is published on the [chain addresses page](/chain/addresses) and shipped as the `@citratelabs/chain-config` package (contract addresses, the account-abstraction stack, and precompiles). Read from one of these rather than copying addresses into your code by hand; they update when the chain is re-rolled, and prose documentation may lag. (`contracts/DEPLOYED_ADDRESSES.md` is superseded and is no longer the source of truth.)
 
 ```bash
-npm install @CitrateNetwork/contracts-abi
+npm install @citratelabs/chain-config
 # or
-pnpm add @CitrateNetwork/contracts-abi
+pnpm add @citratelabs/chain-config
 ```
 
-You can also regenerate an ABI from source with Foundry. After `forge build`, each contract's ABI is the `.abi` key of `out/<Contract>.sol/<Contract>.json`.
+2. Get the ABIs. Regenerate them from source with Foundry. After `forge build`, each contract's ABI is the `.abi` key of `out/<Contract>.sol/<Contract>.json`.
 
 ```bash
 cd contracts
@@ -54,7 +52,7 @@ To go further, compare the runtime bytecode the network returns against your loc
 
 ## Reference
 
-The contract families and where each is documented. Addresses for every contract are in `DEPLOYED_ADDRESSES.md` and the broadcast files, not transcribed here.
+The contract families and where each is documented. Addresses for every contract are in `contracts/addresses/40204.json` and on the [chain addresses page](/chain/addresses), not transcribed here.
 
 | Family | What it covers | Page |
 |---|---|---|
@@ -71,16 +69,16 @@ The address source of truth and the ABI package, named once:
 
 | Resource | Where it lives |
 |---|---|
-| Deployed addresses | `contracts/DEPLOYED_ADDRESSES.md`, backed by `contracts/broadcast/.../run-latest.json` |
-| Aggregated address table | `contracts/broadcast/_address_table/30_address_table.json` |
-| ABI package | `@CitrateNetwork/contracts-abi` |
+| Canonical address table | `contracts/addresses/40204.json` (also on [/chain/addresses](/chain/addresses)) |
+| Chain config package | `@citratelabs/chain-config` (addresses, AA stack, precompiles) |
+| ABIs | regenerate with `forge build`, read the `.abi` key of `out/<Contract>.sol/<Contract>.json` |
 
 Chain facts you will need when configuring a client:
 
 | Field | Value |
 |---|---|
 | Chain id | `40204` (`eth_chainId` returns `0x9d0c`) |
-| Block time | 2s target |
+| Block time | 1s target (testnet) |
 | Consensus | GhostDAG, k = 18 |
 | Public RPC (HTTP) | `https://rpc.citrate.ai` |
 | Public RPC (WebSocket) | `wss://rpc.citrate.ai` |
@@ -89,10 +87,10 @@ Chain facts you will need when configuring a client:
 
 Public. Contract addresses are public on-chain data, and the ABIs and build commands are open developer reference. No private keys, no credentials, and no operational endpoints appear here. The public RPC hostname is the only network address you need; raw node addresses are not published, and you do not need them.
 
-Two pilot caveats carry from the source repo. The deploys are unsigned at this stage, so verification rests on `eth_getCode` cross-checks rather than cosign certificates. The account-abstraction stack was pending broadcast at this SHA; its addresses populate in the broadcast files once the deploy lands.
+One pilot caveat carries from the source repo. The deploys are unsigned at this stage, so verification rests on `eth_getCode` cross-checks rather than cosign certificates. The account-abstraction stack (EntryPoint and the rest) is included in the canonical `contracts/addresses/40204.json` under `aaStack`.
 
 ## Source and verification
 
-Source: `contracts/DEPLOYED_ADDRESSES.md`, `contracts/README.md`, the broadcast files under `contracts/broadcast/`, and the `@CitrateNetwork/contracts-abi` package. Contracts compile under `pragma solidity ^0.8.26` and are built and tested with Foundry. Chain id 40204 and the 2s block time are read from `DEPLOYED_ADDRESSES.md`. Audited against `citrate-chain-laneB` SHA `54d1f2c`. Status: Implemented, testnet beta, pre-audit. Re-verify any address with `eth_getCode` if the chain has been re-rolled.
+Source: `contracts/addresses/40204.json` (regenerated by `scripts/ops/emit-address-table.sh`), `contracts/README.md`, and the `@citratelabs/chain-config` package. Contracts compile under `pragma solidity ^0.8.26` (the 2026-09-07 re-roll built with solc 0.8.36). Chain id 40204 and the 1s testnet block time are confirmed in `node/config/testnet.toml` and `contracts/addresses/40204.json`. Audited against `citrate-chain` SHA `9d5959e`. Status: Implemented, testnet beta, pre-audit. Re-verify any address with `eth_getCode` if the chain has been re-rolled.
 
 See also [chain RPC](/chain/rpc) and the [chain CLI](/chain/cli).

@@ -5,7 +5,7 @@ tier: commercial
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/economics/, citrate-chain/contracts/src/NematocystSlashing.sol, citrate-node-agent
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -28,7 +28,7 @@ The reward for a sealed block is a base reward plus four bonus pools, each a per
 The pools recognize four kinds of contribution, so a node that does more of the work the network values
 earns a larger share. The base reward halves every 2,100,000 blocks, so early seasons are more generous than
 late ones. We describe the base reward as a configurable default rather than a fixed number, because
-governance can move it; what does not move is the halving cadence and the fixed one billion supply.
+governance can move it; what does not move is the halving cadence and the fixed one trillion supply.
 
 ## How to use it
 
@@ -171,7 +171,7 @@ emitting unsigned requests for a separate signing surface to sign.
   `src/slashing.rs`; slashing categories on chain in `contracts/src/NematocystSlashing.sol`; reputation and
   stake reads in `core/api/src/economics_rpc.rs` (`citrate_getReputationScore`, `citrate_getStakedBalance`).
 - Operator-side guards: `citrate-node-agent` (`crates/bidder`, `crates/heartbeat`, `crates/earnings`,
-  supervision state), audited at `38bc9d1`.
-- Audited against SHA: `03d7851` (chain), `38bc9d1` (node-agent).
+  supervision state), audited at `0e63363`.
+- Audited against SHA: `9d5959e` (chain), `0e63363` (node-agent).
 - Status: Implemented (testnet), internally tested, pre external audit. The reward pool percentages and base
   reward are configurable defaults in source, not certified values.

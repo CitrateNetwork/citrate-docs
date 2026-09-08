@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/cli/src/{main.rs,config.rs,commands/}
 surfaces: [CHAIN-cli-citrate, CHAIN-cli-advanced]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -38,6 +38,7 @@ The subcommands, each verified against `cli/src/main.rs`:
 | `governance` | Queues and executes governance parameter changes through the governance precompile. |
 | `advanced` | Network monitoring, benchmarking, stress tests, and DAG and mempool introspection. |
 | `wizard` | Interactive, terminal-guided setup and deployment flows. |
+| `devx` | Developer tools: prints the federation contract table and predicts an embedded Keyring address for a user. |
 
 The testnet faucet is a separate service, not a subcommand. `citrate-faucet` is an HTTP server, configured
 by environment variables, that drips test SALT to an address; you run it or call its endpoint, you do not
@@ -151,7 +152,7 @@ flag list above is public, the internals analysis is not.
 
 ## Source and verification
 
-Verified against `citrate-chain` at `03d7851`. The subcommand set is read from `cli/src/main.rs`
+Verified against `citrate-chain` at `9d5959e`. The subcommand set is read from `cli/src/main.rs`
 (`enum Commands`); defaults from `cli/src/config.rs` (RPC `http://localhost:8545`, chain id 40204); each
 subcommand group from `cli/src/commands/{account,model,contract,network,governance,advanced,wizard}.rs`. The
 faucet is a separate HTTP service in `faucet/`, not a `citrate` subcommand. Status: Implemented (testnet,

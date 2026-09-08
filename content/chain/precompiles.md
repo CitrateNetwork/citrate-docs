@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/precompiles/
 surfaces: [CHAIN-pre-tensor, CHAIN-pre-x402, CHAIN-pre-q16]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -21,13 +21,15 @@ code path. It is for contract authors.
 
 A precompile is a contract address that runs native code rather than EVM bytecode, so a common operation
 runs faster and cheaper than the equivalent Solidity. The Citrate Network keeps the standard nine at `0x01`
-to `0x09`, ECRECOVER through BLAKE2F, and adds three address pages above them, routed by
+to `0x09`, ECRECOVER through BLAKE2F, and adds several address pages above them, routed by
 `PrecompileExecutor` in `core/execution/src/precompiles/mod.rs`.
 
 | Page | Range | Purpose |
 |---|---|---|
-| AI, verification, compute | `0x0100` to `0x010F` | inference runtime, proof verification, deterministic compute |
+| AI, verification, compute | `0x0100` to `0x010F` | inference runtime, proof verification, deterministic Q16 compute |
 | Learning | `0x0110` to `0x011F` | Belnap-q16 aggregation, routing inference |
+| Signature verification | `0x0120` to `0x012F` | Ed25519 signature verification |
+| Recursive-fold verification | `0x0130` to `0x013F` | CommD proof verification (feature-gated) |
 | x402 payments | `0x0200` to `0x0209` | EIP-712 and EIP-3009 payment verification |
 
 `is_precompile()` recognizes an address by matching its leading zero bytes plus the page bytes, and
@@ -72,8 +74,9 @@ binary tensor format, version 1, which is frozen:
 
 That the format is frozen is what keeps the `0x0107 TENSOR_COMMIT` commitments stable across versions. An
 incompatible change requires a new dtype byte or a new precompile address. The deterministic Q16.16 compute
-precompiles (`0x010A` to `0x010F`) are reserved in the dispatcher and route to `compute::execute`; treat
-the tensor-engine API as the documented surface here.
+precompiles (`0x010A` to `0x010F`) are implemented as six fixed-point tensor primitives - matmul, dot,
+softmax, relu, linear, and transpose - and dispatched to `compute::execute` (`compute.rs`); treat the
+tensor-engine API as the documented surface here.
 
 ### x402 payment precompiles
 
@@ -99,8 +102,8 @@ Code: `core/execution/src/precompiles/q16/`. Address `0x0110`, `BELNAP_AGGREGATE
 `0x0111` (`ROUTING_INFERENCE`), is wired in the dispatcher but is future work (RM-FL-2).
 
 The substrate is a hand-rolled, integer-only, saturating Q16.16 fixed-point library (`q16/mod.rs`, type
-`Q16(i32)`, where the real value is `inner / 2^16`). Every operation uses only `i32` and `i64` math, no
-floats and no `unsafe`, so results are bit-identical on any CPU. Overflow saturates to `Q16::MAX` or
+`Q16(i64)`, where the real value is `inner / 2^16`). Every operation uses only `i64` math, with an `i128`
+intermediate only inside multiply and divide, no floats and no `unsafe`, so results are bit-identical on any CPU. Overflow saturates to `Q16::MAX` or
 `Q16::MIN`, division by zero returns `MAX` or `MIN` by the numerator's sign, and nothing panics. `f64`
 conversions exist only behind `#[cfg(test)]`.
 
@@ -109,9 +112,9 @@ weighted-mean value per dimension and a Belnap-FOUR state per dimension drawn fr
 False}. The output is bit-deterministic; gas is `2000 + 50 * dim`.
 
 - Input: a header giving `dim` and `n`, the participant count, then for each participant and dimension a Q16
-  embedding, a Q16 confidence, and a Q16 weight, plus a Q16 positive threshold.
-- Output: per dimension, 4 bytes of Q16 aggregated value then 1 byte of Belnap state, so `dim * 5` bytes in
-  all.
+  embedding, a Q16 confidence, and a Q16 weight, plus a Q16 positive threshold and a Q16 negative threshold.
+- Output: per dimension, 8 bytes of Q16 (i64) aggregated value then 1 byte of Belnap state, so `dim * 9`
+  bytes in all.
 - The off-chain f32 reference is `core/learning/src/belnap.rs`. The precompile matches it at the semantic
   level, sign and confidence regime, not at byte equality, because the reference uses f32.
 
@@ -151,9 +154,9 @@ inference, proof-verification, and attestation internals, are not on this page; 
 - Source repo: `citrate-chain`
 - Source files: `core/execution/src/precompiles/mod.rs`,
   `core/execution/src/precompiles/{x402.rs,tensor_format.rs}`,
-  `core/execution/src/precompiles/q16/{mod.rs,belnap.rs}`, `core/execution/src/tensor/`,
-  `core/learning/src/belnap.rs`
-- Audited against SHA: `03d7851`
-- Status: Implemented (pre-audit). The tensor format and the x402 and q16 precompiles run on testnet
-  40204. `0x0111 ROUTING_INFERENCE` and the `0x010A` to `0x010F` compute ABIs are Specified, reserved in
-  the dispatcher but not yet shipped.
+  `core/execution/src/precompiles/q16/{mod.rs,belnap.rs}`, `core/execution/src/precompiles/compute.rs`,
+  `core/execution/src/tensor/`, `core/learning/src/belnap.rs`
+- Audited against SHA: `9d5959e`
+- Status: Implemented (pre-audit). The tensor format, the `0x010A` to `0x010F` Q16 compute primitives, and
+  the x402 and q16 precompiles run on testnet 40204. `0x0111 ROUTING_INFERENCE` is wired in the dispatcher
+  but is future work (RM-FL-2), and the `0x0130` recursive-fold CommD verifier is feature-gated.

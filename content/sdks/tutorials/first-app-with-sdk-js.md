@@ -6,16 +6,16 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-js/src/index.ts
 surfaces: [SDK-JS-CitrateClient, SDK-JS-aa]
-audited_against_sha: bc5a830
+audited_against_sha: 2f8da46
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-A short, end-to-end first project with `citrate-js`. You will install the SDK, connect to Citrate Network on
+A short, end-to-end first project with `@citratelabs/sdk`. You will install the SDK, connect to Citrate Network on
 testnet, derive a Citrate Keyring account address, read state off the chain, and assemble one sponsored write
-as a UserOperation. It takes about fifteen minutes, and every symbol used is verified against `citrate-js` at
-SHA `bc5a830`.
+as a UserOperation. It takes about fifteen minutes, and every symbol used is verified against `citrate-sdk-js` at
+SHA `2f8da46`.
 
 ## What it is
 
@@ -35,7 +35,7 @@ You will need Node 16 or newer (the SDK's declared `engines.node`) and npm.
 mkdir citrate-first-app && cd citrate-first-app
 npm init -y
 npm pkg set type=module
-npm install citrate-js
+npm install @citratelabs/sdk
 npm install -D typescript tsx @types/node
 ```
 
@@ -47,7 +47,7 @@ it in an environment variable such as `CITRATE_PRIVATE_KEY`, never inline.
 Create `index.ts`:
 
 ```typescript
-import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from 'citrate-js';
+import { CitrateClient, CHAIN_IDS, DEFAULT_RPC_URLS } from '@citratelabs/sdk';
 
 const client = new CitrateClient({
   // DEFAULT_RPC_URLS[40204] resolves to ['https://rpc.citrate.ai'].
@@ -81,7 +81,7 @@ A Citrate Keyring account has the same address on every device, because the addr
 deterministically from the user's id. You can compute it offline, before the account is ever deployed.
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 
 // The 32-byte AA userId is keccak256(utf8(lowercase uuid)).
 const userId = aa.uuidToUserId('3f2504e0-4f89-41d3-9a0c-0305e82c3301');
@@ -106,7 +106,7 @@ first op. The pieces below are all real `aa` exports; the deployment addresses (
 from a bundler estimate.
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 
 // 1. Encode the call this account should make (target, value, calldata).
 const callData = aa.encodeExecuteSingle({
@@ -169,7 +169,7 @@ account address. The write step runs once you supply the deployment config and a
 
 ## Reference
 
-The symbols this tutorial uses, with their source files in `citrate-js`.
+The symbols this tutorial uses, with their source files in `citrate-sdk-js`.
 
 | Symbol | Source |
 |---|---|
@@ -209,8 +209,8 @@ passkey or an environment-held signer, never inline, and the hostnames named (`r
 
 ## Source and verification
 
-- Source repo: `citrate-sdk-js`, package `citrate-js@0.2.0`.
-- Audited against SHA: `bc5a830`.
+- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`citrate-js` retained as a deprecated alias).
+- Audited against SHA: `2f8da46`.
 - Symbols verified in `src/client/CitrateClient.ts`, `src/utils/constants.ts`, and `src/aa/{address, kernel,
   userop, webauthn, eoa, bundler, types}.ts`.
 - Status: Implemented (pre-audit). The client reads run against testnet 40204; the `aa` write path is

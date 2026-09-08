@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/revm_adapter.rs, citrate-chain/core/execution/src/parallel/, citrate-chain/core/execution/src/mvcc/
 surfaces: [CHAIN-lvm-revm, CHAIN-lvm-mvcc]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -131,6 +131,6 @@ reproducing it. No keys, endpoints, or credentials appear on this page.
 - Source files: `core/execution/src/revm_adapter.rs`, `core/execution/src/parallel/{executor.rs,conflict.rs}`,
   `core/execution/src/mvcc/{commit.rs,read_set.rs,scratch_journal.rs,retry.rs,mod.rs}`
 - TLA+ spec: `specs/tla/consensus/ExecutorMVCC.tla`
-- Audited against SHA: `03d7851`
+- Audited against SHA: `9d5959e`
 - Status: Implemented (pre-audit). The EVM path runs on testnet 40204; the MVCC commit protocol is
   Verified against its TLA+ model.

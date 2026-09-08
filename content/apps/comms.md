@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-comms/README.md, citrate-comms/crates, citrate-comms/PLANSET
 surfaces: [APP-comms]
-audited_against_sha: 0a4989e
+audited_against_sha: 67557cf
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -59,10 +59,15 @@ remaining crates fill in on the published plan.
 | Crate | Status | Role |
 |---|---|---|
 | `comms-proto` | Implemented | Wire types: envelope, group id, commit, welcome, application message, role assertion, audit record |
-| `comms-core` | Implemented (mls, identity, audit) | Group messaging over OpenMLS, sign-in identity, and the audit chain; role and storage modules follow |
+| `comms-core` | Implemented (mls, identity, audit, store) | Group messaging over OpenMLS, sign-in identity, the audit chain, and the ciphertext store; the role and domain modules follow |
 | `comms-relay` | Implemented | The server-blind delivery service: total order per group, the key-package directory, the audit log |
-| `comms-agent-bridge` | Specified | A local socket bridge that lets an agent join as a member holding its own keys |
+| `comms-wire` | Implemented | The client-half relay wire protocol, with no MLS present |
+| `comms-session` | Implemented | A member session: sign-in identity, key package, and send and receive |
+| `comms-member-daemon` | Implemented | An account-owned MLS member with an in-process relay over a loopback socket |
+| `comms-agent-bridge` | Implemented | A local socket bridge that lets an agent join as a member holding its own keys |
 | `comms-client` | Implemented (shell, primary channel) | The native client; the shell and the main channel screen are translated from the design handoff |
+| `comms-release` | Implemented | A reproducibility manifest and an Ed25519 release signer (COMMS-S4) |
+| `comms-client-proof` | Implemented | A visual golden-image test harness (COMMS-S5) |
 
 The cryptography is standard and named:
 
@@ -70,8 +75,9 @@ The cryptography is standard and named:
 group messaging   MLS (RFC 9420) via OpenMLS
 ciphersuite       MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519
                   X25519 key exchange, AES-128-GCM, Ed25519 signatures
-at rest           RocksDB column families encrypted with AES-256-GCM,
-                  keys wrapped by a hybrid Kyber-768 + X25519 KEM, SHA3-512 combine
+at rest           RocksDB column families encrypted with AES-256-GCM-SIV
+                  (nonce-misuse-resistant, RFC 8452); classical today, with a
+                  Kyber-768 + X25519 hybrid key wrapping roadmapped (PLANSET/07)
 audit             BLAKE3 hash-chained append-only log,
                   optionally anchored to the Citrate Network for tamper-evidence
 ```
@@ -115,6 +121,9 @@ agent in [the air-gapped agent sidecar](/apps/nist-agent).
 - Audited against SHA: `0a4989e`.
 - Key paths: `crates/comms-proto`, `crates/comms-core` (`mls`, `identity`, `audit`), `crates/comms-relay`,
   `crates/comms-agent-bridge`, `crates/comms-client`.
-- Status: Implemented for the cryptographic and transport spine, accepted into the federation on 2026-06-14,
-  with the foundation prototype complete and 22 tests passing. It is pre-1.0; the agent bridge is Specified
-  and not yet built, and full transport and storage land in the next sprint.
+- Status: Implemented, accepted into the federation on 2026-06-14. The native Rust workspace has shipped
+  through the cryptographic and transport spine and is in interface hardening (COMMS-S5 active, S0 through
+  S4 complete), with 121 tests passing across the workspace. It is pre-1.0: the agent bridge is built (the
+  socket IPC and the account-owned MLS member), while the privileged agent runtime is not yet wired, and
+  the at-rest encryption is classical with a post-quantum hybrid roadmapped. Only an internal self-audit has
+  run; there is no external audit yet.

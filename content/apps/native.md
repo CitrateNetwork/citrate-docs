@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-native/README.md, Cargo.toml, gui/citrate_native/ui/
 surfaces: [APP-native]
-audited_against_sha: 6416447
+audited_against_sha: bc0e8ba
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -109,7 +109,7 @@ behind an environment flag until their wiring lands.
 - The build pulls chain crates over SSH using per-host aliases, while a few sibling repositories still use
   plain `github.com`. Cargo can then fetch a chain crate such as `citrate-wallet-core` twice and treat the
   copies as different sources. It compiles today; if you hit a type mismatch at a chain-API boundary, this
-  double-fetch is the likely cause. A Sprint 1 follow-up normalizes the URLs.
+  double-fetch is the likely cause. A planned follow-up normalizes the URL convention across these repos.
 - The CMO aggregates are demo-stubbed behind the `CITRATE_CMO_DEMO` environment flag in version 1. Treat
   those numbers as illustrative until the wiring lands.
 
@@ -123,7 +123,7 @@ are not reproduced here. The CMO screens are role-gated to CMOSuperAdmin identit
 
 ## Source and verification
 
-- Source repo: `citrate-native`, audited against SHA `6416447`.
+- Source repo: `citrate-native`, audited against SHA `bc0e8ba`.
 - Files read: `README.md`, `Cargo.toml`, `rust-toolchain.toml`,
   `gui/citrate_native/ui/shell/sidebar.slint`, `ui/app.slint`, `ui/onboarding/onboarding.slint`,
   `ui/wallet/wallet.slint`, `ui/wallet/send_dialog.slint`, `ui/dag/dag_explorer.slint`,

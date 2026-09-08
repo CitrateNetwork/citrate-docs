@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-sdk-python/examples/basic_usage.py
 surfaces: [SDK-PY-client]
-audited_against_sha: 0b5c642
+audited_against_sha: 869694b
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -14,15 +14,16 @@ author: Citrate team
 
 Install the Python SDK, connect to a Citrate node, read account state, then deploy a model and run inference,
 in a few minutes. For Python developers meeting Citrate for the first time. Every call below exists in
-`citrate_sdk/client.py` at `0b5c642`, and the flow mirrors `examples/basic_usage.py`, which you can run
+`citrate_sdk/client.py` at `869694b`, and the flow mirrors `examples/basic_usage.py`, which you can run
 as-is from the repo.
 
 ## What it is
 
 A copy-paste tour of the working Python surface. The read steps need no key. The write steps, deploy and
 inference, need a funded account. The Python SDK is non-canonical and Pre-Alpha; the canonical SDK is the
-[JavaScript SDK](/sdks/js). The `citrate` console script is declared but not implemented, so this tutorial
-uses the `CitrateClient` API directly and does not invoke a CLI.
+[JavaScript SDK](/sdks/js). A `citrate` console script also ships (`citrate_sdk/cli.py`, with `contract`,
+`wallet`, `entitlement`, and `gateway` commands); this tutorial uses the `CitrateClient` API directly rather
+than the CLI.
 
 ## How to use it
 
@@ -180,7 +181,8 @@ The calls used above, with their source in `citrate-sdk-python`:
 - Encrypted inference without `recipient_public_key` fails closed.
 - An IPFS upload failure during `deploy_model` propagates; no fallback CID is invented.
 - A manager write without `default_account` raises `ConfigurationError`.
-- The `citrate` console script is not implemented; do not invoke it.
+- The `citrate gateway` command never takes its key as an `argv` value; supply it through
+  `$CITRATE_GATEWAY_API_KEY` or `--api-key-file` (SPY-B-012).
 
 ## Access and canon
 
@@ -193,6 +195,6 @@ the public network is identity-verified through VERI, Citrate's in-house verific
 - Source repo: `citrate-sdk-python`.
 - Mirrors `examples/basic_usage.py`; APIs in `citrate_sdk/client.py`, `citrate_sdk/crypto.py`,
   `citrate_sdk/learning.py`.
-- Audited against SHA: `0b5c642`.
+- Audited against SHA: `869694b`.
 - Status: Implemented, pre-audit, non-canonical (the canonical SDK is the [JavaScript SDK](/sdks/js)). See
   the full surface on the [Python SDK](/sdks/python) reference.

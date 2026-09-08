@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{KYCRegistry,TEEAttestationRegistry,NematocystSlashing}.sol, contracts/src/interfaces/INematocystSlashing.sol
 surfaces: [SC-sec-slashing, SC-sec-kyc, SC-sec-tee]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -205,7 +205,7 @@ consensus](/chain/consensus).
 - Source repo: `citrate-chain`, files under `contracts/src/`: `KYCRegistry.sol`,
   `TEEAttestationRegistry.sol`, `NematocystSlashing.sol`, and `interfaces/INematocystSlashing.sol`, plus
   `contracts/src/lib/Governable.sol` for the ownership mixin.
-- Audited against `citrate-chain` SHA `54d1f2c`.
+- Audited against `citrate-chain` SHA `9d5959e`.
 - Status by contract: `KYCRegistry` Implemented, pre-audit; `TEEAttestationRegistry` Implemented, pre-audit,
   state machine specified against `PipelineParallelTEE.tla`; `NematocystSlashing` Implemented, pre-audit;
   `INematocystSlashing` Implemented as an interface only. None has completed a final third-party audit.

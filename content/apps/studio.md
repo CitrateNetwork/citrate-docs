@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-studio (private repo)
 surfaces: [APP-studio]
-audited_against_sha: c93a827
+audited_against_sha: 39cadf3
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -38,7 +38,7 @@ people only. This page points to that gated material; it does not reproduce it, 
 
 ## Source and verification
 
-- Source repo: `citrate-studio` (private). Public overview audited against SHA `c93a827`.
+- Source repo: `citrate-studio` (private). Public overview audited against SHA `39cadf3`.
 - Status: Implemented. The application is a hardened release candidate with real authentication, policy
   core, signer roster, and chain reads; the precise built-versus-modeled map and the remaining 1.0 work are
   in the gated material. The Confidential bodies remain in the private repository and are intentionally not

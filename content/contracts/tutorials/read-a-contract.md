@@ -4,9 +4,9 @@ codex_slug: /contracts/tutorials/read-a-contract
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-chain-laneB/contracts/src (WrappedSALT.sol, LiquidStakingPool.sol)
+source: citrate-chain/contracts/src (WrappedSALT.sol, LiquidStakingPool.sol)
 surfaces: [SC-econ-wrappedSALT, SC-econ-staking]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -35,7 +35,7 @@ rpc () {
 }
 ```
 
-Read the address you want from `contracts/DEPLOYED_ADDRESSES.md`, the canonical record described on the [contracts reference](/contracts/reference). The examples here use the Wrapped SALT and liquid staking pool addresses from that file; always confirm an address with step 1 before trusting it, because the chain can be re-rolled.
+Read the address you want from `contracts/addresses/40204.json`, the canonical record described on the [contracts reference](/contracts/reference). The examples here use the Wrapped SALT and liquid staking pool addresses from that file; always confirm an address with step 1 before trusting it, because the chain can be re-rolled.
 
 ### Step 1, confirm the contract exists
 
@@ -100,7 +100,7 @@ For the full read surface and patterns like reading events, see [interact read-o
 
 ## Failure modes
 
-- A `0x` result from `eth_getCode` means no contract is at the address. Re-read it from `DEPLOYED_ADDRESSES.md`; the chain may have been re-rolled since you copied it.
+- A `0x` result from `eth_getCode` means no contract is at the address. Re-read it from `contracts/addresses/40204.json`; the chain may have been re-rolled since you copied it.
 - `-32601 Method not found` means the RPC method is misspelled or not served by the node.
 - A call that reverts comes back as an error, not a value. Check that the function exists in the ABI and that any arguments are well-formed.
 - A decoded value that looks wrong is often a signature mismatch. Confirm the return type against the source before reading meaning into it, as with `balanceOf` above.
@@ -111,6 +111,6 @@ Public and read-only. Nothing here writes state, so you can run it against any C
 
 ## Source and verification
 
-Functions verified against `citrate-chain-laneB` at SHA `54d1f2c`: `contracts/src/WrappedSALT.sol` (`symbol`, `decimals`), `contracts/src/LiquidStakingPool.sol` (`getSharePrice`, `balanceOf`). Addresses live in `contracts/DEPLOYED_ADDRESSES.md`, chain 40204, testnet beta. Status: Implemented, testnet beta, pre-audit.
+Functions verified against `citrate-chain` at SHA `9d5959e`: `contracts/src/WrappedSALT.sol` (`symbol`, `decimals`), `contracts/src/LiquidStakingPool.sol` (`getSharePrice`, `balanceOf`). Addresses live in `contracts/addresses/40204.json`, chain 40204, testnet beta. Status: Implemented, testnet beta, pre-audit.
 
 See also [chain RPC](/chain/rpc) and the [chain CLI](/chain/cli).

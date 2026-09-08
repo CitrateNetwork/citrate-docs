@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-dashboard/{app/, lib/daemon-api.ts}
 surfaces: [APP-dashboard]
-audited_against_sha: f6e27c6
+audited_against_sha: 727e62d
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -114,7 +114,7 @@ endpoints shown are public hostnames, and configuration lives in environment. Se
 ## Source and verification
 
 - Source repo: `citrate-dashboard`, split from the Citrate monorepo on 2026-05-18, audited against SHA
-  `f6e27c6`.
+  `727e62d`.
 - Key paths: `app/page.tsx`, `app/cycles/page.tsx`, `app/cycles/[id]/page.tsx`, `app/experiments/page.tsx`,
   `app/profile/page.tsx`, `app/api/profile/route.ts`, `app/api/invites/route.ts`, `lib/daemon-api.ts`.
 - Stack: Next.js 16, React 19, Prisma on Vercel Postgres for profiles and invites, ethers for chain reads,

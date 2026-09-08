@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/storage/src/state_manager.rs, citrate-chain/core/storage/src/db/, citrate-chain/core/storage/src/chain/, citrate-chain/core/storage/src/state/, citrate-chain/core/storage/src/pruning/, citrate-chain/core/storage/src/ipfs/
 surfaces: [CHAIN-storage]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -20,7 +20,7 @@ The storage crate (`core/storage/`) is the persistence layer, and it coordinates
 
 State is flat, not a tree. Citrate Network does not use a Merkle-Patricia trie for the world state. State lives in flat RocksDB column families, and the state root is a hash over the sorted state. `StateManager::calculate_state_root()` computes an account root (accounts sorted by address), a storage root (storage sorted by address), and an AI root, then combines them as `SHA3-256(account_root || storage_root || ai_root)`. Because the inputs are sorted, every honest node with the same state computes the same root. This is a deliberate simplification, explained under design rationale below.
 
-The top-level coordinator is `StorageManager` (`src/lib.rs`), built with `StorageManager::new(path, pruning_config)` for the default, no at-rest encryption, or `StorageManager::with_config(path, config)` for the full configuration including at-rest encryption. It owns the block store, transaction store, state stores, caches, the pruner, and the optional IPFS service.
+The top-level coordinator is `StorageManager` (`src/lib.rs`), built with `StorageManager::new(path, pruning_config)` for the default, no at-rest encryption, or `StorageManager::with_config(path, config)` for the full configuration including at-rest encryption. It owns the RocksDB handle, the block and transaction stores, the state store, the block and state caches, and the pruner. IPFS is a separate service, not a field of `StorageManager`.
 
 ## How to use it
 
@@ -28,19 +28,21 @@ For an operator, storage is mostly configuration and then it runs itself.
 
 1. Choose a data path and a pruning policy, then construct a `StorageManager`.
 2. Start its background services; this spawns the auto-pruner on the configured interval.
-3. If you need at-rest encryption, build with a full config and initialize encryption with an operator-supplied passphrase. Encryption is off by default.
+3. If you need at-rest encryption, supply an `EncryptionAtRestConfig` on the `StorageConfig` you pass to `with_config`; the key material is bound at construction, there is no separate runtime initialize step. Encryption is off by default.
 
 ```rust
-use citrate_storage::{StorageManager, PruningConfig};
+use std::sync::Arc;
+use citrate_storage::{StorageManager, StorageConfig, PruningConfig};
+use citrate_storage::crypto::at_rest::EncryptionAtRestConfig;
 
 // Default storage at a path, auto-pruning with defaults.
-let storage = StorageManager::new("./data", PruningConfig::default())?;
-storage.start_services();            // spawns the auto-pruner
+let storage = Arc::new(StorageManager::new("./data", PruningConfig::default())?);
+storage.clone().start_services().await;   // spawns the auto-pruner (async, takes Arc<Self>)
 
-// Full config with at-rest encryption, tuned for AI model storage:
-let cfg = citrate_storage::StorageConfig::maximum_security("node-1".into());
+// Full config with at-rest encryption:
+let cfg = StorageConfig::default()
+    .with_encryption(EncryptionAtRestConfig::with_password("...operator-supplied passphrase..."));
 let storage = StorageManager::with_config("./data", cfg)?;
-storage.initialize_encryption("...operator-supplied passphrase...")?;
 ```
 
 For storage paths, pruning, and the IPFS daemon in an operational setting, see [run a node](/operators/run-a-node).
@@ -81,7 +83,7 @@ For storage paths, pruning, and the IPFS daemon in an operational setting, see [
 
 ### At-rest encryption
 
-When enabled via `StorageConfig`, the storage layer applies a cipher-agile, post-quantum hybrid envelope (`src/crypto/`): a hybrid key exchange combining ML-KEM (CRYSTALS-Kyber) with X25519, feeding AES-256-GCM data encryption, to resist a harvest-now, decrypt-later attack. Per-column-family keys are derived from an Argon2id master key through HKDF-SHA3, with scheduled rotation. Key commitments, never key material, can be anchored on-chain for auditability (`src/crypto/key_commitment.rs`). It is off by default; initialize it with `StorageManager::initialize_encryption(password)`.
+When enabled via `StorageConfig`, the storage layer applies a cipher-agile, post-quantum hybrid envelope (`src/crypto/`): a hybrid key exchange combining ML-KEM (CRYSTALS-Kyber) with X25519, feeding AES-256-GCM data encryption, to resist a harvest-now, decrypt-later attack. Per-column-family keys are derived from an Argon2id master key through HKDF-SHA3, with scheduled rotation. Key commitments, never key material, can be anchored on-chain for auditability (`src/crypto/key_commitment.rs`). It is off by default; enable it by setting `StorageConfig::with_encryption(EncryptionAtRestConfig::with_password(...))` before `StorageManager::with_config`.
 
 ## Design rationale
 
@@ -102,5 +104,5 @@ Public. The storage model, the state-root construction, and the reference are wh
 ## Source and verification
 
 - Source files: `core/storage/src/state_manager.rs`, `src/db/`, `src/chain/`, `src/state/`, `src/pruning/`, `src/ipfs/`, `src/crypto/`.
-- Audited against SHA `03d7851`.
+- Audited against SHA `9d5959e`.
 - Status: Implemented, pre external audit. The crate is internally tested, including a durability and fsync suite; it has not completed a third-party audit. Several call sites carry remediation markers (for example `REM-2 / WP-H1.3` fsync enforcement, `SECREM-01 CONS-6` corrupt-data handling). Treat it as production-track but pre-certification.

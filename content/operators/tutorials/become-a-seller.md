@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-node-agent (README.md, crates/) + ComputeMarketplace.sol
 surfaces: [NODE-sell, OPS-node-agent]
-audited_against_sha: 38bc9d1
+audited_against_sha: 0e63363
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -146,7 +146,8 @@ SELL-S2, experimental. Earnings sweep with `claimRewards()` once claimable reach
 
 ## Reference
 
-The contract functions you touch, audited against `contracts/src/ComputeMarketplace.sol` at `54d1f2c`:
+The contract functions you touch, audited against `citrate-chain/contracts/src/ComputeMarketplace.sol` at
+`e6f11ef`:
 
 | Function | What it does |
 |---|---|
@@ -197,8 +198,9 @@ count in, not a product to hold. The agent holds no keys.
 
 ## Source and verification
 
-Verified against `citrate-node-agent` at `38bc9d1` (the agent, `crates/`) and
-`contracts/src/ComputeMarketplace.sol` at `54d1f2c` (the marketplace). The build, policy, self-check,
+Verified against `citrate-node-agent` at `0e63363` (the agent, `crates/`) and
+`citrate-chain/contracts/src/ComputeMarketplace.sol` at `e6f11ef` (the marketplace, which lives in the
+`citrate-chain` repository, not the node-agent). The build, policy, self-check,
 daemon, and supervision steps against `crates/config`, `crates/node-agent`, and `crates/supervision`; the
 bid decision against `crates/bidder`; the lifecycle writes and the unsigned signing seam against
 `crates/lifecycle`; registration, stake, scoring, the fee split, the timeout slash, and the dispute bond

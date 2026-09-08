@@ -15,7 +15,7 @@ status: Implemented
 Create a passkey-backed Citrate Keyring account and send your first sponsored transaction, with no seed
 phrase, using `citrate-js`. You will derive the account address before it exists, then deploy and use it in
 a single operation. For the concepts behind each step see [passkeys](/aa/passkeys); for the contracts see
-[account-abstraction contracts](/contracts/aa).
+[account-abstraction contracts](/aa/contracts).
 
 ## What it is
 
@@ -178,7 +178,7 @@ runtime, and passkey private material never leaves the authenticator. Use testne
 ## Source and verification
 
 - `citrate-sdk-js/src/aa/{address,userop,kernel,webauthn,bundler}.ts` at SHA `bc5a830`.
-- Validators and factory: `citrate-chain-laneB/contracts/src/aa/` at SHA `54d1f2c`.
+- Validators and factory: `citrate-chain/contracts/src/aa/` at SHA `9d5959e`.
 
 Status: Implemented, pre-audit. Use testnet; do not custody material value. Re-verify the exports against
 the SHAs before relying on this tutorial.

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-explorer/src/app/api/tx/[hash]/route.ts, src/app/api/v1/route.ts, src/app/api/mcp/route.ts
 surfaces: [APP-explorer]
-audited_against_sha: cf7fa78
+audited_against_sha: 6faab8a
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -128,7 +128,7 @@ be pasted into shared docs.
 
 ## Source and verification
 
-- Repo: `citrate-explorer` (CitrateScan), audited against `cf7fa78`.
+- Repo: `citrate-explorer` (CitrateScan), audited against `6faab8a`.
 - Endpoints used: `/api/tx/[hash]`, `/api/v1` (`proxy`, `transaction`), `/api/mcp`.
 - Status: Implemented (pre-audit). These are read-only public surfaces.
 

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-inference-gateway/gateway/src/, citrate-inference-gateway/crates/x402-axum/src/
 surfaces: [API-GW-rest, API-GW-x402]
-audited_against_sha: a2ad401
+audited_against_sha: 603fe92
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -227,7 +227,7 @@ never documented; the repository source contains no hardcoded credentials at the
   `models.rs`, `usage.rs`, `queries.rs`, `health.rs`, `metrics.rs`, `config.rs`, `main.rs`, `lib.rs`); the
   payment middleware in `crates/x402-axum/src/` (`layer.rs`, `challenge.rs`, `client.rs`). Operator detail
   in `gateway/RUNBOOK.md`.
-- Audited against SHA: `a2ad401`.
+- Audited against SHA: `603fe92`.
 - Status: Implemented (pre-audit). The REST routes, on-chain read queries, provider dispatch with failover,
   and the full x402 settlement path exist and run; this slice has not had an external audit. Specified:
   pool dispatch and durable usage accounting. Theoretical: on-chain per-request job posting and streaming

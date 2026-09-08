@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-wallet-extension/README.md, .github/workflows/release.yml, manifest.json
 surfaces: [APP-wallet-ext]
-audited_against_sha: 543017d
+audited_against_sha: 930594c
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -122,7 +122,7 @@ account created here has no recovery phrase, so keep the password safe.
 
 ## Source and verification
 
-- Source repo: `citrate-wallet-extension`, audited against SHA `543017d`.
+- Source repo: `citrate-wallet-extension`, audited against SHA `930594c`.
 - Files read: `README.md`, `.github/workflows/release.yml`, `manifest.json`, `js/background.js`,
   `js/crypto.js`, `js/provider.js`, `wasm/build.md`.
 - Status: Implemented (pre-audit), version 0.2.0. The download, verify, load-unpacked, and account-creation

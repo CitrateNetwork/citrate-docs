@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/sequencer/src/mempool.rs, citrate-chain/core/sequencer/src/validator.rs, citrate-chain/core/sequencer/src/block_builder.rs
 surfaces: [CHAIN-seq-mempool]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -57,8 +57,8 @@ validator.validate(&tx).await?;
 mempool.add_transaction(tx).await?;
 
 // Build a candidate block from the pool.
-let builder = BlockBuilder::new(builder_config, mempool.clone(), dag_store, ghostdag);
-let block = builder.build_block(selected_parent, merge_parents, proposer_key, vrf_proof).await?;
+let builder = BlockBuilder::new(builder_config, mempool.clone(), proposer_key).with_executor(executor);
+let block = builder.build_block(selected_parent, merge_parents, parent_height, parent_blue_score, vrf_proof).await?;
 ```
 
 To watch pending transactions on a live node without Rust, use `mempool_getPending` and `citrate_getMempoolStats` over JSON-RPC; see [chain RPC](/chain/rpc).
@@ -67,18 +67,17 @@ To watch pending transactions on a live node without Rust, use `mempool_getPendi
 
 ### Mempool, `src/mempool.rs`
 
-- `Mempool::new(config)`, build a mempool. `MempoolConfig::default()` is ten thousand capacity, one Gwei gas floor, one hundred per sender (`src/mempool.rs:169`).
+- `Mempool::new(config)`, build a mempool. `MempoolConfig::default()` is ten thousand capacity, one Gwei gas floor, one hundred per sender (`src/mempool.rs:181`).
 - `Mempool::add_transaction(tx)`, validate and insert with priority sorting.
-- `Mempool::get_transactions(max)`, extract the top-priority batch for building.
-- `Mempool::get_pending_transactions_for_sender(pubkey)`, pending-nonce support.
-- `Mempool::remove_transactions(hashes)`, drop transactions once they are in a block.
-- `Mempool::estimate_gas_price()`, a gas-price estimate from the current pool.
-- `Mempool::get_stats()`, size, gas statistics, and a per-class breakdown.
+- `Mempool::get_transactions(limit)`, extract the top-priority batch for building.
+- `Mempool::pending_nonce_for(sender)`, the next pending nonce for a sender.
+- `Mempool::remove_transaction(hash)`, drop a transaction once it is in a block.
+- `Mempool::stats()`, size, gas statistics, and a per-class breakdown.
 
 ### Transaction validator, `src/validator.rs`
 
 - `TxValidator::new(rules, state_provider)`, then `validate(tx)` or `validate_batch(txs)`.
-- `validate` runs, in order: signature (ed25519 and ECDSA), balance, nonce, gas price and limit, data-size limit, rate limit, and address blacklist.
+- `validate` runs, in order: address blacklist, rate limit, gas price and limit, data-size limit, signature (ed25519 and ECDSA), then balance and nonce (`src/validator.rs:188`).
 - `ValidationRules`, the configurable floor: minimum gas price, maximum gas limit, maximum data size, rate limits.
 - `ValidationPipeline`, splits a batch into valid and invalid.
 - `TxValidator::blacklist_address(addr)` and `unblacklist_address(addr)`.
@@ -86,12 +85,12 @@ To watch pending transactions on a live node without Rust, use `mempool_getPendi
 
 ### Block builder, `src/block_builder.rs`
 
-The builder assembles the candidate block, plainly and in order: it takes the selected parent (the tip with the highest blue score) plus up to `max_parents`, which is ten, merge parents from the consensus layer, pulls the top-priority transactions from the mempool, executes them, computes the state and receipt roots, sets the EIP-1559 base fee, and signs the result.
+The builder assembles the candidate block, plainly and in order: it takes the selected parent (the tip with the highest blue score) plus up to `max_parents - 1`, which is nine, merge parents from the consensus layer, pulls the top-priority transactions from the mempool, executes them, computes the state and receipt roots, sets the EIP-1559 base fee, and signs the result.
 
-- `BlockBuilder::new(config, mempool, dag_store, ghostdag)`.
+- `BlockBuilder::new(config, mempool, proposer_key)`, with the proposer key held on the builder (`src/block_builder.rs:129`).
 - `BlockBuilder::with_executor(executor)`, attach the execution engine.
-- `BlockBuilder::build_block(selected_parent, merge_parents, proposer, vrf_proof)`, produce the full candidate (`src/block_builder.rs:144`).
-- `BlockBuilderConfig`, maximum block size, gas limits, transaction bounds, and `block_time_target`, which defaults to two seconds (`src/block_builder.rs:76`).
+- `BlockBuilder::build_block(selected_parent, merge_parents, parent_height, parent_blue_score, vrf_proof)`, produce the full candidate (`src/block_builder.rs:149`).
+- `BlockBuilderConfig`, maximum block size, gas limits, transaction bounds, and `block_time_target`, which defaults to two seconds (`src/block_builder.rs:77`).
 
 Parent selection itself belongs to the consensus layer: `ParentSelector` returns `(selected_parent, merge_parents)` for a new block. See [consensus](/chain/consensus) for how blue score picks the selected parent, and [the LVM](/chain/lvm) for how the transactions execute.
 
@@ -112,5 +111,5 @@ Public. Mempool behavior and validation rules are what a developer needs to subm
 ## Source and verification
 
 - Source files: `core/sequencer/src/mempool.rs`, `src/validator.rs`, `src/block_builder.rs`.
-- Audited against SHA `03d7851`.
+- Audited against SHA `9d5959e`.
 - Status: Implemented, pre external audit. The crate is internally tested, including property tests; it has not completed a third-party audit. The mempool denial-of-service surface (rate limiting, per-sender caps, eviction) is implemented but should be treated as pre-certification.

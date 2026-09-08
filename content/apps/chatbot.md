@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chatbot
 surfaces: [APP-chatbot]
-audited_against_sha: 023372f
+audited_against_sha: e3827c3
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -129,7 +129,7 @@ testnet at chain id 40204. SALT settles the work the relay performs and the user
 ## Source and verification
 
 - Source repo: `citrate-chatbot`.
-- Audited against: `023372f`.
+- Audited against: `e3827c3`.
 - Key paths: `src/app/api/relay/route.ts`, `src/app/api/chat/route.ts`,
   `src/hooks/use-sponsored-write.ts`, `src/components/auth-provider.tsx`,
   `src/lib/inference/index.ts`, `contracts/src/CitrateForwarder.sol`, `contracts/src/ChatRegistry.sol`,

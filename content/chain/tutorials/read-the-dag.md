@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain core/api
 surfaces: [CHAIN-consensus-ghostdag, CHAIN-rpc-citrate, CHAIN-rpc-chain]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -151,7 +151,7 @@ Public and read-only. No keys, no write methods, no private endpoints, and nothi
 
 ## Source and verification
 
-Methods verified against `citrate-chain` at `03d7851`: `citrate_getDagStats` in `core/api/src/eth_rpc.rs`,
+Methods verified against `citrate-chain` at `9d5959e`: `citrate_getDagStats` in `core/api/src/eth_rpc.rs`,
 and `chain_getTips`, `chain_getBlock`, and `chain_getHeight` in `core/api/src/server.rs`. The GhostDAG
 constants are `GhostDagParams::default()` in `core/consensus/src/types.rs`. Status: Implemented (testnet
 40204), pre external audit. The `blueBlocks` and `redBlocks` fields of `citrate_getDagStats` are estimates,

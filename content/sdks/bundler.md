@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-bundler/gate/src/server.ts, citrate-bundler/gate/src/precheck.ts, citrate-bundler/gate/src/config.ts, citrate-bundler/Caddyfile, citrate-bundler/Dockerfile
 surfaces: [API-BUNDLER]
-audited_against_sha: a3287de
+audited_against_sha: e1aa264
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -141,9 +141,10 @@ the trade-off is visible, not buried.
 This surface is security relevant, and it fails closed where it matters.
 
 - **Missing or invalid API key.** When the gate requires a key, a missing key returns `-32001` and a bad
-  key returns `-32001`; neither reaches the bundler. The key requirement is configurable, and the default
-  in `gate/src/config.ts` leaves it off, so an operator who wants a closed endpoint must set
-  `GATE_REQUIRE_API_KEY=true`.
+  key returns `-32001`; neither reaches the bundler. The key requirement is configurable, and the default in
+  `gate/src/config.ts` is now on (`GATE_REQUIRE_API_KEY` defaults to `true`). An operator who wants an open
+  endpoint must set `GATE_REQUIRE_API_KEY=false`, and in production must also set `GATE_ALLOW_ANONYMOUS=true`
+  to accept the risk, or the gate warns.
 - **Rate limit exceeded.** A per-IP limit, default 60 per minute, and a per-key limit, default 600 per
   minute, both return `-32005`. If the backing Redis store is unavailable the rate limiter fails closed,
   rejecting rather than waving traffic through.
@@ -173,7 +174,7 @@ mnemonic, or private host detail into an example.
   the `/health` versus `/healthz` split in `Caddyfile`; the `--unsafe` upstream invocation in `Dockerfile`.
   The `citrate_getUserAddress` reference is in `README.md`. Operator secrets live in `DEPLOY.md` and are
   not reproduced here.
-- Audited against SHA: `a3287de`.
+- Audited against SHA: `e1aa264`.
 - Status: Implemented (pre-audit). The gate, the precheck, the rate limits, and the standard method surface
   exist and run; this slice has not had an external audit. The `citrate_getUserAddress` method is
   Specified, declared in the README but not implemented at this SHA.

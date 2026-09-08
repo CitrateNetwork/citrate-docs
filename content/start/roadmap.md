@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: Citrate mission + program plan
 surfaces: [START-roadmap]
-audited_against_sha: 03d7851
+audited_against_sha: 9d5959e
 status: Specified
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -53,6 +53,6 @@ overstated.
 
 ## Source and verification
 
-The chain id (40204, permanent) is verified against `citrate-chain` at `03d7851` (`cli/src/config.rs`). The
+The chain id (40204, permanent) is verified against `citrate-chain` at `9d5959e` (`cli/src/config.rs`). The
 timeline reflects the program plan and is stated as a target, not a recorded fact. Status: Specified, with
 the testnet phase Implemented.

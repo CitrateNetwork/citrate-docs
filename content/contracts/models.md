@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (ModelRegistry.sol, ModelMarketplace.sol, LoRAFactory.sol, ModelAccessControl.sol, InferenceRouter.sol, interfaces/IModelRegistry.sol, interfaces/IModelMarketplace.sol)
 surfaces: [SC-model-registry, SC-model-marketplace, SC-model-lora, SC-model-access, SC-model-router]
-audited_against_sha: 54d1f2c
+audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -258,7 +258,7 @@ credentials. The only hardcoded addresses are public protocol precompiles: `0x10
 - Source: `citrate-chain/contracts/src/`, in `ModelRegistry.sol`, `InferenceRouter.sol`,
   `ModelMarketplace.sol`, `LoRAFactory.sol`, and `ModelAccessControl.sol`, with interfaces
   `interfaces/IModelRegistry.sol` and `interfaces/IModelMarketplace.sol`.
-- Audited against `citrate-chain` SHA `54d1f2c`.
+- Audited against `citrate-chain` SHA `9d5959e`.
 - Status: Implemented, pre-audit, on testnet 40204. The LoRAFactory reentrancy gap, the InferenceRouter
   guard mismatch, the unverified-review weighting, and the ModelAccessControl placeholders are open items
   noted above and not yet externally audited. Re-verify deployed bytecode with `eth_getCode` if the chain
