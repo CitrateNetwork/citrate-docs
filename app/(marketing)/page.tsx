@@ -1,10 +1,14 @@
 import Link from "next/link";
-import { CHAIN_STATUS } from "@/prototype/fixtures";
 import { Footer } from "@/components/footer";
 import { LanguagePicker } from "@/components/language-picker";
+import { getChainStatus } from "@/lib/chain-status";
+
+// Re-read live chain height at most every 30s (ISR), not on every request.
+export const revalidate = 30;
 
 /** Splash / front door (DESIGN_BRIEF §6.1). */
-export default function Splash() {
+export default async function Splash() {
+  const status = await getChainStatus();
   return (
     <div className="relative flex min-h-screen flex-col">
     <div className="absolute right-4 top-4 z-40">
@@ -12,8 +16,8 @@ export default function Splash() {
     </div>
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-6 py-20 text-center">
       <div className="mb-4 flex items-center gap-2 text-sm text-[var(--color-muted)]">
-        <span className="inline-flex h-2 w-2 rounded-full bg-[var(--color-citrate)]" />
-        Citrate testnet · chain {CHAIN_STATUS.chainId} · height {CHAIN_STATUS.height.toLocaleString()}
+        <span className="inline-flex h-2 w-2 rounded-full" style={{ background: status.up ? "var(--color-citrate)" : "var(--color-muted)" }} />
+        Citrate testnet · chain {status.chainId} · height {status.height.toLocaleString()}
       </div>
 
       <div className="eyebrow mb-5">Documentation</div>
