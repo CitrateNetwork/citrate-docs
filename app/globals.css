@@ -124,6 +124,10 @@ body {
   .md th, .md td { border: 1px solid var(--border-1); padding: var(--s-2) var(--s-3); text-align: left; vertical-align: top; }
   .md th { background: var(--bg-2); font-family: var(--font-mono); font-size: var(--t-2xs); letter-spacing: var(--tr-caps); text-transform: uppercase; color: var(--fg-2); font-weight: 600; }
   .md hr { border: none; border-top: 1px solid var(--border-1); margin: var(--s-6) 0; }
+  /* screenshots + diagrams (lib/md.tsx img renderer) */
+  .md-figure { margin: var(--s-6) 0; display: flex; flex-direction: column; gap: var(--s-2); }
+  .md-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--border-1); border-radius: var(--r-2); background: var(--bg-inset); box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06); }
+  .md-figure figcaption { font-size: var(--t-xs); color: var(--fg-2); text-align: center; line-height: 1.5; }
   /* code block chrome: language label + copy mount */
   .code-block { position: relative; }
   .code-block-lang { position: absolute; top: 6px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tr-caps); text-transform: uppercase; color: var(--fg-faint); }

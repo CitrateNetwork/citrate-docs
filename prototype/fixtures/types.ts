@@ -87,6 +87,8 @@ export interface NavNode {
   icon?: string;
   /** "tutorials" marks the per-section Tutorials subsection. */
   kind?: "group" | "doc" | "tutorials" | "sandbox";
+  /** Explicit sidebar position from a page's `nav_order` frontmatter; pages without it sort after, by title. */
+  order?: number;
   children?: NavNode[];
 }
 

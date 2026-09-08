@@ -17,12 +17,12 @@ const OUT_FILE = path.join(OUT_DIR, "content.ts");
 const TIER_RANK = { public: 0, commercial: 1, academic: 2, confidential: 3 };
 // Product-surface names (Citrate brand spec) carry Title Case; generic sections are sentence case.
 const SECTION_LABEL = {
-  start: "Start here", chain: "Citrate Network", contracts: "Smart contracts", sdks: "SDKs & APIs",
+  start: "Start here", core: "Citrate Core", chain: "Citrate Network", contracts: "Smart contracts", sdks: "SDKs & APIs",
   aa: "Citrate Keyring & identity", compute: "Citrate Market", apps: "Apps & dapps",
   operators: "Citrate Node", research: "Citrate Orchard", enterprise: "Enterprise & Citrate Ground",
   methodology: "Methodology",
 };
-const SECTION_ORDER = ["start", "chain", "contracts", "sdks", "aa", "compute", "operators", "apps", "research", "enterprise", "methodology"];
+const SECTION_ORDER = ["start", "core", "chain", "contracts", "sdks", "aa", "compute", "operators", "apps", "research", "enterprise", "methodology"];
 
 function walk(dir) {
   const out = [];
@@ -110,7 +110,8 @@ for (const file of files) {
   const section = parts[0] || "misc";
   const isTut = parts.includes("tutorials");
   (sections[section] ||= { leaves: [], tutorials: [] });
-  const node = { id: slug, title, slug, tier, ...(orgId ? { orgId } : {}), kind: isTut ? "tutorials" : "doc" };
+  const navOrder = fm.nav_order != null && fm.nav_order !== "" ? Number(fm.nav_order) : null;
+  const node = { id: slug, title, slug, tier, ...(orgId ? { orgId } : {}), ...(navOrder != null && !Number.isNaN(navOrder) ? { order: navOrder } : {}), kind: isTut ? "tutorials" : "doc" };
   (isTut ? sections[section].tutorials : sections[section].leaves).push(node);
 }
 
@@ -121,8 +122,14 @@ const orderedSections = Object.keys(sections).sort((a, b) => {
 });
 const nav = orderedSections.map((section) => {
   const { leaves, tutorials } = sections[section];
-  const children = [...leaves.sort((a, b) => a.title.localeCompare(b.title)),
-                    ...tutorials.sort((a, b) => a.title.localeCompare(b.title))];
+  // Sort by explicit `nav_order` frontmatter when present (pages without it keep
+  // the previous alphabetical-by-title behaviour and sort after ordered pages).
+  const byOrderThenTitle = (a, b) => {
+    const ao = a.order ?? Infinity, bo = b.order ?? Infinity;
+    return ao !== bo ? ao - bo : a.title.localeCompare(b.title);
+  };
+  const children = [...leaves.sort(byOrderThenTitle),
+                    ...tutorials.sort(byOrderThenTitle)];
   const groupTier = children.reduce(
     (acc, c) => (TIER_RANK[c.tier] < TIER_RANK[acc] ? c.tier : acc), "confidential");
   return { id: `grp-${section}`, title: SECTION_LABEL[section] || section, tier: groupTier, kind: "group", children };

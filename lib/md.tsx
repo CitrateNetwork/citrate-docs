@@ -102,6 +102,15 @@ export function Markdown({ source }: { source: string }) {
               {children}
             </a>
           ),
+          // Screenshots + diagrams: render inside a framed figure, using the alt
+          // text as the caption. Assets live under /public and stay outside Next
+          // image optimization on purpose (static, versioned docs assets).
+          img: ({ src, alt }) => (
+            <figure className="md-figure">
+              <img src={typeof src === "string" ? src : ""} alt={alt || ""} loading="lazy" decoding="async" />
+              {alt ? <figcaption>{alt}</figcaption> : null}
+            </figure>
+          ),
         }}
       >
         {stripLeadingH1(source)}
