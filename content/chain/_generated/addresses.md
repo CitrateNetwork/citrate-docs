@@ -3,7 +3,7 @@ title: Contract addresses
 codex_slug: /chain/addresses
 tier: public
 org_scope: ~
-source_kind: generated
+source_kind: transcluded
 source: citrate-chain/contracts/addresses/40204.json
 surfaces: [CHAIN-addresses]
 audited_against_sha: c6e5906
