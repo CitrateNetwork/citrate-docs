@@ -21,7 +21,8 @@
     "verify:bundle": "node scripts/check-no-confidential.mjs && npm run check:bundle-gate && npm run check:auth-mode && npm run check:access-clock && npm run check:mcp-keys",
     "content-lint": "node scripts/content-lint.mjs",
     "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json",
-    "docs:api": "node scripts/gen-api-refs.mjs"
+    "docs:api": "node scripts/gen-api-refs.mjs",
+    "docs:addresses": "node scripts/gen-addresses.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",

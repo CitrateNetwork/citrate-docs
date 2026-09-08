@@ -84,6 +84,14 @@ if (fs.existsSync(GEN_API_DIR)) {
     if (e.endsWith(".md")) files.push(path.join(GEN_API_DIR, e));
   }
 }
+// Same treatment for the generated contract-address reference (scripts/gen-addresses.mjs):
+// it lives under content/chain/_generated/ (walk-skipped, human-hands-off) but is a real nav page.
+const GEN_ADDR_DIR = path.join(CONTENT_DIR, "chain", "_generated");
+if (fs.existsSync(GEN_ADDR_DIR)) {
+  for (const e of fs.readdirSync(GEN_ADDR_DIR)) {
+    if (e.endsWith(".md")) files.push(path.join(GEN_ADDR_DIR, e));
+  }
+}
 const docs = {};
 const sections = {}; // section -> { leaves: [], tutorials: [] }
 

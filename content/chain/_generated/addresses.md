@@ -1,0 +1,139 @@
+---
+title: Contract addresses
+codex_slug: /chain/addresses
+tier: public
+org_scope: ~
+source_kind: generated
+source: citrate-chain/contracts/addresses/40204.json
+surfaces: [CHAIN-addresses]
+audited_against_sha: c6e5906
+status: Implemented
+created: 2026-09-07T00:00:00Z
+author: Citrate team
+nav_order: 5
+---
+
+This is the canonical list of deployed contract addresses on chain 40204 (Citrate Network). It
+is generated from the federation address book (`citrate-chain/contracts/addresses/40204.json`), the single
+source of truth every application reads from, and is regenerated after each re-roll or address fan-out. As
+of the book at commit `c6e5906`, deployed 2026-09-07 20:37:05UTC.
+
+Addresses are deterministic (CREATE2 through the genesis factory), so a re-roll moves them together and this
+page moves with them. The RPC endpoint is `https://rpc.citrate.ai` and the deployer is `0x4fAB35c8c5033c80b3a0452A873B81e6ED4ED732`.
+
+## Core contracts
+
+| Contract | Address |
+|---|---|
+| `ModelRegistry` | `0xba36fa0da9327030bd14351db968c8c43c5a67e4` |
+| `WrappedSALT` | `0xaa918302b94a4b0e75e01e019cc6b819b4f7c906` |
+| `AgentDecisionRegistry` | `0xd4008e0b4f0bd00d630810d1f7f0f78db0ba837a` |
+| `SpecRegistry` | `0x8ce7000c83d0ef5276a70bdc34bf2fa2fe0159ff` |
+| `IPFSIncentives` | `0xb79e438bc8c68f7d94cf694eb0ec8eae40525680` |
+| `X402Facilitator` | `0xae0d2ddc74732df4424d2a89c0815cba84be37e7` |
+| `X402Paywall` | `0xca98b1678a3127a4d605ac3b37454646adbf5453` |
+| `LiquidStakingPool` | `0xead6a4a47c528ecea2a86cd9d9af7504d7a5e30e` |
+| `ContributionAccounting` | `0xd00d442c735c16d00f04ae31a180c78eec5ec32f` |
+| `NematocystSlashing` | `0xfeb23abd20084d36a1145da8a2dc04e8b48f65c7` |
+| `MarketMakerAllocation` | `0xfcc747d35d616c48bddef98a31b7e8ebc8786864` |
+| `ModelMarketplace` | `0xbd94012b113c81843dc66196d13fe0667651a7f0` |
+| `InferenceRouter` | `0x00463e63a5645de75083460f5f1ee108d0870815` |
+| `LoRAFactory` | `0xbb7eeb6286a756b0e23af2ead3e03acca72f9e39` |
+| `LearningPool` | `0xd973cc744f9fd8da55a8b08cde303d5b59a29771` |
+| `LearningCycleManager` | `0xcce506d1f270f954b726c552879ebc19f3719035` |
+| `ClassroomRegistry` | `0x124f5f69691e0963c3a7c4d9497d1e224568ffb3` |
+| `MentorMatcher` | `0x78ca904036cd144b55f6dd07bc3e36603c6c089b` |
+| `ComputeVerifier` | `0x067c16ea5c2b90045607d9b33c127606e67e61da` |
+| `ComputeMarketplace` | `0x527e636389a46784b9537690716db00d4ab987d4` |
+| `ComputePool` | `0xcd778fc9820ac8cada5cd95aa7cddf6e4ca4d375` |
+| `HeartbeatMonitor` | `0xe9eaac272844f342266862bbefc6d117a227ad9b` |
+| `DisputeResolution` | `0x4562d2a68063a61b83683aae301fe0f480e4f03a` |
+| `ComputePricingOracle` | `0x10b5c17d6f018631fc221594ed8b8bb003c9c975` |
+| `StablecoinTreasury` | `0x0e9c5953bd7c77252119e32f989ba94f735c8599` |
+| `BulkComputeGateway` | `0xf55f743e4a20557f03fdaa3cc43b0d2354c73c79` |
+| `TestnetFarmingAccounting` | `0x220cc378641607df8ff9cff6e985d67331704ca4` |
+| `TreasuryGovernor` | `0xab7c486db6377225453a04a0bf7161291f2611b1` |
+| `InstitutionalVault` | `0xb38a64922fad87e86e36254dc2fd65a971eb211e` |
+| `ClassroomClusterV1` | `0xdd6bad78e88147a46f502e02ff56808916c8c4b8` |
+| `BudgetAllocation` | `0x220a8dbb48ba3dfbe2c4f5ae162c5e5b6dc2351e` |
+| `CashoutRequest` | `0xaeb938bf9eedcffb14ab2db1e8787e591b539700` |
+| `AIModelRegistryPortable` | `0xda30a0408b1690afa739fb63901a6608547f4da6` |
+| `AIInferenceRouterPortable` | `0x85b04c554ee0137818a0e9acbe6d5f8f4b6ef1d7` |
+| `AILearningCycleCorePortable` | `0x615297a23f954681ef4b648eaaf722455eca925c` |
+| `ModelAccessControl` | `0xc68f19c4f3e1fae734ca0a053af8a5b34ed98c63` |
+| `TEEAttestationRegistry` | `0x0834a05a5607af5ff10dade01e1c96cd6e83bd8b` |
+| `ComputePoolTraining` | `0x0858b110dfa9c61df34b9d57576e751229b900b7` |
+| `KYCRegistry` | `0xf72248f5dfe5c8dab3047ae52958aa65b216be8f` |
+| `IPFSIncentivesV2` | `0x951ddc6316efbeda36dcb940e4d81747415b8500` |
+| `IPFSIncentivesV3` | `0xc27a867b8d076d77cf17981f235c64a0d0203a68` |
+| `AggregationChallenge` | `0xe7d7ebe1242feec29d514b00c9272fbffc9e69be` |
+| `ComputePoolPipeline` | `0xc05a38141bb095275f8dc24dfbbcf69722cd1a3b` |
+| `ValidatorRegistry` | `0x2655d9fbbe599e75ff6e53790f99ebc9a20c93bf` |
+| `EduForwarder` | `0xe4c6aa7afd77e24c838f8a490aae6f34b286faff` |
+| `AnchorRegistry` | `0x84a2857a293dd1fb5a0e74aaa14788b0324e408c` |
+| `MeetingRegistry` | `0x2a433b487175d1be14d2b91979d69a21e11af8eb` |
+| `GovernanceTemplateRegistry` | `0xecedd7a64f88f577a9c5d6b501291454f2bba3a6` |
+| `GovernanceProtocolFactory` | `0xb0e474647bd2f74da0d90c010234b9e9a7d2b048` |
+| `PolicyBinding` | `0xe9dd5756d2c01a262caed433f67f36ae2a73d3be` |
+| `CapabilityGrant` | `0x260ffedd17cd05a2e4daa41e1339c19a083f9e57` |
+| `VoteAllowance` | `0x1dc147b73863b1fc662bc9172b19193b4865af5f` |
+| `Sortition` | `0xadc2e3849d10cfdc3b83e5c3fe650b29f0478e54` |
+| `PatronageLedger` | `0x726f2c8a0bfa4145dca7c154577705803c8dafa3` |
+| `ModelCooperative` | `0x54b70368373b0b22ac8ad9882961228d790133bf` |
+| `FacilitySBTImpl` | `0xa8ad418a0be3877a797f183bade8dc52b1608ad0` |
+| `NetworkSBTImpl` | `0x3a6ff326f83cd77ed936dcb1620ece2f5b41d7af` |
+| `FacilitySBT` | `0x2520b5307752318b03047cf547b38b99311f65fb` |
+| `NetworkSBT` | `0x062b355f67b8252054ad59c220b3aac1cd0a0ff6` |
+| `CitrateMemberSBT` | `0xf0badd9eed5a81871a2f0d309b1f0a225646448a` |
+| `MemberBond` | `0x7d6b92757e928ab4207be3b54166ecd2c491aa92` |
+| `MembershipStakeVaultImpl` | `0x72035977f3ec295c70e2a734acbdffb0c98e6f0b` |
+| `MembershipStakeVault` | `0x53fb4badffaceedd575d47d0e74bb721504f786e` |
+| `CitrateCooperativeFactory` | `0x3b88731d65f044cc43c5d4589212c0f32a8c1667` |
+| `CoopDeployer` | `0xd7cbaeb1c1d3a3a12707297a96ae454b37ec56fe` |
+| `CoopMembershipSBT` | `0xb455c14880aca8eeddf95f6e1dcfddb13d8b6a83` |
+| `ContributionRewardPool` | `0x2aee5a81e0fa056d2e6949d71aaf96456218b6c8` |
+| `CoopGovernor` | `0x8046c10f1bb4bf58cedb4a7a55ebfa7f8b09e64b` |
+
+## Account abstraction
+
+The Citrate Keyring account stack (ERC-4337). See [the Keyring section](/aa/identity) for how these fit
+together.
+
+| Contract | Address |
+|---|---|
+| `EntryPoint` | `0x97d5391a647429233e202f99231743c53a648f3c` |
+| `CitrateWallet` | `0x2d742b98d867fc7363f530dd6d756622e4eb768d` |
+| `CitrateWalletFactory` | `0x86486d1de9f256e2cba327c46ac11120df0aa51a` |
+| `CitratePaymaster` | `0xfdc9f7a72163b5d45becdb8a9d8d44b970f77318` |
+| `WebAuthnP256Validator` | `0x0f421a99a0b8f6138dea12f45a523cb896d09fc7` |
+| `CitrateECDSAValidator` | `0xd2d35421379ae5b461e216bfcdd1b7e6a64bbc40` |
+| `GuardianRecoveryModule` | `0x0a909769160c1945401b8f37a9310d37dbb6a891` |
+
+## Precompiles
+
+Precompiles are fixed genesis addresses and do not move across re-rolls.
+
+| Contract | Address |
+|---|---|
+| `ModelDeploy` | `0x0000000000000000000000000000000000000100` |
+| `ModelInference` | `0x0000000000000000000000000000000000000101` |
+| `BatchInference` | `0x0000000000000000000000000000000000000102` |
+| `ModelMetadata` | `0x0000000000000000000000000000000000000103` |
+| `ModelBenchmark` | `0x0000000000000000000000000000000000000105` |
+| `ModelEncryption` | `0x0000000000000000000000000000000000000106` |
+| `TensorCommit` | `0x0000000000000000000000000000000000000107` |
+| `InferenceProofVerify` | `0x0000000000000000000000000000000000000108` |
+| `MerkleVerifyTensor` | `0x0000000000000000000000000000000000000109` |
+| `TensorMatmulQ16` | `0x000000000000000000000000000000000000010a` |
+| `TensorDotQ16` | `0x000000000000000000000000000000000000010b` |
+| `TensorSoftmaxQ16` | `0x000000000000000000000000000000000000010c` |
+| `TensorReluQ16` | `0x000000000000000000000000000000000000010d` |
+| `TensorLinearQ16` | `0x000000000000000000000000000000000000010e` |
+| `TensorTransposeQ16` | `0x000000000000000000000000000000000000010f` |
+| `BelnapAggregate` | `0x0000000000000000000000000000000000000110` |
+| `RoutingInference` | `0x0000000000000000000000000000000000000111` |
+| `Ed25519Verify` | `0x0000000000000000000000000000000000000120` |
+| `X402Eip712Verify` | `0x0000000000000000000000000000000000000200` |
+| `X402TransferAuthVerify` | `0x0000000000000000000000000000000000000201` |
+| `X402BatchPaymentVerify` | `0x0000000000000000000000000000000000000202` |
+
