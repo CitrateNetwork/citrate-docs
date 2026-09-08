@@ -12,6 +12,7 @@ import { DisclosureModal } from "./disclosure-modal";
 import { Icon } from "./icons";
 import { findNavBySlug } from "@/lib/nav-util";
 import { cn } from "@/lib/cn";
+import { FreshnessBadge } from "./freshness-badge";
 
 /** The tier-aware document reader — renders every DocResponse state (DESIGN_BRIEF §7, §15). */
 export function DocView({ slug }: { slug: string }) {
@@ -124,6 +125,7 @@ export function DocView({ slug }: { slug: string }) {
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="font-display text-2xl font-bold tracking-tight">{doc.title}</h1>
           <TierChip tier={doc.tier} />
+          <FreshnessBadge slug={slug} />
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[var(--color-muted)]">
           {doc.readingTimeMin && <span>{doc.readingTimeMin} min read</span>}

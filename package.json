@@ -23,7 +23,8 @@
     "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json",
     "docs:api": "node scripts/gen-api-refs.mjs",
     "docs:addresses": "node scripts/gen-addresses.mjs",
-    "docs:changelog": "node scripts/gen-changelog.mjs"
+    "docs:changelog": "node scripts/gen-changelog.mjs",
+    "docs:freshness": "node scripts/gen-freshness.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",
