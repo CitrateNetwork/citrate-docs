@@ -18,7 +18,7 @@ const spaceGrotesk = localFont({
   preload: true,
 });
 
-const SITE_URL = "https://citrate-atlas.vercel.app";
+const SITE_URL = "https://docs.citrate.ai";
 const DESCRIPTION =
   "Citrate Atlas is the gated, agentic documentation for the Citrate Network: every surface in the federation, the chain, contracts, RPC, SDKs, CLIs, and apps, mapped, searchable, and live.";
 
@@ -70,10 +70,39 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
+// Structured data (SEO/AEO): identify the publisher and the docs site so answer
+// engines and search can attribute Citrate Atlas to the Citrate Network.
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#org`,
+      name: "Citrate Network",
+      url: "https://citrate.ai",
+      sameAs: ["https://docs.citrate.ai", "https://explorer.citrate.ai"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#site`,
+      name: "Citrate Atlas",
+      description:
+        "Documentation for the Citrate Network: chain, contracts, SDKs, identity, the Citrate Core desktop app, and running a node.",
+      url: SITE_URL,
+      publisher: { "@id": `${SITE_URL}/#org` },
+      inLanguage: "en",
+    },
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="dark" className={spaceGrotesk.variable} suppressHydrationWarning>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
         <Providers>{children}</Providers>
         <LanguageBoot />
         <CookieConsent />

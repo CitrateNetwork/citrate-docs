@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CONTENT_DOCS } from "@/content/_generated/content";
 
-const SITE_URL = "https://citrate-atlas.vercel.app";
+const SITE_URL = "https://docs.citrate.ai";
 
 // Only public pages belong in the sitemap. Gated docs (commercial/academic/confidential) are excluded so
 // crawlers do not surface routes a visitor cannot read.

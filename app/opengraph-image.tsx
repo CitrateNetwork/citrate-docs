@@ -58,7 +58,7 @@ export default async function Image() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 28, fontWeight: 500, color: "#a8b0a0" }}>
           <div style={{ display: "flex", width: 12, height: 12, borderRadius: 12, background: "#8ecc09" }} />
-          <div style={{ display: "flex" }}>citrate-atlas.vercel.app</div>
+          <div style={{ display: "flex" }}>docs.citrate.ai</div>
           <div style={{ display: "flex", color: "#3a4234" }}>·</div>
           <div style={{ display: "flex" }}>Documentation</div>
         </div>

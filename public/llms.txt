@@ -16,9 +16,18 @@ The docs state maturity honestly, module by module: what is implemented (pre-aud
 - Account abstraction and identity: https://docs.citrate.ai/aa/identity
 - x402 payments: https://docs.citrate.ai/contracts/x402
 
+## Citrate Core (the desktop app)
+- What Citrate Core is: https://docs.citrate.ai/core/overview
+- Getting started, first run: https://docs.citrate.ai/core/getting-started
+- Screen-by-screen tour: https://docs.citrate.ai/core/tour
+- Run a node from the app: https://docs.citrate.ai/core/run-a-node
+- Keys and safe operation: https://docs.citrate.ai/core/safety
+- For agents and headless operators: https://docs.citrate.ai/core/for-agents
+
 ## Run
 - Run a node: https://docs.citrate.ai/operators/run-a-node
 - Chain internals (consensus, LVM, precompiles): https://docs.citrate.ai/chain
+- Contract addresses (canonical, generated from the address book): https://docs.citrate.ai/chain/addresses
 
 ## Confirm it is live
 - eth_chainId at https://rpc.citrate.ai returns 0x9d0c (40204).
