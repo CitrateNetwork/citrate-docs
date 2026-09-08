@@ -150,8 +150,8 @@ function RelaySandbox() {
     } catch { setS({ status: "error", error: "relay unavailable (fail-closed)" }); }
   };
   return (
-    <Frame title="Gasless relay (EIP-2771)" blurb="A user-signed meta-transaction the Citrate relayer sponsors — no gas, on us." source="citrate-chatbot /api/relay">
-      <RunButton onClick={run} busy={s.status === "loading"} label="Run demo" />
+    <Frame title="Gasless relay (EIP-2771)" blurb="Confirm the Citrate relayer is live and ready to sponsor a user-signed meta-transaction. Read-only: the docs app holds no keys, so it checks readiness rather than submitting." source="citrate-chatbot /api/relay">
+      <RunButton onClick={run} busy={s.status === "loading"} label="Check relayer" />
       <Result state={s} />
     </Frame>
   );

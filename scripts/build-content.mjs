@@ -92,6 +92,13 @@ if (fs.existsSync(GEN_ADDR_DIR)) {
     if (e.endsWith(".md")) files.push(path.join(GEN_ADDR_DIR, e));
   }
 }
+// And the generated federation changelog (scripts/gen-changelog.mjs).
+const GEN_LOG_DIR = path.join(CONTENT_DIR, "start", "_generated");
+if (fs.existsSync(GEN_LOG_DIR)) {
+  for (const e of fs.readdirSync(GEN_LOG_DIR)) {
+    if (e.endsWith(".md")) files.push(path.join(GEN_LOG_DIR, e));
+  }
+}
 const docs = {};
 const sections = {}; // section -> { leaves: [], tutorials: [] }
 

@@ -5,8 +5,8 @@
   "description": "Citrate Atlas, the gated, agentic documentation webapp for the Citrate Network federation.",
   "scripts": {
     "content": "node scripts/build-content.mjs",
-    "predev": "node scripts/build-content.mjs",
-    "prebuild": "node scripts/build-content.mjs",
+    "predev": "node scripts/gen-changelog.mjs && node scripts/build-content.mjs",
+    "prebuild": "node scripts/gen-changelog.mjs && node scripts/build-content.mjs",
     "postbuild": "node scripts/check-no-confidential.mjs && npm run check:bundle-gate && npm run check:auth-mode && npm run check:access-clock && npm run check:mcp-keys",
     "dev": "NEXT_PUBLIC_AUTH_MODE=mock ALLOW_MOCK_AUTH=1 next dev",
     "build": "next build",
@@ -22,7 +22,8 @@
     "content-lint": "node scripts/content-lint.mjs",
     "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json",
     "docs:api": "node scripts/gen-api-refs.mjs",
-    "docs:addresses": "node scripts/gen-addresses.mjs"
+    "docs:addresses": "node scripts/gen-addresses.mjs",
+    "docs:changelog": "node scripts/gen-changelog.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",
