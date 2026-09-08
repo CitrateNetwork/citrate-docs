@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/learning/
 surfaces: [RES-learning]
-audited_against_sha: 03d7851
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -20,7 +20,7 @@ The learning engine that ships in `citrate-chain` is exercised by the crate's ow
 
 ## How to use it
 
-You need a Rust toolchain (`rustup`, stable; `cargo --version` should work), a checkout of `citrate-chain` at SHA `03d7851` or later, and about five minutes.
+You need a Rust toolchain (`rustup`, stable; `cargo --version` should work), a checkout of `citrate-chain` at SHA `e68af83` or later, and about five minutes.
 
 ### Step 1, build and run the learning suite
 
@@ -168,7 +168,7 @@ You ran the four phases a live checkpoint runs, Observe, Orient with paraconsist
 
 ## Source and verification
 
-- Engine: `citrate-chain/core/learning/` at SHA `03d7851`. Pipeline API in `src/phases.rs`; aggregation in `src/aggregation.rs`; four-valued logic in `src/belnap.rs`; the root in `src/orchestration.rs`.
+- Engine: `citrate-chain/core/learning/` at SHA `e68af83`. Pipeline API in `src/phases.rs`; aggregation in `src/aggregation.rs`; four-valued logic in `src/belnap.rs`; the root in `src/orchestration.rs`.
 - Reference tests: `tests/e2e_ooda_pipeline.rs`, `tests/belnap_adversarial.rs`, `tests/lora_provenance.rs`.
 - On-chain surfaces named above: `core/api/src/server.rs` (`citrate_createTrainingJob`, `citrate_getTrainingJob`) and `contracts/src/edu/ai-gateway/AILearningCycleCorePortable.sol`.
 - Status by surface. The crate-level round (Steps 1 through 5) is Implemented (pre-audit) and runs as shown. The on-chain path (Step 6) is Specified, with `citrate_getTrainingJob` and the cycle contract present and `citrate_createTrainingJob` not yet functional.

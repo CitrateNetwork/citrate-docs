@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/api/src/{eth_rpc.rs,server.rs,ai_rpc.rs,economics_rpc.rs,methods/}
 surfaces: [CHAIN-rpc-eth, CHAIN-rpc-citrate, CHAIN-rpc-ai, CHAIN-rpc-econ]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

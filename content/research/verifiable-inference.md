@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/precompiles/{verify.rs,inference.rs}
 surfaces: [RES-verifiable]
-audited_against_sha: 03d7851
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -103,7 +103,7 @@ it. If you are an authorized principal and need the internals, request the gated
   primitives in `core/execution/src/precompiles/compute.rs` and the attestation gate in
   `core/execution/src/precompiles/attestation/`. Research context: Gradient Paper No. 10,
   `gradient_papers_v3/Gradient_Papers_No10_Substrate_of_Verifiable_Inference_v3.md` (linked, not copied).
-- Audited against SHA: `03d7851`.
+- Audited against SHA: `e68af83`.
 - Status: the deterministic verification path (`0x0107` to `0x0109`) and the Q16.16 compute primitives are
   Implemented (pre-audit) on testnet 40204. The `0x0108` verifier is Implemented behind a build feature so
   nodes that do not host it stay lean. The attestation gate is Implemented in its always-reject default;

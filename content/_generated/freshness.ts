@@ -5,9 +5,9 @@ export const FRESHNESS: Record<string, Freshness> = {
   "/aa/contracts": {
     "repo": "citrate-chain",
     "sha": "9d5959e",
-    "head": "9d5959e",
-    "behind": 0,
-    "headDate": "2026-09-07"
+    "head": "e68af83",
+    "behind": 1,
+    "headDate": "2026-09-08"
   },
   "/aa/guardians": {
     "repo": "citrate-identity",
@@ -145,212 +145,212 @@ export const FRESHNESS: Record<string, Freshness> = {
   "/chain/addresses": {
     "repo": "citrate-chain",
     "sha": "c6e5906",
-    "head": "9d5959e",
-    "behind": 1,
-    "headDate": "2026-09-07"
+    "head": "e68af83",
+    "behind": 2,
+    "headDate": "2026-09-08"
   },
   "/chain/bridge": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/cli": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/consensus": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/economics": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/genesis": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/lvm": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/network": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/precompiles-zkp": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/precompiles": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/rpc": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/sequencer": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/storage": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/tutorials/call-citrate-rpc": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/tutorials/deploy-a-contract-with-the-cli": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/chain/tutorials/read-the-dag": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/compute/agent-runtime": {
     "repo": "citrate-agent-runtime",
-    "sha": "560c11a",
+    "sha": "f161e69",
     "head": "f161e69",
-    "behind": 46,
+    "behind": 0,
     "headDate": "2026-09-07"
   },
   "/compute/gateway": {
     "repo": "citrate-inference-gateway",
-    "sha": "a2ad401",
+    "sha": "603fe92",
     "head": "603fe92",
-    "behind": 40,
+    "behind": 0,
     "headDate": "2026-09-07"
   },
   "/compute/node-agent": {
     "repo": "citrate-node-agent",
-    "sha": "38bc9d1",
+    "sha": "0e63363",
     "head": "0e63363",
-    "behind": 20,
+    "behind": 0,
     "headDate": "2026-09-07"
   },
   "/compute/pool": {
     "repo": "citrate-compute-pool",
-    "sha": "ae9358d",
+    "sha": "e5b7280",
     "head": "e5b7280",
-    "behind": 57,
+    "behind": 0,
     "headDate": "2026-09-07"
   },
   "/contracts/compute": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/economics": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/edu": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/governance": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/models": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/reference": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/security": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/tutorials/interact-read-only": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/tutorials/read-a-contract": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/contracts/x402": {
     "repo": "citrate-chain",
-    "sha": "9d5959e",
-    "head": "9d5959e",
+    "sha": "e68af83",
+    "head": "e68af83",
     "behind": 0,
-    "headDate": "2026-09-07"
+    "headDate": "2026-09-08"
   },
   "/core/for-agents": {
     "repo": "citrate-core",
@@ -453,16 +453,16 @@ export const FRESHNESS: Record<string, Freshness> = {
   "/operators/rewards": {
     "repo": "citrate-chain",
     "sha": "9d5959e",
-    "head": "9d5959e",
-    "behind": 0,
-    "headDate": "2026-09-07"
+    "head": "e68af83",
+    "behind": 1,
+    "headDate": "2026-09-08"
   },
   "/operators/run-a-node": {
     "repo": "citrate-chain",
     "sha": "9d5959e",
-    "head": "9d5959e",
-    "behind": 0,
-    "headDate": "2026-09-07"
+    "head": "e68af83",
+    "behind": 1,
+    "headDate": "2026-09-08"
   },
   "/operators/sell-compute": {
     "repo": "citrate-node-agent",
@@ -487,10 +487,10 @@ export const FRESHNESS: Record<string, Freshness> = {
   },
   "/research/bdd": {
     "repo": "citrate-chain",
-    "sha": "03d7851",
-    "head": "9d5959e",
-    "behind": 477,
-    "headDate": "2026-09-07"
+    "sha": "e68af83",
+    "head": "e68af83",
+    "behind": 0,
+    "headDate": "2026-09-08"
   },
   "/research/gradient-papers": {
     "repo": "citrate-docs",
@@ -501,10 +501,10 @@ export const FRESHNESS: Record<string, Freshness> = {
   },
   "/research/learning": {
     "repo": "citrate-chain",
-    "sha": "03d7851",
-    "head": "9d5959e",
-    "behind": 477,
-    "headDate": "2026-09-07"
+    "sha": "e68af83",
+    "head": "e68af83",
+    "behind": 0,
+    "headDate": "2026-09-08"
   },
   "/research/mentorship": {
     "repo": "citrate-docs",
@@ -515,31 +515,31 @@ export const FRESHNESS: Record<string, Freshness> = {
   },
   "/research/paraconsistent": {
     "repo": "citrate-chain",
-    "sha": "03d7851",
-    "head": "9d5959e",
-    "behind": 477,
-    "headDate": "2026-09-07"
+    "sha": "e68af83",
+    "head": "e68af83",
+    "behind": 0,
+    "headDate": "2026-09-08"
   },
   "/research/tla": {
     "repo": "citrate-agentile-archive",
-    "sha": "4da2289",
+    "sha": "f28358f",
     "head": "f28358f",
-    "behind": 1,
+    "behind": 0,
     "headDate": "2026-07-16"
   },
   "/research/tutorials/reproduce-a-learning-round": {
     "repo": "citrate-chain",
-    "sha": "03d7851",
-    "head": "9d5959e",
-    "behind": 477,
-    "headDate": "2026-09-07"
+    "sha": "e68af83",
+    "head": "e68af83",
+    "behind": 0,
+    "headDate": "2026-09-08"
   },
   "/research/verifiable-inference": {
     "repo": "citrate-chain",
-    "sha": "03d7851",
-    "head": "9d5959e",
-    "behind": 477,
-    "headDate": "2026-09-07"
+    "sha": "e68af83",
+    "head": "e68af83",
+    "behind": 0,
+    "headDate": "2026-09-08"
   },
   "/sdks/bundler": {
     "repo": "citrate-bundler",
@@ -614,9 +614,9 @@ export const FRESHNESS: Record<string, Freshness> = {
   "/start/primer": {
     "repo": "citrate-chain",
     "sha": "9d5959e",
-    "head": "9d5959e",
-    "behind": 0,
-    "headDate": "2026-09-07"
+    "head": "e68af83",
+    "behind": 1,
+    "headDate": "2026-09-08"
   },
   "/start/roadmap": {
     "repo": "Citrate",
@@ -627,16 +627,16 @@ export const FRESHNESS: Record<string, Freshness> = {
   },
   "/start/tutorials/your-first-10-minutes": {
     "repo": "citrate-chain",
-    "sha": "03d7851",
-    "head": "9d5959e",
-    "behind": 477,
-    "headDate": "2026-09-07"
+    "sha": "e68af83",
+    "head": "e68af83",
+    "behind": 0,
+    "headDate": "2026-09-08"
   },
   "/start/what-is-citrate": {
     "repo": "citrate-chain",
     "sha": "9d5959e",
-    "head": "9d5959e",
-    "behind": 0,
-    "headDate": "2026-09-07"
+    "head": "e68af83",
+    "behind": 1,
+    "headDate": "2026-09-08"
   }
 };

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (ComputeMarketplace.sol, ComputePool.sol, ComputePoolTraining.sol, ComputeVerifier.sol, BulkComputeGateway.sol, ComputePricingOracle.sol, interfaces/IComputePricingOracle.sol)
 surfaces: [SC-compute-marketplace, SC-compute-pool, SC-compute-training, SC-compute-verifier, SC-compute-bulk, SC-compute-oracle]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

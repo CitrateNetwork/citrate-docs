@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-node-agent (crates/, README.md)
 surfaces: [OPS-node-agent]
-audited_against_sha: 38bc9d1
+audited_against_sha: 0e63363
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -105,9 +105,13 @@ construction and fails closed on plaintext HTTP to a non-loopback host (`crates/
 | `CITRATE_CLAIM_THRESHOLD_WEI` | `1e18`, 1 SALT | No | Auto-claim earnings once claimable reaches this threshold (S2). |
 | `CITRATE_MODEL_CACHE_DIR` | `/var/lib/citrate-node-agent/models` | No | Model-weights cache (S2). |
 | `CITRATE_MODEL_SHA256` | unset | No | Trusted weights digest, recomputed locally for integrity (S2). |
+| `CITRATE_RESIDENT_MODEL_HASH` | unset | No | 64-hex model hash that binds the resident llama-server to one declared model; a job for any other model is refused (S2). |
 | `CITRATE_IPFS_GATEWAY` | unset | No | Gateway for model-CID weight fetch (S2). |
 | `CITRATE_LLAMA_URL` | unset | No | Resident llama-server inference endpoint (S2). |
 | `CITRATE_JOB_INPUT_DIR` | unset | No | Watched directory for off-chain job input (S2). |
+| `CITRATE_HTTP_TIMEOUT_SECS` | `30` | No | Total-request timeout for the outbound RPC and inference clients. |
+| `CITRATE_HTTP_CONNECT_TIMEOUT_SECS` | `10` | No | Connect timeout for the outbound clients. |
+| `CITRATE_HTTP_READ_TIMEOUT_SECS` | `60` | No | Per-read inactivity timeout, covers the streaming weight fetch. |
 
 The execution path turns on only when `CITRATE_IPFS_GATEWAY`, `CITRATE_LLAMA_URL`, and
 `CITRATE_JOB_INPUT_DIR` are all set; otherwise the daemon bids and claims earnings but does not execute

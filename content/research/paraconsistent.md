@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/learning/src/belnap.rs
 surfaces: [RES-paraconsistent]
-audited_against_sha: 03d7851
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -73,6 +73,6 @@ Academic tier. No keys, endpoints, or credentials appear here. The logic is a re
 
 ## Source and verification
 
-- Source: `citrate-chain/core/learning/src/belnap.rs` and `aggregation.rs`, audited against SHA `03d7851`. Adversarial tests in `core/learning/tests/belnap_adversarial.rs`.
+- Source: `citrate-chain/core/learning/src/belnap.rs` and `aggregation.rs`, audited against SHA `e68af83`. Adversarial tests in `core/learning/tests/belnap_adversarial.rs`.
 - Status by surface. The Belnap lattice, the classification function, the reduction, and the dual-output aggregator are Implemented (pre-audit), with property tests for the lattice laws. The fixed-point, in-circuit aggregation precompile and the proof tie-in are Specified, not yet built.
 - Related: [Citrate Orchard, federated learning cycles](/research/learning), [zero-knowledge precompiles](/chain/precompiles-zkp), [verifiable inference](/research/verifiable-inference).

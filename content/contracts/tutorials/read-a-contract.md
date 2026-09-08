@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (WrappedSALT.sol, LiquidStakingPool.sol)
 surfaces: [SC-econ-wrappedSALT, SC-econ-staking]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{WrappedSALT,LiquidStakingPool,IPFSIncentives,ContributionAccounting,StablecoinTreasury,MarketMakerAllocation}.sol
 surfaces: [SC-econ-wrappedSALT, SC-econ-staking, SC-econ-ipfs, SC-econ-contrib, SC-econ-stable, SC-econ-mm]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

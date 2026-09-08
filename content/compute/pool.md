@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-compute-pool (pool-coordinator/, training-worker/)
 surfaces: [OPS-compute-pool]
-audited_against_sha: ae9358d
+audited_against_sha: e5b7280
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -86,20 +86,28 @@ citrate-training-worker
 | `pool-coordinator/` | `citrate-pool-coordinator` | Watches `ComputeRequested`, decides the member, records dispatch, posts the prompt, completes or fails the job. |
 | `training-worker/` | `citrate-training-worker` | `training` mode is a data-parallel training node, `pipeline` mode is one stage of a multi-stage model. |
 
+The workspace also builds two binaries this page does not cover: `citrate-coop-worker` (a member-facing
+register-and-poll daemon in `training-worker/src/bin/coop_worker.rs`) and `citrate-training-coordinator` (a
+separate HTTP coordinator service in the `training-coordinator/` crate).
+
 ### How the coordinator decides
 
-The decision loop is `handle_event` in `pool-coordinator/src/lib.rs`. For one `ComputeRequested`
-event it does five things, in order, and the order matters.
+The decision loop is `handle_event` in `pool-coordinator/src/lib.rs`. Before it touches the chain, it runs
+an admission gate (`pool-coordinator/src/lib.rs`, CP-B-008): it rejects the event with `RejectedEvent` if
+the payment is below `CITRATE_POOL_MIN_PAYMENT_GRAINS`, the prompt is larger than
+`CITRATE_POOL_MAX_PROMPT_BYTES`, or `max_tokens` is above `CITRATE_POOL_MAX_TOKENS`. For an admitted
+`ComputeRequested` event it then does five things, in order, and the order matters.
 
 1. It reads `coordinatorFor(poolId, epoch)`, with the epoch derived from the event's block
    number as `block / 100` (`pool-coordinator/src/chain.rs`, `epoch_of`). If the elected
    coordinator is not this daemon's own account, it stops and does nothing on-chain.
-2. It reads the pool's active members and picks one. Selection is deterministic, not a rotating
-   cursor: the member is `members[keccak256(job_id) mod member_count]`
-   (`pool-coordinator/src/dispatcher.rs`, `select_member`). The same job id always picks the
-   same member, so a coordinator that restarts mid-job picks the same target, and two daemons
-   that briefly believe they are coordinator pick the same target rather than two different
-   ones.
+2. It reads the pool's members, keeps only those that are active and have a GPU, and picks one.
+   Selection is deterministic, not a rotating cursor: the member is
+   `active[keccak256(job_id) mod active_count]`, where `select_member` takes the last eight bytes
+   of the digest as a `u64` and reduces it modulo the active-member count
+   (`pool-coordinator/src/dispatcher.rs`). The same job id always picks the same member, so a
+   coordinator that restarts mid-job picks the same target, and two daemons that briefly believe
+   they are coordinator pick the same target rather than two different ones.
 3. It resolves the chosen member to its HTTPS endpoint from the configured map, failing with
    `UnknownMemberEndpoint` if the member is not listed.
 4. It records the dispatch on-chain before making the HTTP call. Recording first means that if
@@ -117,7 +125,9 @@ correct, only that there is one.
 
 ### Coordinator environment variables
 
-Read from `pool-coordinator/src/config.rs`.
+Read from `pool-coordinator/src/config.rs` (chain, endpoints, timeouts, admission caps),
+`pool-coordinator/src/wallet.rs` (the account keys), and `pool-coordinator/src/main.rs` (contract address,
+poll cadence, metrics bind).
 
 | Variable | Default | Required | Purpose |
 |---|---|---|---|
@@ -128,8 +138,15 @@ Read from `pool-coordinator/src/config.rs`.
 | `CITRATE_POOL_CONTRACT` | none | yes | `ComputePool` address. |
 | `CITRATE_POOL_MEMBER_ENDPOINTS` | `""` | yes | `addr1=url1,addr2=url2` member endpoint map. |
 | `CITRATE_POOL_CHAIN_ID` | `40204` | no | Chain id, verified against the RPC at startup. |
-| `CITRATE_POOL_RPC_URL` | `http://127.0.0.1:18545` | no | JSON-RPC endpoint. |
+| `CITRATE_POOL_RPC_URL` | `http://127.0.0.1:8545` | no | JSON-RPC endpoint. |
 | `CITRATE_POOL_PROVIDER_TIMEOUT_SECS` | `30` | no | Per-request member timeout. |
+| `CITRATE_POOL_MIN_PAYMENT_GRAINS` | `1` | no | Admission gate: reject a request paying below this. |
+| `CITRATE_POOL_MAX_PROMPT_BYTES` | `131072` | no | Admission gate: reject a prompt larger than this (128 KiB). |
+| `CITRATE_POOL_MAX_TOKENS` | `8192` | no | Admission gate: reject a request asking for more tokens than this. |
+| `CITRATE_POOL_POLL_INTERVAL_SECS` | `3` | no | Event poll cadence. |
+| `CITRATE_POOL_CONFIRMATIONS_BUFFER` | `12` | no | Re-scan depth for reorg tolerance. |
+| `CITRATE_POOL_FROM_BLOCK` | `latest` | no | Event start block. |
+| `CITRATE_POOL_WS_URL` | none | no | Opt-in websocket endpoint for event subscription. |
 | `CITRATE_POOL_METRICS_ADDR` | none | no | Prometheus `/metrics` bind, warns if not loopback. |
 
 ### Worker environment variables
@@ -208,7 +225,7 @@ This page connects to [federated learning](/research/learning) for the training 
 - Source repo: `citrate-compute-pool`.
 - Files: `pool-coordinator/src/lib.rs`, `dispatcher.rs`, `chain.rs`, `provider.rs`, `config.rs`;
   `training-worker/src/lib.rs`, `worker.rs`, `pipeline.rs`, `bin/main.rs`, `training-worker/src/wallet.rs`.
-- Audited against SHA: `ae9358d`.
+- Audited against SHA: `e5b7280`.
 - Status by component:
   - Coordinator decision loop (`handle_event`, `select_member`, `epoch_of`, output guard):
     Implemented, with unit and smoke tests. The live JSON-RPC adapter (`HttpChainAdapter`) is the

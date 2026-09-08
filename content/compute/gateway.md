@@ -5,7 +5,7 @@ tier: commercial
 org_scope: ~
 source_kind: authored
 source: citrate-inference-gateway/gateway/src/, citrate-inference-gateway/crates/x402-axum/src/, citrate-inference-gateway/gateway/RUNBOOK.md
-audited_against_sha: a2ad401
+audited_against_sha: 603fe92
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -44,7 +44,7 @@ The deployment shape is the same in both modes: build the binary, set the enviro
 and front it with your own TLS terminator. The difference is which variables you set.
 
 1. Build the gateway from the `citrate-inference-gateway` workspace, then decide the mode. Marketplace mode
-   needs an RPC endpoint and the three contract addresses; local-proxy mode needs one or more upstream URLs.
+   needs an RPC endpoint and the three contract addresses; local-proxy mode needs an upstream URL.
 2. Set the listen address. The default is loopback, `127.0.0.1:9800`. Do not bind to `0.0.0.0` on a host
    reachable from the public network; terminate TLS and apply rate limits at your own reverse proxy and let
    that proxy reach the loopback port.
@@ -60,8 +60,9 @@ and front it with your own TLS terminator. The difference is which variables you
 
 ### Run modes and where they live
 
-The mode is read at start in `gateway/src/config.rs` and wired in `gateway/src/main.rs`. The full operator
-reference is `gateway/RUNBOOK.md` in the repository.
+The mode is read and dispatched at start in `gateway/src/main.rs` (the `CITRATE_GATEWAY_MODE` variable is
+read there); the configuration defaults live in `gateway/src/config.rs`. The full operator reference is
+`gateway/RUNBOOK.md` in the repository.
 
 | Mode | Value | Reads chain | Gating | Use |
 |---|---|---|---|---|
@@ -74,46 +75,66 @@ Handlers live under `gateway/src/`. The request and response bodies are document
 [client page](/sdks/inference-gateway); this table is the operator's view of what is exposed and how each
 route is gated.
 
+The paid routes and `/v1/usage` are mounted by the router that receives the operator signer and the x402
+settlement configuration, `build_router_with_auth` in `gateway/src/lib.rs`, which is the production
+marketplace path. The default `build_router` without that configuration serves only the free read routes,
+`/health`, `/v1/models`, and `/metrics`; it exposes an unauthenticated chat path only when both
+`CITRATE_GATEWAY_OPEN_CHAT` and `CITRATE_GATEWAY_DEV_MODE` are set, and that path carries no x402 gate.
+
 | Route | Method | Handler | Gating |
 |---|---|---|---|
 | `/v1/chat/completions` | POST | `gateway/src/chat.rs` | x402, paid |
-| `/v1/batch`, `/v1/batch/{id}`, `/v1/batch/{id}/output` | POST, GET | `gateway/src/batch.rs` | x402 paid, submitter-bound reads |
+| `/v1/batch` | POST | `gateway/src/batch.rs` | x402, paid |
+| `/v1/batch/{id}`, `/v1/batch/{id}/output` | GET | `gateway/src/batch.rs` | free, submitter-bound reads |
 | `/v1/models` | GET | `gateway/src/models.rs` | free |
 | `/v1/usage` | GET | `gateway/src/usage.rs` | API-key bearer |
 | `/health` | GET | `gateway/src/health.rs` | free liveness |
-| `/metrics` | GET | `gateway/src/metrics.rs` | Prometheus exposition |
+| `/metrics` | GET | `gateway/src/metrics.rs` | bearer token, disabled when unset |
 
 ### Configuration
 
-The gateway reads its configuration from environment variables, verified in `gateway/src/config.rs`. Names
-and purposes follow; no values are shown, and account material is never set inline.
+The gateway reads its configuration from environment variables, verified in `gateway/src/config.rs`,
+`gateway/src/main.rs`, and the signer, provider, metrics, and key-vault modules. Names and purposes follow;
+no values are shown, and account material is never set inline. Contract addresses are published on the
+[chain address book](/chain/addresses); do not transcribe them here.
 
 ```bash
 # Mode and chain wiring
-CITRATE_GATEWAY_MODE=marketplace          # or local-proxy
+CITRATE_GATEWAY_MODE=marketplace          # or local-proxy; read in gateway/src/main.rs
 CITRATE_GATEWAY_CHAIN_ID=40204            # default 40204
-CITRATE_GATEWAY_RPC_URL=...               # chain JSON-RPC endpoint
+CITRATE_GATEWAY_RPC_URL=...               # chain JSON-RPC endpoint, default http://127.0.0.1:8545
 CITRATE_GATEWAY_LISTEN_ADDR=127.0.0.1:9800  # default loopback; 0.0.0.0 only behind a proxy
 
-# Marketplace-mode contract addresses
+# Marketplace-mode contract addresses (see /chain/addresses)
 CITRATE_GATEWAY_MODEL_REGISTRY=0x...
 CITRATE_GATEWAY_PRICING_ORACLE=0x...
 CITRATE_GATEWAY_INFERENCE_ROUTER=0x...
 
 # Operator signer: keystore file or KMS reference, plus spend caps. Never an inline secret.
-CITRATE_GATEWAY_KEYSTORE_PATH=...         # durable store, required in production
-CITRATE_GATEWAY_OPERATOR_KEYSTORE...=...  # operator signer family
-CITRATE_GATEWAY_KMS_KEY_ID=...
+CITRATE_GATEWAY_KEYSTORE_PATH=...                    # durable store, required in production
+CITRATE_GATEWAY_KMS_KEY_ID=...                       # KMS key reference, an alternative to the keystore
+CITRATE_GATEWAY_OPERATOR_KEYSTORE_PASSWORD=...       # keystore passphrase; or _PASSWORD_FILE
+CITRATE_GATEWAY_OPERATOR_SPEND_CAP_WEI=...           # per-epoch settlement spend cap
+CITRATE_GATEWAY_OPERATOR_EPOCH_BLOCKS=...            # spend-cap epoch length in blocks
+CITRATE_GATEWAY_ALLOW_LOCAL_SIGNER=...               # development only, permits an in-process signer
 
-# Request ceiling, dev gates, observability
+# At-rest money-store master key (note: not CITRATE_GATEWAY_-prefixed)
+GATEWAY_STORE_KEY=...                     # or GATEWAY_STORE_KEY_FILE
+
+# Provider dispatch controls
+CITRATE_GATEWAY_REQUIRE_SIGNED_RESULTS=...           # require providers to sign their results
+CITRATE_GATEWAY_ALLOW_PRIVATE_PROVIDER_ENDPOINTS=... # development only, permits private provider URLs
+
+# Request ceiling, metrics, dev gates, observability
 CITRATE_GATEWAY_MAX_TOKENS=8192           # ceiling; per-request default is 512
+CITRATE_GATEWAY_METRICS_TOKEN=...         # bearer token for /metrics; the route is disabled when unset
 CITRATE_GATEWAY_DEV_MODE=...              # development only
 CITRATE_GATEWAY_OPEN_CHAT=...             # development only, refuses non-loopback binds
-LOG_FORMAT=...
+LOG_FORMAT=...                            # default pretty
 RUST_LOG=...
 
-# Local-proxy mode upstreams, tried in order
-CITRATE_GATEWAY_UPSTREAM_URL=...
+# Local-proxy mode upstream
+CITRATE_GATEWAY_UPSTREAM_URL=...          # resident inference server, default http://127.0.0.1:8181
 ```
 
 ### The x402 settlement path, from the operator's side
@@ -127,9 +148,12 @@ a paid request moves through these steps.
    amount in wei, and a limited validity window.
 2. The client signs the EIP-712 `transferWithAuthorization` digest and resends with the `x-payment` header.
 3. The gateway verifies the signature and the nonce, confirms the recipient binds to your treasury, and
-   calls `X402Facilitator.settlePayment` on chain.
-4. After the receipt confirms, the gateway runs the handler, dispatches to a selected provider with up to
-   three failover attempts, verifies the provider's signed result, and returns the OpenAI-shaped response.
+   calls `X402Facilitator.settlePayment` on chain. Settlement is a single transaction, not a retried one.
+4. After the receipt confirms, the gateway runs the handler and dispatches to a selected provider, retrying
+   up to `MAX_PROVIDER_ATTEMPTS` (3) providers before it gives up and returns a `503`. When
+   `CITRATE_GATEWAY_REQUIRE_SIGNED_RESULTS` is set, it also verifies the provider's signed result. It then
+   returns the OpenAI-shaped response. The provider-retry count and the signed-result check are separate from
+   the single settlement transaction in step 3.
 
 The client codec for this handshake lives in the [Marketplace SDK](/sdks/marketplace#x402); an operator does
 not reimplement it.
@@ -166,8 +190,9 @@ The paid surface is where the gateway is security relevant, and it fails closed.
   rejected before it touches the chain.
 - **Settlement revert.** If the on-chain settlement reverts, the gateway returns `402` with the transaction
   hash rather than running the handler.
-- **Oversized request.** `max_tokens` is clamped to the ceiling before pricing, and a batch over 1000
-  requests is rejected, so a caller cannot price small and demand large.
+- **Oversized request.** `max_tokens` is clamped to the ceiling before pricing, a batch over 1000 requests
+  is rejected, and a batch spanning more than 32 distinct models (`MAX_DISTINCT_BATCH_MODELS`) is rejected,
+  so a caller cannot price small and demand large.
 - **Open chat in production.** The unauthenticated chat path is gated behind two development flags and the
   gateway refuses to enable it on a non-loopback bind, so it cannot be left exposed by accident.
 - **Pool dispatch.** A request that scores to a pool returns `503` today rather than failing silently; route
@@ -186,11 +211,12 @@ at the audited SHA.
 
 ## Source and verification
 
-- Source: `citrate-inference-gateway`. Run modes and configuration in `gateway/src/config.rs` and
-  `gateway/src/main.rs`; route handlers in `gateway/src/` (`chat.rs`, `batch.rs`, `models.rs`, `usage.rs`,
-  `queries.rs`, `health.rs`, `metrics.rs`); x402 middleware in `crates/x402-axum/src/layer.rs`; operator
-  reference in `gateway/RUNBOOK.md`.
-- Audited against SHA: `a2ad401`.
+- Source: `citrate-inference-gateway`. Run modes and configuration in `gateway/src/main.rs` and
+  `gateway/src/config.rs`; router assembly in `gateway/src/lib.rs`; route handlers in `gateway/src/`
+  (`chat.rs`, `batch.rs`, `models.rs`, `usage.rs`, `health.rs`, `metrics.rs`); chain reads in
+  `gateway/src/queries.rs` (the `ChainQueries` trait, not an HTTP route); x402 middleware in
+  `crates/x402-axum/src/layer.rs`; operator reference in `gateway/RUNBOOK.md`.
+- Audited against SHA: `603fe92`.
 - Status: Implemented (pre-audit). The run modes, on-chain reads, per-provider dispatch with failover, and
   the full x402 settlement path exist and run; this slice has not had an external audit. Specified: pool
   dispatch (returns `503` today), durable usage accounting, and a name-to-hash model view.

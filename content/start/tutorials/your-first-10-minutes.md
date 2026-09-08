@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain core/api
 surfaces: [START-what-is-citrate, CHAIN-rpc-eth, CHAIN-rpc-citrate]
-audited_against_sha: 03d7851
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -75,8 +75,8 @@ rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-SALT has 18 decimals and a one-billion cap. It is the unit fees and rewards are counted in. Detail:
-[economics](/chain/economics).
+SALT has 18 decimals and a one-trillion cap (`TOTAL_SUPPLY` in `core/economics/src/lib.rs`). It is the
+unit fees and rewards are counted in. Detail: [economics](/chain/economics).
 
 ### Step 4, run a model call on the chain
 
@@ -115,8 +115,8 @@ The methods used above, with their source files in `citrate-chain`:
 
 | Method | What it returns | Source |
 |---|---|---|
-| `eth_chainId` | the chain id, `0x9d0c` | `core/api/src/eth_rpc_simple.rs` |
-| `citrate_getDagStats` | tips, blue score, GhostDAG params | `core/api/src/` |
+| `eth_chainId` | the chain id, `0x9d0c` | `core/api/src/eth_rpc.rs` |
+| `citrate_getDagStats` | tips, blue score, GhostDAG params | `core/api/src/eth_rpc.rs` |
 | `citrate_getToken` | SALT name, decimals, supply | `core/api/src/economics_rpc.rs` |
 | `citrate_getTextEmbedding` | an embedding vector | `core/api/src/ai_rpc.rs` |
 | `citrate_semanticSearch` | corpus entries ranked by meaning | `core/api/src/ai_rpc.rs` |
@@ -136,6 +136,6 @@ are illustrative; exact values depend on the node's current state.
 
 ## Source and verification
 
-Methods verified against `citrate-chain` at `03d7851` (`core/api/src/ai_rpc.rs`, `economics_rpc.rs`,
-`eth_rpc_simple.rs`), and surfaced in full on the [JSON-RPC reference](/chain/rpc). Status: Implemented
+Methods verified against `citrate-chain` at `e68af83` (`core/api/src/ai_rpc.rs`, `economics_rpc.rs`,
+`eth_rpc.rs`), and surfaced in full on the [JSON-RPC reference](/chain/rpc). Status: Implemented
 (testnet).

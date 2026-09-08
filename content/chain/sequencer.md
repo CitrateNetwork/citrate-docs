@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/sequencer/src/mempool.rs, citrate-chain/core/sequencer/src/validator.rs, citrate-chain/core/sequencer/src/block_builder.rs
 surfaces: [CHAIN-seq-mempool]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-agent-runtime (agent/cli/, agent/core/, agent-cron/, agent-chain/)
 surfaces: [OPS-agent-runtime]
-audited_against_sha: 560c11a
+audited_against_sha: f161e69
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -50,7 +50,8 @@ the safety story are these.
    fresh machine without it fails the build with `Could not resolve hostname
    github-citrate-chain`.
 2. Build the workspace. `cargo build --release`, then `cargo run --release --bin
-   citrate-agent-cli -- --help` to confirm the CLI.
+   citrate-agent -- --help` to confirm the CLI. The package is `citrate-agent-cli`; the binary it
+   produces is named `citrate-agent`.
 3. Write a `doctor.toml` naming the agent and pointing at the audit log and the policy files you
    want checked.
 4. Run the diagnostic against a node before you trust it. `citrate-agent doctor` exits 0 on pass
@@ -74,8 +75,9 @@ agent_did = "did:citrate:agent:0x..."
 
 The command lives in `agent/cli/src/doctor_cmd.rs`; its config schema is in
 `agent/cli/src/config.rs`. It runs eleven checks defined in `agent/core/src/doctor/checks.rs`,
-each returning Pass, Warn, or Blocker (`agent/core/src/doctor/report.rs`). With a seed file it
-signs the report. The flags are `--config`, `--output`, `--check <name>` to run a subset, and
+each returning Pass, Skipped, Warn, or Blocker (`agent/core/src/doctor/report.rs`); a skipped
+required check holds the overall result to at least Warn rather than a clean Pass. With a seed
+file it signs the report. The flags are `--config`, `--output`, `--check <name>` to run a subset, and
 `--seed` for the signing key.
 
 | Check | Behavior |
@@ -96,8 +98,10 @@ signs the report. The flags are `--config`, `--output`, `--check <name>` to run 
 
 In `agent/core/src/audit/recorder.rs`. It is the only surface that signs on-chain writes: it
 owns a secp256k1 key, an RPC client, and the chain id 40204. It loads its key with `from_env`,
-which reads `DEPLOYER_PRIVATE_KEY` and falls back to a gitignored `.env.testnet`. Its writes go
-through `send_tx` and `wait_for_receipt`. Every approve or reject the runtime makes is written
+which reads `DEPLOYER_PRIVATE_KEY`, or, when that is unset, a key file named by
+`CITRATE_RECORDER_KEY_ENV_FILE`; that path must be absolute and pass a mode-0600 check. The
+earlier gitignored `.env.testnet` fallback was removed (AR-B-010). Its writes go through
+`send_tx` and `wait_for_receipt`. Every approve or reject the runtime makes is written
 as a decision record to the on-chain `AgentDecisionRegistryV2`. The audit chain itself is
 `AuditChain` in `agent/core/src/audit/chain.rs`, which mints a genesis record, appends each new
 record with a contiguity check against the previous hash, and can walk the whole chain to verify
@@ -145,6 +149,7 @@ approve it, and whether it is break-glass eligible.
 | Variable | Default | Required | Purpose |
 |---|---|---|---|
 | `DEPLOYER_PRIVATE_KEY` | none | tripwire daemon: yes | secp256k1 key for `RecorderClient`. Never commit it. |
+| `CITRATE_RECORDER_KEY_ENV_FILE` | none | no | Absolute path to a mode-0600 key file, read when `DEPLOYER_PRIVATE_KEY` is unset. |
 | `CITRATE_TRIPWIRE_PROM_URL` | `http://127.0.0.1:9090` | no | Prometheus base for tripwire metrics. |
 | `CITRATE_TRIPWIRE_RPC_URL` | `https://rpc.citrate.ai` | no | JSON-RPC for chain queries. |
 | `CITRATE_TRIPWIRE_REGISTRY` and the `_TENANT`, `_ROLE_ESCALATION`, `_MULTISIG` addresses | contract defaults | no | Tripwire contract addresses. |
@@ -182,12 +187,13 @@ itself. The runtime is classified for a full external audit before any v1.0.0 ta
 (`AUDIT_TIER.md`); there is no stable release without a written attestation against an exact
 commit. Every operator account on the public network is identity-verified through VERI, Citrate's in-house verification. No
 secrets appear here: `DEPLOYER_PRIVATE_KEY` and `CITRATE_CAPSULE_SIGNING_SEED` are named only as
-variables to set, and the `.env.testnet` and capsule signing-key fallbacks are gitignored.
+variables to set, and any key file named by `CITRATE_RECORDER_KEY_ENV_FILE` must be an absolute
+path at mode 0600, held in your own secret store.
 
 This page connects to [run a node](/operators/run-a-node) for the operator who hosts the
 runtime, to [research](/research) for the agent-safety work behind it, and to the
 [governance contracts](/contracts/governance), where the recorder writes its decisions to the
-`AgentDecisionRegistry`.
+`AgentDecisionRegistryV2`.
 
 ## Source and verification
 
@@ -197,7 +203,7 @@ runtime, to [research](/research) for the agent-safety work behind it, and to th
   `agent/core/src/hitl/{mod.rs,quorum.rs,roles.rs,signing.rs,break_glass.rs}`,
   `agent/core/src/capsule/{mod.rs,manifest.rs,tiers.rs,verify.rs}`,
   `agent-cron/src/{scheduler.rs,sop.rs,bin/tripwire_daemon.rs}`, `AUDIT_TIER.md`.
-- Audited against SHA: `560c11a`.
+- Audited against SHA: `f161e69`.
 - Status by component:
   - `doctor` and its eleven checks, `RecorderClient`, `AuditChain`, `ApprovalQueue`, the quorum
     and role rules, break-glass, the cron scheduler, the standing-procedure engine, the tripwire

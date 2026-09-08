@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/precompiles/
 surfaces: [CHAIN-pre-tensor, CHAIN-pre-x402, CHAIN-pre-q16]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

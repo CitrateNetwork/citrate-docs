@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/cli/src/{main.rs,config.rs,commands/}
 surfaces: [CHAIN-cli-citrate, CHAIN-cli-advanced]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

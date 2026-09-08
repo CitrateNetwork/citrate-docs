@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/bridge/ (internals gated)
 surfaces: [CHAIN-bridge]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Specified
 created: 2026-06-17T00:00:00Z
 author: Citrate team

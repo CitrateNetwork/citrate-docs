@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/learning/
 surfaces: [RES-learning]
-audited_against_sha: 03d7851
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -93,7 +93,7 @@ Academic tier. The learning engine is a research contribution and its on-chain o
 
 ## Source and verification
 
-- Source: `citrate-chain/core/learning/`, audited against SHA `03d7851`.
+- Source: `citrate-chain/core/learning/`, audited against SHA `e68af83`.
 - Key files: `phases.rs` (the four phases, macro-phase, pipeline), `aggregation.rs` (dual-output aggregation), `belnap.rs` (four-valued logic), `orchestration.rs` (`LearningOrchestrator`, `compute_learning_root`), `checkpoint.rs` (`LearningCheckpoint`), `safety.rs` (`SafetyGuard`), `embeddings.rs`.
 - The block header `learning_root` field and its exclusion from `Block::compute_hash` are in `core/consensus/src/types.rs`; the invariant is INV-4 (StateRootIndependent) against `specs/tla/StrobilationCheckpoint.tla`.
 - Status by surface. The `citrate-learning` crate is Implemented (pre-audit), with unit, property, and integration tests across the four phases, the four-valued lattice laws, and the safety invariant. The on-chain wiring, the orchestrator driven by a live block producer and federated rounds on testnet 40204, is Specified, not yet a production feature. Treat this page as documenting a real, tested engine whose chain integration is in progress.

@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{KYCRegistry,TEEAttestationRegistry,NematocystSlashing}.sol, contracts/src/interfaces/INematocystSlashing.sol
 surfaces: [SC-sec-slashing, SC-sec-kyc, SC-sec-tee]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

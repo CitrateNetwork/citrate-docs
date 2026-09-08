@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: linked
 source: citrate-chain/specs/gherkin/ + per-repo .agentile features
 surfaces: [RES-bdd]
-audited_against_sha: 03d7851
+audited_against_sha: e68af83
 created: 2026-06-17T00:00:00Z
 author: Citrate team
 status: Specified
@@ -127,7 +127,7 @@ truth.
 - Source: `citrate-chain/specs/gherkin/` (31 features) plus the per-repo libraries named above under
   `bdd/`, `.agentile/`, and `features/` directories. Methodology: Gradient Paper No. 4,
   `gradient_papers_v3/Gradient_Papers_No4_Behavioral_Issues_v3.md` (linked, not copied).
-- Audited against SHA: `03d7851` (citrate-chain); per-repo libraries pinned at each repo's HEAD.
+- Audited against SHA: `e68af83` (citrate-chain); per-repo libraries pinned at each repo's HEAD.
 - Status: Specified, the features are written and run as acceptance tests in continuous integration; a
   feature with passing steps in CI is Verified for the surface it covers. The `.feature` files and their
   step definitions are the truth; this page links them.

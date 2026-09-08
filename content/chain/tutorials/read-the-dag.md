@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain core/api
 surfaces: [CHAIN-consensus-ghostdag, CHAIN-rpc-citrate, CHAIN-rpc-chain]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team

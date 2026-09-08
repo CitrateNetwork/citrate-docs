@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: linked
 source: citrate-agentile-archive/formal/specs/ + per-repo specs/tla/
 surfaces: [RES-tla]
-audited_against_sha: 4da2289
+audited_against_sha: f28358f
 status: Verified
 created: 2026-06-17T00:00:00Z
 author: Citrate team
@@ -72,7 +72,7 @@ tree; `INDEX.md` carries the full per-domain list and invariant counts.
 | contracts | Trust scoring, the spec registry, inference-request lifecycle, role-escalation grants | `TrustScoring.tla`, `SpecRegistryLifecycle.tla`, `InferenceRequestLifecycle.tla`, `RoleEscalationGrant.tla` |
 | compute | Settlement, batch-inference escrow, data and pipeline parallel jobs, disputes | `X402FacilitatorSettle.tla`, `GatewayBatchLifecycle.tla`, `DataParallelTrainingJob.tla`, `DisputeResolution.tla` |
 | agent | Approval, break-glass, capability grants, emergency stop, append-only trails | `ApprovalStateMachine.tla`, `BreakGlass.tla`, `CapabilityGrantLifecycle.tla`, `EmergencyStopProtocol.tla`, `TrailAppendOnly.tla` |
-| gui | Desktop state machines: auth, account session, send and deploy flows, role-escalation timer | `AuthStateMachine.tla`, `WalletSessionLifecycle.tla`, `SendTransactionFlow.tla`, `ContractDeploymentFlow.tla`, `RoleEscalationTimer.tla` |
+| gui | Desktop state machines: onboarding, account session, send and deploy flows, role-escalation timer | `OnboardingStateMachine.tla`, `WalletSessionLifecycle.tla`, `SendTransactionFlow.tla`, `ContractDeploymentFlow.tla`, `RoleEscalationTimer.tla` |
 | network | Peer handshake, block sync, mempool gossip and routing | `P2PPeerHandshake.tla`, `BlockSyncProtocol.tla`, `MempoolGossipProtocol.tla` |
 | iot | Inter-organizational envelope transfer, sub-secret derivation | `InterOrgEnvelopeChain.tla`, `HKDFSubSecretDerivation.tla` |
 | account | Key lifecycle, signing, recovery safety, session limits | `WalletKeyLifecycle.tla`, `TransactionSigningFlow.tla`, `MnemonicRecoverySafety.tla`, `SessionRateLimiting.tla` |
@@ -83,7 +83,7 @@ deep audit, which are excluded from the authored count.
 Per-repo runnable subsets sit next to the code they govern:
 
 - `citrate-agentile-archive/formal/specs/<domain>/`, the canonical corpus, authoritative for counts.
-- `citrate-chain/specs/tla/{consensus,zk,learning,contracts,compute,gui}/`, with `run_all.sh`,
+- `citrate-chain/specs/tla/{consensus,zk,learning,contracts,compute,gui,network}/`, with `run_all.sh`,
   `run_deep.sh`, and `VERIFICATION_REPORT.txt`; the chain README notes this is a runnable subset, not the
   authority for counts.
 - `citrate-explorer/specs/tla/` (for example `SelectedParentReconcile.tla`).
@@ -115,8 +115,8 @@ the corpus or on this page. We link the specs and their indices rather than copy
 
 - Source: `citrate-agentile-archive/formal/specs/` (canonical) plus the per-repo `specs/tla/` runnable
   subsets named above.
-- Audited against SHA: `4da2289` (citrate-agentile-archive); per-repo subsets pinned at each repo's HEAD,
-  for example citrate-chain at `03d7851`.
+- Audited against SHA: `f28358f` (citrate-agentile-archive); per-repo subsets pinned at each repo's HEAD,
+  for example citrate-chain at `e68af83`.
 - Status: Verified for specs the index records as TLC-checked, for example `ExecutorMVCC.tla` (checked at
   Small, Liveness, and Medium configurations, with a deep run reported clean) and
   `Halo2VerifierVersionMonotonic.tla` (four invariants). The corpus as a whole is Specified and being

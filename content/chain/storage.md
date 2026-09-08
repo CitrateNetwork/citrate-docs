@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/core/storage/src/state_manager.rs, citrate-chain/core/storage/src/db/, citrate-chain/core/storage/src/chain/, citrate-chain/core/storage/src/state/, citrate-chain/core/storage/src/pruning/, citrate-chain/core/storage/src/ipfs/
 surfaces: [CHAIN-storage]
-audited_against_sha: 9d5959e
+audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
