@@ -1,4 +1,6 @@
 # citrate-docs
+
+*Part of the **[Citrate Network](https://citrate.ai)** — own the means of computation. · [Docs](https://docs.citrate.ai) · [Run a node](https://citrate.ai/download) · [Contribute → free membership](https://github.com/CitrateNetwork/.github/blob/main/CONTRIBUTING.md)*
 > Citrate Atlas — the documentation webapp for the Citrate Network (the site published at **docs.citrate.ai**): guides, API references, live contract-address pages, and an in-page "Ask Atlas" assistant.
 
 ## What it is
