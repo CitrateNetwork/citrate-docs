@@ -24,7 +24,7 @@ with `CitrateWallet`, builds `postJob` calldata with `postJobCalldata` and submi
 events, and, as an alternative, calls a paid gateway route over x402 with `X402Client`. The SDK is `0.1.0`
 and Tier 1, so it is pre-audit; run against testnet only, and use a throwaway account. Never paste a real
 key, passphrase, or mnemonic. The compute marketplace and its contracts are described under
-[Citrate Market](/compute) and [the compute contracts](/contracts/compute); the per-request payment path is
+[Citrate Market](/compute/pool) and [the compute contracts](/contracts/compute); the per-request payment path is
 the [x402 contract path](/contracts/x402).
 
 ## How to use it

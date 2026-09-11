@@ -191,7 +191,7 @@ variables to set, and any key file named by `CITRATE_RECORDER_KEY_ENV_FILE` must
 path at mode 0600, held in your own secret store.
 
 This page connects to [run a node](/operators/run-a-node) for the operator who hosts the
-runtime, to [research](/research) for the agent-safety work behind it, and to the
+runtime, to [research](/research/learning) for the agent-safety work behind it, and to the
 [governance contracts](/contracts/governance), where the recorder writes its decisions to the
 `AgentDecisionRegistryV2`.
 

@@ -26,7 +26,7 @@ for two roles, the agent that decides and the signer that holds keys. The work y
 
 The field reference for every flag, route, and gate is [Citrate Node](/compute/node-agent), audited against
 the same SHA. Bringing the node online at all is covered in [run a node](/operators/run-a-node), and the
-identity step is covered under [verified identity](/aa).
+identity step is covered under [verified identity](/aa/identity).
 
 ## How to use it
 
@@ -110,7 +110,7 @@ claimable reaches `CITRATE_CLAIM_THRESHOLD_WEI`. Treat this path as experimental
 | The on-chain marketplace functions | [compute contracts](/contracts/compute) |
 | Reputation, scoring, and slashing-protection | [rewards and reputation](/operators/rewards) |
 | Bringing the node online | [run a node](/operators/run-a-node) |
-| Identity verification through VERI | [verified identity](/aa) |
+| Identity verification through VERI | [verified identity](/aa/identity) |
 
 ## Design rationale
 

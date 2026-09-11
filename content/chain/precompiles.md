@@ -50,7 +50,7 @@ return bytes.
    20 bytes, mirroring ECRECOVER, with the zero address on failure.
 4. For exact encodings, work from the test vectors in the precompile's source file rather than from prose.
 
-See [chain tutorials](/chain/tutorials) for a worked x402 verification, and [chain RPC](/chain/rpc) for
+See [chain tutorials](/chain/tutorials/call-citrate-rpc) for a worked x402 verification, and [chain RPC](/chain/rpc) for
 connection details.
 
 ## Reference
