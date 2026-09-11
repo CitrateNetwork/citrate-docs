@@ -193,7 +193,7 @@ The dispute game is bisection rather than full re-execution because re-running a
 is not affordable. Bisection narrows the disagreement to a single step in a logarithmic number of rounds,
 and only that step needs adjudication. The design is written in TLA+ first so the property that matters,
 that an attacker who griefs always loses net SALT, is checked before the code is trusted. That formal work
-is described under [research](/research).
+is described under [research](/research/learning).
 
 ## Failure modes
 
@@ -218,7 +218,7 @@ listed because the contracts are pre-audit and pre-deployment.
 
 The agent-safety and formal-methods pieces, `AgentDecisionRegistry` and `SpecRegistry`, are the on-chain
 edge of the research surface. The behavioral specs they pin and the TLA+ work behind `DisputeResolution`
-live under [research](/research). Slashing and finality are covered under
+live under [research](/research/learning). Slashing and finality are covered under
 [Citrate Network consensus](/chain/consensus).
 
 ## Source and verification

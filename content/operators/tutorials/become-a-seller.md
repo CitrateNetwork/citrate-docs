@@ -32,7 +32,7 @@ contract surface in [compute contracts](/contracts/compute).
 ### Step 1, get identity-verified
 
 Every operator and machine on Citrate Network is identity-verified through VERI, Citrate's in-house verification before they can sell.
-Complete verification through [verified identity](/aa). Citrate keeps the verification result, not the
+Complete verification through [verified identity](/aa/identity). Citrate keeps the verification result, not the
 personal data behind it. You cannot register as a provider without it.
 
 ### Step 2, build the agent
