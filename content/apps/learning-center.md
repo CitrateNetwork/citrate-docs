@@ -142,7 +142,7 @@ public Citrate Network. Students appear on chain only as pseudonymous identifier
 schools is FERPA, COPPA, and CIPA; the right-to-erasure path for guardian records is built into the
 provisioning CLI. No secrets are reproduced here: the institution's org secret is loaded from its
 encrypted keystore in production, and Docusign credentials are operator configuration. See
-[enterprise compliance](/enterprise) for the FERPA, COPPA, and CIPA model and [Citrate Schools](/contracts/edu)
+[enterprise compliance](/enterprise/compliance) for the FERPA, COPPA, and CIPA model and [Citrate Schools](/contracts/edu)
 for the program.
 
 ## Source and verification

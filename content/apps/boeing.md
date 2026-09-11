@@ -21,7 +21,7 @@ customer-specific internals are gated.
 A customer shell is a tailored native application composed over the network's standard parts for a single
 enterprise customer. It packages that customer's branded workspace and their role-bound access bindings on
 top of the same primitives every Citrate application uses. This particular shell serves a customer in
-regulated manufacturing and runs on [Citrate Ground](/enterprise/ground), the on-premise enterprise
+regulated manufacturing and runs on [Citrate Ground](/enterprise/federal), the on-premise enterprise
 deployment, often alongside an isolated agent like [the air-gapped agent sidecar](/apps/nist-agent).
 
 ## Access and canon

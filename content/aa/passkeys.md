@@ -16,7 +16,7 @@ How a Citrate user signs in with a passkey and sends transactions with no seed p
 EOA path for users who already hold a signer. This is the builder reference for Citrate Keyring: the
 WebAuthn-P256 validator on chain, the Kernel v3 account, the address that is known before deployment, and
 the first operation that deploys the account. For the on-chain contract reference see
-[account-abstraction contracts](/contracts/aa); for the runnable walkthrough see
+[account-abstraction contracts](/aa/contracts); for the runnable walkthrough see
 [sign in with a passkey](/aa/tutorials/sign-in-with-a-passkey).
 
 ## What it is

@@ -185,7 +185,7 @@ secrets appear here: `DEPLOYER_PRIVATE_KEY` and `CITRATE_CAPSULE_SIGNING_SEED` a
 variables to set, and the `.env.testnet` and capsule signing-key fallbacks are gitignored.
 
 This page connects to [run a node](/operators/run-a-node) for the operator who hosts the
-runtime, to [research](/research) for the agent-safety work behind it, and to the
+runtime, to [research](/research/learning) for the agent-safety work behind it, and to the
 [governance contracts](/contracts/governance), where the recorder writes its decisions to the
 `AgentDecisionRegistry`.
 

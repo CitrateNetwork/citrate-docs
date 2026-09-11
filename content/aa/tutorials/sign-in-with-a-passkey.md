@@ -15,7 +15,7 @@ status: Implemented
 Create a passkey-backed Citrate Keyring account and send your first sponsored transaction, with no seed
 phrase, using `citrate-js`. You will derive the account address before it exists, then deploy and use it in
 a single operation. For the concepts behind each step see [passkeys](/aa/passkeys); for the contracts see
-[account-abstraction contracts](/contracts/aa).
+[account-abstraction contracts](/aa/contracts).
 
 ## What it is
 

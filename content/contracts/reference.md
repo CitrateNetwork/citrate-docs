@@ -65,7 +65,7 @@ The contract families and where each is documented. Addresses for every contract
 | Governance | treasury governor, budget allocation, dispute resolution | [/contracts/governance](/contracts/governance) |
 | Security | slashing, heartbeat monitoring, TEE attestation, KYC | [/contracts/security](/contracts/security) |
 | x402 payments | the facilitator and paywall for HTTP 402 settlement | [/contracts/x402](/contracts/x402) |
-| Account abstraction | the ERC-4337 stack, validators, paymaster, factory | [/contracts/aa](/contracts/aa) |
+| Account abstraction | the ERC-4337 stack, validators, paymaster, factory | [/contracts/aa](/aa/contracts) |
 
 The address source of truth and the ABI package, named once:
 

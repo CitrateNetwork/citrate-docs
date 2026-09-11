@@ -28,7 +28,7 @@ Underneath, the store is two-plane. A Derived plane rebuilds deterministically f
 manifests, so it can always be reconstructed from the repositories themselves. An Asserted plane holds
 signed human and agent claims, append-only, canonical for its own content. The split keeps the
 distinction between what was reconstructed and what was asserted, and it is the same kind of memory
-substrate the [research pages](/research) describe.
+substrate the [research pages](/research/learning) describe.
 
 Everything is scoped to an Org and isolated per Org. Every call is authorized by a signed capability
 grant, and every read, write, and denial is recorded to a tamper-evident hash-chained audit log. The

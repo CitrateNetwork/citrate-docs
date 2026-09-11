@@ -141,7 +141,7 @@ and PII stay on Citrate Ground, the district's on-premise instance, and never re
 Network or this registry. The compliance floor for schools, FERPA, COPPA, and CIPA, is met before any
 pilot. No secrets appear in this page or in the repo; all credentials live in environment configuration,
 and only an example file with no real values is committed. See [identity verification](/aa/identity) for
-the VERI model, [enterprise compliance](/enterprise) for the on-premise and compliance model, and
+the VERI model, [enterprise compliance](/enterprise/compliance) for the on-premise and compliance model, and
 [Citrate Schools](/contracts/edu) for what the bundle does next.
 
 ## Source and verification

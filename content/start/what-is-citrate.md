@@ -47,7 +47,7 @@ Pick the path that matches why you are here.
    model call in [your first 10 minutes](/start/tutorials/your-first-10-minutes).
 2. **You operate hardware.** Read [run a node](/operators/run-a-node) and [sell compute](/operators/sell-compute).
    A node is how idle GPUs earn SALT on Citrate Market.
-3. **You run models on your own data.** Read [Citrate Ground](/enterprise/ground) and
+3. **You run models on your own data.** Read [Citrate Ground](/enterprise/federal) and
    [federated learning](/research/learning), where models train across nodes without the data leaving them.
 4. **You are evaluating the network.** Read the [roadmap](/start/roadmap) for the path to mainnet, then the
    [Gradient Papers](/research/gradient-papers) for the research the design rests on.

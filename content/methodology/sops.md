@@ -49,10 +49,10 @@ Commercial and operator procedures (commercial tier; operator depth is identity-
 
 | Procedure | Audience | Where it lives |
 |---|---|---|
-| Run a node | operator | [Citrate Node](/operators) |
+| Run a node | operator | [Citrate Node](/operators/run-a-node) |
 | Sell compute end to end | operator (verified) | [node agent](/compute/node-agent) |
 | Run a training worker | operator | [compute pool](/compute/pool) |
-| Rewards, reputation, and slashing protection | operator | [Citrate Node](/operators) |
+| Rewards, reputation, and slashing protection | operator | [Citrate Node](/operators/run-a-node) |
 | Request a verification packet | enterprise customer | enterprise and compliance (commercial) |
 | District onboarding | enterprise customer (verified) | [district registration](/apps/district-registration) |
 

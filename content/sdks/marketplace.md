@@ -35,9 +35,9 @@ The mental model: read state with `MarketplaceClient`; pay for an inference requ
 with a `CitrateWallet` (key held in the browser) or an `InjectedSigner` (an extension such as MetaMask or
 Rabby); and for on-chain actions, posting a job, buying credits, requesting training, build calldata with the
 builder functions and send it through your signer and viem. The compute marketplace it talks to is described
-under [Citrate Market](/compute) and [the compute contracts](/contracts/compute); the per-request payment
+under [Citrate Market](/compute/pool) and [the compute contracts](/contracts/compute); the per-request payment
 handshake is the [x402 contract path](/contracts/x402); account recovery and passkeys are covered under
-[accounts](/aa).
+[accounts](/aa/identity).
 
 The package classifies itself Tier 1 in `AUDIT_TIER.md`: a full external audit of its cryptographic
 primitives, key handling, and supply chain is required before any `v1.0.0` stable release, and no stable

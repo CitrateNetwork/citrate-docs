@@ -37,7 +37,7 @@ The service runs in one of two modes, selected at boot by `CITRATE_GATEWAY_MODE`
 
 The two read paths fit Citrate Market as follows. A model's price comes from the
 [x402 pricing contract](/contracts/x402) and the pricing oracle; the provider that runs the work is one of
-the operators selling [compute](/compute). The gateway is the thin layer that turns an OpenAI request into
+the operators selling [compute](/compute/pool). The gateway is the thin layer that turns an OpenAI request into
 a metered, paid marketplace job and an OpenAI response.
 
 There are two documented surfaces:

@@ -34,7 +34,7 @@ it back yourself.
 Payment is bounded by design. The x402 client signs for at most a fixed amount per round, defaulting
 to one SALT, and it will only ever pay in a single allowed token on a single chain. A payment
 request naming any other token or chain is rejected before it is signed. You can find the wider
-market in [the compute overview](/compute) and the client library in
+market in [the compute overview](/compute/pool) and the client library in
 [the marketplace SDK](/sdks/marketplace).
 
 ## How to use it
