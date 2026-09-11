@@ -5,7 +5,7 @@ import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Cookies policy",
-  description: "How Citrate Atlas uses cookies, the essential cookies it sets, and how to manage your consent.",
+  description: "How Citrate Almanac uses cookies, the essential cookies it sets, and how to manage your consent.",
   alternates: { canonical: "/cookies" },
 };
 
@@ -18,7 +18,7 @@ export default function CookiesPolicy() {
     <div className="flex min-h-screen flex-col">
       <header className="flex h-14 shrink-0 items-center border-b bg-[var(--color-canvas)] px-4">
         <Link href="/" className="flex items-center gap-2 font-display font-semibold">
-          <CitrateMark size={18} color="var(--accent-text)" /> Citrate Atlas
+          <CitrateMark size={18} color="var(--accent-text)" /> Citrate Almanac
         </Link>
       </header>
 
@@ -28,7 +28,7 @@ export default function CookiesPolicy() {
         <p className="mt-2 text-sm text-[var(--color-muted)]">Last updated 17 June 2026.</p>
 
         <p className="mt-6 text-[var(--color-fg)]">
-          This policy explains how Citrate Atlas, the documentation site for the Citrate Network, uses cookies
+          This policy explains how Citrate Almanac, the documentation site for the Citrate Network, uses cookies
           and similar storage, and how you control them. We keep this short and honest: the site runs on a
           small number of essential cookies, and we ask for consent before anything beyond that.
         </p>
@@ -89,7 +89,7 @@ export default function CookiesPolicy() {
         </p>
 
         <div className="mt-10">
-          <Link href="/" className="text-sm text-[var(--color-citrate)] hover:underline">← Back to Citrate Atlas</Link>
+          <Link href="/" className="text-sm text-[var(--color-citrate)] hover:underline">← Back to Citrate Almanac</Link>
         </div>
       </main>
 

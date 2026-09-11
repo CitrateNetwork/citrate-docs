@@ -4,14 +4,14 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { Chunk } from "./corpus";
 
 /**
- * Ask Atlas inference provider. Uses the SAME inference seam as citrate-explorer
+ * Ask Almanac inference provider. Uses the SAME inference seam as citrate-explorer
  * (src/lib/ai/provider.ts): an OpenAI-compatible client (@ai-sdk/openai-compatible) pointed at the
  * citrate-inference-gateway, selectable by CITRATE_INFERENCE_MODE. Grounded ONLY in the tier-filtered
  * `chunks` the caller may read. If the gateway is unreachable, it falls back to a deterministic extractive
  * answer so the docs still respond.
  */
 export const SYSTEM_PROMPT =
-  "You are Ask Atlas, the documentation and project-history assistant for the Citrate Network. You answer " +
+  "You are Ask Almanac, the documentation and project-history assistant for the Citrate Network. You answer " +
   "from two grounded sources, both scoped to what the reader may access: (1) DOCUMENTATION excerpts (slugs " +
   "like /chain/rpc), the canonical how-it-works; and (2) MEMORY items from the live federation knowledge " +
   "graph (slugs like mem:<repo>:<id>), each a commit, sprint decision, ADR, or document title across the " +

@@ -137,7 +137,7 @@ not on this page. A relying party consumes only the claim shapes above. See
 
 ### Entitlement claim, Implemented
 
-Citrate Atlas decides which gated pages a request may read from the `https://citrate.ai/entitlement` claim,
+Citrate Almanac decides which gated pages a request may read from the `https://citrate.ai/entitlement` claim,
 which names a caller's access tier. The identity service mints it: `resolveEntitlementClaim`
 (`src/entitlements.ts`) looks the principal up in the entitlements roster (a Postgres table keyed on `sub`,
 `wallet`, or a verified `email`) and returns `{ tier, orgId, citrateRole?, milestone?, expiresAt? }`, which
@@ -174,7 +174,7 @@ life of a token.
   `wallet_address` is simply omitted rather than guessed. A relying party should treat the claim as
   optional.
 - **Secrets.** No client secret, cookie key, signing key, webhook secret, or vendor credential appears in
-  Citrate Atlas. They live in operator environment only.
+  Citrate Almanac. They live in operator environment only.
 
 ## Access and canon
 

@@ -4,7 +4,7 @@ import { canRead, type AuthSession, type Tier } from "@/prototype/fixtures";
 import type { Chunk } from "./corpus";
 
 /**
- * Live knowledge-graph retrieval for Ask Atlas (S4 extension).
+ * Live knowledge-graph retrieval for Ask Almanac (S4 extension).
  *
  * The docs corpus is a frozen snapshot; the citrate-memories DAG ("mem-gateway")
  * is the LIVE federation memory — commits, sprint decisions, ADRs, findings,

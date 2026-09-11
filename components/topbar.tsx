@@ -19,7 +19,7 @@ export function TopBar({ onToggleAsk }: { onToggleAsk: () => void }) {
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-[var(--color-canvas)] px-4">
       <Link href="/" className="flex items-center gap-2 font-semibold" translate="no">
         <CitrateMark size={18} color="var(--accent-text)" />
-        Atlas
+        Almanac
       </Link>
 
       <Link
@@ -60,7 +60,7 @@ export function TopBar({ onToggleAsk }: { onToggleAsk: () => void }) {
         <button
           onClick={onToggleAsk}
           className="rounded-lg bg-[var(--color-citrate)] px-3 py-1.5 text-sm font-medium text-[var(--color-citrate-fg)]"
-          title="Ask Atlas"
+          title="Ask Almanac"
         >
           <span className="inline-flex items-center gap-1.5"><CitrateMark size={13} color="var(--accent-fg)" /> Ask</span>
         </button>

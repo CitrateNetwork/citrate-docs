@@ -7,10 +7,10 @@ import rehypeSlug from "rehype-slug";
 import { Icon } from "@/components/icons";
 
 /**
- * Citrate Atlas markdown renderer. Real GFM (tables, code, nested lists, anchors) via react-markdown +
+ * Citrate Almanac markdown renderer. Real GFM (tables, code, nested lists, anchors) via react-markdown +
  * remark-gfm. Fenced code gets a language label and a copy button; ```mermaid blocks render as diagrams.
  * The leading H1 is stripped so the page title (rendered by the reader chrome) never prints twice. Used by
- * both the docs reader and Ask Atlas.
+ * both the docs reader and Ask Almanac.
  */
 
 function CopyButton({ text }: { text: string }) {

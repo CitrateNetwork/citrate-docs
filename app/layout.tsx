@@ -20,36 +20,36 @@ const spaceGrotesk = localFont({
 
 const SITE_URL = "https://docs.citrate.ai";
 const DESCRIPTION =
-  "Citrate Atlas is the gated, agentic documentation for the Citrate Network: every surface in the federation, the chain, contracts, RPC, SDKs, CLIs, and apps, mapped, searchable, and live.";
+  "Citrate Almanac is the gated, agentic documentation for the Citrate Network: every surface in the federation, the chain, contracts, RPC, SDKs, CLIs, and apps, mapped, searchable, and live.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Citrate Atlas",
-    template: "%s · Citrate Atlas",
+    default: "Citrate Almanac",
+    template: "%s · Citrate Almanac",
   },
   description: DESCRIPTION,
-  applicationName: "Citrate Atlas",
+  applicationName: "Citrate Almanac",
   authors: [{ name: "Citrate Network", url: "https://citrate.ai" }],
   creator: "Citrate Network",
   publisher: "Citrate Network",
   keywords: [
-    "Citrate", "Citrate Network", "Citrate Atlas", "documentation", "BlockDAG", "GhostDAG",
+    "Citrate", "Citrate Network", "Citrate Almanac", "documentation", "BlockDAG", "GhostDAG",
     "AI compute", "substrate", "federated learning", "smart contracts", "SDK", "RPC", "SALT",
   ],
   alternates: { canonical: "/" },
   manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
-    siteName: "Citrate Atlas",
-    title: "Citrate Atlas",
+    siteName: "Citrate Almanac",
+    title: "Citrate Almanac",
     description: DESCRIPTION,
     url: SITE_URL,
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Citrate Atlas",
+    title: "Citrate Almanac",
     description: DESCRIPTION,
     site: "@citratenetwork",
     creator: "@citratenetwork",
@@ -71,7 +71,7 @@ export const viewport: Viewport = {
 };
 
 // Structured data (SEO/AEO): identify the publisher and the docs site so answer
-// engines and search can attribute Citrate Atlas to the Citrate Network.
+// engines and search can attribute Citrate Almanac to the Citrate Network.
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -85,7 +85,7 @@ const JSON_LD = {
     {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#site`,
-      name: "Citrate Atlas",
+      name: "Citrate Almanac",
       description:
         "Documentation for the Citrate Network: chain, contracts, SDKs, identity, the Citrate Core desktop app, and running a node.",
       url: SITE_URL,

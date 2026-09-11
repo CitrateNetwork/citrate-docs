@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Citrate Atlas",
-    short_name: "Atlas",
+    name: "Citrate Almanac",
+    short_name: "Almanac",
     description: "Gated, agentic documentation for the Citrate Network.",
     start_url: "/",
     display: "standalone",

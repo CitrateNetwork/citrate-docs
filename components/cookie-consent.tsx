@@ -46,7 +46,7 @@ export function CookieConsent() {
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border bg-[var(--color-panel)] p-5 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-relaxed text-[var(--color-muted)]">
-          We use essential cookies to run Citrate Atlas (they keep you signed in). With your consent we may
+          We use essential cookies to run Citrate Almanac (they keep you signed in). With your consent we may
           also use cookies to understand usage. Read the{" "}
           <Link href="/cookies" className="text-[var(--color-fg)] underline underline-offset-2">cookies policy</Link>.
         </p>

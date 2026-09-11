@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Citrate Atlas icons, ported from the design handoff (src/icons.jsx). Lucide-style, 1.5px stroke,
+ * Citrate Almanac icons, ported from the design handoff (src/icons.jsx). Lucide-style, 1.5px stroke,
  * currentColor. No emoji anywhere in the product (brand rule). Plus the Citrate C-mark (the ✦ motif).
  */
 const P: Record<string, React.ReactNode> = {
@@ -88,7 +88,7 @@ export function Icon({ name, size = 16, strokeWidth = 1.5, style, className }: {
   );
 }
 
-/** The Citrate C-mark, the ✦ Atlas/agent motif. */
+/** The Citrate C-mark, the ✦ Almanac/agent motif. */
 export function CitrateMark({ size = 22, color = "currentColor", style }: { size?: number; color?: string; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="21.69 16.46 79.88 71.36" style={{ display: "block", flexShrink: 0, ...style }}>

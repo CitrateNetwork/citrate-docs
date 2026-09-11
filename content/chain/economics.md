@@ -106,7 +106,7 @@ guarantee.
 
 ## Access and canon
 
-Public. SALT settles the work the network performs; it is not an investment instrument, and Atlas does not
+Public. SALT settles the work the network performs; it is not an investment instrument, and Almanac does not
 describe it as one. The token fundamentals, the reward structure, and the halving cadence are exactly what a
 builder or operator needs to reason about the economy. No keys, balances, or private allocations appear
 here.

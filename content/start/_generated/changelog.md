@@ -14,9 +14,9 @@ nav_order: 90
 ---
 
 The changelog draws recent activity from the Citrate memory graph, the same
-signed, code-anchored knowledge store that powers Ask Atlas. It is regenerated
+signed, code-anchored knowledge store that powers Ask Almanac. It is regenerated
 on every deploy from `memory.recall` across the federation repositories.
 
 Live entries appear here once the docs build can reach the memory gateway. To
-see current activity in the meantime, ask Ask Atlas what changed recently in a
+see current activity in the meantime, ask Ask Almanac what changed recently in a
 given area, or browse the source repositories directly.

@@ -62,7 +62,7 @@ export function AskDrawer({ open, onClose }: { open: boolean; onClose: () => voi
     <aside className="flex h-full w-80 shrink-0 flex-col border-l bg-[var(--color-canvas)]">
       <div className="flex items-center justify-between border-b px-4 py-3">
         <span className="flex items-center gap-2 font-semibold">
-          <CitrateMark size={16} color="var(--accent-text)" /> Ask Atlas
+          <CitrateMark size={16} color="var(--accent-text)" /> Ask Almanac
         </span>
         <button onClick={onClose} aria-label="Close" className="text-[var(--color-muted)]"><Icon name="x" size={16} /></button>
       </div>

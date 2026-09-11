@@ -34,7 +34,7 @@ export function resolveEntitlement(
   const minted = claims[ENTITLEMENT_CLAIM];
   if (minted && typeof minted === "object") {
     const m = minted as Partial<Entitlement>;
-    // The issuer's tier vocabulary is wider than Atlas's — normalize it here, at the trust boundary,
+    // The issuer's tier vocabulary is wider than Almanac's — normalize it here, at the trust boundary,
     // so no unmapped tier string can reach TIER_RANK/TIER_META downstream.
     if (m.tier) {
       const tier = normalizeTier(m.tier);

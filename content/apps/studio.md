@@ -33,7 +33,7 @@ to be visible and usable.
 Public, for this overview only. The implementation internals are Confidential and gated. The design
 specification, the map of what is built against what is modeled, the policy, signer-roster, approval-queue,
 and Capsule-dispatch implementation, and the packaging and release detail are not written into Citrate
-Atlas. They live in the private `citrate-studio` repository and are served at request time to authorized
+Almanac. They live in the private `citrate-studio` repository and are served at request time to authorized
 people only. This page points to that gated material; it does not reproduce it, and it contains no secrets.
 
 ## Source and verification
