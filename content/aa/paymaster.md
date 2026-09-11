@@ -199,7 +199,7 @@ that. The economics of who funds sponsorship are in [network economics](/chain/e
   bundler, where the EntryPoint and the paymaster contract re-validate. The edge skipping a check never
   causes an over-budget sponsorship.
 - **Secrets.** No `bk_` key, multisig address, deposit balance, private RPC endpoint, or host credential
-  appears in Citrate Atlas. Those live only in operator configuration.
+  appears in Citrate Almanac. Those live only in operator configuration.
 
 ## Access and canon
 

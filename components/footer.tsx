@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CitrateMark } from "./icons";
 
 /**
- * Corporate footer, shown at the foot of the marketing splash and the docs chrome. Connects Atlas to the
+ * Corporate footer, shown at the foot of the marketing splash and the docs chrome. Connects Almanac to the
  * rest of the Citrate Network (citrate.ai, Chat, CitrateScan) and the company channels (GitHub, LinkedIn,
  * X), plus the legal links. External links open in a new tab with rel="noopener noreferrer".
  */
@@ -61,7 +61,7 @@ export function Footer() {
         <div className="col-span-2 md:col-span-2">
           <Link href="/" className="flex items-center gap-2 font-display text-lg font-semibold">
             <CitrateMark size={22} color="var(--accent-text)" />
-            Citrate Atlas
+            Citrate Almanac
           </Link>
           <p className="mt-3 max-w-xs text-sm text-[var(--color-muted)]">
             Documentation for the Citrate Network. A substrate for AI compute, mapped, searchable, and live.

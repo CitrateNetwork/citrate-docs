@@ -127,7 +127,7 @@ across Citrate, as described in [what Citrate is](/start/what-is-citrate).
 ## Source and verification
 
 - Source repo: `citrate-memories`. The product is named Memrizz; an earlier working codename still
-  lingers in some spec and crate comments and is not used in Atlas.
+  lingers in some spec and crate comments and is not used in Almanac.
 - Audited against: `a616e75`.
 - Key paths: `crates/mem-mcp/src/lib.rs`, `crates/mem-gateway/` (`auth.rs`, `control.rs`, `oidc.rs`,
   `http.rs`), `crates/mem-authz/`, `crates/mem-store/src/shred.rs`, `PLANSET/00` to `07`, `webapp/`,

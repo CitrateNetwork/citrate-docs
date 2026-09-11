@@ -193,7 +193,7 @@ would help a competitor, so the full detail is served to contracted and verified
 published openly. There are no secrets here, no keys, no credentials, and no private endpoints. Any deployed
 addresses are public on-chain data and are verifiable with `eth_getCode`.
 
-This surface ties to the rest of Atlas at three points. The identity result `KYCRegistry` holds comes from
+This surface ties to the rest of Almanac at three points. The identity result `KYCRegistry` holds comes from
 the VERI identity check that gates every account on the public network, covered under [accounts and
 identity](/aa/identity); Citrate keeps the verification result, not the personal data. The compliance posture these
 gates serve, FERPA, HIPAA, SOC 2, and the rest by deployment context, is covered under

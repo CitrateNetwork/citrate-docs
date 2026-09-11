@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: { canonical: path },
     // Only public docs are indexed; gated tiers are kept out of search.
     robots: isPublic ? { index: true, follow: true } : { index: false, follow: false },
-    openGraph: { title: `${doc.title} · Citrate Atlas`, description, url: path, type: "article" },
-    twitter: { card: "summary_large_image", title: `${doc.title} · Citrate Atlas`, description },
+    openGraph: { title: `${doc.title} · Citrate Almanac`, description, url: path, type: "article" },
+    twitter: { card: "summary_large_image", title: `${doc.title} · Citrate Almanac`, description },
   };
 }
 

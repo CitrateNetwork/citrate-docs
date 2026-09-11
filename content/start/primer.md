@@ -12,7 +12,7 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-Five ideas make the rest of Atlas click. If your intuition comes from a single-chain world, these are the
+Five ideas make the rest of Almanac click. If your intuition comes from a single-chain world, these are the
 places it needs to bend. Read [what Citrate is](/start/what-is-citrate) first if you have not.
 
 ## What it is
@@ -71,7 +71,7 @@ Put the five together and a transaction's life reads cleanly. You sign a user op
 bundler submits it, the execution layer runs it (often alongside others, in parallel), and it lands in a
 block that names a selected parent and maybe some merge parents. GhostDAG assigns the block a blue score
 and places it in the total order. Once the block is 100 deep, it is final. The fee and any reward are
-denominated in SALT. If you can hold that sentence in your head, the rest of Atlas will read easily.
+denominated in SALT. If you can hold that sentence in your head, the rest of Almanac will read easily.
 
 ## Reference
 

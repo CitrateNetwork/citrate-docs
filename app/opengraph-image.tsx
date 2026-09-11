@@ -5,7 +5,7 @@ import { join } from "node:path";
 // On-brand social/link card (1200x630): warm near-black, Citrate green, the C-mark, Space Grotesk.
 // Used for og:image and (absent a twitter-image) twitter:image. Generated at build, served statically.
 export const runtime = "nodejs";
-export const alt = "Citrate Atlas, gated, agentic documentation for the Citrate Network";
+export const alt = "Citrate Almanac, gated, agentic documentation for the Citrate Network";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -49,7 +49,7 @@ export default async function Image() {
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: 130, fontWeight: 700, letterSpacing: -3, lineHeight: 1 }}>
-            Citrate Atlas
+            Citrate Almanac
           </div>
           <div style={{ display: "flex", fontSize: 38, fontWeight: 500, color: "#a8b0a0", marginTop: 28, maxWidth: 900, lineHeight: 1.35 }}>
             A handbook you can run. Every surface in the federation, mapped, searchable, and live.

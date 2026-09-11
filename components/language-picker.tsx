@@ -13,7 +13,7 @@ import {
   type TranslateStatus,
 } from "@/lib/i18n/engine";
 
-// Atlas header language switcher. Browser-first: docs are authored in English so
+// Almanac header language switcher. Browser-first: docs are authored in English so
 // the browser auto-offers native translation; this lets a reader force any language,
 // translated on-device where supported (CSP-clean). Code blocks (translate="no")
 // are never touched.

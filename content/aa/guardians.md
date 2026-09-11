@@ -142,7 +142,7 @@ module at first deploy means guardians cost the person no extra transaction.
 - **Bounds at the edge.** Counts outside 2 to 7, or a threshold outside `[1, N]`, are rejected both
   off-chain and on-chain, so a person sees the error at nomination rather than at deploy.
 - **Secrets.** The nomination service stores only the addresses the person chose. No key or credential
-  appears in Citrate Atlas.
+  appears in Citrate Almanac.
 
 ## Access and canon
 

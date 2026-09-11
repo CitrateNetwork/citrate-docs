@@ -14,7 +14,7 @@ author: Citrate team
 
 The Gradient Papers are the research corpus the Citrate Network grew from, a ten-part working
 dissertation plus a series index. This page is for researchers, engineers, and reviewers who want the
-reasoning behind the design. It indexes the papers and points each one at the surface in Atlas that
+reasoning behind the design. It indexes the papers and points each one at the surface in Almanac that
 treats it; following Rule 9, it summarizes and links the papers, it does not copy them.
 
 ## What it is
@@ -29,7 +29,7 @@ treats disagreement as data.
 The papers are research, not a product manual. Some describe surfaces that run on testnet today, some
 describe designs written down but not yet built, and one describes a hardware direction with no code at
 all. We keep those honest by carrying a maturity tag on each paper and, in the table below, naming the
-Atlas page where the work actually lives when it has been built.
+Almanac page where the work actually lives when it has been built.
 
 The v3 revision was written in April 2026 against the v0.5.0 testnet on chain id 40204, so every
 mechanical claim traces to a file path or a public contract address in the source. The series index,
@@ -47,16 +47,16 @@ index, are:
 | Operators | I, IV, X, IX, VIII |
 | Community | VIII, VII, VI, IX, I |
 
-When a paper has a surface in Atlas, read the Atlas page for what is built and the paper for why it is
+When a paper has a surface in Almanac, read the Almanac page for what is built and the paper for why it is
 built that way. When a paper is theoretical, the paper is all there is, and the page says so.
 
 ## Reference
 
 Ten papers numbered No.1 through No.10, plus the No.0 series index. The maturity column is the paper's
-own header tag. The Atlas page column links to the surface that treats the work; where a paper is
+own header tag. The Almanac page column links to the surface that treats the work; where a paper is
 research with no built surface, that is stated instead.
 
-| No. | Title | One line | Treated in Atlas |
+| No. | Title | One line | Treated in Almanac |
 |---|---|---|---|
 | 0 | Series Index | The map: change log, maturity tags, and reading paths by role. | this page |
 | 1 | Citrate Technical Paper | The foundational specification, a Layer-1 BlockDAG with the EVM-compatible Lattice VM and AI-native precompiles that make models first-class on the ledger. | [Lattice VM](/chain/lvm), [precompiles](/chain/precompiles) |
@@ -92,7 +92,7 @@ with Lauren Mendenhall on the constitution, Saul Loveman on engineering, and the
 - Source: `citrate-docs/gradient_papers_v3/` in this repository, ten numbered papers plus
   `Gradient_Papers_No0_Series_Index_v3.md`.
 - Audited against SHA: `cd729ed` (citrate-docs).
-- Rule 9: this page is an annotated index. The papers are the source of truth; Atlas links them and does
+- Rule 9: this page is an annotated index. The papers are the source of truth; Almanac links them and does
   not duplicate their text.
 - Status: Specified. The papers are a written corpus; the maturity of each described surface is the
-  paper's own tag, shown above and detailed on the linked Atlas pages.
+  paper's own tag, shown above and detailed on the linked Almanac pages.

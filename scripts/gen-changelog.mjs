@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Generate the federation changelog page from the memory graph. Queries the
-// mem-gateway MCP surface (the same one that powers "Ask Atlas") with
+// mem-gateway MCP surface (the same one that powers "Ask Almanac") with
 // `memory.recall` per repo for recent-history storylines, and writes a real nav
 // page at content/start/_generated/changelog.md.
 //
@@ -115,11 +115,11 @@ async function recall(repo, token) {
 function placeholder() {
   return `${FRONTMATTER}
 The changelog draws recent activity from the Citrate memory graph, the same
-signed, code-anchored knowledge store that powers Ask Atlas. It is regenerated
+signed, code-anchored knowledge store that powers Ask Almanac. It is regenerated
 on every deploy from \`memory.recall\` across the federation repositories.
 
 Live entries appear here once the docs build can reach the memory gateway. To
-see current activity in the meantime, ask Ask Atlas what changed recently in a
+see current activity in the meantime, ask Ask Almanac what changed recently in a
 given area, or browse the source repositories directly.
 `;
 }
@@ -151,7 +151,7 @@ async function main() {
 
   const body = `${FRONTMATTER}
 Recent activity across the Citrate federation, drawn from the memory graph (the
-signed, code-anchored knowledge store behind Ask Atlas) via \`memory.recall\`.
+signed, code-anchored knowledge store behind Ask Almanac) via \`memory.recall\`.
 This page is regenerated on every deploy. Each line is one recalled item with
 its kind and a short id.
 

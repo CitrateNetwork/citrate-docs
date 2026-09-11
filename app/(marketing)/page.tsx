@@ -29,7 +29,7 @@ export default async function Splash() {
         height={145}
         className="h-auto w-full max-w-md"
       />
-      <h1 className="font-display mt-1 text-7xl font-normal leading-none tracking-tight">Atlas</h1>
+      <h1 className="font-display mt-1 text-7xl font-normal leading-none tracking-tight">Almanac</h1>
       <p className="t-lede mt-6 max-w-2xl font-display text-xl leading-relaxed text-[var(--color-muted)]">
         The handbook for the Citrate federation. Documentation you can run: the contracts, the RPC, the
         SDKs, the desktop app, and how to operate a node, mapped, searchable, and live. Pick where to start.
