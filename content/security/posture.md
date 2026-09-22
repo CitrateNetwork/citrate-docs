@@ -13,8 +13,8 @@ author: Citrate team
 
 Citrate secures real value — a Layer-1, on-chain settlement, embedded-wallet key custody, and
 metered compute. This page is the public, standing summary of how we keep it safe: how we
-audit, how to report a vulnerability, what we pay for one, and where to read the record of
-issues we've already fixed.
+audit, how to report a vulnerability, and where to read the record of issues we've already
+fixed.
 
 ## Report a vulnerability
 
@@ -26,13 +26,6 @@ issues we've already fixed.
 Full policy: [`SECURITY.md`](https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md).
 We acknowledge within **72 hours**, triage within **5 business days**, and follow a
 **90-day coordinated disclosure** window.
-
-## Bug bounty
-
-Qualifying vulnerabilities are rewarded in the native **SALT** token — fixed awards for
-**zero-day, critical, and high** findings; **medium** at the team's discretion. Rewards are
-distributed at mainnet and subject to KYC + sanctions screening. Full terms, scope, and
-amounts: [`BUG_BOUNTY.md`](https://github.com/CitrateNetwork/.github/blob/main/BUG_BOUNTY.md).
 
 ## How we audit
 
