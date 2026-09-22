@@ -123,7 +123,7 @@ agent in [the air-gapped agent sidecar](/apps/nist-agent).
   `crates/comms-agent-bridge`, `crates/comms-client`.
 - Status: Implemented, accepted into the federation on 2026-06-14. The native Rust workspace has shipped
   through the cryptographic and transport spine and is in interface hardening (COMMS-S5 active, S0 through
-  S4 complete), with 121 tests passing across the workspace. It is pre-1.0: the agent bridge is built (the
+  S4 complete), with 303 tests passing across the workspace (121 Rust + 182 TypeScript). It is pre-1.0: the agent bridge is built (the
   socket IPC and the account-owned MLS member), while the privileged agent runtime is not yet wired, and
   the at-rest encryption is classical with a post-quantum hybrid roadmapped. Only an internal self-audit has
   run; there is no external audit yet.

@@ -16,7 +16,7 @@ The contracts that run on the Citrate Network, where to find their addresses, wh
 
 ## What it is
 
-The Citrate Network is EVM-compatible, so the on-chain surface is a set of Solidity contracts you call with ordinary tooling. About 39 contracts are deployed on testnet beta, chain id 40204, across six deploy scripts. They group into families: education, compute, models, network economics, governance, security, x402 payments, and account abstraction. The families are described on their own pages, linked below.
+The Citrate Network is EVM-compatible, so the on-chain surface is a set of Solidity contracts you call with ordinary tooling. About 76 contracts are deployed on testnet beta, chain id 40204 (roughly 100 including the BFR governance suite), across the deploy-script set. They group into families: education, compute, models, network economics, governance, security, x402 payments, and account abstraction. The families are described on their own pages, linked below.
 
 Two facts shape how you should treat this page. First, addresses drift: the chain can be re-rolled, and a contract you read about yesterday may sit at a new address today. The canonical record of what is deployed lives in the source repo, not here. Second, the ABIs are published as a package, so you never have to hand-copy them. This page tells you where both live and how to verify an address yourself.
 
