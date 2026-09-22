@@ -56,10 +56,13 @@ const DEFAULT_REPOS = [
 ];
 
 /**
- * Repos whose memory is sensitive → elevated tier. Everything not listed defaults
- * to `MEM_DEFAULT_TIER` (default "public"), so the chatbot can answer about most of
- * the graph for everyone while internal/audit/deal/compliance memory stays gated.
- * Override the whole map with `MEMORY_REPO_TIERS` (JSON: {"repo":"tier"}).
+ * Repos whose memory tier is pinned. Everything not listed defaults to
+ * `MEM_DEFAULT_TIER` (default **"confidential"** — FAIL CLOSED). Federation memory is
+ * live internal engineering data (commits, ADRs, code-anchored facts, findings), so an
+ * unlisted repo is gated by default; a public/anonymous asker gets NO federation memory
+ * until a repo is explicitly opened. To let the public chatbot answer about a
+ * genuinely-public repo, add it here with tier "public" (e.g. docs/SDKs), or set
+ * `MEM_DEFAULT_TIER`. Override the map with `MEMORY_REPO_TIERS` (JSON: {"repo":"tier"}).
  */
 export const DEFAULT_REPO_TIERS: Record<string, Tier> = {
   "citrate-security": "confidential", // audit findings, vulnerability reports
@@ -95,9 +98,11 @@ export function resolveRepoTiers(raw: string | undefined = process.env.MEMORY_RE
   return { ...DEFAULT_REPO_TIERS };
 }
 
-/** Tier for one repo against an already-resolved map (unknown repo → configured default). */
+/** Tier for one repo against an already-resolved map (unknown repo → configured default).
+ *  FAIL CLOSED: an unlisted repo defaults to "confidential" so federation memory is never
+ *  served to a lower-tier (incl. anonymous/public) asker unless explicitly opened. */
 export function repoTierFrom(map: Record<string, Tier>, repo: string): Tier {
-  return map[repo] ?? ((process.env.MEM_DEFAULT_TIER as Tier) || "public");
+  return map[repo] ?? ((process.env.MEM_DEFAULT_TIER as Tier) || "confidential");
 }
 
 function repoTier(repo: string): Tier {
