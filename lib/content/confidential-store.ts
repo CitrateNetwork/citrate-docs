@@ -26,6 +26,11 @@ export interface ConfidentialDoc {
   disclosureId?: string;
   disclosureRequired?: boolean;
   embargoUntil?: number;
+  /** CIT-DOCS-004: per-doc named-principal scoping (e.g. funding = ["admin","exec"]) layered
+   *  on top of the tier/org gate. Optional; when set, authorizeConfidentialRead must also
+   *  require the session's role to be in this list. NOTE: authorizeConfidentialRead is
+   *  currently a fail-closed stub (returns false) — full enforcement is not yet implemented. */
+  allowedRoles?: readonly string[];
 }
 
 export interface ConfidentialDisclosure {
