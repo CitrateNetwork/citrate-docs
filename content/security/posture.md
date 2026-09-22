@@ -11,7 +11,7 @@ created: 2026-09-21T00:00:00Z
 author: Citrate team
 ---
 
-Citrate secures real value - a Layer-1, on-chain settlement, embedded-wallet key custody, and
+Citrate secures real value - a Layer-1, on-chain settlement, embedded-account key custody, and
 metered compute. This page is the public, standing summary of how we keep it safe: how we
 audit, how to report a vulnerability, and where to read the record of issues we've already
 fixed.
