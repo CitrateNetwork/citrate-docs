@@ -1,17 +1,17 @@
 /**
- * Confidential content store — PUBLIC-REPO FALLBACK (fail-closed).
+ * Confidential content store - PUBLIC-REPO FALLBACK (fail-closed).
  *
  * Confidential doc BODIES never live in this repo. The content generator is explicit
  * ("confidential bodies are never authored into content/"), and the runtime gateway
  * (app/api/content/[...slug]/route.ts) fetches them "from the server-only store (prod: the
  * private home repo)". This module exists so the app TYPE-CHECKS and BUILDS in the public
  * repo (and any build without the private overlay) while shipping NO confidential content:
- * an empty doc set and a DENY authorizer. A confidential read therefore fails closed —
+ * an empty doc set and a DENY authorizer. A confidential read therefore fails closed -
  * route.ts returns 404 and never reveals that a confidential doc exists.
  *
  * A private/confidential deployment OVERLAYS the real store (with the actual CONFIDENTIAL_DOCS
  * / CONFIDENTIAL_DISCLOSURES and the real tier/org/role/expiry gate) from the private home
- * repo at build time. That overlay MUST NOT be committed here — this repo is public.
+ * repo at build time. That overlay MUST NOT be committed here - this repo is public.
  */
 
 export type ConfidentialTier = "public" | "commercial" | "academic" | "confidential";
@@ -29,7 +29,7 @@ export interface ConfidentialDoc {
   /** CIT-DOCS-004: per-doc named-principal scoping (e.g. funding = ["admin","exec"]) layered
    *  on top of the tier/org gate. Optional; when set, authorizeConfidentialRead must also
    *  require the session's role to be in this list. NOTE: authorizeConfidentialRead is
-   *  currently a fail-closed stub (returns false) — full enforcement is not yet implemented. */
+   *  currently a fail-closed stub (returns false) - full enforcement is not yet implemented. */
   allowedRoles?: readonly string[];
 }
 
@@ -39,7 +39,7 @@ export interface ConfidentialDisclosure {
   body?: string;
 }
 
-/** Empty in the public repo — no confidential bodies ship here. */
+/** Empty in the public repo - no confidential bodies ship here. */
 export const CONFIDENTIAL_DOCS: Record<string, ConfidentialDoc> = {};
 
 /** Empty in the public repo. */
