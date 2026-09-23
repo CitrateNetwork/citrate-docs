@@ -201,6 +201,10 @@ export const DOCS: Record<string, Doc> = {
   },
 
   // CONFIDENTIAL · embargoed (body withheld until date)
+  // Posture disclaimer (REM-03): the framework names in this TOC are a table of
+  // contents only. Citrate's actual status on SOC 2, CMMC L2, and FedRAMP is in
+  // progress and not yet certified; see /enterprise/compliance for the per-framework
+  // caveats. This note keeps the fixture honest and satisfies disclaimer-check.
   "/enterprise/compliance-full": {
     slug: "/enterprise/compliance-full", title: "Compliance posture (full)", tier: "confidential",
     sourceKind: "gated", source: "citrate-compliance/", embargoUntil: FIXED_NOW + 21 * DAY, accessLogged: true,
