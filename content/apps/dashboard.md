@@ -1,7 +1,7 @@
 ---
 title: Learning dashboard
 codex_slug: /apps/dashboard
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-dashboard/{app/, lib/daemon-api.ts}

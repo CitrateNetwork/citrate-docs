@@ -1,7 +1,7 @@
 ---
 title: Citrate Compute Pool
 codex_slug: /compute/pool
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-compute-pool (pool-coordinator/, training-worker/)

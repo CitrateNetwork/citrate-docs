@@ -59,7 +59,7 @@ The audited surface, each item with its code path under `citrate-chain`.
 |---|---|---|
 | Hardfork spec | `SpecId::CANCUN`, set with `.with_spec_id(SpecId::CANCUN)`. CANCUN enables MCOPY (EIP-5656), which Solidity 0.8.25+ emits for dynamic-bytes return encoding (the `BFR-VM-1` note). | `core/execution/src/revm_adapter.rs` |
 | Chain id | Supplied per executor with `Executor::with_chain_id(..)` and written into the REVM config. The Citrate Network uses 40204. | `core/execution/src/revm_adapter.rs` |
-| Precompiles | The nine standard Ethereum precompiles, ECRECOVER through BLAKE2F at `0x01` to `0x09`, plus Citrate extensions. | see [Precompiles](/chain/precompiles), [confidential precompiles](/chain/precompiles-zkp) |
+| Precompiles | The nine standard Ethereum precompiles, ECRECOVER through BLAKE2F at `0x01` to `0x09`, plus Citrate extensions. | see [Precompiles](/chain/precompiles), [verification, inference, and attestation precompiles](/chain/precompiles-zkp) |
 | Logs and events | REVM logs are converted one to one into Citrate receipt logs by `convert_revm_log` (fix PIL-48), so `eth_getLogs` returns real event topics. | `core/execution/src/revm_adapter.rs` |
 | State source | `StateDBAdapter` is backed by an in-memory cache and a persistent store; cache misses fall through to the store (fix PIL-13b). | `core/execution/src/revm_adapter.rs` |
 | BLOCKHASH | Returns the hash for the 256 most recent blocks; older or unknown blocks return zero, per EVM spec. | `core/execution/src/revm_adapter.rs` |

@@ -1,7 +1,7 @@
 ---
 title: Paraconsistent aggregation, Belnap four-valued logic
 codex_slug: /research/paraconsistent
-tier: academic
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/learning/src/belnap.rs

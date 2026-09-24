@@ -28,7 +28,7 @@ product-surface names that apply. Facts cross-checked against `SURFACE_REGISTRY.
 ## Canon (state where relevant) and product names
 
 Substrate-not-AI; Citrate Network (public ledger) + Citrate Ground (on-prem default); GhostDAG k=18 /
-finality-depth 100 / 100-validator BFT 67% / 50-block checkpoint; chain 40204 testnet, mainnet Q1 2027,
+finality-depth 100 / 100-validator BFT 67% / 50-block checkpoint; chain 40204 testnet, mainnet Q2 2027,
 pilots prior summer; KYC via CLEAR (no PII held); SALT settles work (not the product); K-12 free in
 perpetuity; compliance floors FERPA/COPPA/CIPA/HIPAA/SOC 2/ITAR.
 Names: Citrate Network / Ground / Market / Orchard / Node / Keyring / Schools / Atlas.
@@ -39,7 +39,7 @@ Names: Citrate Network / Ground / Market / Orchard / Node / Keyring / Schools / 
 |---|---|---|---|---|
 | /start/what-is-citrate | README, citrate-chain | substrate, BlockDAG, 40204, timeline | redundant H1 | Network, Ground |
 | /start/primer | citrate-chain consensus/learning/economics | blue-score vs height, finality-by-depth, gasless AA, on-prem | none major | Network, Keyring, Node |
-| /start/roadmap (NEW) | MISSION canon | mainnet Q1 2027, pilots prior summer | page missing | Network |
+| /start/roadmap (NEW) | MISSION canon | mainnet Q2 2027, pilots prior summer | page missing | Network |
 | /start/agentile | AGENTILE.md (linked) | 13 rules, operators+auditors | em-dashes | , |
 | /start/tutorials/your-first-10-minutes | chain RPC/CLI, sdk-js | real RPC names, 40204 | fictional RPC | Network |
 | /methodology/rules | docs/AGENTILE_RULES.md (linked) | 13 rules | em-dashes | , |
@@ -59,7 +59,7 @@ Names: Citrate Network / Ground / Market / Orchard / Node / Keyring / Schools / 
 | /chain/sequencer | core/sequencer/ | parent selection, mempool, OODA (no military metaphor) | Network, Node |
 | /chain/storage | core/storage/ | flat KV + SHA3-256 root (corr. 3) | Network, Node |
 | /chain/genesis | config/, node/config/ | 40204 testnet, mainnet id=1 pre-launch; no keys | Network |
-| /chain/economics | core/economics/ | SALT 1B/18dp, fee splits, block reward 10/halving; settles work | Network |
+| /chain/economics | core/economics/ | SALT 1T/18dp, fee splits, block reward 10/halving; settles work | Network |
 | /chain/network | core/network/ | P2P/gossip/bootstrap; link OPERATIONS.md | Node |
 | /chain/bridge | core/bridge/ | pre-alpha public stub; internals gated | Network |
 
@@ -120,7 +120,7 @@ Names: Citrate Network / Ground / Market / Orchard / Node / Keyring / Schools / 
 | /apps/native | citrate-native | native wallet + DAG explorer (Slint) | Keyring, Network |
 | /apps/wallet-extension | citrate-wallet-extension | MV3 extension | Keyring |
 | /apps/studio | citrate-studio | agent control UI; public stub (X internals) | Node |
-| /apps/boeing | citrate-boeing-shell | customer shell; public stub (X) | Ground |
+| /apps/defense_prime | citrate-defense_prime-shell | customer shell; public stub (X) | Ground |
 | /apps/comms | citrate-comms | E2E workspace + MCP | , |
 | /apps/nist-agent | nist-agent | air-gapped sidecar; on-prem isolation; no military jargon | Ground, Node |
 | /apps/tutorials/* | per-app | real 40204 | per-page |

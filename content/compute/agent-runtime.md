@@ -1,7 +1,7 @@
 ---
 title: Citrate Agent Runtime
 codex_slug: /compute/agent-runtime
-tier: academic
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-agent-runtime (agent/cli/, agent/core/, agent-cron/, agent-chain/)
@@ -153,7 +153,7 @@ approve it, and whether it is break-glass eligible.
 | `CITRATE_TRIPWIRE_PROM_URL` | `http://127.0.0.1:9090` | no | Prometheus base for tripwire metrics. |
 | `CITRATE_TRIPWIRE_RPC_URL` | `https://rpc.citrate.ai` | no | JSON-RPC for chain queries. |
 | `CITRATE_TRIPWIRE_REGISTRY` and the `_TENANT`, `_ROLE_ESCALATION`, `_MULTISIG` addresses | contract defaults | no | Tripwire contract addresses. |
-| `CITRATE_TRIPWIRE_SCOPE` | `keccak256("boeing-root")` | no | bytes32 scope. |
+| `CITRATE_TRIPWIRE_SCOPE` | `keccak256("defense_prime-root")` | no | bytes32 scope. |
 | `CITRATE_CAPSULE_SIGNING_SEED` | none | no | ed25519 seed for capsule packing. Never commit it. |
 
 ## Design rationale

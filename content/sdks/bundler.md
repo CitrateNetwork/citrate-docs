@@ -1,7 +1,7 @@
 ---
 title: Citrate Bundler
 codex_slug: /sdks/bundler
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-bundler/gate/src/server.ts, citrate-bundler/gate/src/precheck.ts, citrate-bundler/gate/src/config.ts, citrate-bundler/Caddyfile, citrate-bundler/Dockerfile

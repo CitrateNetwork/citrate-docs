@@ -1,7 +1,7 @@
 ---
 title: Paymaster and bundler topology
 codex_slug: /aa/paymaster
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: contracts/src/aa/paymaster/CitratePaymaster.sol + citrate-bundler (gate/src, README, Caddyfile)

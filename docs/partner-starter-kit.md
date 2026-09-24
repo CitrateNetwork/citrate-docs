@@ -43,14 +43,14 @@ initial Week 0 discovery (see `PILOT_ONBOARDING_PLAYBOOK.md` §3).
 # - Training pool worker: citrate-training-worker
 
 # OPTION A: Build from source (current S0 path)
-git clone https://github.com/mozi-group/citrate.git
-cd citrate/citrate_v0.01.1
+git clone https://github.com/CitrateNetwork/citrate-chain.git
+cd citrate-chain
 cargo build --release -p citrate-pool-coordinator       # or -p citrate-training-worker
 sudo install target/release/citrate-pool-coordinator /usr/local/bin/
 
 # OPTION B: Release tarball (coming in S1 — see backlog item
 # `release-binaries-via-release-yml` in S1_S2_BACKLOG.md)
-# curl -L https://github.com/mozi-group/citrate/releases/latest/\
+# curl -L https://github.com/CitrateNetwork/citrate-chain/releases/latest/\
 #   download/citrate-pool-coordinator-linux-x86_64.tar.gz | tar xz
 # sudo install citrate-pool-coordinator /usr/local/bin/
 ```

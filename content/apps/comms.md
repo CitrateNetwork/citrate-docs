@@ -1,7 +1,7 @@
 ---
 title: Citrate Comms
 codex_slug: /apps/comms
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-comms/README.md, citrate-comms/crates, citrate-comms/PLANSET

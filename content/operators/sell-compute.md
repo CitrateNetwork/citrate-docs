@@ -1,7 +1,7 @@
 ---
 title: Sell compute
 codex_slug: /operators/sell-compute
-tier: commercial.kyc
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-node-agent (README.md, crates/)

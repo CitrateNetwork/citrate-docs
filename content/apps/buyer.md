@@ -1,7 +1,7 @@
 ---
 title: Citrate Market (buyer)
 codex_slug: /apps/buyer
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-buyer-webapp

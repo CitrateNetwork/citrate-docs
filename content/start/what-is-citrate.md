@@ -93,5 +93,5 @@ audience that needs them.
 Chain facts verified against `citrate-chain` at `9d5959e`: chain id 40204 (`eth_chainId` returns `0x9d0c`,
 see `cli/src/config.rs` and `cli/src/commands/advanced.rs`), GhostDAG parameters in
 `core/consensus/src/types.rs`, SALT supply in `core/api/src/economics_rpc.rs`. The network is live on
-testnet; mainnet is targeted for Q1 2027, with school pilots the prior summer. Status: Implemented
+testnet; mainnet is targeted for Q2 2027, with school pilots the prior summer. Status: Implemented
 (testnet).

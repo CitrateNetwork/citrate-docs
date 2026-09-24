@@ -1,7 +1,7 @@
 ---
 title: Deploy the inference gateway
 codex_slug: /compute/gateway
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-inference-gateway/gateway/src/, citrate-inference-gateway/crates/x402-axum/src/, citrate-inference-gateway/gateway/RUNBOOK.md

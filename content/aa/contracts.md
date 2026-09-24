@@ -1,7 +1,7 @@
 ---
 title: Account-abstraction contracts
 codex_slug: /aa/contracts
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/aa/* (+ contracts/src/edu/Forwarder.sol)

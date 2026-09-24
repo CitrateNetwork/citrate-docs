@@ -1,7 +1,7 @@
 ---
 title: Citrate Orchard, federated learning cycles
 codex_slug: /research/learning
-tier: academic
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/learning/

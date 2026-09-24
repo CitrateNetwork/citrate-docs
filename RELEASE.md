@@ -23,10 +23,11 @@ attestation; every release ships an SBOM and a keyless signature.
 
 ## Confidential safety at release
 
-The release artifact is the **client build** — it must contain zero Confidential content. The
-`verify:bundle` step proves this (sentinel absent from `.next/static`); Confidential bodies live only in
-the server-only store and are served at runtime by `/api/content` after auth. No repo visibility flip is
-part of any release (the repo stays private; the deployed site is the public surface).
+The release artifact is the **client build** — it must contain zero gated content. This repo is public
+open-core and ships no gated content (every doc is `public`), so the `verify:bundle` step passes trivially
+here (sentinel absent from `.next/static`, no gated bodies to probe). The gate exists for private overlay
+deployments (Homestead / enterprise), where gated bodies live only in the server-only store and are served
+at runtime by `/api/content` after auth — never in the client build.
 
 ## Steps
 

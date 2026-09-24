@@ -1,7 +1,7 @@
 ---
 title: Reproduce a learning round
 codex_slug: /research/tutorials/reproduce-a-learning-round
-tier: academic
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/learning/

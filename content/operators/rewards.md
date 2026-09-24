@@ -1,7 +1,7 @@
 ---
 title: Rewards, reputation, and slashing
 codex_slug: /operators/rewards
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/economics/, citrate-chain/contracts/src/NematocystSlashing.sol, citrate-node-agent

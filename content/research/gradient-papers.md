@@ -1,7 +1,7 @@
 ---
 title: The Gradient Papers (v3)
 codex_slug: /research/gradient-papers
-tier: academic
+tier: public
 org_scope: ~
 source_kind: linked
 source: citrate-docs/gradient_papers_v3/
@@ -65,7 +65,7 @@ research with no built surface, that is stated instead.
 | 4 | Behavioral Issues | Catalogues five reproducible agent failure modes and the behavior-driven development discipline, Gherkin contracts, that blocks each one. | [behavior-driven development](/research/bdd) |
 | 5 | ATIS | Proposes computing transformer attention's token-importance score in analog hardware before the digital projection; carries an honest analysis of why the naive version does not pay off. | [ATIS](/research/atis) |
 | 6 | The Memetic Money Portal | Moving value in and out of the network; replaces the earlier automated bridge with a contracted market-maker model governed on the ledger. | [the bridge](/chain/bridge) |
-| 7 | The Citrate Inc. | A third path between concentrated ownership and flat cooperatives: standing accrues in proportion to contribution, recorded on the ledger. | [marketplace economics](/contracts/economics) |
+| 7 | The Cooperative Model (conceptual) | A conceptual, currently-tabled research direction: a third path between concentrated ownership and flat cooperatives, where standing accrues in proportion to contribution, recorded on the ledger. Not a current legal entity. | [marketplace economics](/contracts/economics) |
 | 8 | The BR1J Constitution | The constitutional law of the Citrate organization, the boundaries no proposal can cross, enforced through the treasury governor. | [governance](/contracts/governance) |
 | 9 | The Medusa Paradigm | Derives the architecture from cnidarian biology, nerve nets, siphonophore colonies, and Turritopsis, mapping the motifs to slashing and attestation surfaces. | research only; motifs surface in [security](/contracts/security) |
 | 10 | The Substrate of Verifiable Inference | How on-chain verification of off-chain model work is mechanized: Halo2-KZG proofs, deterministic Q16 compute, and attestation gates. | [verifiable inference](/research/verifiable-inference) |

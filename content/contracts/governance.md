@@ -1,7 +1,7 @@
 ---
 title: Governance Contracts
 codex_slug: /contracts/governance
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{TreasuryGovernor,DisputeResolution,AgentDecisionRegistry,SpecRegistry}.sol

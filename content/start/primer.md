@@ -81,7 +81,7 @@ denominated in SALT. If you can hold that sentence in your head, the rest of Alm
 | Finality | final at depth 100, no reorg past it | [consensus, finality](/chain/consensus#finality) |
 | Merge parents | one selected parent, many merge parents | [consensus](/chain/consensus) |
 | Citrate Keyring | smart-contract account, passkey, sponsored fees | [Citrate Keyring](/aa/passkeys) |
-| SALT | 18 decimals, 1B cap, settles work | [economics](/chain/economics) |
+| SALT | 18 decimals, 1T cap, settles work | [economics](/chain/economics) |
 
 ## Access and canon
 
@@ -90,7 +90,7 @@ behind GhostDAG and finality are academic-tier and live on the linked Citrate Ne
 
 ## Source and verification
 
-The numbers (k = 18, finality depth 100, SALT 18 decimals and 1B cap, chain id 40204) are verified against
+The numbers (k = 18, finality depth 100, SALT 18 decimals and 1T cap, chain id 40204) are verified against
 `citrate-chain` at `9d5959e`: `core/consensus/src/types.rs` and `core/api/src/economics_rpc.rs`, surfaced
 through the [consensus](/chain/consensus) and [economics](/chain/economics) pages. Status: Implemented
 (testnet).

@@ -1,7 +1,7 @@
 ---
 title: The TLA+ formal specification corpus
 codex_slug: /research/tla
-tier: academic
+tier: public
 org_scope: ~
 source_kind: linked
 source: citrate-agentile-archive/formal/specs/ + per-repo specs/tla/

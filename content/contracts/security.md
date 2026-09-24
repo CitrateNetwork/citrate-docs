@@ -1,7 +1,7 @@
 ---
 title: Security & Slashing Contracts
 codex_slug: /contracts/security
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src/{KYCRegistry,TEEAttestationRegistry,NematocystSlashing}.sol, contracts/src/interfaces/INematocystSlashing.sol

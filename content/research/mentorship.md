@@ -1,7 +1,7 @@
 ---
 title: The Mentorship Protocol
 codex_slug: /research/mentorship
-tier: academic
+tier: public
 org_scope: ~
 source_kind: linked
 source: citrate-docs/gradient_papers_v3/Gradient_Papers_No3_Mentorship_Protocol_v3.md

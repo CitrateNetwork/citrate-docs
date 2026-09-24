@@ -12,39 +12,50 @@ created: 2026-07-28T00:00:00Z
 author: Citrate team
 ---
 
-Citrate is built to be open. The entire chain and its application layer are open sourced before mainnet, in
-January 2027. Until then, access to the core is deliberate, and that is a security decision, not secrecy.
+Citrate is open-core, and the code is public today at
+[github.com/CitrateNetwork](https://github.com/CitrateNetwork). The chain and its application layer are
+already open — you can read the source, build against it, and reproduce the results now, ahead of the Q2
+2027 mainnet. There is no waiting list and no gate on reading the code.
 
-## How we work
+## How the licensing works
 
-We research and build in private, and we open source a component once it has findings worth publishing and
-third-party validation behind it, from auditors or independent researchers. Publishing code the day it is
-written, before it is audited and before the design has settled, invites two failures we refuse: IP theft
-during the window when a design is most copyable, and a wider attack surface on infrastructure that is still
-moving. Opening a component after it is validated is the stronger position, for the network and for the
-people who build on it.
+The repositories ship under a two-tier open-core model, with **Citrate Inc.** as the licensor:
 
-## What is open today
+- **Infrastructure is Apache-2.0** — permissively licensed, use it however you like. This is the chain, the
+  federated-types crate, the node agent, the bundler, NAT, the cooperative contracts, the agent runtime,
+  the JavaScript / Python / marketplace SDKs, the docs, and the explorer.
+- **The application layer is BUSL-1.1** — source-available today (you can read, build, and self-host it for
+  non-production use), and it converts to Apache-2.0 on its Change Date. This is the inference gateway, the
+  compute pool, the cluster, Citrate Core, Comms, Quorum, Identity, Memories, the native wallet, the
+  air-gapped agent, and Studio.
 
-Some work is public now, because it is meant to be read and reproduced:
+Publishing the source in the open is the stronger position — for the network and for the people who build
+on it — than holding it back. The design is public, the audits land against public code, and the
+BUSL Change Date puts the whole application layer on a path to fully permissive licensing.
 
-- **NAT** is the model architecture. Memory-safe Rust, formally specified, public. You can read the source
-  and reproduce the results.
+## What is public
+
+Everything that ships is public at [github.com/CitrateNetwork](https://github.com/CitrateNetwork). A few
+starting points:
+
+- **NAT** is the model architecture. Memory-safe Rust, formally specified, Apache-2.0. Read the source and
+  reproduce the results.
 - **American Learning Federation (ALF)** is the cooperative that trains NAT through federated learning.
 - **agentile-skills** is the engineering methodology, installable by anyone.
+- **The chain, SDKs, and explorer** are Apache-2.0; **Core, the gateway, and the rest of the app layer**
+  are BUSL-1.1 and source-available.
 
-## Getting access to the rest
+## What stays private
 
-If you want to build on the parts that are not yet public, ask. Request access on the website or by email.
-Once your application is processed, approved contributors receive privileged access to every repository in
-the federation, with one exception: the private repositories of clients and employees, which stay closed for
-their sake, not ours.
+A small set of repositories are deliberately closed, and none of them are the network itself:
 
-- Request access: [citrate.ai/contact](https://citrate.ai/contact), or email `hello@citrate.ai`.
-- Already building: NAT and ALF are open now. Start there.
+- **Client and enterprise repositories** — per-customer and on-premise (Citrate Ground / Homestead) work,
+  closed for the customers' sake, not ours.
+- **Security and internal repositories** — the security program's private tracker (its history carries
+  material that must not be public) and internal federation tooling.
 
-## The commitment
+If you are building on Citrate, start with the public repositories — you do not need to request access to
+read or build the code.
 
-The whole chain and the whole application layer are open sourced before mainnet, in January 2027. That is a
-date, not an aspiration. What is private today is private on a schedule we set, for reasons we can name, and
-every part of it has a public release ahead of it.
+- Contact: [citrate.ai/contact](https://citrate.ai/contact), or email `hello@citrate.ai`.
+- Already building: the chain, SDKs, NAT, and ALF are public now. Start there.

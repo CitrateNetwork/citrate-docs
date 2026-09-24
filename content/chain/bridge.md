@@ -32,10 +32,10 @@ ceremony has not been scheduled. Do not treat it as production-ready.
 
 ## Access and canon
 
-This page is public, but it is intentionally brief. The bridge's implementation internals, its trust model,
+This page is public, and intentionally brief. The bridge's implementation internals, its trust model,
 oracle and relay design, signature and freshness handling, and the bonding-curve and limit parameters, are
-gated and confidential, held in `core/bridge/` and its `SECURITY.md` rather than authored here. No keys,
-endpoints, thresholds, or mechanism internals appear on this page.
+public in the `citrate-chain` repository under `core/bridge/` and its `SECURITY.md`; this page summarizes
+and links to them rather than reproducing them. No keys or endpoints appear on this page.
 
 ## Source and verification
 

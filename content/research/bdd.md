@@ -1,7 +1,7 @@
 ---
 title: The Gherkin acceptance library
 codex_slug: /research/bdd
-tier: academic
+tier: public
 org_scope: ~
 source_kind: linked
 source: citrate-chain/specs/gherkin/ + per-repo .agentile features

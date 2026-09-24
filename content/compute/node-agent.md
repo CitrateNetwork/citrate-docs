@@ -1,7 +1,7 @@
 ---
 title: Citrate Node
 codex_slug: /compute/node-agent
-tier: commercial.kyc
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-node-agent (crates/, README.md)

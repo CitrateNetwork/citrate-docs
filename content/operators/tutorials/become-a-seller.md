@@ -1,7 +1,7 @@
 ---
 title: Become a seller
 codex_slug: /operators/tutorials/become-a-seller
-tier: commercial.kyc
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-node-agent (README.md, crates/) + ComputeMarketplace.sol

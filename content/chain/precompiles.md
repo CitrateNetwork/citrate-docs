@@ -1,7 +1,7 @@
 ---
 title: Precompiles, address pages, tensor, x402, q16
 codex_slug: /chain/precompiles
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/precompiles/
@@ -14,7 +14,7 @@ author: Citrate team
 
 The Citrate Network keeps the nine standard Ethereum precompiles and adds its own at higher addresses:
 deterministic tensor primitives, x402 payment verification, and Belnap-q16 lattice aggregation. This page
-is the reference for the address pages and for the non-confidential surfaces, with each item cited to its
+is the reference for the address pages and for the tensor, x402, and q16 surfaces, with each item cited to its
 code path. It is for contract authors.
 
 ## What it is
@@ -34,8 +34,8 @@ to `0x09`, ECRECOVER through BLAKE2F, and adds several address pages above them,
 
 `is_precompile()` recognizes an address by matching its leading zero bytes plus the page bytes, and
 `execute()` dispatches by the same prefix. This page documents the tensor, x402, and q16 surfaces. The
-`0x0100` to `0x0109` inference, verification, and attestation surfaces are confidential and are summarized
-on a separate page, see [confidential precompiles](/chain/precompiles-zkp).
+`0x0100` to `0x0109` inference, verification, and attestation surfaces are summarized
+on a separate page, see [inference, verification, and attestation precompiles](/chain/precompiles-zkp).
 
 ## How to use it
 
@@ -147,7 +147,7 @@ anonymously. Every node operator on the public network is identity-verified thro
 the verification result, not the personal data behind it. Nothing here is secret: addresses, public ABIs,
 gas constants, and type hashes are all observable on-chain. The genuinely sensitive precompiles, the
 inference, proof-verification, and attestation internals, are not on this page; see
-[confidential precompiles](/chain/precompiles-zkp).
+[verification, inference, and attestation precompiles](/chain/precompiles-zkp).
 
 ## Source and verification
 

@@ -1,7 +1,7 @@
 ---
 title: Guardians and social recovery
 codex_slug: /aa/guardians
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-identity/src/aa (guardians.ts, guardian-routes.ts, install-data.ts) + contracts/src/aa/recovery/GuardianRecoveryModule.sol

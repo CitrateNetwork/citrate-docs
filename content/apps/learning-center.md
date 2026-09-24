@@ -1,7 +1,7 @@
 ---
 title: Citrate Learning Center
 codex_slug: /apps/learning-center
-tier: academic
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-learning-center/{README.md, gui/, cli-school-bootstrap/, Cargo.toml}

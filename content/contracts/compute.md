@@ -1,7 +1,7 @@
 ---
 title: Compute contracts
 codex_slug: /contracts/compute
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (ComputeMarketplace.sol, ComputePool.sol, ComputePoolTraining.sol, ComputeVerifier.sol, BulkComputeGateway.sol, ComputePricingOracle.sol, interfaces/IComputePricingOracle.sol)

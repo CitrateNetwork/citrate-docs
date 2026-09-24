@@ -79,7 +79,7 @@ AI-first, supercharge, intelligent (as a product claim).
   Ground). On-prem sovereignty is the default; a participant's data and models stay on their hardware.
 - The chain is a BlockDAG written in Rust, GhostDAG consensus: k = 18, finality depth 100, a 100-validator
   BFT committee at a 67% threshold, a checkpoint every 50 blocks. Chain id 40204 is testnet.
-- Mainnet is targeted for Q1 2027; school pilots run the prior summer.
+- Mainnet is targeted for Q2 2027; school pilots run the prior summer.
 - Every node operator and machine on the public network is identity-verified through Citrate's in-house verification (VERI). Citrate holds no sensitive
   personal data from that check.
 - SALT settles work performed. It is not the product and not a speculative instrument. Avoid naming it

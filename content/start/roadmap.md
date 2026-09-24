@@ -13,7 +13,7 @@ author: Citrate team
 ---
 
 Where Citrate is today and what comes next. The network is live on testnet now; mainnet is targeted for the
-first quarter of 2027. This page is the plan, so it carries a Specified status: the dates are commitments
+second quarter of 2027. This page is the plan, so it carries a Specified status: the dates are commitments
 we are working toward, not facts already recorded on a ledger.
 
 ## What it is
@@ -34,7 +34,7 @@ target is the date to plan around.
 |---|---|---|
 | Testnet, chain id 40204 | Implemented | The public network is live. RPC, the SDKs, contracts, and the model calls in the tutorials all run against it today. |
 | School pilots | Specified, summer 2026 | The first Citrate Schools deployments: US K-12 public schools running on Citrate Ground, free in perpetuity. |
-| Mainnet | Specified, Q1 2027 | The production network. Chain id 40204 carries forward from testnet; it is permanent. |
+| Mainnet | Specified, Q2 2027 | The production network. Chain id 40204 carries forward from testnet; it is permanent. |
 
 The chain id does not change between testnet and mainnet. 40204 is canonical and permanent, so addresses,
 tooling, and integrations you build against testnet carry over.
@@ -47,7 +47,7 @@ we ask anyone to depend on the production network. The pilots are the evidence; 
 
 ## Access and canon
 
-Public. This page states the mainnet target (Q1 2027) and the pilot window. Where a phase is still ahead of
+Public. This page states the mainnet target (Q2 2027) and the pilot window. Where a phase is still ahead of
 us it is labeled Specified, and where it is live it is labeled Implemented, so the status is never
 overstated.
 

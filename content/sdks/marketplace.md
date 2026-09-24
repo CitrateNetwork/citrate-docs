@@ -1,7 +1,7 @@
 ---
 title: Marketplace SDK
 codex_slug: /sdks/marketplace
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-sdk-marketplace/src/index.ts

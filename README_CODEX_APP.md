@@ -18,16 +18,18 @@ npm run verify:bundle  # S3 gate: asserts ZERO Confidential content in .next/sta
   Authorization-Code+PKCE; the gateway uses the server-verified session. Fail-closed when unconfigured.
 
 ## Confidential gateway (S3)
-Confidential bodies live ONLY in the **server-only** store (`lib/content/confidential-store.ts`,
-`import "server-only"`) and are served exclusively by `GET /api/content/[...slug]` after the gate
-(tier ∧ org ∧ ¬expired), a disclosure ack (`x-codex-ack`), and an access-log write — **never** in the
-client bundle (proven by `verify:bundle`). Unentitled callers get 404 (existence is never revealed).
-Authorized as Rule-13 sign-off in `AUDIT_TIER.md` (repo stays private; no visibility flip).
+This repo is **public open-core** and ships **no gated content** — every doc is `public`. The gateway
+mechanism remains for private overlay deployments (Homestead / enterprise): there, gated bodies live ONLY
+in the **server-only** store (`lib/content/confidential-store.ts`, `import "server-only"`) and are served
+exclusively by `GET /api/content/[...slug]` after the gate (tier ∧ org ∧ ¬expired), a disclosure ack
+(`x-codex-ack`), and an access-log write — **never** in the client bundle (proven by `verify:bundle`).
+Unentitled callers get 404 (existence is never revealed). In this public repo the store is an empty,
+fail-closed stub. Authorized as the Rule-13 gateway sign-off in `AUDIT_TIER.md`.
 
 - **Splash** `/` · **docs** `/<section>/<page>` (e.g. `/chain/rpc`) · **search** `/search` ·
   **sandboxes** `/sandboxes` · **settings** `/settings` · **admin** `/admin`.
 - Use the **"view as"** switcher (top bar) to preview every access state: Anonymous, KYC'd builder,
-  Enterprise (Boeing), Academic (Rutgers), Administrator, Auditor (time-gated / expired).
+  Enterprise (defense_prime), Academic (academic_partner), Administrator, Auditor (time-gated / expired).
 - The access chokepoint is `prototype/fixtures` `canRead`/`visibility` (mirror of the server seam).
   S2 replaces the switcher with the real citrate-identity OIDC session — components are unchanged.
 

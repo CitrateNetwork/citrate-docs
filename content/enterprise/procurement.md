@@ -1,7 +1,7 @@
 ---
 title: Procurement, how to buy Citrate
 codex_slug: /enterprise/procurement
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-commercial/CITRATE_PROCUREMENT_ORDER_FORM.md

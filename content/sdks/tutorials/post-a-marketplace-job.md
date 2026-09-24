@@ -1,7 +1,7 @@
 ---
 title: Post a marketplace job
 codex_slug: /sdks/tutorials/post-a-marketplace-job
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-sdk-marketplace/src/index.ts

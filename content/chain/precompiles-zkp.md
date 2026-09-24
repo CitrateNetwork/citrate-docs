@@ -1,5 +1,5 @@
 ---
-title: Confidential precompiles, verification, inference, attestation (summary)
+title: Verification, inference, and attestation precompiles (summary)
 codex_slug: /chain/precompiles-zkp
 tier: public
 org_scope: ~
@@ -12,17 +12,17 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-This is a public summary of three precompile families on the Citrate Network whose internals are
-confidential. It tells you what they do and where their addresses sit. It does not contain their proving
-internals or circuit design, which are gated. It is for anyone deciding how to build against verifiable AI
-work on the chain.
+This is a summary of three precompile families on the Citrate Network. It tells you what they do and where
+their addresses sit. Their proving internals and circuit design are public in the `citrate-chain`
+repository and linked below rather than reproduced here. It is for anyone deciding how to build against
+verifiable AI work on the chain.
 
 ## What it is
 
 The Citrate Network ships three precompile families that let an on-chain contract trust off-chain AI work
-without re-running it, and that gate non-deterministic inference. The interfaces and addresses are public.
-The implementation depth is confidential and is served at request time to authorized principals, never
-built into the public docs.
+without re-running it, and that gate non-deterministic inference. The interfaces and addresses are public,
+and the full implementation is public in the `citrate-chain` repository (Apache-2.0); this page summarizes
+and links to it.
 
 | Family | Addresses | What it does |
 |---|---|---|
@@ -89,24 +89,22 @@ non-deterministic compute.
 
 ## Access and canon
 
-This page is a public summary. It carries the address map, the input and output shapes, for example
-"returns a 32-byte boolean", and plain-English behavior, and nothing more.
+This page is a summary. It carries the address map, the input and output shapes, for example
+"returns a 32-byte boolean", and plain-English behavior.
 
-The implementation detail of all three families is confidential: circuit construction, prover and verifier
-internals, the inference runtime, the attestation-verification logic, any ceremony material, and the exact
-ABIs. Those are gated, served at runtime from the private source repo to admins, issued auditors, and
-contracted principals, and never built into the public docs. Access is enforced at the protocol chokepoint,
-not by obscurity. Every node operator on the public network is identity-verified through VERI, Citrate's in-house verification, and Citrate
-keeps the verification result, not the personal data behind it. No keys, ceremony secrets, or credentials
-appear on this page or in any tier.
+The implementation detail of all three families — circuit construction, prover and verifier internals, the
+inference runtime, the attestation-verification logic, and the exact ABIs — is public in the `citrate-chain`
+repository (Apache-2.0). This page summarizes and links to that source rather than reproducing it. Every
+node operator on the public network is identity-verified through VERI, Citrate's in-house verification, and
+Citrate keeps the verification result, not the personal data behind it. No keys, ceremony secrets, or
+credentials appear on this page.
 
-If you are an authorized principal and need the internals, the circuit specs, verifier code, or
-attestation-verification design, request the gated `CHAIN-pre-zkp`, `CHAIN-pre-inference`, or
-`CHAIN-pre-attestation` surfaces.
+For the full internals — the circuit specs, verifier code, or attestation-verification design — read the
+precompile and ZKP sources in `citrate-chain` linked below.
 
 ## Source and verification
 
-- Source repo: `citrate-chain` (confidential bodies served from the private repo)
+- Source repo: `citrate-chain` (public, Apache-2.0)
 - Public anchors audited for this summary:
   `core/execution/src/precompiles/{verify.rs,inference.rs,attestation/}`,
   `core/execution/src/zkp/{poseidon_bn254.rs,halo2/}`, dispatch in

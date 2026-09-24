@@ -1,7 +1,7 @@
 ---
 title: Memrizz (agent-memory DAG and MCP)
 codex_slug: /apps/memories
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-memories

@@ -4,7 +4,7 @@ codex_slug: /apps/studio
 tier: public
 org_scope: ~
 source_kind: authored
-source: citrate-studio (private repo)
+source: citrate-studio (BUSL-1.1)
 surfaces: [APP-studio]
 audited_against_sha: 39cadf3
 status: Implemented
@@ -13,8 +13,8 @@ author: Citrate team
 ---
 
 Citrate Studio is the agent-control interface for node operators, a native application for driving the
-Citrate agent runtime and watching its safety machinery work. This page is a public overview; the
-implementation internals are gated.
+Citrate agent runtime and watching its safety machinery work. This page is the overview; the full source is
+public in the `citrate-studio` repository under BUSL-1.1.
 
 ## What it is
 
@@ -30,16 +30,15 @@ to be visible and usable.
 
 ## Access and canon
 
-Public, for this overview only. The implementation internals are Confidential and gated. The design
-specification, the map of what is built against what is modeled, the policy, signer-roster, approval-queue,
-and Capsule-dispatch implementation, and the packaging and release detail are not written into Citrate
-Almanac. They live in the private `citrate-studio` repository and are served at request time to authorized
-people only. This page points to that gated material; it does not reproduce it, and it contains no secrets.
+Public. This page is the overview; the full implementation is public in the `citrate-studio` repository
+under BUSL-1.1 (source-available, converting to Apache-2.0 on its Change Date). The design specification,
+the map of what is built against what is modeled, the policy, signer-roster, approval-queue, and
+Capsule-dispatch implementation, and the packaging and release detail all live in that repository. This page
+summarizes and links to the source rather than reproducing it, and it contains no secrets.
 
 ## Source and verification
 
-- Source repo: `citrate-studio` (private). Public overview audited against SHA `39cadf3`.
+- Source repo: `citrate-studio` (public, BUSL-1.1). Overview audited against SHA `39cadf3`.
 - Status: Implemented. The application is a hardened release candidate with real authentication, policy
   core, signer roster, and chain reads; the precise built-versus-modeled map and the remaining 1.0 work are
-  in the gated material. The Confidential bodies remain in the private repository and are intentionally not
-  in the public build.
+  tracked in the repository.

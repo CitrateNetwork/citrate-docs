@@ -1,7 +1,7 @@
 ---
 title: ATIS, Analog Token Importance Scoring
 codex_slug: /research/atis
-tier: academic
+tier: public
 org_scope: ~
 source_kind: linked
 source: citrate-docs/gradient_papers_v3/Gradient_Papers_No5_ATIS_v3.md

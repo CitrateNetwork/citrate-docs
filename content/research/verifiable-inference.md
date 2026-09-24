@@ -1,7 +1,7 @@
 ---
 title: The substrate of verifiable inference
 codex_slug: /research/verifiable-inference
-tier: academic
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/core/execution/src/precompiles/{verify.rs,inference.rs}
@@ -13,8 +13,8 @@ author: Citrate team
 ---
 
 This is the research-angle account of how a contract on the Citrate Network can trust the result of an AI
-computation it did not run. It is a public summary for researchers and reviewers; the proving internals
-that make it work are confidential and are not reproduced here.
+computation it did not run. It is a summary for researchers and reviewers; the proving internals that make
+it work are public in the `citrate-chain` repository and are linked rather than reproduced here.
 
 ## What it is
 
@@ -41,7 +41,7 @@ status below.
 
 These three building blocks back the determinism that [paraconsistent consensus](/research/paraconsistent)
 and the [learning cycle](/research/learning) depend on, and they are summarized for builders on the chain
-page, [confidential precompiles](/chain/precompiles-zkp). This page is the companion to that one and does
+page, [verification, inference, and attestation precompiles](/chain/precompiles-zkp). This page is the companion to that one and does
 not contradict it.
 
 ## How to use it
@@ -87,15 +87,15 @@ compute.
 
 ## Access and canon
 
-This is a public summary. It names the verification surface and the three public building blocks, Q16.16
-fixed-point determinism, Halo2-KZG proof verification, and hardware attestation, and goes no further. The
-proving-system internals are gated and Confidential: circuit construction, prover and verifier internals,
-any structured reference string or setup material, and the exact proof wire formats are served at runtime to
-authorized principals from the private repo, and never built into these docs. No setup seed, ceremony
-material, keys, or credentials appear on this page or in any tier. Every node operator on the public network
-is identity-verified through VERI, Citrate's in-house verification, and Citrate keeps the verification result, not the personal data behind
-it. If you are an authorized principal and need the internals, request the gated `CHAIN-pre-zkp`,
-`CHAIN-pre-inference`, or `CHAIN-pre-attestation` surfaces.
+This is a summary. It names the verification surface and the three building blocks, Q16.16
+fixed-point determinism, Halo2-KZG proof verification, and hardware attestation. The proving-system
+internals — circuit construction, prover and verifier internals, any structured reference string or setup
+material, and the exact proof wire formats — are public in the `citrate-chain` repository (Apache-2.0);
+this page summarizes and links to them rather than reproducing them. No setup seed, ceremony material,
+keys, or credentials appear on this page. Every node operator on the public network is identity-verified
+through VERI, Citrate's in-house verification, and Citrate keeps the verification result, not the personal
+data behind it. For the full internals, read the `verify.rs`, `inference.rs`, and `attestation/` precompile
+sources in `citrate-chain`.
 
 ## Source and verification
 

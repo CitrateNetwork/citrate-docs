@@ -38,7 +38,7 @@ canonical state is the merged `main` of `citrate-docs` at `e2fc387`.
 - The learning cycle has **four** phases (Observe/Orient/Decide/Act), described without combat metaphor.
 - Storage state root is **SHA3-256 over flat KV**, not a Merkle-Patricia trie.
 - BFT checkpoints: interval 50, committee 100, quorum 67 of 100 (`checkpoint.rs`); GhostDAG k=18, finality
-  depth 100; chain id 40204 / `eth_chainId` 0x9d0c; SALT 1B / 18 decimals; reward halving every 2,100,000
+  depth 100; chain id 40204 / `eth_chainId` 0x9d0c; SALT 1T (one trillion) / 18 decimals; reward halving every 2,100,000
   blocks.
 - `IPFSIncentives` **v1** is deployed (V2/V3 never deployed); x402 precompiles are `0x0200-0x0209`.
 - `LoRAFactory` provenance does **not** link to learning rounds.

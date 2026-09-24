@@ -1,7 +1,7 @@
 ---
 title: Model contracts
 codex_slug: /contracts/models
-tier: commercial
+tier: public
 org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (ModelRegistry.sol, ModelMarketplace.sol, LoRAFactory.sol, ModelAccessControl.sol, InferenceRouter.sol, interfaces/IModelRegistry.sol, interfaces/IModelMarketplace.sol)

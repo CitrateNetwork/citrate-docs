@@ -27,8 +27,8 @@ password. The account is created for you on first sign-in, so there is no key to
 [passkeys page](/aa/passkeys) covers the account model in full.
 
 The second is that it is gasless. Citrate has no native paymaster, so the app uses an EIP-2771
-meta-transaction relay: you sign a request, which is free, and a relayer funded by the Citrate
-Foundation submits the on-chain transaction and pays the fee. You never need SALT in hand to use it.
+meta-transaction relay: you sign a request, which is free, and a relayer funded by Citrate Inc.
+submits the on-chain transaction and pays the fee. You never need SALT in hand to use it.
 That relay is described under [the paymaster page](/aa/paymaster).
 
 The mental model is plain. You chat normally. The model reply streams back to you, and when receipt
@@ -66,7 +66,7 @@ The screens are built from the components below, in `src/components/`.
 
 You sign a typed-data `ForwardRequest` with your account. The relayer route
 (`src/app/api/relay/route.ts`) checks that your authenticated session owns the `from` address,
-rate-limits the request to protect the Foundation account, validates the signature on-chain with the
+rate-limits the request to protect the Citrate Inc. relayer account, validates the signature on-chain with the
 forwarder's `verify`, then calls the forwarder's `execute` and pays the gas. Only the relayer can call
 `execute`, and it appends your address to the call per the EIP-2771 standard.
 
@@ -95,7 +95,7 @@ The account and the gas rail both exist to remove the two things that usually st
 trying a network app: setting up keys, and acquiring the fee token first. A Citrate Keyring account is
 created on sign-in, so there is no key ceremony. The EIP-2771 relay lets the network, not the user,
 pay the fee, so there is nothing to acquire before the first message. The cost of sponsoring gas is
-that the Foundation account is a target, which is why the relay rate-limits and checks session
+that the Citrate Inc. relayer account is a target, which is why the relay rate-limits and checks session
 ownership before it ever signs. We separated the receipt from the inference deliberately: the on-chain
 receipt is gasless and live today, independent of whether the model call has moved on-chain yet.
 
@@ -106,7 +106,7 @@ The relay spends real funds on a user's behalf, so it is built to fail closed.
 - The relay verifies that your authenticated session owns the `from` address before sponsoring any
   transaction. A request to relay for an address you do not own is refused.
 - The relay enforces per-address and per-IP rate limits and a daily budget before it touches the
-  chain, so a flood cannot drain the Foundation account.
+  chain, so a flood cannot drain the Citrate Inc. relayer account.
 - Only the relayer may call the forwarder's `execute`, and the signature is validated on-chain before
   execution.
 - The on-chain inference path is not wired. Calling it throws rather than silently degrading, so the

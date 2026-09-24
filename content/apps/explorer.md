@@ -128,14 +128,14 @@ some history that only the index can serve.
 
 ## Access and canon
 
-Public. CitrateScan is foundation infrastructure: open, self-hostable, and read-only across the surfaces
+Public. CitrateScan is shared network infrastructure: open, self-hostable, and read-only across the surfaces
 documented here. A developer needs it to build, and it exposes no write path, so it stays public. No
 secrets appear on this page. Endpoints are public routes, and API keys are issued to you inside the app and
 must never be pasted into shared docs.
 
 ## Source and verification
 
-- Source repo: `citrate-explorer` (brand: CitrateScan), Apache-2.0, Citrate Foundation.
+- Source repo: `citrate-explorer` (brand: CitrateScan), Apache-2.0, Citrate Inc.
 - Audited against: `6faab8a`.
 - Key paths: `src/app/page.tsx`, `src/scan/screens/`, `src/app/api/v1/route.ts`,
   `src/app/api/mcp/route.ts`, `src/app/api/tx/[hash]/route.ts`, `src/lib/ai/tools.ts`. Reference specs:
