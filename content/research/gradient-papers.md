@@ -12,7 +12,7 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-The Gradient Papers are the research corpus the Citrate Network grew from, a ten-part working
+The Gradient Papers are the research corpus the Citrate Network grew from, an eleven-part working
 dissertation plus a series index. This page is for researchers, engineers, and reviewers who want the
 reasoning behind the design. It indexes the papers and points each one at the surface in Almanac that
 treats it; following Rule 9, it summarizes and links the papers, it does not copy them.
@@ -42,8 +42,8 @@ index, are:
 
 | Reader | Suggested order |
 |---|---|
-| Engineers | I, X, IV, II, III, V, VI |
-| Researchers | IX, V, II, X, III, I |
+| Engineers | I, X, XI, IV, II, III |
+| Researchers | XI, II, V, X, III, I |
 | Operators | I, IV, X, IX, VIII |
 | Community | VIII, VII, VI, IX, I |
 
@@ -52,7 +52,7 @@ built that way. When a paper is theoretical, the paper is all there is, and the 
 
 ## Reference
 
-Ten papers numbered No.1 through No.10, plus the No.0 series index. The maturity column is the paper's
+Eleven papers numbered No.1 through No.11, plus the No.0 series index. The maturity column is the paper's
 own header tag. The Almanac page column links to the surface that treats the work; where a paper is
 research with no built surface, that is stated instead.
 
@@ -69,6 +69,7 @@ research with no built surface, that is stated instead.
 | 8 | The BR1J Constitution | The constitutional law of the Citrate organization, the boundaries no proposal can cross, enforced through the treasury governor. | [governance](/contracts/governance) |
 | 9 | The Medusa Paradigm | Derives the architecture from cnidarian biology, nerve nets, siphonophore colonies, and Turritopsis, mapping the motifs to slashing and attestation surfaces. | research only; motifs surface in [security](/contracts/security) |
 | 10 | The Substrate of Verifiable Inference | How on-chain verification of off-chain model work is mechanized: Halo2-KZG proofs, deterministic Q16 compute, and attestation gates. | [verifiable inference](/research/verifiable-inference) |
+| 11 | The Neuroarchitectural Transformer (NAT) | Verifiable-by-construction model architecture: the hidden representation is partitioned into named zones wired over a declared, model-checkable topology, merged on a deterministic Q16.16 path, with a provenance trace emitted as a first-class output of every forward pass. | research only; the public `nat` architecture |
 
 ## Design rationale
 
@@ -89,7 +90,7 @@ with Lauren Mendenhall on the constitution, Saul Loveman on engineering, and the
 
 ## Source and verification
 
-- Source: `citrate-docs/gradient_papers_v3/` in this repository, ten numbered papers plus
+- Source: `citrate-docs/gradient_papers_v3/` in this repository, eleven numbered papers plus
   `Gradient_Papers_No0_Series_Index_v3.md`.
 - Audited against SHA: `cd729ed` (citrate-docs).
 - Rule 9: this page is an annotated index. The papers are the source of truth; Almanac links them and does
