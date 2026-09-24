@@ -1,6 +1,7 @@
 {
   "name": "citrate-atlas",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "private": true,
   "description": "Citrate Atlas, the gated, agentic documentation webapp for the Citrate Network federation.",
   "scripts": {

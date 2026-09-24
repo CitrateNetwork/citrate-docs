@@ -109,4 +109,5 @@ optional live knowledge-graph (`MEM_*`) wiring.
 - Contributing (DCO): `CONTRIBUTING.md` · Security: `SECURITY.md` · License: [`LICENSE`](LICENSE)
 
 ## License
-Apache-2.0.
+
+Licensed under the Apache License, Version 2.0 (see [`LICENSE`](LICENSE)). This is the open-source infrastructure tier of Citrate's open-core model. The commercial application layer is source-available under BUSL-1.1. Licensor: Citrate Inc.
