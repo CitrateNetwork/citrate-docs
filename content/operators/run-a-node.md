@@ -37,7 +37,7 @@ Network parameters, verified against the chain README at SHA `9d5959e`:
 | Token | SALT, one trillion supply, 18 decimals |
 | Consensus | GhostDAG, k = 18, max-parents 10 |
 | Proposer election | ECVRF-P256-SHA256 (RFC 9381) |
-| Finality | committee BFT checkpoints, 100 validators, 67 quorum, 50-block interval (~25–50s at ~0.5–1s blocks); ~1s block confirmation |
+| Finality | committee BFT checkpoints, 100 validators, 67 quorum, 50-block interval (~90–100s at ~2s blocks); ~1–2s block confirmation |
 | Default JSON-RPC | `127.0.0.1:8545` |
 | Default WebSocket | `127.0.0.1:8546` |
 | Default REST | `127.0.0.1:3000` |

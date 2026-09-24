@@ -90,10 +90,14 @@ Conflicts are detected by `AccessSet::conflicts_with` (`parallel/conflict.rs`), 
 read-write, and write-read overlaps. The default extractor marks the sender as a writer, for nonce and
 balance, and derives recipient access from the transaction type.
 
-The executor benchmark (`benches/tps_parallel.rs`, 2026-04-21) records about a 2.41 times parallel speedup
-at 8 workers over a single worker on a disjoint-senders microbench. That is a property of the executor
-alone; real throughput is bound by RPC and signature checking and sits well below it. Network throughput is
-5,000 TPS sustained, 10,000 ceiling. Treat the microbench as informational, not a guarantee.
+The executor microbenchmark (`benches/tps_parallel.rs`) records about a 2.41 times parallel speedup at 8
+workers over a single worker on a disjoint-senders run. That is a property of the in-memory executor alone,
+not network throughput, which is bound by RPC, signature checking, and the block gas limit and sits well
+below it. On the current testnet, sustained network throughput for simple transfers is about **750 TPS** —
+an arithmetic, gas-limit bound: the 30M block gas limit divided by 21,000 gas per transfer over ~2s blocks,
+with no 10,000 headroom today. Sustained **5,000–10,000 TPS is a mainnet target** pursued through proposed
+protocol upgrades (a higher block gas limit and faster blocks); it has not been reproduced on-chain. Treat
+the executor microbench as informational, not a network guarantee.
 
 ## Design rationale
 
