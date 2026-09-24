@@ -48,7 +48,7 @@ sprint: DOCS-CODEX-S1
 | CHAIN-cli-faucet | citrate-faucet | cli | faucet/ | P | transcluded | /chain/cli#faucet | draft |
 | CHAIN-net-p2p | P2P / bootstrap / gossip | primitive | core/network/ | P | transcluded | /chain/network | draft |
 | CHAIN-seq-mempool | Sequencer / mempool / bundle / parent-selection | primitive | core/sequencer/ | P→A | transcluded | /chain/sequencer | draft |
-| CHAIN-storage | Storage (MPT/RocksDB/pruning/pinning) | primitive | core/storage/ | P→A | transcluded | /chain/storage | draft |
+| CHAIN-storage | Storage (flat-KV state root/RocksDB/pruning/pinning) | primitive | core/storage/ | P→A | transcluded | /chain/storage | draft |
 | CHAIN-econ | Economics (fees/tokenomics/rewards/slashing) | primitive | core/economics/ | P→X | transcluded | /chain/economics | draft |
 | CHAIN-bridge | Cross-chain bridge | primitive | core/bridge/ | X | gated | /chain/bridge | draft |
 | CHAIN-genesis | Chain params / genesis / chain-spec | spec | config/, node/config/ | P | transcluded | /chain/genesis | draft |

@@ -54,9 +54,12 @@ You meet this substrate through precompile addresses, the same way you would cal
    invalid.
 3. To check that a single element belongs to a committed tensor, call `0x0109` with a Merkle path. It
    returns a 32-byte boolean.
-4. To run inference itself, call into the `0x0100` to `0x0106` family. The non-deterministic paths,
-   `0x0101` and `0x0102`, first consult the attestation gate, which on a default validator binary refuses
-   them and returns a discoverable error rather than a fabricated result.
+4. To run inference itself, call into the hosted-inference family, `0x0100` to `0x0106`. This path is
+   model-runtime-backed and returns a signed receipt over the result, gated by hardware attestation — an
+   attestable statement about what ran, not a cryptographic proof that the output is correct. The
+   non-deterministic paths, `0x0101` and `0x0102`, first consult the attestation gate, which on a default
+   validator binary refuses them and returns a discoverable error rather than a fabricated result. For a
+   result that is verifiable on-chain, verify a proof through `0x0108` instead.
 
 ## Reference
 
@@ -68,7 +71,7 @@ family verifies claims; the inference family runs and registers models.
 | `0x0107` | `TENSOR_COMMIT` | Commitment over a canonical-format tensor; returns a 32-byte field element |
 | `0x0108` | `INFERENCE_PROOF_VERIFY` | Halo2-KZG verification of an inference proof; returns a 32-byte boolean |
 | `0x0109` | `MERKLE_VERIFY_TENSOR` | Merkle inclusion check over a committed tensor; returns a 32-byte boolean |
-| `0x0100` to `0x0106` | inference family | Model deployment, single and batch inference, metadata, proof verification, benchmarking, model encryption |
+| `0x0100` to `0x0106` | hosted inference family | Model deployment, single and batch inference, metadata, benchmarking, model encryption; returns a signed, attestation-gated receipt, not a proof of correctness |
 
 The verification family at `0x0107` to `0x0109` is deterministic by construction, hash and pairing and
 integer math only, and its byte-level output is frozen: any drift would fork the chain and invalidate every

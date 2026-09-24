@@ -81,6 +81,8 @@ Depth-based finality is the everyday mechanism. The checkpoint layer adds determ
 
 `CheckpointConfig::default()` sets `interval = 50` blocks, `committee_size = 100`, and `quorum_threshold = 67`, which is two-thirds of one hundred plus one (`src/checkpoint.rs:98`).
 
+In wall-clock terms under current testnet parameters (~0.5–1s blocks), a block sees ~1s confirmation, and deterministic BFT checkpoint finality lands roughly every 50 blocks, so ~25–50s. These are checkpoint-cadence and block-time figures, not a single fixed finality latency; there is no ~12s finality guarantee.
+
 ### Example
 
 Construct the engine and read the order in Rust.
