@@ -25,15 +25,15 @@ block finalizes without a valid quorum. The TLC model checker explores the reach
 invariant can be broken, returns the exact sequence of steps that breaks it. This catches a design error
 before it becomes code, which is cheaper than catching it after.
 
-Citrate keeps a large corpus of these specifications, organized by domain. The canonical, consolidated tree
-lives in the public Agentile archive at `citrate-agentile-archive/formal/specs/`, with the authoritative
-index at `formal/specs/INDEX.md` and the spec-to-code mapping in `formal/mapping/` (`tla_to_solidity.md`,
-`tla_to_slint.md`). A runnable subset is mirrored into each repo under `specs/tla/` so the specs can be
-exercised in continuous integration next to the code they constrain. The archive is the reproducible source
-of truth: it currently holds roughly 169 `.tla` files under `formal/specs/` across twelve domains - count
-them in the archive rather than trusting any summary number, since the corpus grows over time - and take
-invariant totals and TLC outcomes from `INDEX.md` and the per-repo `VERIFICATION_REPORT.txt`, not from older
-summary files.
+Citrate keeps a large corpus of these specifications, organized by domain. The public, verifiable figure is
+100+ TLA+ specifications across the public repositories (citrate-chain, nat, nist-agent, coop, core,
+memories, comms, explorer, and others), 102 today. Anyone can reproduce that number by cloning those repos
+and running `find -name '*.tla' | wc -l`; the specs sit under each repo's `specs/tla/` (or `formal/`,
+`specs/`) tree so they can be exercised in continuous integration next to the code they constrain. The
+fuller authored corpus (roughly 169 specs, with its consolidated index and the spec-to-code mapping,
+`tla_to_solidity.md` and `tla_to_slint.md`) lives in an internal archive that is not public, so it is not the
+number to cite publicly; count the specs in the public repos instead. For invariant totals and TLC outcomes,
+read each repo's `INDEX.md` and `VERIFICATION_REPORT.txt`, not older summary files.
 
 ## How to use it
 
@@ -83,7 +83,8 @@ deep audit, which are excluded from the authored count.
 
 Per-repo runnable subsets sit next to the code they govern:
 
-- `citrate-agentile-archive/formal/specs/<domain>/`, the canonical corpus, authoritative for counts.
+- `citrate-agentile-archive/formal/specs/<domain>/`, the fuller authored corpus in a private internal
+  archive (not public, so not the publicly countable figure).
 - `citrate-chain/specs/tla/{consensus,zk,learning,contracts,compute,gui,network}/`, with `run_all.sh`,
   `run_deep.sh`, and `VERIFICATION_REPORT.txt`; the chain README notes this is a runnable subset, not the
   authority for counts.
