@@ -66,7 +66,7 @@ export const NAV: NavNode[] = [
     id: "enterprise", title: "Enterprise & Compliance", tier: "commercial", kind: "group", icon: "building",
     children: [
       { id: "ent-procurement", title: "Procurement (MSA/SOW)", slug: "/enterprise/procurement", tier: "commercial", kind: "doc" },
-      { id: "ent-boeing", title: "Boeing — private space", slug: "/enterprise/boeing", tier: "commercial", orgId: "boeing", kind: "doc" },
+      { id: "ent-defense_prime", title: "defense_prime — private space", slug: "/enterprise/defense_prime", tier: "commercial", orgId: "defense_prime", kind: "doc" },
       { id: "ent-compliance", title: "Compliance posture (full)", slug: "/enterprise/compliance-full", tier: "confidential", kind: "doc" },
       { id: "ent-tut", title: "Tutorials", slug: "/enterprise/tutorials", tier: "commercial", kind: "tutorials" },
     ],
@@ -152,13 +152,13 @@ export const DOCS: Record<string, Doc> = {
       "```ts\nimport { MarketplaceClient } from \"@citratenetwork/marketplace-sdk\";\n```\n",
   },
 
-  // COMMERCIAL · org-scoped to boeing (only enterprise+admin see it)
-  "/enterprise/boeing": {
-    slug: "/enterprise/boeing", title: "Boeing — private space", tier: "commercial", orgId: "boeing",
-    sourceKind: "gated", source: "private:boeing-space", readingTimeMin: 5, accessLogged: true,
+  // COMMERCIAL · org-scoped to defense_prime (only enterprise+admin see it)
+  "/enterprise/defense_prime": {
+    slug: "/enterprise/defense_prime", title: "defense_prime — private space", tier: "commercial", orgId: "defense_prime",
+    sourceKind: "gated", source: "private:defense_prime-space", readingTimeMin: 5, accessLogged: true,
     toc: toc("Provenance workflows", "Procurement", "Support SOPs"),
     body:
-      "# Boeing — private space\n\n_Scoped to org `boeing`. Other orgs cannot see this node._\n\n" +
+      "# defense_prime — private space\n\n_Scoped to org `defense_prime`. Other orgs cannot see this node._\n\n" +
       "Supply-chain provenance workflows, procurement event semantics, and your support SOPs.\n",
   },
 
@@ -231,5 +231,5 @@ export const SEARCH_RESULTS: SearchResult[] = [
   { title: "marketplace-sdk", slug: "/sdks/marketplace", tier: "commercial", section: "SDKs & APIs", snippet: "MarketplaceClient, X402Client, CitrateWallet …" },
   { title: "Paraconsistent consensus", slug: "/research/paraconsistent", tier: "academic", section: "Research", snippet: "Belnap four-valued logic; disagreement as information …" },
   { title: "Audit reports & findings", slug: "/internal/audit", tier: "confidential", section: "Internal / Audit", snippet: "Audit reports & findings — gated; served post-auth via the Confidential gateway." },
-  { title: "Boeing — private space", slug: "/enterprise/boeing", tier: "commercial", section: "Enterprise", snippet: "Provenance workflows, procurement, support SOPs" },
+  { title: "defense_prime — private space", slug: "/enterprise/defense_prime", tier: "commercial", section: "Enterprise", snippet: "Provenance workflows, procurement, support SOPs" },
 ];

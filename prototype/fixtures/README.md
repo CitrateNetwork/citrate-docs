@@ -44,7 +44,7 @@ const hits = mockApi.search(session, "blue score");   // no above-tier results
 const reply = mockApi.ask(session, "what is SALT?");  // citations re-filtered to the caller's tier
 ```
 
-`<ViewerSwitcher>` should list `VIEWERS` (Anonymous, KYC'd builder, Enterprise/Boeing, Academic/Rutgers,
+`<ViewerSwitcher>` should list `VIEWERS` (Anonymous, KYC'd builder, Enterprise/defense_prime, Academic/academic_partner,
 Administrator, Auditor time-gated, Auditor expired) so a reviewer can flip through every access state.
 
 ## The five viewer states to demo (acceptance, DESIGN_BRIEF §18)
@@ -52,9 +52,9 @@ Administrator, Auditor time-gated, Auditor expired) so a reviewer can flip throu
 | Viewer | Sees | Notably can't / special |
 |---|---|---|
 | **Anonymous** | Public docs, all sandboxes, Ask (public corpus) | Commercial → gate card; Confidential → hidden/404 |
-| **KYC'd builder** | + Commercial/`C·kyc` implementation track | Boeing space hidden (wrong org); Confidential hidden |
-| **Enterprise (Boeing)** | + the `boeing` private space | Other orgs' spaces hidden; Confidential hidden |
-| **Academic (Rutgers)** | + Gradient Papers, TLA+ corpus, research portal | Confidential hidden |
+| **KYC'd builder** | + Commercial/`C·kyc` implementation track | defense_prime space hidden (wrong org); Confidential hidden |
+| **Enterprise (defense_prime)** | + the `defense_prime` private space | Other orgs' spaces hidden; Confidential hidden |
+| **Academic (academic_partner)** | + Gradient Papers, TLA+ corpus, research portal | Confidential hidden |
 | **Administrator** | Everything + Internal/Audit + Admin Console | — |
 | **Auditor (time-gated)** | Confidential **audit** material, disclosure-gated, access-logged | expires in 30d; non-audit orgs scoped out |
 | **Auditor (expired)** | Collapses to **Public** (EntitlementExpiry) | proves expiry revocation |
@@ -64,7 +64,7 @@ Administrator, Auditor time-gated, Auditor expired) so a reviewer can flip throu
 - `/start/what-is-citrate` — Public, **authored**
 - `/chain/rpc`, `/sdks/js` — Public, **transcluded** (last-synced badge; `/sdks/js` is **versioned**)
 - `/sdks/marketplace` — **Commercial** (gate card for anonymous)
-- `/enterprise/boeing` — **Commercial + org-scoped** (hidden from non-Boeing; visible to Boeing+admin)
+- `/enterprise/defense_prime` — **Commercial + org-scoped** (hidden from non-defense_prime; visible to defense_prime+admin)
 - `/research/gradient-papers` — **Academic**, **linked** archive
 - `/internal/audit` — **Confidential**, **gated + disclosure required + access-logged**
 - `/enterprise/compliance-full` — **Confidential + embargoed** (body withheld until date)

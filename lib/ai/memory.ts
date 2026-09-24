@@ -27,7 +27,7 @@ const DEFAULT_REPOS = [
   ".github",
   "citrate-agent-runtime",
   "citrate-agentile-archive",
-  "citrate-boeing-shell",
+  "citrate-defense_prime-shell",
   "citrate-bundler",
   "citrate-buyer-webapp",
   "citrate-chain",

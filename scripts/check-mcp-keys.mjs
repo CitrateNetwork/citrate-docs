@@ -83,14 +83,14 @@ const goodKey = "prov-academic-key-x7";
 const expiredKey = "prov-expired-key-x8";
 const badTierKey = "prov-superadmin-key-x9";
 const store = {
-  [sha256Hex(goodKey)]: { tier: "academic", sub: "org:rutgers", expiresAt: now + 30 * 86_400_000 },
+  [sha256Hex(goodKey)]: { tier: "academic", sub: "org:academic_partner", expiresAt: now + 30 * 86_400_000 },
   [sha256Hex(expiredKey)]: { tier: "academic", sub: "org:stale", expiresAt: now - 1 },
   [sha256Hex(badTierKey)]: { tier: "superadmin", sub: "org:evil", expiresAt: null },
 };
 const env = { MCP_API_KEYS: JSON.stringify(store) };
 
 assert.equal(resolveMcpKeyCap(goodKey, now, env).tier, "academic", "provisioned key must grant its configured tier");
-assert.equal(resolveMcpKeyCap(goodKey, now, env).sub, "org:rutgers", "cap must carry the key owner's sub");
+assert.equal(resolveMcpKeyCap(goodKey, now, env).sub, "org:academic_partner", "cap must carry the key owner's sub");
 assert.equal(resolveMcpKeyCap(expiredKey, now, env).tier, "public", "expired key must collapse to public");
 assert.equal(resolveMcpKeyCap(badTierKey, now, env).tier, "public", "unknown tier in store must normalize to public (never escalate)");
 assert.equal(resolveMcpKeyCap("unlisted-key", now, env).tier, "public", "unknown key must resolve to public");

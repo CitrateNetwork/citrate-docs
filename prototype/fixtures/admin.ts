@@ -14,12 +14,12 @@ export const PRINCIPALS: Principal[] = [
     entitlement: { tier: "commercial", orgId: null, expiresAt: null },
   },
   {
-    sub: "uuid:enterprise-boeing-014", email: "architect@boeing.example", kycStatus: "verified",
-    entitlement: { tier: "commercial", orgId: "boeing", milestone: "production", expiresAt: null },
+    sub: "uuid:enterprise-defense_prime-014", email: "architect@defense_prime.example", kycStatus: "verified",
+    entitlement: { tier: "commercial", orgId: "defense_prime", milestone: "production", expiresAt: null },
   },
   {
-    sub: "uuid:rutgers-sarwate-pi", email: "pi@winlab.rutgers.example", kycStatus: "verified",
-    entitlement: { tier: "academic", orgId: "rutgers", milestone: "phase-1-lab", expiresAt: null },
+    sub: "uuid:academic_partner-pi", email: "pi@academic_partner.example", kycStatus: "verified",
+    entitlement: { tier: "academic", orgId: "academic_partner", milestone: "phase-1-lab", expiresAt: null },
   },
   {
     sub: "uuid:tob-auditor-21", email: "auditor@trailofbits.example", kycStatus: "verified",
@@ -32,8 +32,8 @@ export const PRINCIPALS: Principal[] = [
 ];
 
 export const ORGS: Org[] = [
-  { id: "boeing", name: "Boeing", sector: "defense", tierBand: "commercial", kycRequired: true, seats: 50, seatsUsed: 14 },
-  { id: "rutgers", name: "Rutgers University", sector: "research", tierBand: "academic", kycRequired: true, seats: 25, seatsUsed: 6 },
+  { id: "defense_prime", name: "defense_prime", sector: "defense", tierBand: "commercial", kycRequired: true, seats: 50, seatsUsed: 14 },
+  { id: "academic_partner", name: "academic_partner", sector: "research", tierBand: "academic", kycRequired: true, seats: 25, seatsUsed: 6 },
   { id: "nj-district-07", name: "NJ School District 07", sector: "education", tierBand: "commercial", kycRequired: true, seats: 120, seatsUsed: 88 },
   { id: "audit:2026-06", name: "Audit engagement 2026-06 (Trail of Bits)", sector: "enterprise", tierBand: "confidential", kycRequired: true, seats: 4, seatsUsed: 2 },
 ];
@@ -54,7 +54,7 @@ export const EMBARGOES: EmbargoRow[] = [
 export const GLOBAL_ACCESS_LOG: AccessLogEntry[] = [
   { id: "g1", sub: "uuid:tob-auditor-21", docSlug: "/internal/audit", tier: "confidential", orgId: "audit:2026-06", disclosureAck: true, at: FIXED_NOW - 30 * 60_000 },
   { id: "g2", sub: "uuid:citrate-admin-saul", docSlug: "/internal/funding", tier: "confidential", orgId: null, disclosureAck: false, at: FIXED_NOW - 90 * 60_000 },
-  { id: "g3", sub: "uuid:enterprise-boeing-014", docSlug: "/enterprise/boeing", tier: "commercial", orgId: "boeing", disclosureAck: false, at: FIXED_NOW - 4 * 3_600_000 },
+  { id: "g3", sub: "uuid:enterprise-defense_prime-014", docSlug: "/enterprise/defense_prime", tier: "commercial", orgId: "defense_prime", disclosureAck: false, at: FIXED_NOW - 4 * 3_600_000 },
 ];
 
 export const SANDBOX_CONFIG: SandboxConfig[] = [

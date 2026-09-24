@@ -37,13 +37,6 @@ export const FRESHNESS: Record<string, Freshness> = {
     "behind": 33,
     "headDate": "2026-09-07"
   },
-  "/apps/boeing": {
-    "repo": "citrate-boeing-shell",
-    "sha": "efb6fec",
-    "head": "efb6fec",
-    "behind": 0,
-    "headDate": "2026-09-07"
-  },
   "/apps/buyer": {
     "repo": "citrate-buyer-webapp",
     "sha": "7d44b29",

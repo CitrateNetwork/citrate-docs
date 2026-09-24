@@ -154,7 +154,7 @@ sprint: DOCS-CODEX-S1
 | APP-native | Citrate native wallet + DAG explorer (Slint) | app-native | citrate-native | P | transcluded | /apps/native | draft |
 | APP-learning | Learning Center desktop (Slint) | app-native | citrate-learning-center | A | transcluded | /apps/learning-center | draft |
 | APP-studio | Citrate Studio (agent-runtime control UI) | app-native | citrate-studio | X | gated | /apps/studio | draft |
-| APP-boeing | Boeing shell (customer) | app-native | citrate-boeing-shell | X | gated | /apps/boeing | draft |
+| APP-defense_prime | defense_prime shell (customer) | app-native | citrate-defense_prime-shell | X | gated | /apps/defense_prime | draft |
 | APP-comms | citrate-comms (E2E team workspace) | app-native | citrate-comms | C | transcluded | /apps/comms | draft |
 | APP-wallet-ext | Browser wallet extension (MV3) | app-web | citrate-wallet-extension | P | transcluded | /apps/wallet-extension | draft |
 | APP-nist | nist-agent (air-gapped sidecar) | app-native | nist-agent | P→X | transcluded | /apps/nist-agent | draft |
