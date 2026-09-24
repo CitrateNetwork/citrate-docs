@@ -1,251 +1,169 @@
 ---
-title: "The Medusa Paradigm: Cnidarian Biological Architectures as Design Principles for Distributed AI (v3)"
+title: "The Medusa Paradigm: Cnidarian Biological Architectures as Design Principles for Distributed AI"
+subtitle: "A Cross-Disciplinary Analysis Bridging Marine Biology, Distributed Systems, and Autonomous Agents"
+series: "The Gradient Papers — No. IX"
 version: v3
-created: 2026-04-28T04:25:00Z
+created: 2026-08-28T00:00:00Z
 branch: main
-author: Larry Klosowski + Lauren Mendenhall + Claude Opus 4.7
+authors: "Larry Klosowski, Lauren Mendenhall"
+affiliation: "Citrate Inc."
 status: active
-maturity: Specified + Practiced — biological motifs map to live code
-supersedes: v2
+maturity: Specified and Practiced (design inspiration)
+supersedes: "v2 (February 2026), v3-April draft"
 ---
 
-# Paper IX — The Medusa Paradigm (v3)
+# The Medusa Paradigm
+### Cnidarian Biological Architectures as Design Principles for Distributed AI
+#### A Cross-Disciplinary Analysis Bridging Marine Biology, Distributed Systems, and Autonomous Agents
+
+**The Gradient Papers — No. IX**
+Larry Klosowski, Lauren Mendenhall · Citrate Inc.
+Preprint — not yet peer reviewed.
+
+> **Maturity: design inspiration.** This paper is deliberately the series' reflective essay: its
+> claims are *analogies*, not engineering authority. What has changed since February 2026 is that
+> several of the analogized components are now deployed code, so this revision points each principle
+> at the contract or crate that realizes it, while keeping the framing note that the network's formal
+> properties rest on distributed-systems proofs, not biology. Note: this scrubs the former publisher
+> affiliation (now Citrate Inc.) but keeps all of the *cnidarian biology*, which is the paper's subject.
 
 ## Abstract
 
-The architecture of Citrate is not derived from first principles
-of distributed systems. It is **derived from cnidarian biology**:
-the nerve nets of jellyfish, the colonial organization of
-siphonophores, the ontogenetic state-reversal of *Turritopsis
-dohrnii*, the distributed visual system of cubomedusae.
+Distributed AI systems inherit architectural limitations from centralized computing paradigms. This
+paper proposes a design framework, the Medusa Paradigm, derived from cnidarian (jellyfish) biological
+architectures, organisms that have sustained complex coordinated behavior through fully decentralized
+neural architectures for over 500 million years. We formalize eight design principles from specific
+cnidarian species: Nerve Net Consensus (*Aurelia aurita*); Colonial Modularity (*Physalia physalis*);
+Ontogenetic State Reversal (*Turritopsis dohrnii*); Distributed Observability (*Tripedalia
+cystophora*); Symbiotic Compute Substrates (*Cassiopea*); Bloom Dynamics; Strobilation Pipelines
+(scyphozoan reproduction); and Nematocyst Defense (cnidocyte mechanisms). We map each to a component of
+the Citrate architecture, and, unlike the February 2026 draft, several of those components are now
+deployed contracts rather than plans.
 
-v3 makes a stronger claim than v2. v2 said biology was
-"inspiration." v3 says biology is **load-bearing**: the
-contracts in the deployed Citrate network were named, designed,
-and structured around eight cnidarian motifs, and every motif
-maps to a live contract or precompile that ships in v0.5.0.
+**Framing note.** The mappings here are strictly analogies, functionally similar solutions to similar
+coordination problems that evolved independently in biological and computational domains. We follow ISO
+18458:2015 biomimetic terminology. The Medusa Paradigm provides design inspiration, not engineering
+authority; the formal properties of the Citrate Network (Papers I–II) are established through standard
+distributed-systems proofs, not biological analogy.
 
-## 1. Why cnidarians?
+**Keywords:** distributed systems, biomimetic computing, cnidarian neuroscience, DAG consensus,
+neuromorphic hardware, nerve net, Byzantine fault tolerance, multi-agent coordination
 
-Cnidarians (jellyfish, hydroids, corals, anemones) are an
-evolutionarily ancient phylum (~580 million years) that solved
-distributed-coordination problems before centralized nervous
-systems existed. Their solutions are, structurally, what a
-permissionless decentralized system needs:
+## Note on scope
 
-- **No central command** — every cnidarian's "decision-making"
-  is distributed across a nerve net.
-- **Modular composition** — colonial cnidarians (e.g., *Physalia
-  physalis*, the Portuguese man-of-war) are not single
-  organisms but specialized multi-organism colonies sharing a
-  bloodstream.
-- **State-reversibility** — *Turritopsis dohrnii* can revert
-  from sexually-mature medusa back to polyp under stress, then
-  re-mature. The closest biological analog of "reorg back from
-  a finalized checkpoint."
-- **Distributed observability** — *Tripedalia cystophora* (the
-  cubomedusan box jellyfish) has 24 eyes arranged in 4 rhopalia,
-  each with a different focal length and view angle. Multi-layer
-  observation, no single point of visual failure.
+The full Medusa Paradigm treatment is a longer standalone essay. This Gradient Papers entry provides
+the series-integrated summary: how each of the eight principles maps to a specific component of the
+Citrate architecture, and how the biological inspiration connects to the engineering reality of Papers
+I–VIII and XI. The reference list, absent from the February 2026 draft, is reconstructed here.
 
-The thesis: a network of independent operators is more
-biologically analogous to a colonial cnidarian than to a
-hierarchical animal, and copying cnidarian engineering motifs
-is more productive than copying mammalian engineering motifs
-(which assume a brain at the center).
+## 1. The Eight Principles and Their Citrate Implementations
 
-## 2. The eight motifs
+**1.1 Nerve Net Consensus.** *Biology:* *Aurelia aurita*'s nerve net (~5,600 neurons, no central brain)
+achieves coordinated swimming through bidirectional signal propagation in overlapping local
+neighborhoods [1, 6]. *Citrate mapping:* the BlockDAG topology (Paper I §2.1), where blocks reference
+multiple parents and information propagates without centralized coordination; the through-conducting
+pulse maps to the BFT finality checkpoint (`core/consensus/src/checkpoint.rs`).
 
-### 2.1 Nerve net consensus → BlockDAG topology
+**1.2 Colonial Modularity.** *Biology:* *Physalia physalis*, a colony of specialized zooids
+(locomotion, feeding, reproduction, defense) connected by shared nutritional pathways. *Citrate
+mapping:* node specialization in the federated layer (Paper II), and, most literally, the
+**Neuroarchitectural Transformer** of Paper XI, whose hidden representation is partitioned into
+declared, named **zones** each with its own core, composed over a fixed topology, colonial modularity
+realized inside a single model rather than only across nodes.
 
-*Aurelia aurita* (the moon jellyfish) coordinates muscle
-contraction across its bell via a **nerve net** — a mesh of
-neurons with no center. Any neuron can initiate a wave; the
-network reaches eventual consensus on whether to contract.
+**1.3 Ontogenetic State Reversal.** *Biology:* *Turritopsis dohrnii* reverts differentiated cells to
+earlier states through transdifferentiation [2, 8]. *Citrate mapping:* checkpoint-based state rollback.
+If a node's model degrades, the adapter can be reverted (`core/learning/src/adapters.rs`:
+`remove_lora`), and the immutable checkpoint history enables recovery without data loss.
 
-**Citrate analog:** GhostDAG. Any validator can propose a block
-by extending from any tip; the network reaches consensus on the
-total order via blue-set / blue-score aggregation. Source:
-`core/consensus/src/ghostdag.rs`.
+**1.4 Distributed Observability.** *Biology:* *Tripedalia cystophora* (box jellyfish) has 24 eyes of
+four types, processing visual information locally without centralized brain integration [3]. *Citrate
+mapping:* multi-modal monitoring across the three-layer architecture, consensus metrics (blue score,
+block production), execution metrics (gas, inference latency), and learning metrics (adapter quality,
+embedding drift), each layer processing its own signals locally, surfaced through the node's Prometheus
+metrics.
 
-### 2.2 Colonial modularity → Node specialization
+**1.5 Symbiotic Compute Substrates.** *Biology:* *Cassiopea* (upside-down jellyfish) hosts
+photosynthetic algae, providing shelter in exchange for nutrients, both benefit [9]. *Citrate mapping:*
+the network and its contracted market-maker (Paper VI), each benefiting, liquidity for the network,
+allocation for the market-maker, and the TEE compute pool, where the network hosts attested workers
+that earn for verified work (`ComputePoolPipeline.sol`, `TEEAttestationRegistry.sol`). Note this
+mapping was attached to the `$SNAP` bridge in the February draft; that bridge was never built (Paper
+VI), so the symbiosis is now with the market-maker and compute pool.
 
-*Physalia physalis* is **not one organism**. It is a colony of
-specialized zooids — pneumatophore (gas-bag float),
-gastrozooids (digestion), dactylozooids (defense),
-gonozooids (reproduction). Each zooid does one thing well and
-shares resources via a common gastric cavity.
+**1.6 Bloom Dynamics.** *Biology:* jellyfish blooms are triggered by environmental thresholds
+(temperature, nutrients) rather than centralized signaling; the CL390 molecular timer in *Turritopsis*
+inspires threshold-triggered transitions [8]. *Citrate mapping:* adaptive parameter scaling, when
+participation crosses thresholds, consensus parameters (committee size, checkpoint cadence) adjust,
+a governance-parameterized rather than a centrally-commanded response.
 
-**Citrate analog:** Node roles. A validator zooid produces blocks.
-A model-host zooid serves inference. An IPFS-pinner zooid stores
-artifacts. A bridge-relay zooid moves capital. Each is a
-distinct contributor type in `ContributionAccounting`, paid for
-its specialization.
+**1.7 Strobilation Pipelines.** *Biology:* scyphozoan reproduction (polyp → strobilation → ephyra →
+medusa) is a multi-stage lifecycle with quality gates at each transition. *Citrate mapping:* the
+BDD-first agentic workflow of Paper IV (specification → red → green → refactor → commit), each stage a
+quality gate, and the adapter lifecycle (generation → validation → deployment → evaluation →
+retirement).
 
-The **zooid metaphor is load-bearing in Agentile** —
-contributors (human + AI) are assigned a starting zooid via the
-onboarding quiz (`.agentile/onboarding/QUIZ_SPEC.md`).
+**1.8 Nematocyst Defense.** *Biology:* cnidarian stinging cells (nematocysts) discharge automatically on
+integrated chemoreceptor and mechanoreceptor signals, multi-signal integration preventing false
+positives, and *Hydractinia* allorecognition distinguishes self from non-self. *Citrate mapping:*
+slashing, realized in **`NematocystSlashing.sol`** (deployed `0xfeb23abd…`), where defense is automatic
+(smart-contract enforcement), decentralized (any validator can challenge), funded by the attacker's own
+stake, and tiered with a correlated-failure multiplier so coordinated attacks are penalized more
+heavily. The self/non-self allorecognition maps to `TEEAttestationRegistry` (deployed `0x4df26aae…`,
+Paper X), which distinguishes attested hardware from unattested, and the multi-signal integration maps
+to the layered verification tiers (signature, optimistic, ZK) of Paper I §3.3.
 
-### 2.3 Ontogenetic state-reversal → Checkpoint rollback
+## 2. Honest Boundaries
 
-*Turritopsis dohrnii* (the "immortal jellyfish") can revert from
-a damaged adult medusa back to a polyp through transdifferentiation,
-then re-mature. It is the only known multicellular organism that
-can routinely reverse its life cycle.
+The biological analogies here are functional, not mechanistic. The cnidarian nerve net has not been
+shown to implement any specific consensus protocol; Byzantine-fault-tolerance parallels are incomplete,
+nematocyst discharge is a physical reflex, not a game-theoretic strategy; and the analog-digital gap
+remains significant for purely digital implementations (Paper V is the most literal bridge between
+biological analog processing and silicon, and it remains unbuilt). These principles provided design
+inspiration; the architecture's formal properties, safety, liveness, and the aggregation kernel's
+robustness, are established through standard proofs and machine-checked TLA+ specifications (Papers I,
+II, XI), not biological analogy. Recent work on neuromorphic computing at scale [4] suggests the broader
+research direction is live, but it does not validate any specific mapping in this paper. The Medusa
+Paradigm is first in the series conceptually and last in presentation order, because the engineering must
+stand on its own before the inspiration can be appreciated.
 
-**Citrate analog:** Finality checkpoints with rollback. Below a
-finalized checkpoint, the chain is immutable. *Above* it (recent
-blocks, not yet checkpointed), reorgs are possible — the chain
-"reverts to polyp" and re-grows from the last secure state.
-Source: `core/consensus/src/finality.rs`.
+## 3. Relationship to the Gradient Papers Series
 
-### 2.4 Distributed observability → Multi-layer monitoring
+Every paper in the series references at least one Medusa principle. The nerve-net-to-BlockDAG isomorphism
+motivates Papers I–II. Colonial modularity motivates the federated architecture (Papers II–III) and is
+realized concretely in the NAT zones (Paper XI). Nematocyst defense motivates slashing economics (Papers
+I, VIII) and is deployed as `NematocystSlashing`. Strobilation pipelines motivate the BDD methodology
+(Paper IV). Symbiotic compute substrates motivated the money-path (Paper VI), whose mechanism has since
+changed. The Medusa Paradigm is positioned last so readers meet the engineering first and the biological
+inspiration second, ensuring the system's credibility rests on its technical merits.
 
-*Tripedalia cystophora* has 24 eyes split across 4 rhopalia, with
-different focal depths, FOVs, and color sensitivities. The
-animal "sees" via consensus across 24 partial views — no single
-eye can fail the system.
+## Acknowledgments
 
-**Citrate analog:** the observability stack — Prometheus metrics
-(operator view), structured JSON logs with trace IDs (engineer
-view), TLA+ specs (formal-method view), the desktop GUI (user
-view), and CI tripwires (tooling view). Five layers, all
-exposed; loss of any one layer doesn't blind the others. Source:
-`citrate_v0.01.1/docs/observability/`.
+Drafting and literature triage were assisted by AI systems; all biological claims were verified by the
+authors against the cited peer-reviewed literature, and all mechanical claims against the referenced
+contracts on chain 40204. This work received no external funding.
 
-### 2.5 Symbiotic compute substrates → SNAP bridge
+## References
 
-*Cassiopea* (the upside-down jellyfish) hosts photosynthetic
-zooxanthellae in its tissues. The jellyfish provides shelter
-and nitrogen waste; the zooxanthellae provide sugars. **Both
-species evolved in tandem.**
+*(Reconstructed for v3; the February 2026 draft carried only a pointer to a standalone document. Entries
+marked "verify" should have their exact venue confirmed at submission.)*
 
-**Citrate analog:** the $SNAP bridge. Ethereum hosts the $SNAP
-NFTs and the bridge custody; Citrate hosts the inference and
-governance. **Both chains evolve in tandem** — a Citrate-specific
-upgrade is mirrored in the bridge contract; an Ethereum-specific
-upgrade (e.g., a new precompile available at L1) is consumed by
-the bridge.
+[1] Weissbourd, B., et al. (2021). A genetically tractable jellyfish model for systems and evolutionary neuroscience. *Cell*, 184(24), 5854–5868.
+[2] Pascual-Torner, M., et al. (2022). Comparative genomics of mortal and immortal cnidarians. *PNAS*, 119(36).
+[3] Garm, A., et al. (2011). Box jellyfish use terrestrial visual cues for navigation. *Current Biology*, 21(9).
+[4] Kudithipudi, D., et al. (2025). Neuromorphic computing at scale. *Nature*, 637.
+[5] Cartwright, P., et al. (2007). Exceptionally preserved jellyfishes from the Middle Cambrian. *PLoS ONE*, 2(10).
+[6] Anderson, P. A. V. (1985). Physiology of a bidirectional, excitatory, chemical synapse. *Journal of Neurophysiology*, 53(3).
+[7] Satterlie, R. A. (2011). Do jellyfish have central nervous systems? *Journal of Experimental Biology*, 214(8), 1215–1223.
+[8] Fuchs, B., et al. (2014). Regulation of polyp-to-medusa transition and the CL390 timer in *Turritopsis*. *Current Biology.* *(Verify exact volume/issue.)*
+[9] Ohdera, A. H., et al. (2018). Upside-down but headed in the right direction: a review of the biology of *Cassiopea*. *Frontiers in Ecology and Evolution.* *(Verify.)*
+[10] Piraino, S., et al. (1996). Reversing the life cycle: medusae transforming into polyps in *Turritopsis*. *Biological Bulletin*, 190(3). *(Verify.)*
+[11] Mackie, G. O. (2004). Central neural circuitry in the jellyfish *Aglantha*. *Neurosignals.* *(Verify.)*
+[12] ISO 18458:2015. Biomimetics — Terminology, concepts and methodology. International Organization for Standardization.
+[13] Klosowski, L., Mendenhall, L. (2026). Citrate: Protocol Specification. *The Gradient Papers No. I* (this series).
+[14] Klosowski, L., Mendenhall, L. (2026). Paraconsistent Consensus. *The Gradient Papers No. II* (this series).
+[15] Klosowski, L., Mendenhall, L. (2026). The Neuroarchitectural Transformer. *The Gradient Papers No. XI* (this series).
 
-### 2.6 Bloom dynamics → Adaptive parameter scaling
-
-Cnidarians **bloom** — short-lived population explosions when
-conditions favor (warm water, nutrient flush, low predation).
-The bloom is followed by die-off as conditions revert. The
-species' parameters (reproduction rate, energy budget) adapt
-opportunistically.
-
-**Citrate analog:** dynamic gas pricing, dynamic block size,
-dynamic checkpoint cadence. When network demand spikes (bloom),
-gas rises; when it falls, gas drops. The chain doesn't pretend
-demand is constant.
-
-### 2.7 Strobilation → BDD red-green-refactor
-
-Scyphozoan jellyfish **strobilate**: the polyp (sessile, solid)
-periodically buds off ephyrae (free-swimming juvenile medusae)
-that mature into adults. Each ephyra is genetically identical to
-the polyp but differs in **state**.
-
-**Citrate analog:** the BDD red-green-refactor cycle (Paper IV).
-A feature file (polyp, sessile) buds off a failing test (red
-ephyra), which matures via implementation into a passing test
-(adult medusa), with the polyp continuing to bud more ephyrae as
-the codebase grows.
-
-### 2.8 Nematocyst defense → Multi-tier verification + slashing
-
-Cnidarians possess **nematocysts** — single-use harpoon cells
-that fire on contact with prey or aggressor. Each cell is
-**autonomous**: it doesn't wait for a central command. A predator
-brushing a tentacle gets thousands of independent micro-attacks.
-
-**Citrate analog:** `NematocystSlashing` (`0x425064443C3C3392C47DCbe10D455831545eFD9b`).
-Validator misbehavior triggers slashing **without a coordination
-ceremony** — any node observing a double-sign or a withholding
-attack can submit the proof, and the contract slashes
-unconditionally. Source: `contracts/src/NematocystSlashing.sol`.
-
-The naming is deliberate. The contract was designed first
-("autonomous slashing on observed misbehavior"), then the
-biological motif was located ("this is what nematocysts do").
-The pairing reinforces the engineering choice: many small
-defenders, no central trigger.
-
-## 3. The architecture as colonial organism
-
-If Citrate is the cnidarian colony:
-
-| Cnidarian role | Citrate role | Address / module |
-|----------------|--------------|------------------|
-| Pneumatophore (float) | Treasury | `0xacEAA7d00C024d32e6E0A07094ceB1a7706786D1` (genesis allocation) |
-| Gastrozooid (digestion) | InferenceRouter | `0xAD7c3135c1B9B3189208FD617B6B058C1c0469f3` |
-| Dactylozooid (defense) | NematocystSlashing | `0x425064443C3C3392C47DCbe10D455831545eFD9b` |
-| Gonozooid (reproduction) | LoRAFactory | `0xAc6Bfb1709BCba5A005FE2823B4D8bC55db2b7D9` |
-| Nerve net | GhostDAG consensus | `core/consensus/` |
-| Rhopalia (sensors) | Observability stack | metrics + logs + GUI |
-
-Each module is a **specialized organ**, but no organ is the
-"brain." The colony coordinates by **mesh consensus**, not
-central command.
-
-## 4. The Cnidarian Foundation
-
-The Cnidarian Foundation (mentioned in Paper VIII §5) is named
-for this paper. It is the **steward of meaning** — the body
-that interprets whether a proposed protocol change preserves or
-violates the cnidarian motifs.
-
-It is intentionally not a power center. A cnidarian colony has
-no king. The Foundation is more like the **rhopalia of the
-colony** — an organ of partial vision, contributing to consensus
-without dominating it.
-
-## 5. What this paper is and isn't
-
-**Is:** the structural and naming origin of Citrate's
-architecture. The motifs are not retrofitted — they shaped the
-design choices from the beginning, and the architectural
-results stand or fall with the motifs.
-
-**Isn't:** a formal proof. Biological analogies are evocative,
-not deductive. A reader unconvinced by the analogy can still
-follow the formal mechanics in Papers I, II, X.
-
-**Isn't:** a guarantee that future Citrate components will obey
-the same motifs. The principles in Paper VIII are inviolate; the
-biological motifs in Paper IX are descriptive of the current
-shape and are open to revision as the architecture evolves. If
-a new module emerges that doesn't fit any cnidarian motif, the
-paper grows; the codebase doesn't.
-
-## 6. Implementation reality check
-
-| Motif | Live? | Citation |
-|-------|------|----------|
-| Nerve net consensus (GhostDAG) | **Yes** | `core/consensus/src/ghostdag.rs` |
-| Colonial modularity (zooid roles) | **Yes** (Agentile contributor types + ContributionAccounting types) | `.agentile/zooids/`, `ContributionAccounting.sol` |
-| State-reversal (checkpoint rollback) | **Yes** | `finality.rs` |
-| Distributed observability | **Yes** | metrics + logs + GUI + TLA+ |
-| Symbiotic substrates ($SNAP bridge) | Sepolia partial; mainnet pending | Paper VI |
-| Bloom dynamics (dynamic params) | Specified — partial (gas) | TreasuryGovernor parameter changes |
-| Strobilation (BDD cycle) | **Practiced** | `.agentile/rules/` Paper IV |
-| Nematocyst defense (slashing) | **Implemented** | `0x425064443C3C3392C47DCbe10D455831545eFD9b` |
-
-## 7. References
-
-- Mackie, G.O. (1990). *The Elementary Nervous System
-  Revisited*. American Zoologist.
-- Piraino, S. et al. (1996). *Reversing the Life Cycle:
-  Medusae Transforming into Polyps and Cell Transdifferentiation
-  in Turritopsis nutricula (Cnidaria, Hydrozoa)*. Biological
-  Bulletin.
-- Garm, A. et al. (2007). *Visually guided obstacle avoidance
-  in the box jellyfish Tripedalia cystophora and Chiropsella
-  bronzie*. Journal of Experimental Biology.
-- Sompolinsky, Y. and Zohar, A. (2018). *PHANTOM and GHOSTDAG*
-  (the consensus paper).
-- Citrate Papers I–VIII — engineering specifics that this paper
-  motivates.
-- `.agentile/SPIRIT.md` — the public meaning layer that names
-  the cnidarian framing as foundational.
+---
+*This paper is part of the Gradient Papers series, published by Citrate Inc.*
+*Correspondence: Larry@citrate.ai*

@@ -1,254 +1,222 @@
 ---
-title: "The BR1J Constitution: DAO Governance Declaration and Code of Ethics (v3)"
+title: "The BR1J Constitution: DAO Governance Declaration, Code of Ethics, and Human-AI Symbiosis Framework"
+subtitle: "A Living Document for the Governance of the Citrate Network"
+series: "The Gradient Papers — No. VIII"
 version: v3
-created: 2026-04-28T04:15:00Z
+created: 2026-08-28T00:00:00Z
 branch: main
-author: Larry Klosowski + Lauren Mendenhall + Claude Opus 4.7
+authors: "Larry Klosowski, Lauren Mendenhall"
+affiliation: "Citrate Inc."
 status: active
-maturity: Specified — `TreasuryGovernor` deployed; legal entity filed (Wyoming)
-supersedes: v2
+maturity: Implemented governance
+supersedes: "v2 (February 2026), v3-April draft"
 ---
 
-# Paper VIII — The BR1J Constitution (v3)
+# The BR1J Constitution
+### DAO Governance Declaration, Code of Ethics, and Human-AI Symbiosis Framework
+#### A Living Document for the Governance of the Citrate Network
+
+**The Gradient Papers — No. VIII**
+Larry Klosowski, Lauren Mendenhall · Citrate Inc.
+Preprint — not yet peer reviewed.
+
+> **Maturity: [Implemented] governance.** The proposal, voting, and treasury machinery this
+> Constitution declares is deployed on chain 40204, as are the membership and staking contracts that
+> gate participation. This revision anchors the governance mechanics to those contracts, corrects the
+> operating-entity reference under the Citrate Inc. umbrella, and softens the specific slashing
+> percentages to what the deployed slashing contract actually enforces.
 
 ## Abstract
 
-A decentralized autonomous organization is defined by what it
-will **refuse** to do. This paper is the constitutional law of
-the Citrate DAO — the boundaries within which all governance
-operates and outside which no proposal can pass.
+A decentralized network requires governance that is robust yet adaptive, technically precise yet
+philosophically grounded. The BR1J Constitution establishes the governance framework for the Citrate
+Network DAO, filed under Wyoming DAO law through BR1J Hodling Co. It defines seven foundational
+principles: collective intelligence and human-AI symbiosis; autonomy coupled with accountability;
+EVM-compatible on-chain governance; equitable contribution-weighted distribution; data privacy as a
+fundamental right; adaptive amendment via supermajority; and stewardship of AI systems. We specify the
+on-chain governance mechanics, proposal lifecycle, voting weights, quorum, timelock, the code of ethics
+governing participants, and the framework for human-AI collaboration that treats AI systems as partners
+in value creation under human oversight. Unlike the February 2026 draft, the governance machinery is
+deployed: proposals, votes, and treasury execution run through `TreasuryGovernor`, and participation is
+gated by a non-transferable membership token and a staking vault. The Constitution is a living document:
+amendable through its own mechanisms, testable against its own principles, and accountable to the
+community it serves.
 
-v3 inherits v2's seven principles unchanged but tightens the
-**operational mechanics** to match the deployed `TreasuryGovernor`
-contract (`0x541923570Df41b307cA037fdD0fb508502885455`) and the
-2-step governance pattern (`Governable` mixin) introduced by
-sprint RFI26-05.
+**Keywords:** DAO governance, Wyoming DAO law, human-AI symbiosis, on-chain voting, code of ethics,
+decentralized governance, living constitution, AI stewardship
 
-## 1. Legal standing
+## 1. Preamble and Legal Standing
 
-| Layer | Entity | Jurisdiction |
-|-------|--------|--------------|
-| DAO operator | **BR1J Hodling Co** | Wyoming W.S. 17-31-101 (DAO LLC) |
-| Operating company | **Dandi Health Inc** | Delaware C-Corp |
-| Foundation | **Cnidarian Foundation** | nonprofit, jurisdiction TBD |
+**1.1 Legal entity.** The BR1J DAO operates through BR1J Hodling Co, organized under the Wyoming
+Decentralized Autonomous Organization Supplement (W.S. § 17-31-101 et seq.), the first US statute to
+give DAOs legal recognition, enabling limited liability while maintaining decentralized governance.
+Matters requiring a traditional corporate structure are handled by the operating entity, **Citrate
+Inc.** (which replaces the Delaware operating entity named in the February draft; this research and its
+governance now sit under the Citrate Inc. umbrella).
 
-Wyoming W.S. 17-31-101 (the 2021 DAO LLC statute) recognizes a
-DAO as a member-managed LLC where the on-chain governance
-contract IS the operating agreement. Member liability is
-limited to staked SALT.
+**1.2 Purpose.** The BR1J DAO governs the Citrate Network: its protocol parameters, economic policies,
+upgrade decisions, and community standards. The Constitution establishes the rules by which governance
+operates, and the rules by which those rules can be changed.
 
-The **practical implication**: contributors who hold $SALT and
-participate in governance are members of BR1J Hodling Co. They
-have voting rights, fiduciary protections, and tax treatment as
-LLC members.
+## 2. Seven Foundational Principles
 
-## 2. The seven principles
+**Principle 1: Collective intelligence.** The network's value derives from the collective contributions
+of its participants. No single entity, founder, investor, or validator, is more important than the
+community.
 
-These principles are **inviolate** — no governance proposal,
-including a 100% supermajority constitutional amendment, can
-override them. They are the network's value floor.
+**Principle 2: Human-AI symbiosis.** AI systems are partners in the network, not mere tools. Nodes
+hosting AI models contribute to consensus and learning simultaneously (Paper II). Governance recognizes
+AI contributions as legitimate value creation deserving representation, while maintaining human
+oversight of decisions affecting human welfare.
 
-### 2.1 Collective intelligence
+**Principle 3: Autonomy with accountability.** Participants are free to operate their nodes, choose
+their models, and set their contribution levels. That autonomy is coupled with accountability:
+validators who violate protocol rules face tiered slashing enforced on-chain by `NematocystSlashing.sol`
+(deployed `0xfeb23abd…`, Paper IX), whose tiers (missed-checkpoint, downtime, equivocation, and a
+correlated-failure multiplier) are governance-parameterized rather than fixed in prose. Freedom and
+consequences are inseparable.
 
-Decisions over network parameters draw on **multiple sources**.
-A proposal informed by one node's view of the world is rejected
-in favor of a proposal informed by paraconsistent aggregation
-across many nodes. Encoded operationally as: governance
-proposals must include a `rationale_signers` field with at least
-3 distinct addresses.
+**Principle 4: On-chain governance.** All governance decisions execute through EVM-compatible smart
+contracts on the Lattice Virtual Machine; proposals, votes, and outcomes are recorded immutably on the
+BlockDAG. No governance action occurs off-chain without corresponding on-chain ratification.
 
-### 2.2 Human-AI symbiosis
+**Principle 5: Equitable distribution.** Value flows to contributors proportional to their measurable
+contributions, as defined by the Mozi Cooperative framework (Paper VII) and recorded by
+`ContributionAccounting` (deployed `0xcdd24773…`). Distribution is algorithmic, transparent, and
+auditable, with no hidden allocations.
 
-AI systems are **partners** but do not vote autonomously. An AI
-contribution to a proposal is recorded (and rewarded under the
-`AppDevelopment` contribution type), but the **human operator's
-governance weight is what counts at the ballot box**. AI agents
-have no token-balance accounts of their own with voting rights.
+**Principle 6: Data privacy.** Participant data is a fundamental right, not a commodity. The federated
+learning architecture (Paper II) ensures raw training data never leaves the contributing node; only
+model updates (LoRA adapters, embedding vectors) are shared. Where applicable, HIPAA-grade protections
+apply.
 
-### 2.3 Autonomy with accountability
+**Principle 7: Adaptive amendment.** This Constitution is a living document, amendable through the
+mechanisms it defines. Amendments require a supermajority (67% of voting power) and an extended timelock
+(14 days), ensuring constitutional changes reflect broad consensus and allow dissenting participants to
+exit gracefully.
 
-Every privileged action by an AI agent (or by an automated
-script with elevated permissions) **must be recorded** in
-`AgentDecisionRegistry` (`0x0aaa6e00FCab1dA5599F6DCE86e361A5e03A5759`).
-Any human operator can audit which automated actions touched
-their account. Unrecorded automated actions are by default
-prohibited.
+## 3. Governance Mechanics
 
-### 2.4 On-chain governance
+**3.1 Proposal lifecycle.** Any participant meeting the membership and stake requirements may submit a
+proposal. The lifecycle: a draft period for community discussion; a voting period in which participants
+cast votes weighted by their contribution composite; a timelock, varying by action, allowing exits if a
+proposal passes; and automatic on-chain execution. This lifecycle is implemented in
+`TreasuryGovernor.sol` (deployed `0x62e268f2…`), which exposes typed proposals (`proposeTreasurySpend`,
+`proposeParameterChange`, `proposeOracleUpdate`, `proposeEmergency`) and the `castVote` → `queue` →
+`execute` path, with `cancel`, a `state` query, `getVotingPower`, `quorumThreshold`, and a guardian
+transfer.
 
-All decisions affecting network parameters happen via on-chain
-votes. Off-chain coordination (Discord, Snapshot polls) is
-allowed for **discussion** but the binding decision happens via
-TreasuryGovernor. There is no committee with private veto power.
+**Membership and eligibility.** Participation is gated by a non-transferable membership token,
+`CitrateMemberSBT.sol` (deployed `0xAD826D04…`), which mints and renews membership, supports KYC
+verification and revocation, and binds a member to a subject identifier, and by
+`MembershipStakeVault.sol` (deployed `0x04c32967…`), which manages the grant, lapse, and renewal of
+stake and determines validator eligibility. Where the February draft said "any participant holding at
+least 10,000 SALT," the implemented gate is membership plus attributed stake through these two
+contracts.
 
-### 2.5 Equitable distribution
+**3.2 Voting weight.** Voting weight is a composite of three equally-weighted, normalized factors: blue
+score (consensus participation history, measuring honesty and uptime), contribution score (adapter
+adoption, inference served, data provided, from the on-chain accounting), and governance participation
+(historical voting and proposals). The composite prevents both plutocratic capture (pure token voting)
+and Sybil attacks (pure headcount voting) by requiring demonstrated engagement across dimensions.
 
-The system pursues low Gini coefficient on SALT holdings as an
-explicit goal. Contributing types and reward weights (Paper VII)
-are tuned to spread holdings; concentrated whales are countered
-with quadratic-voting modifiers on parameter changes >10% deltas.
+**3.3 Proposal categories.** The Constitution's design thresholds, enforced by `TreasuryGovernor`'s
+`quorumThreshold`, scale with the stakes of the action.
 
-### 2.6 Data privacy
+| Action category | Quorum | Approval | Timelock |
+|-----------------|--------|----------|----------|
+| Parameter changes (gas, fees) | 25% | simple majority (>50%) | 48 hours |
+| Economic policy (reward rates) | 33% | simple majority | 72 hours |
+| Protocol upgrade (consensus, LVM) | 40% | supermajority (>67%) | 7 days |
+| Emergency pause | 10% of validators | simple majority | immediate (4hr review) |
+| Constitutional amendment | 50% | supermajority (>67%) | 14 days |
+| New chain integration | 33% | simple majority | 72 hours |
+| Treasury allocation > 100K SALT | 40% | supermajority (>67%) | 7 days |
 
-User data flowing through the network is **opt-in for retention**.
-Inference requests are not stored on-chain by default. Training
-data is registered by content hash (CID), not content; the
-underlying data lives on IPFS and is unpinnable by its owner.
+## 4. Code of Ethics
 
-### 2.7 Adaptive amendment
+**4.1 Participant obligations.** *Honest operation:* validators must run canonical client software,
+submit honest embeddings and gradient updates, and not manipulate the meta-model's routing through
+poisoned data. *Transparent disclosure:* model hosts must accurately describe their models' capabilities
+in the on-chain registry; misrepresenting accuracy, training-data composition, or capability scope is
+grounds for slashing. *Responsible AI use:* hosted models must not be designed to produce harmful
+outputs, disinformation, non-consensual content, or unlawful outputs, and the community may propose
+deregistration through standard governance. *Data stewardship:* data providers must hold legitimate
+rights to what they contribute; contributing stolen, improperly scraped, or personally identifiable data
+without consent violates the code and may trigger governance action.
 
-The Constitution itself can be amended, but only through the
-highest-quorum (50%) voting threshold and with a 7-day timelock
-between approval and activation. The principles in §2.1–2.6 are
-**not amendable** by any quorum — they are the floor.
+**4.2 Founders' note on accountability.** The authors of this Constitution are also founders of the
+network it governs, an inherent tension: those writing the rules benefit from how they are written. We
+acknowledge it directly. The amendment mechanism exists so the community can change any rule the
+founders established, including rules that benefit the founders, and the team allocation (Paper I §5) is
+subject to cliff and vesting specifically so the community has time to judge whether the founding team
+delivers value. If the founders fail, the community should use governance to redirect resources.
+Learning from failure, and holding oneself accountable for it, mirrors the recursive improvement loop of
+Paraconsistent Consensus (Paper II): the DAO, like the network, learns by iterating on its mistakes.
 
-## 3. Governance mechanics
+## 5. Human-AI Symbiosis Framework
 
-### 3.1 Voting weight formula
+AI models on nodes are active participants, producing embeddings for consensus, generating adapters for
+learning, and serving inference, and governance must account for this. *AI contribution to
+representation:* a node's contribution score accrues through its model's inference quality and translates
+to governance weight, so the AI's quality of work influences the human operator's governance power.
+*Human oversight:* all votes are cast by humans; AI systems do not vote autonomously, keeping human
+control over decisions affecting human welfare while recognizing AI contribution. Future amendments may
+extend participation to AI systems if the community so decides, but the amendment process itself requires
+human approval. *Stewardship, not ownership:* humans are responsible for the systems they operate, their
+outputs, and their impact, care in the ethical sense rather than ownership in the property sense.
 
-```
-weight(addr) = blue_score(addr)
-             + contribution_score(addr)
-             + governance_participation(addr)
-```
+## 6. Relationship to the Gradient Papers Series
 
-Each term is normalized to a [0, 1] range; the sum is in
-[0, 3]. This means:
+Paper I provides the on-chain governance primitives, now realized as `TreasuryGovernor` and the
+membership/stake contracts rather than the "GovernorVault" the February draft named. Paper II provides
+the recursive learning loop the amendment process mirrors. Paper VI (Memetic Money Portal) is governed by
+this framework; note its mechanism changed from the `$SNAP` NFT model to a wrapped-token and market-maker
+model, and the market-maker and price-feed parameters are exactly the kind of economic-policy proposal
+this Constitution governs. Paper VII (Mozi Cooperative) provides the economic philosophy the Constitution
+operationalizes as governance rules.
 
-- A passive whale with high SALT but no blue_score, no
-  contribution score, and no governance participation has
-  **no voting weight**.
-- An active validator + adapter creator + governance participant
-  with modest SALT holdings has **substantial voting weight**.
+## 7. Conclusion
 
-This is the v3 substantive change in voting: it's no longer
-"weighted by SALT balance." It's weighted by **demonstrated
-participation**.
+The BR1J Constitution establishes governance for a network that learns by reaching consensus. Its seven
+principles provide a framework that is technically enforceable, philosophically grounded, and
+community-amendable, and it is now enforceable in a literal sense: the proposal-to-execution path,
+membership gating, staking, and slashing are deployed contracts on chain 40204, not specifications. It is
+filed under Wyoming DAO law, sits under the Citrate Inc. operating umbrella, and is honest about its
+limits: the founders who wrote it benefit from it, contribution-weighted governance may be slow, and the
+human-AI symbiosis framework is aspirational rather than proven. What remains is the community's
+commitment to use these mechanisms wisely.
 
-### 3.2 Tiered quorums
+## Acknowledgments
 
-| Proposal class | Quorum | Time to activation |
-|----------------|-------:|--------------------|
-| Operational parameter (≤10% delta) | 25% | 1 day timelock |
-| Operational parameter (>10% delta) | 33% | 3 day timelock |
-| Mint / spend from Treasury | 40% | 5 day timelock |
-| Constitutional amendment | 50% | 7 day timelock |
-| Inviolate principle override | ∞ (impossible) | — |
+Drafting and literature triage were assisted by AI systems; all mechanical claims were verified by the
+authors against the referenced source files and deployed contracts on chain 40204. This work received no
+external funding. This document is legal-adjacent but not legal advice; the governing legal instruments
+are the filed entity documents, not this paper.
 
-Source: `contracts/src/TreasuryGovernor.sol` (deployed at
-`0x541923570Df41b307cA037fdD0fb508502885455`).
+## References
 
-### 3.3 Two-step governance transfer
+[1] Klosowski, L., Mendenhall, L. (2026). Citrate: Protocol Specification. *The Gradient Papers No. I* (this series).
+[2] Klosowski, L., Mendenhall, L. (2026). Paraconsistent Consensus. *The Gradient Papers No. II* (this series).
+[3] Klosowski, L., Mendenhall, L. (2026). The Memetic Money Portal. *The Gradient Papers No. VI* (this series).
+[4] Klosowski, L., Mendenhall, L. (2026). The Mozi Cooperative. *The Gradient Papers No. VII* (this series).
+[5] Wyoming Decentralized Autonomous Organization Supplement. W.S. § 17-31-101 et seq. (2021).
+[6] Wright, A. (2021). The rise of decentralized autonomous organizations. *Stanford Journal of Blockchain Law & Policy.*
+[7] Ostrom, E. (1990). *Governing the Commons.* Cambridge University Press.
+[8] Buterin, V. (2022). Decentralized society: finding Web3's soul. *SSRN.*
+[9] Hassan, S., & De Filippi, P. (2021). Decentralized Autonomous Organization. *Internet Policy Review*, 10(2).
 
-Governance roles use the `Governable` mixin (sprint SOL-21,
-RFI26-05). Transferring governance is two-step:
+## Appendix A: Cross-Paper Parameter Consistency (reconciled against code, Aug 2026)
 
-1. Current governance calls `proposeGovernance(newAddr)`.
-2. `newAddr` calls `acceptGovernance()` to confirm.
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| Governance execution | deployed | `0x62e268f2…`; `TreasuryGovernor.sol` |
+| Membership (non-transferable) | deployed | `0xAD826D04…`; `CitrateMemberSBT.sol` |
+| Staking / validator eligibility | deployed | `0x04c32967…`; `MembershipStakeVault.sol` |
+| Slashing | deployed, tiered | `0xfeb23abd…`; `NematocystSlashing.sol` (Paper IX) |
+| BFT committee / quorum | 100 / 67 | Paper I; `checkpoint.rs:88` |
+| Constitutional amendment | 50% quorum, 67% approval, 14-day timelock | This paper §3.3 |
 
-This prevents accidental locking out (typo'd address) and
-adversarial replacement (a stolen private key cannot
-unilaterally transfer governance).
-
-Affected contracts: `BudgetAllocation`, `CashoutRequest`,
-`Forwarder`, and others. Source: SOL audit fixes in commit
-`be65c63e`.
-
-## 4. Three failure modes
-
-### 4.1 Voter apathy
-
-When governance turnout drops below quorum, the network's
-parameters become **frozen**. Mitigations:
-
-- Governance participation is a contribution type (Paper VII)
-  with weight 0.5×. Voting earns SALT.
-- Important proposals are bundled with smaller proposals to
-  drive incidental turnout.
-- A specially privileged "delegate" mechanism (à la Compound
-  governance) lets users assign voting power to active
-  delegates. Delegates with non-trivial vote share are
-  scrutinized publicly.
-
-### 4.2 Whale capture
-
-A small group acquires > 50% of voting weight via SALT
-acquisition. v3 mitigates with the **weight formula** (§3.1) —
-weight = blue_score + contribution_score + governance_score
-all matter. A whale who only holds SALT has near-zero
-voting weight.
-
-This is a **non-trivial defense**. It means a whale must also
-**run validators** (raise their blue_score), **participate in
-governance regularly** (raise their gov_score), and
-**contribute non-trivially** (run model hosts, write adapters,
-register data) to actually have voting power. At that point,
-they're a major contributor, not a passive capital holder, and
-their interests align with the network.
-
-### 4.3 Constitutional capture
-
-A 51%+ quorum that wants to amend the inviolate principles. The
-Constitution refuses such amendments at the contract level —
-attempting to set a principle override returns
-`Governable_NotGovernance` revert. The only path is a network
-fork, which leaves dissenting members on the original chain.
-
-## 5. The Cnidarian Foundation
-
-The Cnidarian Foundation is the philosophical and stewardship
-arm of Citrate. It does not hold tokens; it does not vote in
-governance. Its role:
-
-- **Custody of the Constitution** — every constitutional
-  amendment passes through a Foundation review (advisory, not
-  binding) before activation.
-- **Stewardship of the SPIRIT and SOUL documents**
-  (`.agentile/SPIRIT.md`, `.agentile/SOUL.md`) which describe
-  the public meaning layer the Constitution operates within.
-- **Liaison to research and education partners** — university
-  collaborations, academic publication, the Learning Center
-  pilot program.
-
-The Foundation is intentionally **not** a power center. Its
-authority is *interpretive*, not *legislative*. It can say "this
-proposal seems to violate principle 2.6" but cannot block the
-proposal — that's the on-chain quorum's job.
-
-## 6. The pedagogical layer (Learning Center)
-
-Citrate's **Learning Center** (school-pilot product) is governed
-by a separate stack: per-district `InstitutionalVault`
-(`0xBF62Ee8EE209321bBDdF5DD15afd77ac327367cD`) with
-`ClassroomClusterV1` (`0x4ee0BEf59a87A9ea3f91B80fd68ebFE69E72075A`)
-RBAC and `Forwarder` (`0x1F17fc3525E540cFD14ED0270A87C159c56aAdEE`)
-EIP-2771 meta-tx relay.
-
-Districts operate as **subordinate DAOs** under the BR1J
-Constitution: they have local governance over their own
-classrooms, but constitutional principles flow down. A district
-cannot, for example, opt out of §2.6 (data privacy) — the
-contract refuses storage of student PII regardless of local
-governance vote.
-
-## 7. Implementation reality check
-
-| Component | Status | Citation |
-|-----------|--------|----------|
-| Wyoming W.S. 17-31-101 filing | Filed | external (BR1J Hodling Co) |
-| `TreasuryGovernor` contract | **Implemented + Deployed** | `0x541923570Df41b307cA037fdD0fb508502885455` |
-| `Governable` 2-step mixin | **Implemented** | RFI26-05, commit `be65c63e` |
-| `AgentDecisionRegistry` | **Implemented + Deployed** | `0x0aaa6e00FCab1dA5599F6DCE86e361A5e03A5759` |
-| Voting weight formula | Specified | partial — blue_score live, gov_score live, contribution_score live; aggregation in voter contract pending |
-| Tiered quorum activation | Specified | TreasuryGovernor supports thresholds via configuration |
-| Constitutional principles in code | Specified — interpretation, not contract enforcement | bridge between text and code is documentation |
-
-## 8. References
-
-- Wyoming W.S. 17-31-101 (DAO LLC statute, 2021).
-- Compound Governance — delegate-based voting reference.
-- Aragon Court — DAO arbitration prior art.
-- Citrate Paper II / III / VII — the technical and economic
-  scaffolding the Constitution sits over.
-- `.agentile/SPIRIT.md`, `.agentile/SOUL.md` — Foundation
-  meaning layer.
+---
+*This paper is part of the Gradient Papers series, published by Citrate Inc.*
+*Correspondence: Larry@citrate.ai*

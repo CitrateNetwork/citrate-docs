@@ -1,248 +1,257 @@
 ---
-title: "The Memetic Money Portal v3 — Bridge Architecture and Contracted Market-Maker Model"
+title: "The Memetic Money Portal: Separating the Liquidity Instrument from the Gas Token"
+subtitle: "From an NFT Bridge-as-Fundraise Proposal to an Implemented Wrapped-Token and Market-Maker Money-Path"
+series: "The Gradient Papers — No. VI"
 version: v3
-created: 2026-04-28T03:55:00Z
+created: 2026-08-28T00:00:00Z
 branch: main
-author: Larry Klosowski + Saul Loveman + Claude Opus 4.7
+authors: "Larry Klosowski, Lauren Mendenhall"
+affiliation: "Citrate Inc."
 status: active
-maturity: Specified — bridge primitives partly deployed (Sepolia testnet); MM contract live on Citrate testnet; mainnet pending
-supersedes: v2 (which assumed an open AMM bridge model; v3 replaces with contracted MM)
+maturity: Partially Implemented
+supersedes: "v2 (February 2026), v3-April draft"
 ---
 
-# Paper VI — The Memetic Money Portal (v3)
+# The Memetic Money Portal
+### Separating the Liquidity Instrument from the Gas Token
+#### From an NFT Bridge-as-Fundraise Proposal to an Implemented Wrapped-Token and Market-Maker Money-Path
 
-> **v3 substantive change.** v2 specified a **fundraise + AMM
-> bridge** where $SNAP holders would price-discover liquidity
-> against $SALT through a per-wallet bonding curve. v3 **replaces
-> the AMM model with a contracted full-time market-maker**
-> arrangement (DLP / John Burnell), with on-chain governance
-> (`MarketMakerAllocation.sol`, `0xF61e79AF3Bc2a905695E45b0fa7a43F9141a554a`)
-> retaining 10% of gas fees as the MM compensation pool. The
-> rationale is in §3 below; the v2 bridge mechanics are
-> archived as historical context only.
+**The Gradient Papers — No. VI**
+Larry Klosowski, Lauren Mendenhall · Citrate Inc.
+Preprint — not yet peer reviewed.
 
-## 1. The bridge problem
+> **Maturity: [Partially Implemented], and a design that shifted.** This paper has changed more
+> than any other in the series between v2 and v3. The February 2026 draft proposed a specific
+> mechanism, an ERC-6551 NFT "bridge-as-fundraise" called $SNAP, that was **never deployed**. This
+> revision keeps the durable thesis (separate the instrument that raises liquidity from the gas
+> token) and replaces the unbuilt bridge with the money-path that Citrate actually implemented: a
+> wrapped SALT token with gasless authorization transfers, a contracted market-maker allocation,
+> and an on-chain SALT/USD price feed. We say plainly what was proposed, what was built, and what
+> is still pending.
 
-Citrate exists on its own L1 with chain id 40204. Most DeFi
-liquidity exists on Ethereum mainnet. To get capital into Citrate
-(for staking, model marketplace participation, paying for
-inference) and out of Citrate (for off-ramp, treasury operations,
-DAO grants), there must be a **bridge**.
+## Abstract
 
-Bridges fail in two characteristic ways:
+Traditional blockchain fundraising creates a structural misalignment: tokens sold to raise capital
+face immediate sell pressure, diluting the network's economic foundation before it can build value.
+This paper's durable claim is that the instrument used to bootstrap external liquidity should be
+*separate* from the native gas token, so that raising and liquidity-provision do not dilute the
+utility asset. The February 2026 draft realized that separation through $SNAP, ERC-721 NFTs with
+ERC-6551 Token Bound Accounts serving simultaneously as fundraising instruments, bridge nodes, and
+ownership positions. That NFT bridge was specified and partially deployed to a testnet but never
+carried to production, and it is not the mechanism Citrate runs. This revision documents the
+implemented money-path: **WrappedSALT**, an ERC-20 wrapper over native SALT supporting EIP-3009
+gasless authorization transfers; **MarketMakerAllocation**, a governable vault that funds a
+contracted market-maker; and **ComputePricingOracle**, which carries an on-chain SALT/USD price. We
+present both, the design that shifted and the mechanism that exists, and we keep the memetic-money
+framing as a philosophy rather than a prediction. In keeping with Citrate Inc.'s
+public-communication policy, this paper makes no claim of day-one cash earnings and treats SALT's
+availability on a licensed exchange as pending.
 
-1. **Trusted custodians**: someone holds ETH on one side and
-   issues SALT on the other. Catastrophe if the custodian is
-   compromised.
-2. **AMM bridges**: a smart contract pools both assets and lets
-   the market price them. Subject to oracle attacks, JIT
-   liquidity manipulation, and severe slippage on small chains.
+**Keywords:** wrapped token, EIP-3009, gasless transfer, market maker, price oracle, decentralized
+liquidity, memetic finance, token economics, Citrate Network
 
-v3 chooses a **third path**: a contracted full-time market
-maker, operating with on-chain compensation, on-chain reporting,
-and DAO-revocable authority.
+## 1. Introduction: the ICO paradox
 
-## 2. Architecture overview
+Every network faces the same bootstrapping problem: it needs capital to build infrastructure, but
+selling its native token to raise capital creates sell pressure that undermines the token's economic
+foundation. ICOs, IDOs, and venture rounds all involve selling or diluting the gas token, so the
+network's economic base is weakened before it has demonstrated value, and speculative holders exit
+precisely when the network needs momentum.
 
-```
-Ethereum mainnet                          Citrate L1 (40204)
-----------------                          ------------------
-$SNAP (ERC-721 + ERC-6551)                $SALT (native gas)
-        │                                          │
-        │                                          │
-        ▼                                          ▼
-User Zone vault ──────► MM operator ────► Citrate MarketMaker
-(freely accessible:     (DLP, contracted   Allocation contract
-fees, rewards)           full-time)        (10% gas fees,
-                                            DAO-reconfigurable)
-        ▲                                          ▲
-        │                                          │
-Protocol Zone vault ◄───────────────── Pricing oracle
-(locked collateral,                     (ComputePricingOracle
-timelocked withdrawal)                   + off-chain CEX feeds)
-```
+The durable thesis of this paper is a structural response: separate the instrument that bootstraps
+external liquidity from the gas token entirely. Citrate's native gas token SALT (Paper I §5) should
+not be the thing sold to raise or seed liquidity; a distinct mechanism should carry SALT to external
+markets and provide the liquidity a two-sided market needs, while SALT itself remains a utility
+asset. Everything else in this paper is a question of *which* mechanism realizes that separation, and
+that is exactly where the design changed.
 
-The MM:
+## 2. The design that shifted: $SNAP as an NFT bridge-as-fundraise (February 2026, not deployed)
 
-- Holds inventory of both **ETH** (and other base assets) and
-  **SALT**.
-- Quotes a tradable spread against an external CEX reference
-  price plus an inventory-skew premium.
-- Pays for the privilege of operating with their own capital;
-  the network compensates via a 10% take of gas fees, scoped to
-  prevent rent extraction.
-- Can be **fired by DAO vote**. The MarketMakerAllocation
-  contract has a `setMarketMaker` governance-only call that
-  replaces the operator address.
+**[Superseded, not deployed to production]** The February 2026 proposal realized the separation
+through $SNAP: ERC-721 NFTs whose ERC-6551 Token Bound Accounts held a dual-zone vault, a
+user-accessible zone for the holder's fee revenue and a protocol-managed zone holding locked ETH
+collateral that backed cross-chain transfers. Each NFT was to be a bridge node; a per-wallet bonding
+curve discouraged whale dominance; Chainlink oracle nodes operated by holders formed the attestation
+layer; and the ETH committed at mint became bridge liquidity, so that "the fundraise is the bridge."
+A reference implementation was deployed to an Ethereum testnet.
 
-## 3. Why a contracted MM, not an AMM
+The design was intellectually appealing for reasons worth recording, because they explain what the
+replacement had to preserve. The dual-zone vault solved a real problem: it let a contributor retain
+ownership of and withdraw their fee revenue (the user zone) while the collateral backing transfers
+(the protocol zone) stayed locked behind a timelock and governance, so holders could not drain the
+liquidity that made the instrument useful. The per-wallet bonding curve, where a wallet's successive
+mints grew progressively more expensive, was an attempt to discourage whale dominance and reward
+early conviction without a central allocator. And making each NFT a bridge node meant the act of
+investing was the act of building capacity. These are genuine design virtues, and any replacement had
+to keep the core of them: separate the roles of "raise/seed liquidity" and "spend gas," and keep the
+liquidity base stable.
 
-We considered AMM-style bridges deeply (v2 specified one). The
-analysis behind switching:
+We record the design here because honesty about the series' evolution requires it, and because the
+thesis it embodied survives, but we are explicit: **no SNAP/SALT lock-mint bridge contract exists on
+the Citrate chain-40204 deployment.** The `CitrateBridgeNFT` / `DualVault6551` / `BridgeRouter`
+contracts were never carried to production, the AngelList SPV and Delaware C-Corp operating structure
+described in the draft is not the vehicle for this work, and cross-chain bridges, being among the
+most attacked primitives in the space (Ronin ~$625M, Wormhole ~$325M, Nomad ~$190M), are precisely
+the kind of surface a small team should hesitate to ship without a very strong reason. The per-wallet
+bonding curve also never solved Sybil resistance on its own, a coordinated actor could mint once from
+many wallets at the base price, so its whale-resistance depended on an off-chain identity layer the
+draft acknowledged it lacked. Weighed together, the bridge's attack surface and the instrument's
+unresolved Sybil problem argued for a simpler mechanism. Section 3 documents the one that was built.
 
-### 3.1 Liquidity depth
+## 3. What was actually built: the implemented money-path
 
-A small-chain AMM is permanently shallow. With $X total
-liquidity, a $X/100 trade incurs ~1% slippage; a $X/10 trade
-incurs ~5% slippage. Citrate's anticipated mainnet TVL on
-launch is ~$2M (conservative). At those depths, every meaningful
-trade is a slippage event.
+The separation thesis is realized on chain 40204 by three deployed contracts, none of which is a
+lock-mint bridge.
 
-A contracted MM borrows from professional market making's
-deeper book — they pre-position inventory based on flow
-expectations, run dynamic hedging (perp shorts, delta-neutral
-exposure), and quote tight spreads against external references.
+**3.1 WrappedSALT (EIP-3009 gasless transfer).** **[Implemented, deployed `0xaa918302…`]**
+`WrappedSALT.sol` is an ERC-20 wrapper over native SALT implementing the EIP-3009
+transfer-with-authorization flow: `transferWithAuthorization`, a fee-bearing
+`transferWithFeeAuthorization`, `receiveWithAuthorization`, `cancelAuthorization`, and
+`authorizationState`, with a signature-malleability guard (`_recoverCanonical`). This is the
+"portal" in its concrete form: a user signs an authorization off-chain, and a relayer or
+counterparty submits it, so SALT can move to and be used by external tooling without the holder
+needing native gas in hand. Where the February design imagined an NFT-vault bridge, the implemented
+onramp is a standard, auditable wrapped token with gasless authorization, the same EIP-3009 pattern
+used by production stablecoins, plus native `x402` payment-authorization precompiles (`0x0200`,
+`0x0201`) for the verification path.
 
-### 3.2 Adversarial environments
+**3.2 MarketMakerAllocation (contracted market maker).** **[Implemented, deployed `0xa87fae5c…`]**
+Rather than crowd-sourcing bridge liquidity from NFT holders, Citrate funds a *contracted*
+market-maker. `MarketMakerAllocation.sol` is a `Governable` vault that accumulates native SALT (via a
+receive fallback), and exposes `withdraw`/`withdrawAll`, `changeMarketMaker`, `changeAllocationRate`,
+and `calculateAllocation`. The market-maker relationship, and its allocation rate, are governance
+parameters, not a bonding curve. This is the recast the series index anticipated: a contracted
+full-time market-maker model in place of the NFT-node model.
 
-AMM bridges are heaven for MEV bots: the entire price discovery
-is on-chain, transparent, and racable. A contracted MM operates
-**off-chain order book + on-chain settlement** — quotes come
-through the MM's API; trades land on-chain only after the MM
-has accepted them. MEV is not eliminated (settlement is still
-on-chain) but the price-discovery surface is closed.
+**3.3 ComputePricingOracle (SALT/USD).** **[Implemented, deployed `0xdcebd5ec…`]** There is no
+standalone "SaltUsdOracle"; the SALT/USD reference lives in `ComputePricingOracle.sol`, which carries
+`saltPriceUsdCents` and a rate-limited `proposeSaltPrice` update path (with a commit nonce and
+`SaltPriceProposed`/`SaltPriceUpdated` events). This is the price reference the allocation and
+compute-pricing logic read; it is an operator-proposed feed with rate limiting, not a
+decentralized-oracle network, and we describe it as such.
 
-### 3.3 Operational cost
+**3.4 The end-to-end money-path.** The three contracts compose into a concrete flow that plays the
+role the February design assigned to the bridge. A holder who wants to move SALT into external
+tooling wraps native SALT into WrappedSALT and signs an EIP-3009 authorization; a relayer or
+counterparty submits the authorization on-chain, so the transfer settles without the holder paying
+native gas, and the `x402` precompiles verify the authorization on the payment path. On the
+market-making side, the treasury funds `MarketMakerAllocation` with SALT at a governance-set
+allocation rate, the contracted market-maker draws against that allocation to quote two-sided
+liquidity on venues, and `ComputePricingOracle` supplies the SALT/USD reference the allocation and
+compute-pricing logic read. The separation the thesis demands is preserved: SALT reaches external
+markets and a two-sided market is seeded without SALT being sold in a fundraise, and the liquidity
+base is stable because it is a governed allocation rather than a crowd of individually withdrawable
+vaults. The difference from the February design is that the stability now comes from a contracted
+relationship under governance control, not from a timelocked NFT vault, and the whale-resistance
+question is moot because there is no public mint to game. What the wrapped-token path gives up
+relative to the NFT design is the "every holder is an operator" ownership story; that ownership logic
+now lives in the cooperative accounting of Paper VII rather than in bridge nodes.
 
-An AMM's "cost" is impermanent loss + bot front-running. A
-contracted MM's cost is the 10% gas-fee allocation +
-inventory-management overhead. For a chain with non-trivial
-volume, the contracted-MM model is **cheaper per dollar
-traded**. The break-even is around $1M daily volume, which we
-expect to clear within 6 months of mainnet.
+## 4. Security considerations
 
-### 3.4 Governance leverage
+The shift in mechanism also shifts the threat model, mostly in a favorable direction. **Bridge
+risk is largely avoided:** because there is no lock-mint bridge holding pooled collateral, the
+catastrophic bridge-exploit surface that dominated the February design (and the industry's loss
+record) is simply not present. **The residual risks are different and named.** The wrapped-token
+path inherits ERC-20 and EIP-3009 risks, replay and authorization-reuse, which the implemented
+`cancelAuthorization`/`authorizationState` and the canonical-signature recovery are there to bound,
+and it should still be third-party audited before any mainnet reliance. The market-maker path
+introduces a *trust* dependency: `MarketMakerAllocation` funds a contracted counterparty, and the
+governance controls (`changeMarketMaker`, `changeAllocationRate`) are the only checks on that
+relationship, so their timelock and quorum matter. The price feed is operator-proposed and
+rate-limited, which is honest to state: it is not manipulation-proof the way a deep decentralized
+oracle would be, and downstream logic should treat it accordingly. Two specifics are worth stating because they are the failure modes a reviewer will look for first.
+On the wrapped-token side, EIP-3009 authorizations are single-use nonced messages: each carries a
+unique nonce whose consumption is recorded in `authorizationState`, so a submitted authorization
+cannot be replayed, and a holder who signed one they no longer want executed can burn it via
+`cancelAuthorization` before a relayer submits it. The malleability guard matters here too, because
+without canonical-signature recovery an attacker could reshape a valid signature into a second
+distinct-looking authorization; `_recoverCanonical` closes that. On the market-maker side, the honest
+statement is that `MarketMakerAllocation` concentrates trust in a contracted counterparty: the vault
+can be drained up to its allocation by whoever holds the market-maker role, so the safety of the
+arrangement reduces to the safety of `changeMarketMaker` and `changeAllocationRate`, which are the
+governance levers that appoint and bound that counterparty. Those levers should carry the same
+timelock and quorum as any treasury action (Paper VIII), and their event log is the audit trail a
+holder uses to verify the market-maker has not been changed without notice. As with every contract in
+the series, none of this substitutes for a professional audit, which remains a precondition for
+mainnet.
 
-An AMM has no levers — once deployed, parameters move only via
-governance contract upgrades. A contracted MM has dozens of
-levers — spread floor, inventory limits, max-trade size, daily
-volume cap — each settable via DAO proposal. This lets the
-network respond to market conditions at the speed of governance,
-not the speed of contract migration.
+## 5. The memetic thesis
 
-## 4. The compensation contract
+The name "Memetic Money Portal" is deliberate, and survives the mechanism change. In traditional
+finance, a monetary instrument's value derives from institutional backing; in cryptocurrency, much
+of it derives from narrative propagation. The meme-coin phenomenon showed that cultural resonance can
+bootstrap real economic networks, though meme coins typically lack utility beyond speculation. The
+portal's aspiration is to couple narrative and utility: the instrument that spreads culturally is
+also the instrument that does useful work, moving value and seeding liquidity. **Honest boundaries:**
+this depends on achieving cultural resonance, which is not an engineering variable and cannot be
+specified or guaranteed. We present the memetic thesis as a design philosophy, not a prediction, and
+we note it is even more clearly a philosophy now that the mechanism is a wrapped token and a
+market-maker rather than a collectible NFT.
 
-`MarketMakerAllocation.sol` (canonical address
-`0xF61e79AF3Bc2a905695E45b0fa7a43F9141a554a`):
+## 6. Compliance and honest boundaries
 
-- Receives **10% of every block's gas fees** as a stream.
-- Streams the accumulated balance to the registered MM address
-  on a configurable schedule (default: daily).
-- Has a **DAO-only `setRate(uint16)`** that can adjust the 10%
-  rate up to 25% or down to 0% via governance vote.
-- Has a **DAO-only `setMarketMaker(address)`** that fires the
-  current MM and authorizes a successor. A two-step transfer
-  (propose / accept) prevents accidental misallocation.
-- Has a **public `pendingRewards()`** view so the chain is
-  transparent about MM compensation — anyone can audit what's
-  paid out.
+This paper is written under Citrate Inc.'s public-communication policy, and two constraints apply
+directly. First, **no day-one cash earnings** are claimed from holding SALT, providing liquidity, or
+operating any part of this money-path; SALT is a utility and staking asset, cash convertibility is
+gated on mainnet and on audit, and any yield is a staked-grant construct, not a cash promise.
+Second, **SALT's availability on a licensed exchange is pending**, so nothing here should be read as
+a listing commitment or a solicitation. The February draft's fundraise targets, hard caps, and SPV
+structure are not carried forward; the implemented money-path is infrastructure, not an offering.
 
-The 10% rate is a **starting point**. v3 expects governance to
-tune it within the first 6 months based on observed liquidity
-quality (spread tightness, fill rates, inventory utilization).
+## 7. Relationship to the Gradient Papers Series
 
-## 5. The $SNAP NFT layer
+Paper I defines SALT tokenomics (1 trillion supply, distribution, staking minimums); the Memetic Money Portal
+provides the mechanism by which SALT reaches external markets without being sold in a fundraise.
+Paper VII (Mozi Cooperative) provides the economic philosophy of contribution-proportional
+ownership; the implemented money-path is thinner than the NFT-holder model the draft imagined, and
+the cooperative's ownership logic now lives primarily in `ContributionAccounting` (Paper VII), not in
+bridge NFTs. Paper VIII (BR1J Constitution) supplies the governance that controls the market-maker
+and price-feed parameters through `TreasuryGovernor`. Paper IX (Medusa Paradigm) offers the symbiotic
+framing, a host and its guest each benefiting, which now maps to the network and its contracted
+market-maker rather than to a coral-and-algae vault.
 
-The $SNAP NFTs from v2 remain — they are now **bridge-side
-governance tokens** with reduced economic role:
+## 8. Conclusion
 
-- Each $SNAP is an ERC-721 + ERC-6551 token-bound account on
-  Ethereum.
-- Holders **vote** on bridge parameters (MM identity, rate,
-  inventory caps) via Snapshot-style off-chain signing,
-  ratified on-chain via `TreasuryGovernor`.
-- $SNAP holders **receive a residual** of MM-allocation excess —
-  if the MM's compensation pool grows beyond a target reserve,
-  the overflow is distributed pro-rata to $SNAP holders.
+The Memetic Money Portal's durable idea, separate the instrument that bootstraps liquidity from the
+gas token, holds. Its *mechanism* changed: the ERC-6551 NFT bridge-as-fundraise of February 2026 was
+never deployed, and the money-path Citrate actually runs is a wrapped SALT token with EIP-3009
+gasless transfers, a governable market-maker allocation, and an on-chain SALT/USD feed, all deployed
+on chain 40204. This is a narrower, more auditable, and less dangerous design than a pooled-collateral
+bridge, and documenting the change honestly is the point of this revision. What remains before
+mainnet reliance is the same short list that gates the rest of the series: a professional audit, real
+SALT liquidity, and, for anything touching users' funds, the compliance posture Section 6 describes.
 
-This is intentionally **smaller** than v2's promise. v2 gave
-$SNAP holders direct ownership of bridge fees; v3 makes them
-governance-and-residual-only. The reasoning: a token that mainly
-governs is more legally defensible (less likely to be classed as
-a security under various jurisdictions) than a token that mainly
-extracts fees.
+## Acknowledgments
 
-## 6. The bonding-curve fundraise (historical, see §10)
+Drafting and literature triage were assisted by AI systems; all mechanical claims were verified by
+the authors against the referenced source files and deployed contracts on chain 40204. This work
+received no external funding.
 
-v2 described a per-wallet bonding curve from 1.0× to 3.0×
-discouraging whale accumulation. **v3 does not deploy this on
-mainnet.** The fundraise that occurred on Sepolia testnet
-(deployed at `0xB225F65B6a297dfe3A11BAD6e19E6f2f5D4AB247`) is
-preserved in archive but not promoted to mainnet.
+## References
 
-Reasoning: bonding curves are subtle to operate (whale-discouragement
-becomes whale-encouragement at the right Sybil count) and the
-current treasury mix already covers the launch capital
-requirements. Re-running the bonding curve on mainnet would be
-a re-launch of $SNAP, not a continuation; v3 chooses
-continuation.
+[1] ERC-6551: Non-fungible Token Bound Accounts. Ethereum Improvement Proposal (Windle, Giang, et al., 2023). *(Cited for the superseded design of Section 2.)*
+[2] ERC-3009: Transfer with Authorization. Ethereum Improvement Proposal.
+[3] ERC-20: Token Standard. Ethereum Improvement Proposal (Vogelsteller, Buterin, 2015).
+[4] Klosowski, L., Mendenhall, L. (2026). Citrate: Protocol Specification for an AI-Native BlockDAG Network. *The Gradient Papers No. I* (this series).
+[5] Klosowski, L., Mendenhall, L. (2026). The Mozi Cooperative. *The Gradient Papers No. VII* (this series).
+[6] Klosowski, L., Mendenhall, L. (2026). The BR1J Constitution. *The Gradient Papers No. VIII* (this series).
+[7] Klosowski, L., Mendenhall, L. (2026). The Medusa Paradigm. *The Gradient Papers No. IX* (this series).
+[8] Buterin, V. (2014). Ethereum: a next-generation smart contract and decentralized application platform.
+[9] Ronin Network (2022); Wormhole (2022); Nomad (2022). Bridge incident post-mortems. *(Cited for the bridge-risk record that motivated not shipping a lock-mint bridge.)*
 
-## 7. Settlement flow
+## Appendix A: Cross-Paper Parameter Consistency (reconciled against code, Aug 2026)
 
-The end-to-end ETH → SALT flow (mainnet, post-launch):
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| SALT total supply | 1,000,000,000,000 | Paper I §5 |
+| BFT threshold | 67/100 (2/3) | Paper I; `checkpoint.rs:88` |
+| WrappedSALT (EIP-3009) | deployed | `0xaa918302…`; `WrappedSALT.sol` |
+| MarketMakerAllocation | deployed | `0xa87fae5c…`; `MarketMakerAllocation.sol` |
+| SALT/USD feed (ComputePricingOracle) | deployed | `0xdcebd5ec…`; `ComputePricingOracle.sol` |
+| x402 payment-auth precompiles | `0x0200`–`0x0201` | `precompiles/x402.rs` |
+| SNAP/SALT lock-mint bridge | does not exist | superseded design (Section 2) |
 
-```
-Step 1: User signs an EIP-3009 TransferWithAuthorization on Ethereum:
-        "Transfer 1 ETH from me to the bridge custody multisig."
-Step 2: User submits the signed authorization to the MM's API.
-Step 3: MM verifies the signature off-chain and quotes:
-        "I'll pay you 100 SALT (at current market) for your 1 ETH."
-Step 4: User accepts; MM submits a settlement bundle to Citrate:
-        - calls 0x0201 TRANSFER_AUTH_VERIFY (precompile gas: 4200)
-        - on success, mints/releases SALT to user's Citrate address
-Step 5: Cross-chain bot relays the now-claimed authorization
-        to Ethereum, calling transferWithAuthorization() to pull
-        the user's ETH into the bridge multisig. MM-controlled
-        keys then route the ETH into MM inventory.
-```
-
-The reverse flow (SALT → ETH) inverts the directionality: user
-deposits SALT into a Citrate bridge contract, MM holds the SALT
-inventory and releases ETH on Ethereum.
-
-## 8. Failure modes & mitigations
-
-| Failure | Mitigation |
-|---------|-----------|
-| MM goes offline | Settlement is paused; users can withdraw deposits after a 7-day timeout via the bridge fallback contract. |
-| MM acts adversarially | DAO can fire via `setMarketMaker`. Worst-case loss is bounded by the MM's inventory at firing time. |
-| External oracle manipulation | The pricing reference uses **median of 3 CEXs**. A manipulated single-CEX feed is rejected. |
-| Sybil-vote on $SNAP governance | Quadratic voting (anti-whale) on parameter changes >10% deltas. |
-| Cross-chain MEV (settlement front-run) | Permissioned MM-only access to the settlement function on Citrate (via `onlyMarketMaker` modifier). |
-
-## 9. Implementation reality check
-
-| Component | Status | Citation |
-|-----------|--------|----------|
-| `MarketMakerAllocation` contract | **Implemented + Deployed** | `0xF61e79AF3Bc2a905695E45b0fa7a43F9141a554a` |
-| `X402Facilitator` (EIP-3009 verifier) | **Implemented + Deployed** | `0xc0fDE3a8a42f6479Cf12B4A5489E7A988C918e23` |
-| Bridge custody multisig | Specified — uses 3-of-5 hardware wallet Safe pre-launch | TBD |
-| MM operator (DLP / John Burnell) | Specified | onboarding pending |
-| Off-chain pricing oracle | Specified (3-CEX median) | not yet running |
-| Sepolia $SNAP NFT contracts | **Deployed** (testnet only) | `0xB225F65B6a297dfe3A11BAD6e19E6f2f5D4AB247` |
-| Mainnet $SNAP migration | **Not planned** for launch | post-launch governance |
-
-The **structural** components are on-chain. The **operational**
-relationship with DLP is in negotiation (per Saul's project
-notes); contract execution awaits MM signature.
-
-## 10. v2 → v3 archive note
-
-v2's bonding-curve fundraise design and AMM bridge mechanism
-are preserved for historical context in:
-
-- `archive/papers/Gradient_Papers_No6_Memetic_Money_Portal_v2.md`
-  (or the original .docx if that's where v2 lives)
-
-The v2 design is **not** the deployed system. Reading v2 to
-understand "what Citrate does today" will mislead. Read v3.
-
-## 11. References
-
-- Coinbase x402 protocol (https://www.x402.org).
-- ERC-6551 standard — Token Bound Accounts.
-- Citrate Paper I — protocol foundation, $SALT tokenomics.
-- Citrate Paper VII — economic framework that the MM
-  compensation slots into.
-- John Burnell / DLP correspondence — see Saul's project notes
-  for MM contracting details.
+---
+*This paper is part of the Gradient Papers series, published by Citrate Inc.*
+*Correspondence: Larry@citrate.ai*

@@ -1,343 +1,357 @@
 ---
-title: "The Substrate of Verifiable Inference: Halo2-KZG, Q16 Compute, and Attestation Gates (v3)"
+title: "The Substrate of Verifiable Inference: Halo2-KZG, Deterministic Q16 Compute, and Attestation Gates"
+series: "The Gradient Papers — No. X"
 version: v3
-created: 2026-04-28T04:35:00Z
+created: 2026-08-28T00:00:00Z
 branch: main
-author: Larry Klosowski + Saul Loveman + Claude Opus 4.7
+authors: "Larry Klosowski, Lauren Mendenhall"
+affiliation: "Citrate Inc."
 status: active
-maturity: Implemented — every primitive in this paper is on testnet 40204
-new_in_v3: yes (no v2 antecedent)
+maturity: Implemented
+supersedes: "v3-April draft (new in v3; no v2 antecedent)"
 ---
 
-# Paper X — The Substrate of Verifiable Inference (v3, new)
+# The Substrate of Verifiable Inference
+### Halo2-KZG, Deterministic Q16 Compute, and Attestation Gates
+
+**The Gradient Papers — No. X**
+Larry Klosowski, Lauren Mendenhall · Citrate Inc.
+Preprint — not yet peer reviewed.
+
+> **Maturity: [Implemented], with one feature-gate caveat.** Papers I–IX describe *what*
+> Citrate does. This paper describes *how the on-chain verification of off-chain AI work is
+> actually mechanized*. Every primitive here has code on the chain-40204 testnet; the one that
+> is compiled out of the default build (the Halo2-KZG verifier, behind a cargo feature) is
+> labelled as such, rather than presented as always-on.
 
 ## Abstract
 
-Papers I–IX describe **what** Citrate does. Paper X describes
-**how the on-chain verification of off-chain AI work is actually
-mechanized**. This paper is new in v3 because the substrate
-itself is new — the RM-M1 / RM-M1b / RM-M2 / RM-M3 sprint
-families landed between v2 and v3, and shipping in v0.5.0
-(2026-04-26).
+We present the substrate that lets Citrate certify off-chain AI computation on-chain without
+trusted custodians. It has four layers: **Q16.16 fixed-point arithmetic** giving
+bit-deterministic numeric primitives identical across CPUs; a **tensor canonical wire format**
+that fixes the byte layout crossing the contract/precompile boundary; a **Halo2-KZG
+zero-knowledge verifier** whose structured reference string is a public Powers-of-Tau ceremony;
+and **TEE attestation gates** that admit non-deterministic operations, such as large-model
+inference, on signed hardware evidence rather than a proof. We situate this hybrid against the
+2024–2026 verifiable-ML literature, which has produced practical zero-knowledge inference
+systems (zkLLM, ZKML, zkGPT), optimistic fraud-proof designs (opML), and determinism-focused
+verification (DiFR), and we argue that a chain needs both a proof path for small deterministic
+work and an attestation path for large non-deterministic work. We anchor every layer to source
+and give the honest status of each: the deterministic compute path and the on-chain attestation
+registry are live; the Halo2-KZG verifier is real and tested but ships behind a cargo feature;
+and full saturation-sound circuits and the production attestation implementation are scoped
+follow-ups.
 
-The substrate has four layers:
+**Keywords:** verifiable inference, zero-knowledge machine learning, Halo2, KZG, TEE
+attestation, fixed-point arithmetic, deterministic computation, precompiles
 
-1. **Q16.16 fixed-point arithmetic** — bit-deterministic numeric
-   primitives, identical across every CPU. (RM-M2)
-2. **Tensor canonical wire format** — a single byte-layout for
-   tensors that crosses the contract / precompile boundary.
-3. **Halo2-KZG ZK verifier substrate** — a proving system whose
-   SRS is the public Powers-of-Tau k=18 ceremony. (RM-M1b)
-4. **TEE attestation gates** — for non-deterministic operations
-   (e.g., LLM inference), an attestation contract that gates
-   precompile dispatch on signed evidence from a TEE worker.
-   (RM-M3, target deployment CM-08)
+## 1. Introduction
 
-Together these make on-chain certification of off-chain AI
-**possible without trusted custodians**. v3 is the first time
-the substrate is documented end-to-end at the paper level.
+A blockchain that hosts AI must answer a question ordinary chains never face: when a node
+claims it ran a model and got an output, how does the network *check*? Papers I–IX describe the
+surface, model registration, paraconsistent aggregation, mentorship, economics, governance. This
+paper documents the substrate beneath that surface, the mechanical layer at which "Citrate has
+verifiable inference" becomes a specific set of primitives a contract can call. A reader who
+stops at Papers I–IX could leave believing in verifiable inference without knowing what the
+verification consists of; if the substrate fails, every higher-level promise fails with it.
 
-## 1. Q16.16 fixed-point arithmetic [Implemented]
+Verification faces a hard split. Some computation is small and deterministic enough to prove in
+zero knowledge, a linear layer, a small classifier, where the network can demand a cryptographic
+proof that the output follows from committed weights and inputs. Other computation, a 70-billion
+parameter language-model forward pass, is far beyond practical proving time, and for it the only
+tractable trust anchor today is hardware attestation: run the work inside a confidential VM and
+have the hardware sign evidence of what ran. Citrate's substrate provides both paths and a
+common numeric and wire-format foundation underneath them, so that a contract can choose the
+trust model appropriate to the work rather than being forced into one.
 
-### 1.1 Why fixed-point
+**Status conventions.** As in the rest of the series: **[Implemented]** cites a source file or
+deployed address; **[Feature-gated]** exists in code but is compiled out of the default build;
+**[Specified]** is designed but unbuilt.
 
-Floats are non-deterministic across CPUs. ARM and x86 differ in
-rounding modes, fused-multiply-add semantics, and extended-
-precision register widths. For a ZK system to be sound, the
-result computed off-chain (by the prover, on real hardware) must
-be **bit-identical** to the result encoded as a witness in the
-ZK circuit (which lives over a finite field).
+## 2. Related Work: the verifiable-ML landscape (2024–2026)
 
-Q16.16 — one i32 = sign + 15 integer bits + 16 fractional bits —
-gives us:
+The April draft of this paper cited no academic prior art; this revision corrects that, because
+the field it sits in has matured quickly and Citrate must be positioned against it.
 
-- **Bit-deterministic** arithmetic (integer-only, saturating).
-- **5-decimal-digit dynamic range**, enough for forward
-  inference of small networks.
-- **Single-cycle add/subtract** on every modern CPU.
-- **Two-cycle multiply** with 32-bit intermediate, no precision
-  loss.
+**Zero-knowledge inference.** ZKML (Chen, Waiwitlikhit, Stoica, Kang, EuroSys 2024) [3] is an
+optimizing compiler from ML computation to zero-knowledge circuits, and establishes the
+practicality baseline for small-to-medium models. zkLLM (Sun, Li, Zhang, CCS 2024) [4]
+introduces tlookup and a specialized zkAttn to bring a full large-language-model forward pass
+into a proof, on the order of fifteen minutes for a Llama-2-13B inference. zkGPT (Qu et al.,
+USENIX Security 2025) [5] drives GPT-2-scale proving down to tens of seconds; we note this
+figure belongs to zkGPT and not to zkLLM, a distinction easy to blur. A 2025 survey [6]
+organizes the space into training, test, and inference verification. Citrate's Halo2-KZG path
+(Section 5) is in this lineage but deliberately scoped: it proves small deterministic layers
+today and leans on attestation for anything large, rather than claiming to prove LLM inference.
 
-CI tripwire `scripts/ci/check_m2_no_float_in_q16.py` blocks any
-commit that introduces `f32` / `f64` / `to_f64` in
-`precompiles/q16/`.
+**Optimistic and interactive alternatives.** opML (Conway et al., 2024) [7] replaces proofs
+with fraud proofs: a result is assumed correct and challengeable, echoing optimistic rollups.
+This is cheaper than zero knowledge and complements Citrate's optimistic inference tier
+(Paper I §3.3), but its security depends on an honest challenger being online, and it does not
+give the immediate cryptographic settlement a proof does.
 
-### 1.2 The exp function
+**Determinism as a first-class problem.** DiFR (2025) [8] verifies inference despite
+nondeterminism, which is precisely why Citrate's substrate begins with fixed-point arithmetic:
+a proof or a cross-node re-execution is only meaningful if the computation is bit-reproducible
+in the first place. Where DiFR tolerates nondeterminism at the verification layer, Citrate
+eliminates it at the arithmetic layer for the deterministic path (Section 3), and confines
+nondeterminism to the attestation path (Section 7).
 
-The hardest deterministic operation is `exp(x)`. v3 ships
-`q16_exp` via 7-term Taylor with range reduction by `ln(2)`,
-using Q48 (i128) intermediates to preserve precision:
+**TEE-attested inference.** A growing line of work uses confidential computing to attest
+generative inference, including optimistic TEE-rollup hybrids for blockchain settlement [9].
+Citrate's attestation registry (Section 7) is in this family, pinning Microsoft Azure
+Attestation and NVIDIA remote-attestation trust roots. The distinguishing choice is that
+attestation gates *precompile dispatch*: a non-deterministic operation is not merely recorded as
+attested, it is refused execution unless attestation succeeds.
+
+Citrate's contribution is not a new proof system but the composition: one deterministic numeric
+foundation, one wire format, a proof path for what can be proven, and an attestation path for
+what cannot, all callable from ordinary EVM contracts.
+
+## 3. Q16.16 fixed-point arithmetic [Implemented]
+
+**Why fixed-point.** Floating point is non-deterministic across CPUs: ARM and x86 differ in
+rounding modes, fused-multiply-add semantics, and extended-precision register widths. For a
+zero-knowledge system to be sound, the result computed off-chain by the prover on real hardware
+must be bit-identical to the result encoded as a witness in the circuit over a finite field.
+Q16.16, a single `i32` carrying a sign, 15 integer bits, and 16 fractional bits, gives
+bit-deterministic integer-only saturating arithmetic, roughly five decimal digits of dynamic
+range (enough for forward inference of small networks), single-cycle add/subtract, and
+two-cycle multiply with a 32-bit intermediate and no precision loss. The arithmetic lives in
+`core/execution/src/precompiles/q16/ops.rs`, and cross-platform determinism is pinned by
+fixtures at `tests/cross_platform/q16_determinism.rs`. A CI tripwire blocks any commit that
+introduces `f32`/`f64` in the Q16 precompile tree, so the determinism property cannot silently
+regress.
+
+**The exp function.** The hardest deterministic operation is `exp(x)`, needed for softmax. The
+substrate computes it by range reduction and Taylor series with wide intermediates:
 
 ```
-q16_exp(x) =
-    1. Decompose x = k · ln(2) + r,  |r| ≤ ln(2)/2
-    2. Compute exp(r) via 7-term Taylor: 1 + r + r²/2! + ... + r⁷/7!
-    3. Multiply by 2^k via integer shift
-    4. Saturate result to Q16 range
+q16_exp(x):
+  1. Decompose x = k * ln(2) + r,  with |r| <= ln(2)/2
+  2. Compute exp(r) via 7-term Taylor: 1 + r + r^2/2! + ... + r^7/7!
+     using Q48 (i128) intermediates to preserve precision
+  3. Multiply by 2^k via integer shift
+  4. Saturate the result to the Q16 range
 ```
 
-Worst-case error: ≤ 32 ULP across the entire Q16 range. For
-softmax this is sub-percent error after normalization, comfortably
-inside the precision required for inference.
+Worst-case error is at most 32 ULP across the entire Q16 range; after softmax normalization this
+is sub-percent, comfortably inside the precision inference requires (`precompiles/q16/exp.rs`).
 
-Source: `precompiles/q16/exp.rs`. Spec:
-`specs/tla/compute/Q16ArithmeticDeterminism.tla` (verified, 265
-states).
-
-### 1.3 Six compute precompiles
-
-The Q16 substrate exposes six precompiles at `0x010A–0x010F`:
+**Six compute precompiles.** The Q16 substrate exposes six operations at `0x010A`–`0x010F`
+(`core/execution/src/precompiles/compute.rs`):
 
 | Precompile | Operation | Cap |
 |-----------|-----------|-----|
-| `0x010A` Q16_MATMUL | `C = A · B` | `m·n·p ≤ 2²⁰` |
-| `0x010B` Q16_DOT | dot product | `len ≤ 2¹⁶` |
-| `0x010C` Q16_SOFTMAX | numerically-stable softmax | `len ≤ 1024` |
-| `0x010D` Q16_RELU | `max(0, x)` elementwise | `len ≤ 2²⁰` |
-| `0x010E` Q16_LINEAR | `y = Wx + b` | `out × in ≤ 2¹⁸` |
-| `0x010F` Q16_TRANSPOSE | matrix transpose | `m·n ≤ 2¹⁸` |
+| `0x010A` Q16_MATMUL | C = A * B | m*n*p <= 2^20 |
+| `0x010B` Q16_DOT | dot product | len <= 2^16 |
+| `0x010C` Q16_SOFTMAX | numerically-stable softmax | len <= 1024 |
+| `0x010D` Q16_RELU | max(0, x) elementwise | len <= 2^20 |
+| `0x010E` Q16_LINEAR | y = Wx + b | out * in <= 2^18 |
+| `0x010F` Q16_TRANSPOSE | matrix transpose | m*n <= 2^18 |
 
-Each validates dtype = Q16_16 and rejects with revert on
-mismatch. Each performs **validate-before-allocate** — caps
-checked from the parsed header before any large allocation.
+Each validates the dtype as Q16.16 and reverts on mismatch, and each performs
+validate-before-allocate: caps are checked from the parsed header before any large allocation,
+bounding memory consumption to the cap regardless of caller intent.
 
-Source: `precompiles/compute.rs`. Detailed wire format:
-`PRECOMPILES.md`.
+## 4. Tensor canonical wire format [Implemented]
 
-## 2. Tensor canonical wire format [Implemented]
+A precompile and a Solidity contract must agree on byte layout before they can hash, verify, or
+compute over a tensor. The canonical format is an 8-byte header (magic `0x54` = 'T', a version
+byte, a dtype byte, a rank byte of at most 4, and reserved zero bytes), followed by the shape as
+one little-endian `uint32` per dimension, followed by the packed data. The parser returns an
+oversize error *before* allocation if the declared shape exceeds the per-precompile cap, which
+is what makes the caps in Section 3 memory-safe rather than advisory. The format is
+ABI-friendly: a Solidity `bytes calldata` holding canonical tensor bytes can be `keccak256`'d
+for direct comparison or transmitted with `abi.encodePacked`, and a contract that needs to
+remember a tensor stores a single hash rather than the tensor itself. Poseidon commitments over
+this layout are produced by precompile `0x0107` (TENSOR_COMMIT) and Merkle inclusion is checked
+by `0x0109` (MERKLE_VERIFY_TENSOR), both in `core/execution/src/precompiles/verify.rs`.
 
-A precompile and a Solidity contract have to agree on byte
-layout before they can hash, verify, or compute. The format:
+## 5. Halo2-KZG verifier substrate [Implemented, feature-gated]
 
-```
-header (8 bytes):
-  byte 0:    magic = 0x54 ('T')
-  byte 1:    version = 0x01
-  byte 2:    dtype (0x01 = Q16_16)
-  byte 3:    rank (≤ 4)
-  byte 4–7:  reserved (zero)
+**Why Halo2-KZG rather than a per-circuit trusted setup.** An earlier substrate used Groth16
+with a per-circuit trusted setup; the current substrate uses Halo2-KZG with a public
+Powers-of-Tau ceremony. The migration buys a universal setup (one ceremony serves all circuits),
+native recursion via folding and accumulation, and the ability to change a circuit by
+regenerating a verifying key rather than running a new trusted setup. The cost is on-chain
+verification gas, a single SHPLONK pairing check is several times more expensive than Groth16,
+which is acceptable here because inference proofs are submitted by sophisticated counterparties
+and the transparency of a universal, publicly-audited setup outweighs the gas cost for a public
+chain.
 
-shape (rank × 4 bytes):
-  uint32-LE per dimension
+**Honest status.** The verifier is real code: `verify_inference_proof` at
+`core/execution/src/zkp/halo2/mod.rs:199` uses `verify_proof_multi`, the KZG commitment scheme,
+the SHPLONK verifier, and a Blake2b transcript, and it is exercised by tests including
+`tests/inference_proof_verify_real_srs.rs`, `tests/porep_proof_verify_e2e.rs`, and
+`tests/post_proof_verify_e2e.rs`. It is dispatched by precompile `0x0108`
+(`verify.rs:118`). **But it is compiled behind the `halo2-substrate` cargo feature**; in the
+default build, `0x0108` returns a discoverable "feature absent" error (`mod.rs:132`). This paper
+states that plainly: proving and verifying are implemented and tested, and off by default. A
+deployment that needs on-chain KZG verification enables the feature; one that relies on the
+attestation path does not.
 
-data:
-  shape.product() × dtype.byte_width() bytes
-```
+**The inference circuit.** The v1 `InferenceCircuit` exposes three public inputs, a Poseidon
+commitment to the input vector, a Poseidon commitment to the flattened weights and bias, and a
+Poseidon commitment to the output, and privately witnesses the Q16 weights, inputs, and biases.
+Its constraints enforce that the output equals the linear layer applied to the witnessed weights
+and inputs, and that each public commitment equals the Poseidon hash of the corresponding cells,
+bound via copy constraints so a malicious prover cannot feed different values to the hash than to
+the arithmetic. The circuit is composed from a Poseidon chip and a linear chip
+(`core/execution/src/zkp/halo2/circuits.rs`, `chips.rs`). The v1 dimensions are small
+(`out_dim=1, in_dim=2`); larger sizes are configuration-only changes to the witness vectors and
+the keygen parameter, since the circuit logic is already general.
 
-`tensor_format.rs::TensorView::parse` returns
-`OversizeTensor` **before** allocation if the declared shape
-exceeds the per-precompile cap. This bounds memory consumption
-to the cap regardless of caller intent.
+**Soundness sketch and a v1 limitation.** The circuit reduces "I ran the linear layer correctly"
+to a SHPLONK pairing check whose soundness inherits from Halo2-KZG knowledge soundness under the
+discrete-log assumption and the secrecy of the Powers-of-Tau setup, from the Poseidon chip
+matching the off-chain hash byte-for-byte (round-trip tested), and from the linear chip's gate
+equations matching Q16 overflow semantics over the field. A full cryptographic soundness proof is
+deferred to the underlying Halo2 and KZG literature; a state-machine-level property (verifier
+version monotonicity) is model-checked in TLA+. One honest limitation: the linear chip does not
+yet enforce Q16 saturation in-circuit, so the v1 off-chain witness contract is that inputs stay
+in range, and the application layer must enforce ranges before submitting proofs. Full
+saturation soundness via in-circuit lookup range checks is a scoped follow-up.
 
-The format is **ABI-friendly** — Solidity `bytes calldata`
-holding canonical-format tensor bytes can be `keccak256`'d for
-direct comparison, or `abi.encodePacked`'d for transmission. A
-contract writing a tensor to storage stores a single hash, not
-the tensor itself.
+## 6. Structured reference string resolution [Implemented]
 
-## 3. Halo2-KZG verifier substrate [Implemented]
+The structured reference string is loaded from a `.ptau` file named by the `CITRATE_PTAU_PATH`
+environment variable. The loader (`core/execution/src/zkp/halo2/ptau.rs`) hash-verifies the file
+against an embedded expected SHA-256 for the k=18 ceremony before parsing, so a tampered or
+wrong file is rejected fail-closed. If the variable is unset, the verifier falls back to a
+deterministic setup with a hardcoded seed; this is reproducible across nodes but cryptographically
+insecure (the toxic waste is reproducible) and is for development and test only. The production
+runbook covers acquisition of the real ceremony file and its hash verification.
 
-### 3.1 Why Halo2-KZG (not Groth16)
+## 7. TEE attestation gates [Implemented registry; Specified precompile gate]
 
-The legacy substrate (RM-M0) used Groth16 with a per-circuit
-trusted setup. v3 substrate (RM-M1b) uses Halo2-KZG with the
-public Powers-of-Tau k=18 ceremony. The migration motivations:
+**The non-determinism problem.** Some operations cannot be proven in zero knowledge at any
+practical cost, a large-model forward pass being the canonical example. For these the substrate
+offers hardware attestation: a worker runs the inference inside a confidential VM (Azure
+confidential GPU VMs with NVIDIA H100 support under the current target), the hardware produces an
+attestation token combining a Microsoft Azure Attestation JWT with NVIDIA remote-attestation
+evidence, and an on-chain registry verifies the token against pinned trust roots.
 
-| Concern | Groth16 | Halo2-KZG |
-|---------|---------|-----------|
-| Trusted setup | Per-circuit | Universal (PPoT k=18, hundreds of contributors) |
-| Recursion | No native | Yes (folding + accumulation) |
-| Proof size | ~200 bytes | ~10 KB |
-| Verification gas | ~250K | ~1M (single SHPLONK pairing) |
-| Circuit changes | New trusted setup required | Just regenerate VK |
+**What is deployed.** The `TEEAttestationRegistry` contract is deployed on chain 40204 at
+`0x4df26aae3619f449a142d237ed818ebf7c186ed5` (the April draft listed an earlier address; this is
+the current one). It implements attestation submission (`submitAttestation`,
+`submitAttestationStrictBound`), lookup (`isAttested`, `getAttestation`), a dispute path for
+serving expired attestations (`reportExpiredServe`, `finalizeReport`), governance of the MAA and
+NRAS signer trust roots and MAA RSA keys, and a strict-cryptographic-mode switch. It is consumed
+on-chain by `ComputePoolPipeline.sol` and `ComputeVerifier.sol`. So the on-chain attestation
+state machine is real and live.
 
-The trade-off is **verification gas**: Halo2-KZG is ~4× more
-expensive on-chain. For Citrate this is acceptable because (a)
-inference proofs are submitted by sophisticated counterparties
-(model serving providers), (b) the *transparency* benefit of
-universal SRS outweighs gas cost for a public chain.
+**What is still gated.** On the precompile side, the non-deterministic inference operations
+(`0x0101`, `0x0102`) gate their dispatch on attestation, and in the default production build the
+gate is fail-closed: a `AlwaysReject` attestation gate is the shipped default, and a full
+Microsoft Azure Attestation plus NVIDIA remote-attestation implementation of the gate is the
+scoped follow-up. The gate is pre-deployed precisely so that when the production implementation
+ships it is a swap-in rather than an architectural change: contracts already using the
+gate-checked precompiles keep working, the gate simply stops always-rejecting, and the chain
+stays running while attestation is upgraded with no contract redeployment. A CI tripwire ensures
+any new non-deterministic operation declares its attestation requirement.
 
-The legacy Groth16 substrate (`zkp/inference_proof.rs`, 1005
-lines) was **fully deleted** in commit `781a8b03` (RM-M1b WP-M1b.4)
-once the Halo2 path was confirmed working.
+## 8. End-to-end verifiable inference flow
 
-Source decision: `.agentile/planset/adr/ADR-RM-M1b-1-halo2-kzg-substrate.md`.
+The layers compose into a complete flow. Off-chain, a provider runs inference inside a TEE and
+obtains the input/output pair plus an attestation token. On-chain, the provider posts the pair
+to the inference router, which calls `TEEAttestationRegistry` to verify the token; on success the
+tuple is settled and paid. Optionally, for small deterministic layers, the provider also
+generates a Halo2-KZG proof that the output matches the committed weights and the contract calls
+`0x0108` to verify it (with the `halo2-substrate` feature enabled). Optionally, a contract calls
+the `0x010A`–`0x010F` Q16 compute precompiles for arbitrary deterministic post-processing. The
+deterministic compute path and the on-chain attestation registry are live today on testnet
+40204; the production MAA+NRAS gate implementation is the remaining piece for the fully
+non-deterministic path.
 
-### 3.2 The InferenceCircuit v1
+## 9. Implementation reality check
 
-```
-Public inputs (3 slots, single Instance column):
-  PI[0] = Poseidon(x[0..in_dim])      input commitment
-  PI[1] = Poseidon(W flat ‖ b)         model commitment
-  PI[2] = Poseidon(y[0..out_dim])     output commitment
+| Component | Status | Anchor |
+|-----------|--------|--------|
+| Q16 arithmetic + exp | Implemented | `precompiles/q16/{ops,exp}.rs` |
+| 6 Q16 compute precompiles (0x010A–0x010F) | Implemented, live | `precompiles/compute.rs` |
+| Tensor canonical wire format | Implemented | `precompiles/verify.rs`, format parser |
+| Poseidon commit / Merkle verify (0x0107/0x0109) | Implemented | `precompiles/verify.rs` |
+| Halo2-KZG verifier (0x0108) | Implemented, **feature-gated `halo2-substrate`** | `zkp/halo2/mod.rs:199` (real), `:132` (stub) |
+| InferenceCircuit v1 | Implemented | `zkp/halo2/circuits.rs` |
+| PPoT k=18 SRS loader (hash-verified) | Implemented | `zkp/halo2/ptau.rs` |
+| TEEAttestationRegistry (on-chain) | Implemented, deployed | `0x4df26aae…`; `TEEAttestationRegistry.sol` |
+| Precompile attestation gate (0x0101/0x0102) | Fail-closed default; production impl Specified | `precompiles/inference.rs` |
+| In-circuit Q16 saturation lookups | Specified | future sprint |
+| TLA+ specs (verifier monotonic, Q16 determinism, attestation) | Verified | `specs/tla/{zk,compute}/` |
 
-Private witness:
-  W: out_dim × in_dim Q16 weights
-  x: in_dim Q16 inputs
-  b: out_dim Q16 biases
+## 9b. Threat model and trust boundaries
 
-Constraints:
-  y = LinearChip(W, x, b)              (gate-enforced)
-  Poseidon(x cells)         = PI[0]    (cell-bound via copy constraints)
-  Poseidon(W cells ‖ b cells) = PI[1]
-  Poseidon(y cells)         = PI[2]
-```
+It is worth stating plainly what each path does and does not protect against, because the two
+paths have different trust boundaries and conflating them is the easiest way to overclaim.
 
-The cell-bindings (via `PoseidonChip::hash_n_from_cells`) prevent
-a malicious prover from feeding different values to the hash than
-to the linear layer. The chip is composed in
-`core/execution/src/zkp/halo2/circuits.rs` from
-`PoseidonChip` + `LinearChip` (in `chips.rs`).
+**The deterministic proof path (Q16 + Halo2-KZG).** Here the trusted base is cryptographic and
+minimal: the discrete-log assumption, the secrecy of at least one honest contributor to the
+Powers-of-Tau ceremony, and the correctness of the verifier code. A prover cannot make the
+verifier accept an output that does not follow from the committed weights and inputs without
+breaking one of these, and the cell-binding copy constraints close the specific gap where a
+prover might hash one set of values while computing on another. The residual risks are concrete
+and named: the v1 circuit does not enforce Q16 saturation in-circuit, so an out-of-range input
+is a soundness gap the application layer must exclude until the lookup-based range checks land;
+and because the verifier is feature-gated, a deployment that forgets to enable `halo2-substrate`
+gets a fail-closed "feature absent" rather than a silent accept, which is the safe failure but
+still a configuration hazard the runbook must cover. The proof path does not protect against a
+wrong *model* being committed; it proves computation over whatever weights were committed, so
+model provenance (Paper I's registry) is a separate and necessary control.
 
-v1 dimensions: `out_dim=1, in_dim=2`. Larger sizes are
-**configuration-only changes** — the witness vectors and the
-keygen `k` parameter need updating, the circuit logic itself is
-already general.
+**The attestation path (TEE + registry).** Here the trusted base is larger and hardware-rooted:
+the confidential-VM manufacturer, the attestation services whose roots are pinned in the
+registry, and the assumption that the enclave was not physically compromised. This is a
+strictly weaker guarantee than a proof, and the substrate treats it that way, it is offered only
+for computation that cannot be proven at practical cost, and it is gated rather than assumed.
+The registry's dispute path (`reportExpiredServe`/`finalizeReport`) exists because attestation
+tokens expire and a provider might serve stale evidence; the strict-cryptographic-mode switch
+exists so an operator can require full signature verification rather than trusting a softer
+check. The honest characterization is that the attestation path moves trust from "the provider's
+word" to "the provider's hardware and its attestation roots," which is a large improvement over
+an unverified oracle but is not the custodian-free guarantee the proof path provides.
 
-### 3.3 Sketch of soundness
+**Why both.** A chain that offered only proofs could not host large-model inference at all; a
+chain that offered only attestation would be custodial for its most valuable operations. The
+substrate's position is that the trust model should match the computation: prove what is
+provable, attest what is not, and never present the second as the first. The end-to-end flow of
+Section 8 lets a single application use both, a proven deterministic post-processing step over an
+attested large-model output, so the trust boundary is drawn as tightly as the work allows.
 
-The InferenceCircuit reduces "I ran the linear layer correctly"
-to a SHPLONK pairing check. Soundness inherits from:
+## 10. Conclusion
 
-1. **Halo2-KZG soundness**: knowledge soundness under the
-   discrete-log assumption + power-of-tau setup secrecy.
-2. **PoseidonChip correctness**: `hash_n_from_cells` matches the
-   off-chain Poseidon implementation byte-for-byte (verified by
-   round-trip tests in `chips.rs::tests`).
-3. **LinearChip correctness**: gate equations enforce
-   `y[i] = ((Σⱼ W[i,j] · x[j]) >> 16) + b[i]` over Fr field
-   arithmetic, matching Q16 overflow semantics.
+The substrate is the mechanical foundation the rest of the series rests on. Its deterministic
+numeric layer makes proofs and cross-node re-execution meaningful; its wire format lets contracts
+and precompiles agree on tensors; its Halo2-KZG path proves small deterministic computation
+against a public setup; and its attestation gates admit the large non-deterministic computation
+that no proof system can yet reach, refusing it unless the hardware evidence checks out. We have
+been explicit about the seams: the KZG verifier is real but ships behind a feature, the
+attestation registry is deployed while the production precompile-side gate is a scoped swap-in,
+and saturation-sound circuits are a follow-up. A chain that hosts AI needs both a proof path and
+an attestation path, and it needs to be honest about which parts of each are live. This paper is
+that account.
 
-A formal soundness proof is beyond the scope of this paper —
-it's tracked in `specs/tla/zk/Halo2VerifierVersionMonotonic.tla`
-(state-machine-level), with the cryptographic argument deferred
-to the underlying Halo2 / KZG papers.
+## Acknowledgments
 
-### 3.4 Saturation status (v1 limitation)
+Drafting and literature triage were assisted by AI systems; all mechanical claims were verified
+by the authors against the referenced source files and the deployed contract on chain 40204. This
+work received no external funding.
 
-The LinearChip does **not** enforce Q16 saturation in-circuit.
-The off-chain witness contract is that inputs stay in safe range.
-This is the v1 limitation; **RM-M2b** adds lookup-table range
-checks for full saturation soundness (target: 6-month follow-up).
+## References
 
-For v1 deployment, the application layer (e.g.,
-`InferenceRouter`) must enforce input ranges before submitting
-proofs. Documented in `ZK_VERIFICATION.md` §2.
+[1] Bowe, S., Grigg, J., Hopwood, D. (2019). Halo: recursive proof composition without a trusted setup. *IACR ePrint 2019/1021.*
+[2] Boneh, D., Bonneau, J., Bünz, B., Fisch, B. (2018). Verifiable delay functions. *CRYPTO.*
+[3] Chen, B.-J., Waiwitlikhit, S., Stoica, I., Kang, D. (2024). ZKML: an optimizing system for ML inference in zero-knowledge proofs. *EuroSys.*
+[4] Sun, H., Li, J., Zhang, H. (2024). zkLLM: zero-knowledge proofs for large language models. *ACM CCS*; arXiv:2404.16109.
+[5] Qu, W., et al. (2025). zkGPT: an efficient non-interactive zero-knowledge proof framework for LLM inference. *USENIX Security.* (Source of the tens-of-seconds GPT-2 proving figure.)
+[6] Peng, Z., Wang, T., et al. (2025). A survey of zero-knowledge proof based verifiable machine learning. arXiv:2502.18535.
+[7] Conway, K. D., et al. (2024). opML: optimistic machine learning on blockchain. arXiv:2401.17555.
+[8] (2025). DiFR: inference verification despite nondeterminism. arXiv:2511.20621. *(Verify author list before final submission.)*
+[9] (2025). Optimistic TEE-rollups: a hybrid architecture for scalable and verifiable generative AI inference on blockchain. arXiv:2512.20176. *(Verify author list before final submission.)*
+[10] Microsoft Azure Attestation. Product documentation.
+[11] NVIDIA. Confidential computing and H100 remote attestation (NRAS). Product documentation.
+[12] Grassi, L., Khovratovich, D., Rechberger, C., Roy, A., Schofnegger, M. (2021). Poseidon: a new hash function for zero-knowledge proof systems. *USENIX Security.*
 
-## 4. SRS (Powers-of-Tau) source resolution [Implemented]
-
-The SRS is loaded from a `.ptau` file specified by the
-`CITRATE_PTAU_PATH` environment variable. The loader
-(`zkp/halo2/ptau.rs`) **hash-verifies** the file against the
-embedded constant `srs::EXPECTED_PTAU_SHA256_K18` before
-parsing. A tampered or wrong file is rejected fail-closed.
-
-If `CITRATE_PTAU_PATH` is unset, the verifier falls back to
-`ParamsKZG::setup` with a hardcoded seed `[0x4D; 32]`. This is
-**INSECURE** (toxic waste reproducible) but DETERMINISTIC across
-nodes. Dev/test only. Production runbook
-`runbooks/RM_M1B_SOAK.md` covers acquisition + hash verification.
-
-## 5. TEE attestation gates [Implemented + Specified deployment]
-
-### 5.1 The non-determinism problem
-
-Some operations cannot be ZK-verified: a 70B-parameter LLM
-inference would take exponential proving time. For these the
-substrate offers a **TEE-based shortcut**:
-
-- A worker runs the inference inside a Confidential VM
-  (Azure DCsv5 with NVIDIA H100 GPUs supported under the v3
-  target).
-- The TEE produces an **attestation token** (Microsoft Azure
-  Attestation MAA JWT + NVIDIA NRAS evidence).
-- The attestation contract `TEEAttestationRegistry`
-  (`0x26333384a517c50d8B116979490b4AD1506F1F9a`) verifies the
-  token against pinned trust roots.
-- Precompile dispatch for non-deterministic ops gates on
-  successful attestation lookup.
-
-### 5.2 The AttestationGate trait
-
-The substrate exposes an `AttestationGate` trait with a default
-`AlwaysReject` implementation (Phase 1) and a planned
-`MaaPlusNras` implementation (Phase 2 / CM-08). Source:
-`core/execution/src/precompiles/attestation/`.
-
-This means: today, non-deterministic precompiles (`0x0101`,
-`0x0102`) **always reject** in production builds via
-strict-mode enforcement. CI tripwire
-`scripts/ci/check_m3_attestation_gate_required.py` ensures any
-new non-deterministic op declares its attestation requirement.
-
-### 5.3 Why pre-deploy the gate before the implementation
-
-The gate is **pre-deployed** so that when the MAA+NRAS impl ships,
-it's a **swap-in**, not an architectural change. Contracts that
-already use the gate-checked precompiles continue working; the
-gate just stops always-rejecting.
-
-This matters operationally: the chain stays running while
-attestation is upgraded; no contract needs to be redeployed.
-
-## 6. End-to-end verifiable inference flow
-
-The substrate composes for a complete verifiable inference:
-
-```
-1. Off-chain: provider runs inference inside a TEE.
-2. TEE produces (input, output) + MAA+NRAS attestation token.
-3. On-chain: provider posts (input, output) to InferenceRouter.
-4. InferenceRouter calls TEEAttestationRegistry.verify(token).
-   On success, the (input, output) tuple is settled and paid.
-5. (Optional) Provider also generates a Halo2-KZG proof
-   that the output matches the inference circuit on the
-   committed weights. Contract calls 0x0108 to verify.
-6. (Optional) Solidity contract calls 0x010A–0x010F Q16
-   compute precompiles for arbitrary Q16 post-processing.
-```
-
-Step 4 requires CM-08 (TEE attestation deployment, target
-2026-Q3). Steps 1–3 and 5–6 are **live today** on testnet 40204.
-
-## 7. Implementation reality check
-
-| Component | Status | Citation |
-|-----------|--------|----------|
-| Q16 substrate | **Implemented** | `precompiles/q16/{ops,exp}.rs` |
-| 6 Q16 compute precompiles (0x010A–0x010F) | **Implemented + Live** | RM-M2 |
-| Tensor canonical wire format | **Implemented** | `tensor_format.rs` |
-| Halo2-KZG verifier (0x0108) | **Implemented + Live** | RM-M1b WP-M1b.4 |
-| InferenceCircuit v1 (out_dim=1, in_dim=2) | **Implemented** | `circuits.rs` |
-| PPoT k=18 SRS loader | **Implemented** | `ptau.rs` |
-| AttestationGate trait + AlwaysReject | **Implemented** | RM-M3 |
-| MAA+NRAS attestation impl | Specified | CM-08 (target Q3 2026) |
-| RM-M2b saturation lookup tables | Specified | future sprint |
-| TLA+ specs (verifier monotonic, Q16 determinism, dispatch injective, attestation) | **Verified** | `specs/tla/{zk,compute}/` |
-
-## 8. Why this paper exists
-
-The Gradient Papers I–IX describe the **what** and the **why**.
-This paper documents the **how** at the deepest mechanical layer.
-A reader who reads only Papers I–IX could leave thinking
-"Citrate has verifiable inference" without knowing what the
-verification actually consists of.
-
-The substrate is the mechanical foundation that all the
-higher-level promises rest on. If the substrate fails, the
-promises fail.
-
-## 9. References
-
-- Bowe, S. et al. (2020). *Halo2: Recursive proof composition
-  without a trusted setup*. Electric Coin Co.
-- Hermez / Polygon Powers-of-Tau ceremony (2021–2022).
-- Boneh, D. et al. (2018). *Verifiable Delay Functions*. Crypto.
-- Microsoft Azure Attestation documentation.
-- NVIDIA NRAS (Confidential Computing) — H100 attestation.
-- Citrate Papers I, II, III — the surface this substrate
-  supports.
-- `PRECOMPILES.md`, `ZK_VERIFICATION.md` — developer-side
-  reference for using these primitives.
-- `.agentile/planset/adr/ADR-RM-M1b-1` and `ADR-RM-M2-1` —
-  decision records.
+---
+*This paper is part of the Gradient Papers series, published by Citrate Inc.*
+*Correspondence: Larry@citrate.ai*
