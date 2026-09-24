@@ -30,8 +30,8 @@ lives in the public Agentile archive at `citrate-agentile-archive/formal/specs/`
 index at `formal/specs/INDEX.md` and the spec-to-code mapping in `formal/mapping/` (`tla_to_solidity.md`,
 `tla_to_slint.md`). A runnable subset is mirrored into each repo under `specs/tla/` so the specs can be
 exercised in continuous integration next to the code they constrain. The archive is the reproducible source
-of truth: it currently holds roughly 169 `.tla` files under `formal/specs/` across twelve domains — count
-them in the archive rather than trusting any summary number, since the corpus grows over time — and take
+of truth: it currently holds roughly 169 `.tla` files under `formal/specs/` across twelve domains - count
+them in the archive rather than trusting any summary number, since the corpus grows over time - and take
 invariant totals and TLC outcomes from `INDEX.md` and the per-repo `VERIFICATION_REPORT.txt`, not from older
 summary files.
 
@@ -118,10 +118,10 @@ the corpus or on this page. We link the specs and their indices rather than copy
   subsets named above.
 - Audited against SHA: `f28358f` (citrate-agentile-archive); per-repo subsets pinned at each repo's HEAD,
   for example citrate-chain at `e68af83`.
-- Status: a subset of specs carry recorded TLC runs — for example `ExecutorMVCC.tla` (checked at Small,
+- Status: a subset of specs carry recorded TLC runs - for example `ExecutorMVCC.tla` (checked at Small,
   Liveness, and Medium configurations, with a deep run reported clean) and `Halo2VerifierVersionMonotonic.tla`
   (four invariants). These are **bounded** model checks over abstract, finite configurations, not exhaustive
   proofs over the unbounded system, and the largest specs (the `cit-agent` domain) are checked at bounded
   parameters only. The corpus as a whole is Specified and being checked spec by spec; do not read a global
-  "N verified" figure into it — consult `INDEX.md` and each repo's `VERIFICATION_REPORT.txt` for the current,
+  "N verified" figure into it - consult `INDEX.md` and each repo's `VERIFICATION_REPORT.txt` for the current,
   reproducible outcome of any one spec.

@@ -55,7 +55,7 @@ You meet this substrate through precompile addresses, the same way you would cal
 3. To check that a single element belongs to a committed tensor, call `0x0109` with a Merkle path. It
    returns a 32-byte boolean.
 4. To run inference itself, call into the hosted-inference family, `0x0100` to `0x0106`. This path is
-   model-runtime-backed and returns a signed receipt over the result, gated by hardware attestation — an
+   model-runtime-backed and returns a signed receipt over the result, gated by hardware attestation - an
    attestable statement about what ran, not a cryptographic proof that the output is correct. The
    non-deterministic paths, `0x0101` and `0x0102`, first consult the attestation gate, which on a default
    validator binary refuses them and returns a discoverable error rather than a fabricated result. For a
@@ -92,8 +92,8 @@ compute.
 
 This is a summary. It names the verification surface and the three building blocks, Q16.16
 fixed-point determinism, Halo2-KZG proof verification, and hardware attestation. The proving-system
-internals — circuit construction, prover and verifier internals, any structured reference string or setup
-material, and the exact proof wire formats — are public in the `citrate-chain` repository (Apache-2.0);
+internals - circuit construction, prover and verifier internals, any structured reference string or setup
+material, and the exact proof wire formats - are public in the `citrate-chain` repository (Apache-2.0);
 this page summarizes and links to them rather than reproducing them. No setup seed, ceremony material,
 keys, or credentials appear on this page. Every node operator on the public network is identity-verified
 through VERI, Citrate's in-house verification, and Citrate keeps the verification result, not the personal

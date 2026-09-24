@@ -14,23 +14,23 @@ author: Citrate team
 
 Citrate is open-core, and the code is public today at
 [github.com/CitrateNetwork](https://github.com/CitrateNetwork). The chain and its application layer are
-already open — you can read the source, build against it, and reproduce the results now, ahead of the Q2
+already open - you can read the source, build against it, and reproduce the results now, ahead of the Q2
 2027 mainnet. There is no waiting list and no gate on reading the code.
 
 ## How the licensing works
 
 The repositories ship under a two-tier open-core model, with **Citrate Inc.** as the licensor:
 
-- **Infrastructure is Apache-2.0** — permissively licensed, use it however you like. This is the chain, the
+- **Infrastructure is Apache-2.0** - permissively licensed, use it however you like. This is the chain, the
   federated-types crate, the node agent, the bundler, NAT, the cooperative contracts, the agent runtime,
   the JavaScript / Python / marketplace SDKs, the docs, and the explorer.
-- **The application layer is BUSL-1.1** — source-available today (you can read, build, and self-host it for
+- **The application layer is BUSL-1.1** - source-available today (you can read, build, and self-host it for
   non-production use), and it converts to Apache-2.0 on its Change Date. This is the inference gateway, the
-  compute pool, the cluster, Citrate Core, Comms, Quorum, Identity, Memories, the native wallet, the
+  compute pool, the cluster, Citrate Core, Comms, Quorum, Identity, Memories, Citrate Native, the
   air-gapped agent, and Studio.
 
-Publishing the source in the open is the stronger position — for the network and for the people who build
-on it — than holding it back. The design is public, the audits land against public code, and the
+Publishing the source in the open is the stronger position - for the network and for the people who build
+on it - than holding it back. The design is public, the audits land against public code, and the
 BUSL Change Date puts the whole application layer on a path to fully permissive licensing.
 
 ## What is public
@@ -49,12 +49,12 @@ starting points:
 
 A small set of repositories are deliberately closed, and none of them are the network itself:
 
-- **Client and enterprise repositories** — per-customer and on-premise (Citrate Ground / Homestead) work,
+- **Client and enterprise repositories** - per-customer and on-premise (Citrate Ground / Homestead) work,
   closed for the customers' sake, not ours.
-- **Security and internal repositories** — the security program's private tracker (its history carries
+- **Security and internal repositories** - the security program's private tracker (its history carries
   material that must not be public) and internal federation tooling.
 
-If you are building on Citrate, start with the public repositories — you do not need to request access to
+If you are building on Citrate, start with the public repositories - you do not need to request access to
 read or build the code.
 
 - Contact: [citrate.ai/contact](https://citrate.ai/contact), or email `hello@citrate.ai`.
