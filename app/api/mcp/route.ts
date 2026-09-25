@@ -1,5 +1,5 @@
-import { canRead, type AuthSession } from "@/prototype/fixtures";
-import { retrieve, getSurface } from "@/lib/ai/corpus";
+import type { AuthSession } from "@/prototype/fixtures";
+import { retrieve, readSurface } from "@/lib/ai/corpus";
 import { resolveMcpKeyCap, extractApiKey, type McpKeyCap } from "@/lib/auth/mcp-keys";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 
@@ -25,7 +25,7 @@ function syntheticSession(cap: McpKeyCap): AuthSession {
 
 const TOOLS = [
   { name: "searchDocs", description: "Search Citrate documentation within your entitlement tier.", inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] } },
-  { name: "getSurface", description: "Fetch one documentation surface by slug (if within your tier).", inputSchema: { type: "object", properties: { slug: { type: "string" } }, required: ["slug"] } },
+  { name: "getSurface", description: "Fetch one documentation surface by slug (if within your tier). Disclosure-gated surfaces need `ack` set to their disclosure id.", inputSchema: { type: "object", properties: { slug: { type: "string" }, ack: { type: "string" } }, required: ["slug"] } },
 ];
 
 const rpc = (id: unknown, result: unknown) => Response.json({ jsonrpc: "2.0", id, result }, { headers: { "cache-control": "no-store" } });
@@ -58,11 +58,12 @@ export async function POST(req: Request) {
       return rpc(id, { tierCap: cap.tier, results: hits });
     }
     if (name === "getSurface") {
-      const c = getSurface(String(args.slug ?? ""));
-      // Enforce the cap: never return a surface above the key's tier.
-      if (!c || !canRead(session, { tier: c.tier, orgId: c.orgId }, now)) {
-        return rpc(id, { error: "not_found_or_above_tier", tierCap: cap.tier });
-      }
+      // PBA-L3c-004: the same chokepoint as /api/content (role scoping, embargo, disclosure ack,
+      // fail-closed access log), not just the tier cap.
+      const ack = typeof args.ack === "string" ? args.ack : null;
+      const r = readSurface(session, String(args.slug ?? ""), now, ack);
+      if (!r.ok) return rpc(id, { error: r.error, tierCap: cap.tier });
+      const c = r.chunk;
       return rpc(id, { slug: c.slug, title: c.title, tier: c.tier, body: c.text });
     }
     return rpcErr(id, -32601, `unknown tool: ${name}`);
