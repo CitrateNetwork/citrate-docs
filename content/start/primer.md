@@ -33,13 +33,13 @@ height alone cannot order the ledger.
 Blue score is the DAG's clock. When you read `citrate_getDagStats`, the field that tells you the head is
 `maxBlueScore`, not `height`. Full detail under [Citrate Network](/chain/consensus).
 
-### Finality by depth
+### Confirmation by depth
 
-Citrate finalizes by depth, not by a single special block. A block is final once it sits 100 blocks
-(`finality_depth`) behind the selected tip, and any reorg that would rewrite a finalized block is rejected
-when the block is admitted. There is a BFT checkpoint mechanism layered on top, but depth is the everyday
-rule: the deeper a block, the more final it is, and past depth 100 it cannot be reorged. See
-[finality](/chain/consensus#finality).
+Confirmation on the testnet is probabilistic: a block gains weight as later blocks build on it, so the
+deeper a block sits behind the selected tip, the more work a competing branch would need to displace it.
+There is no protocol finality point today. A finality depth of 100 (`finality_depth`) and a BFT
+checkpoint committee are specified in the code, but checkpoint finality is not running. The explorer's depth≥100 flag is a display heuristic, not a
+settlement guarantee. See [consensus, current status](/chain/consensus#current-status).
 
 ### Merge parents
 
@@ -78,7 +78,7 @@ denominated in SALT. If you can hold that sentence in your head, the rest of Alm
 | Idea | The key fact | Where it is treated in full |
 |---|---|---|
 | Blue score | ordering key; `maxBlueScore` is the head | [consensus](/chain/consensus) |
-| Finality | final at depth 100, no reorg past it | [consensus, finality](/chain/consensus#finality) |
+| Finality | probabilistic confirmation; checkpoint finality is specified, not running | [consensus, current status](/chain/consensus#current-status) |
 | Merge parents | one selected parent, many merge parents | [consensus](/chain/consensus) |
 | Citrate Keyring | smart-contract account, passkey, sponsored fees | [Citrate Keyring](/aa/passkeys) |
 | SALT | 18 decimals, 1T cap, settles work | [economics](/chain/economics) |

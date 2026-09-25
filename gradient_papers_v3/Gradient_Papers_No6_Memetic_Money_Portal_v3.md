@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # The Memetic Money Portal
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Separating the Liquidity Instrument from the Gas Token
 #### From an NFT Bridge-as-Fundraise Proposal to an Implemented Wrapped-Token and Market-Maker Money-Path
 

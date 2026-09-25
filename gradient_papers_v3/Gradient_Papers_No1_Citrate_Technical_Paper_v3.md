@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # Citrate: Protocol Specification for an AI-Native BlockDAG Network
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### GhostDAG Consensus, the Lattice Virtual Machine, and the Model Context Protocol
 
 **The Gradient Papers — No. I**
@@ -29,9 +31,9 @@ Preprint — not yet peer reviewed.
 
 We present the protocol specification for the Citrate Network, a BlockDAG system that
 extends GhostDAG consensus with AI-native execution. The architecture comprises three
-layers: a **GhostDAG consensus layer** providing parallel block production with committee
-BFT finality checkpoints (k=18, up to 10 parents per block, a 100-validator committee with
-a 67-signature quorum); a **Lattice Virtual Machine (LVM)** providing EVM bytecode
+layers: a **GhostDAG consensus layer** providing parallel block production (k=18, up to 10
+parents per block), with committee BFT finality checkpoints specified but not yet running (a
+100-validator committee with a 67-signature quorum is the target design); a **Lattice Virtual Machine (LVM)** providing EVM bytecode
 compatibility via REVM, augmented with families of AI-specific precompiled contracts for
 inference, verifiable proof checking, deterministic fixed-point tensor compute, and
 paraconsistent learning aggregation; and a **Model Context Protocol (MCP)** layer providing
@@ -122,14 +124,17 @@ or the learning path is not needed on a given deployment.
 
 ### 2.3 BFT Finality Checkpoints
 
-**[Implemented]** Citrate runs a dual finality mechanism. Depth-based optimistic
-confirmation is provided by the `FinalityTracker` (`core/consensus/src/finality.rs:95`).
-On top of it, **committee BFT checkpoints** (`core/consensus/src/checkpoint.rs`, "WP-S.3:
+**[Specified]** Citrate specifies a dual finality mechanism; on the chain-40204 testnet
+today, confirmation is probabilistic only. The node constructs the checkpoint manager, but no
+production code path proposes a checkpoint, so none is ever finalized, and the depth tracker
+and finality-aware chain selector are exercised only by tests. The testnet runs a single block
+producer, with stake-gated eligibility staged and off by default. The design follows.
+Depth-based optimistic confirmation is provided by the `FinalityTracker`
+(`core/consensus/src/finality.rs:95`). On top of it, **committee BFT checkpoints** (`core/consensus/src/checkpoint.rs`, "WP-S.3:
 Committee BFT Checkpoints") select a committee deterministically by VRF seed and validator
 public key, and require a **67-of-100 quorum** (2/3+1; `checkpoint.rs:88,103`) over a
 domain-separated ed25519 vote (`CITRATE-CHECKPOINT-V1`, `checkpoint.rs:59`). The default
-checkpoint interval is **50 blocks** (`checkpoint.rs:101`); when a checkpoint reaches quorum
-it overrides depth-based finality up to the checkpoint height, and the committed block hash,
+checkpoint interval is **50 blocks** (`checkpoint.rs:101`); when a checkpoint reaches quorum it is designed to override depth-based finality up to the checkpoint height, and the committed block hash,
 blue set, and state root become irreversible. The README documents a ≤12-second optimistic
 finality target; the checkpoint cadence itself is 50 blocks, and this revision states both
 rather than collapsing them into a single headline number. The checkpoint commitment is
@@ -275,9 +280,9 @@ The GhostDAG + BFT consensus inherits well-studied properties. Safety (no confli
 finalized states) holds under the Byzantine assumption f < n/3 [11]; with a 100-validator
 committee requiring 67 signatures, this tolerates up to 33 Byzantine validators. Liveness
 holds under GhostDAG's properties when fewer than half of validators are Byzantine [1, 2].
-The PoW component provides Sybil resistance for block production while the BFT finality layer
-provides fast deterministic finality, avoiding the finality delays of pure PoW while retaining
-permissionless participation.
+The PoW component provides Sybil resistance for block production while the BFT finality layer,
+once it runs, is designed to provide fast deterministic finality, avoiding the finality delays of
+pure PoW. Until then these safety bounds describe the design, not the live testnet.
 
 ### 6.2 Inference Verification Security
 

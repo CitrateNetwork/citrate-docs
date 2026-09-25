@@ -47,7 +47,7 @@ Citrate Core is a Tauri application: a Rust backend (`src-tauri/`) and a React i
 as one signed desktop app. The backend supervises the node process and other local services (the inference
 runtime, an IPFS node, the memory service), talks to chain id 40204, and holds the account. Every signature,
 whether it comes from you, from the on-device agent, or from a background service, goes through one
-human-in-the-loop approval path called the SignatureCeremony (`src-tauri/src/ceremony.rs`). Nothing else can
+HIC (Human In Control) approval path called the SignatureCeremony (`src-tauri/src/ceremony.rs`). Nothing else can
 sign, and no key or recovery phrase ever crosses the interface boundary. Key handling and safe operation are
 covered in [keys and safety](/core/safety).
 

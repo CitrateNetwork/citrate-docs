@@ -21,9 +21,10 @@ fixed.
 **Never open a public issue for a security problem.** Report privately:
 
 - **GitHub Private Vulnerability Reporting** - on the affected repository's **Security** tab → *Report a vulnerability* (encrypted, no key exchange).
-- **Email** [security@citrate.ai](mailto:security@citrate.ai) - encrypt with our PGP key (`keys.openpgp.org`, search `security@citrate.ai`, or the `Encryption` field of our [`security.txt`](https://citrate.ai/.well-known/security.txt)).
+- **Email** [security@citrate.ai](mailto:security@citrate.ai). We do not publish a PGP key yet, so send sensitive details through private vulnerability reporting.
 
-Full policy: [`SECURITY.md`](https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md).
+Full policy: [`SECURITY.md`](https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md). Bounty scope,
+safe-harbor rules and testing limits: coming soon.
 We acknowledge within **72 hours**, triage within **5 business days**, and follow a
 **90-day coordinated disclosure** window.
 
@@ -31,28 +32,30 @@ We acknowledge within **72 hours**, triage within **5 business days**, and follo
 
 Security is continuous, not a one-time gate. We run an internal **adversarial audit
 program** (the Agentile-Audit standard) across the federation on every meaningful change,
-with a per-repository **tier** that sets the bar a change must clear:
+with a per-repository **tier** that sets the bar a change must clear. This is the same table as the
+org [`SECURITY.md`](https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md):
 
-| Tier | Repositories (examples) | Policy |
-|---|---|---|
-| **Tier 1** - consensus & value | `citrate-chain` (consensus, EVM/LVM, contracts, ZK), `citrate-identity`, `citrate-inference-gateway`, `citrate-compute-pool`, `citrate-coop`, `citrate-core` | Full adversarial audit before every stable release; two-reviewer merges; coordinated disclosure with an advisory for High+ |
-| **Tier 2** - supporting services | daemons, SDKs, agent surfaces | Audit on security-relevant change; single-reviewer merges |
-| **Tier 3** - docs & tooling | documentation, examples | Content review |
+| Tier | Repositories | Audit policy | Vulnerability handling |
+|---|---|---|---|
+| **Tier 1**: consensus, value, keys, identity | `citrate-chain` (node, contracts, ZK), `citrate-core`, `citrate-identity`, `citrate-inference-gateway`, `citrate-compute-pool`, `citrate-coop`, `citrate-agent-runtime`, `citrate-sdk-js`, `citrate-sdk-python` | Full adversarial audit before every stable release | Coordinated disclosure; a GitHub Security Advisory (with a CVE request) for fixed High and Critical issues in released code |
+| **Tier 3**: docs and content | `citrate-docs`, `.github`, and other content-only repositories | Content review | Triage as documentation corrections, no CVE |
 
-Every merge to a protected branch requires review, green CI (including a secret-scanning
-gate), and signed history. Third-party GitHub Actions are pinned to commit SHAs, and the
-default CI token is read-only.
+A repository's own `AUDIT_TIER.md` is authoritative for that repository. A public repository without an
+`AUDIT_TIER.md` is handled as Tier 1 for reports.
 
-> **Independent review.** We welcome external audits and engage independent reviewers for
-> Tier-1 code. Completed external engagements (firm and scope) will be listed here as they
-> are finalized.
+Supply-chain hardening is in progress: required review and CI checks on every public repository,
+third-party GitHub Actions pinned to commit SHAs, and signed releases with SBOMs. Current prereleases are
+unsigned.
+
+> **Independent review.** We welcome external audits. No external-firm audit has been completed
+> yet; completed engagements (firm and scope) will be listed here.
 
 ## Prior known issues
 
-Resolved, disclosable vulnerabilities are published as **[GitHub Security Advisories](https://github.com/CitrateNetwork/citrate-chain/security/advisories)**
-on the affected repository (Security → Advisories), with affected and patched versions.
-That is the authoritative, machine-readable record - subscribe to a repo's advisories to be
-notified.
+Resolved, disclosable vulnerabilities will be published as **[GitHub Security Advisories](https://github.com/CitrateNetwork/citrate-chain/security/advisories)**
+on the affected repository (Security → Advisories), with affected and patched versions. None
+have been published yet; the first will follow the fixes from the 2026-09 pre-bounty audit.
+Subscribe to a repo's advisories to be notified.
 
 At a high level, the classes of issue we've found and fixed to date include node **sync
 robustness** (deep-sync and restart edge cases), **consensus liveness** under adversarial

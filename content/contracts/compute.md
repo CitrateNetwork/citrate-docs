@@ -188,8 +188,10 @@ path. The constructor takes the marketplace address.
 The tiers are `enum VerificationTier { Commitment, ZKProof, TEE }` and the verdict is
 `enum VerificationResult { Pending, Valid, Invalid }`. A job above `VALUE_THRESHOLD` (10 SALT) cannot
 settle on a bare commitment; the verifier upgrades it to the ZK tier. The constant
-`INFERENCE_PROOF_VERIFY = address(0x0108)` points at the live Halo2-KZG verifier precompile, described in
-[precompiles](/chain/precompiles).
+`INFERENCE_PROOF_VERIFY = address(0x0108)` points at the Halo2-KZG verifier precompile, described in
+[precompiles](/chain/precompiles). The ZK tier is a research preview (the v1 circuit is small, not a
+full-model proof), and hardening is in progress. The TEE tier is inert on chain 40204 today because no TEE
+oracle is registered with `ComputeVerifier` (`teeOracleCount()` returns 0).
 
 ### ComputePricingOracle
 
@@ -237,8 +239,9 @@ usdAmount, uint256 creditsReceived, uint256 purchaseIndex)`.
 The split between on-chain record and off-chain work is the whole point. A model run is large and
 private, so it happens on the operator's own hardware; the ledger keeps only the hash, the proof, and
 the receipt. That is why ComputeVerifier offers three tiers rather than one. A small job can settle on a
-cheap commitment, a job above the value threshold must carry a real zero-knowledge proof against the
-`0x0108` precompile, and a job that needs hardware attestation can require a TEE signature. The buyer
+cheap commitment, a job above the value threshold must carry a zero-knowledge proof checked by the
+`0x0108` precompile (a research preview), and a job that needs hardware attestation is designed to
+require a TEE oracle signature (inert on 40204 until an oracle is registered). The buyer
 chooses how much assurance to pay for, and the contract enforces a floor for high-value work.
 
 The training pool stores only one Merkle root per epoch. Putting every step commitment on-chain would be
@@ -277,9 +280,7 @@ which is the formal-methods and proof surface. These contracts are open on the p
 can read them; the full lifecycle, scoring, and settlement design is paid-seat depth.
 
 No secrets appear on this page. There are no private keys, mnemonics, internal hostnames, or
-credentials. The only hardcoded address is the public protocol precompile `0x0108`. Every operator on
-the public network is identity-verified through VERI, Citrate's in-house verification before they can register and stake; Citrate keeps
-the verification result, not the personal data behind it.
+credentials. The only hardcoded address is the public protocol precompile `0x0108`. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity.
 
 ## Source and verification
 

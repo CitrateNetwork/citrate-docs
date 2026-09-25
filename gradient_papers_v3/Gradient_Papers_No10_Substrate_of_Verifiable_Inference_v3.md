@@ -12,6 +12,8 @@ supersedes: "v3-April draft (new in v3; no v2 antecedent)"
 ---
 
 # The Substrate of Verifiable Inference
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Halo2-KZG, Deterministic Q16 Compute, and Attestation Gates
 
 **The Gradient Papers — No. X**

@@ -35,7 +35,7 @@ the safety story are these.
   signed report.
 - A recorder, `RecorderClient`, the single surface that signs and writes to the chain. Nothing
   else holds the key.
-- An approval queue, `ApprovalQueue`, the human-in-the-loop gate that risky tool calls pass
+- An approval queue, `ApprovalQueue`, the HIC (Human In Control) gate that risky tool calls pass
   through.
 - A cron daemon that runs recurring checks, the tripwires and standing procedures, on a
   schedule, and records what they find.
@@ -185,7 +185,7 @@ Tier academic: this surface is oriented to research and formal methods, the TLA+
 audit chain and the break-glass machine, capsule capability verification, and the diagnostic
 itself. The runtime is classified for a full external audit before any v1.0.0 tag
 (`AUDIT_TIER.md`); there is no stable release without a written attestation against an exact
-commit. Every operator account on the public network is identity-verified through VERI, Citrate's in-house verification. No
+commit. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. No
 secrets appear here: `DEPLOYER_PRIVATE_KEY` and `CITRATE_CAPSULE_SIGNING_SEED` are named only as
 variables to set, and any key file named by `CITRATE_RECORDER_KEY_ENV_FILE` must be an absolute
 path at mode 0600, held in your own secret store.

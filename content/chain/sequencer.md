@@ -90,17 +90,17 @@ The builder assembles the candidate block, plainly and in order: it takes the se
 - `BlockBuilder::new(config, mempool, proposer_key)`, with the proposer key held on the builder (`src/block_builder.rs:129`).
 - `BlockBuilder::with_executor(executor)`, attach the execution engine.
 - `BlockBuilder::build_block(selected_parent, merge_parents, parent_height, parent_blue_score, vrf_proof)`, produce the full candidate (`src/block_builder.rs:149`).
-- `BlockBuilderConfig`, maximum block size, gas limits, transaction bounds, and `block_time_target`, which defaults to two seconds (`src/block_builder.rs:77`).
+- `BlockBuilderConfig`, maximum block size, gas limits, transaction bounds, and `block_time_target`, whose library default is two seconds (`src/block_builder.rs:77`). The testnet node configuration sets a one-second target, and the measured block interval on the testnet is about two seconds.
 
 Parent selection itself belongs to the consensus layer: `ParentSelector` returns `(selected_parent, merge_parents)` for a new block. See [consensus](/chain/consensus) for how blue score picks the selected parent, and [the LVM](/chain/lvm) for how the transactions execute.
 
 ## Design rationale
 
-Two design choices stand out. The mempool sorts by class as well as price so the network does not let a fee war crowd out the work it exists to carry; compute and training traffic carry weight that an ordinary transfer does not. And the builder reuses the consensus layer's parent selection rather than inventing its own, so there is one definition of "which parents" across the codebase, not two that can drift apart. The two-second target keeps blocks frequent enough that priority work waits seconds, not minutes, while the BlockDAG absorbs the near-simultaneous blocks that a fast cadence produces.
+Two design choices stand out. The mempool sorts by class as well as price so the network does not let a fee war crowd out the work it exists to carry; compute and training traffic carry weight that an ordinary transfer does not. And the builder reuses the consensus layer's parent selection rather than inventing its own, so there is one definition of "which parents" across the codebase, not two that can drift apart. A block cadence of a few seconds keeps blocks frequent enough that priority work waits seconds, not minutes, while the BlockDAG absorbs the near-simultaneous blocks that a fast cadence produces.
 
 ## Failure modes
 
-- A transaction that fails any validation check is set aside, not staged; an invalid signature, a stale nonce, a gas price below the floor, or a blacklisted sender each stop it at the door.
+- A transaction that fails any validation check is set aside, not staged; an invalid signature, a stale nonce, a gas price below the floor, or a blacklisted sender each stop it at the door of this node's mempool. Signature and transaction hardening is in progress; see [SECURITY.md](https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md).
 - The mempool is bounded. At capacity, low-priority transactions are evicted rather than allowed to exhaust memory, and per-sender caps stop one account from filling the pool. The system fails closed: it sheds the lowest-priority load rather than accepting unbounded work.
 - A built block carries computed state and receipt roots; a proposer cannot substitute arbitrary roots, because the receiving nodes recompute and reject a block whose roots do not match execution.
 

@@ -2,7 +2,7 @@
 
 > The docs for an AI-native Layer-1 BlockDAG: chain, contracts, SDKs, identity, agents, and compute. Testnet live on chain 40204 (0x9d0c). Canonical machine-readable facts: https://citrate.ai/.well-known/citrate.json
 
-The docs state maturity honestly, module by module: what is implemented (pre-audit), what is specified but not built, and what is a research direction. Current testnet network throughput is ~750 TPS for simple transfers (a 30M block-gas-limit bound), and 5,000–10,000 TPS is a mainnet target via proposed protocol upgrades, not yet reproduced on-chain; identity is verified in-house (VERI); the whole chain and application layer are open-core and public today at github.com/CitrateNetwork (Apache-2.0 infrastructure + BUSL-1.1 app layer). Mainnet target is Q2 2027.
+The docs state maturity honestly, module by module: what is implemented (pre-audit), what is specified but not built, and what is a research direction. Current testnet throughput is about 750 TPS for simple transfers, derived from the 30M block gas limit and the measured ~2 s block time (not yet benchmarked), and 5,000–10,000 TPS is a mainnet target via proposed protocol upgrades, not yet reproduced on-chain. Confirmation is probabilistic; checkpoint finality is specified, not running, and the testnet runs a single block producer. 57 of the 76 contracts in the address book have code on chain; the paid inference and x402 rails are not deployed yet. Identity is verified in-house (VERI), server-side, sealed at rest; the whole chain and application layer are open-core and public today at github.com/CitrateNetwork (Apache-2.0 infrastructure + BUSL-1.1 app layer). Mainnet target is Q2 2027.
 
 ## Start here
 - What Citrate is: https://docs.citrate.ai/start/what-is-citrate

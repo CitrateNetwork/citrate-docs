@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # Paraconsistent Consensus: Federated Meta-Learning Over BlockDAG Finality Checkpoints
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Belnap Four-Valued Aggregation, LoRA Adapter Composition, and Recursive Learning
 
 **The Gradient Papers — No. II**
@@ -86,11 +88,11 @@ Paper I.
 
 ### 2.1 BlockDAG Consensus
 
-**[Implemented]** The Citrate consensus layer implements GhostDAG [1, 2] with BFT finality
-(Paper I; `core/consensus/src/ghostdag.rs:54`). Blocks reference up to 10 parents (one
+**[Implemented]** The Citrate consensus layer implements GhostDAG [1, 2], with BFT finality
+specified but not yet running (Paper I §2.3; `core/consensus/src/ghostdag.rs:54`). Blocks reference up to 10 parents (one
 selected plus up to nine merge; `types.rs:179`), are classified into blue and red sets via the
-k-cluster rule (k=18; `types.rs:178`), and reach finality through committee signatures at
-checkpoints. The chain-40204 testnet block time is **approximately 2 seconds**
+k-cluster rule (k=18; `types.rs:178`), and are designed to reach finality through committee
+signatures at checkpoints; until checkpoints run, confirmation is probabilistic. The chain-40204 testnet block time is **approximately 2 seconds**
 (`testnet-config.toml:4`), and BFT checkpoints occur every **50 blocks** by default
 (`core/consensus/src/checkpoint.rs:101`). The February 2026 draft quoted 0.5-second blocks and
 10-block checkpoints; both are corrected here against the running configuration. These
@@ -224,7 +226,7 @@ convergence remains a conjecture (§7.2).
 
 ### 4.1 Extended Checkpoint Structure
 
-**[Implemented]** We extend the BFT finality checkpoint (Paper I §2.3) with three committed
+**[Specified]** We extend the BFT finality checkpoint (Paper I §2.3; specified, not yet running) with three committed
 fields: a routing-weights Merkle root, an adapter-registry Merkle root, and a
 performance-profile Merkle root. This is realized in `struct LearningCheckpoint`
 (`core/learning/src/checkpoint.rs:14`), whose fields are the routing-weights root (`:35`), the

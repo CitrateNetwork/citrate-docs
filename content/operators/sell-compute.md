@@ -13,7 +13,7 @@ author: Citrate team
 ---
 
 This is the standing procedure for selling compute on Citrate Market with Citrate Node, end to end, on
-chain id 40204. It is written for identity-verified operators who run their own hardware and want idle
+chain id 40204. It is written for operators who run their own hardware and want idle
 GPU hours to earn while the machine is otherwise unsupervised.
 
 ## What it is
@@ -136,8 +136,7 @@ and without taking on work it cannot finish before a slashable deadline.
 ## Access and canon
 
 Tier commercial.kyc: operator-depth marketplace know-how, gated on identity verification through Citrate's in-house verification (VERI), not
-on a seat. Every operator and machine on Citrate Network is identity-verified through VERI, and Citrate
-holds the verification result, not the personal data behind it. Compute is sold from your own hardware,
+on a seat. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. Compute is sold from your own hardware,
 on-premise by default, and SALT settles the work performed; it is the unit you count in, not a product to
 hold. No secrets here: the supervision token is generated locally at mode 0600 and never transcribed, bind
 the supervision API to loopback only, and key custody stays in your external signer. The agent never holds

@@ -36,9 +36,10 @@ The service knows a person by one of two subject shapes, resolved in `findAccoun
 
 The service stores almost nothing about a person. It holds sign-in records, the set of addresses a person
 has linked, and a VERI verification result that is a status and two dates, never the documents behind it.
-Verification is done in-house by VERI, Citrate's own server-blind check (`src/kyc-engine.ts`): the captured
-document and biometric are sealed per-case and the biometric is destroyed the moment the decision is
-reached, so no outside party holds the personal data. The OIDC service persists only the closed
+Verification is done in-house by VERI, Citrate's own check (`src/kyc-engine.ts`). It is server-side
+processing: the server decrypts the identity, document and face evidence to decide the case. Evidence is
+sealed per case at rest, the biometric is destroyed once the decision is reached, and no outside vendor
+holds the personal data. The OIDC service persists only the closed
 `{status, verified_at, expires_at}` record and an opaque case reference. This follows the on-premise default
 that holds across the network: the public ledger, and the authority in front of it, see only what they must.
 
@@ -127,8 +128,9 @@ record reads as `expired` and prompts a re-check. The stored record is a closed 
 and an opaque case reference, and nothing else. There is no field where a name, a document, or an identifier
 could be added.
 
-VERI is Citrate's in-house verification and it is server-blind. The engine (`src/kyc-engine.ts`) decides a
-captured case with no outside call: it unseals the per-case evidence, runs the liveness and 1:1 face-match
+VERI is Citrate's in-house verification. It processes evidence server-side and keeps it sealed at
+rest. The engine (`src/kyc-engine.ts`) decides a captured case with
+no outside call: it unseals the per-case evidence, runs the liveness and 1:1 face-match
 analyzers, the document OCR and MRZ check, and the in-house sanctions screener, then destroys the biometric
 immediately and records only the decision. It fails closed: with no model backend a case routes to human
 review, never to an auto-`verified`. The engine wiring and operator runbook are gated to operators and are
@@ -181,8 +183,8 @@ life of a token.
 Public. The OIDC issuer and the claim shapes are what a relying party needs to integrate, and they are
 standard. The verification internals are gated to operators. The `https://citrate.ai/entitlement` claim is
 minted by the authority and the tier meanings are public, while the roster of who holds which tier is not.
-Every person on the public network is identity-verified through VERI, Citrate's in-house server-blind
-verification, and Citrate keeps the verification result, not the personal data behind it.
+VERI is Citrate's in-house, server-side verification. Node and consensus code do not check identity.
+After a decision Citrate keeps the verification result, and any retained evidence stays sealed at rest.
 
 ## Source and verification
 

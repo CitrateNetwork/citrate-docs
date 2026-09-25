@@ -85,8 +85,8 @@ feature, and the maturity column is the paper's own, not ours.
 
 Academic tier. The papers cite public contract addresses and the public testnet RPC only; no keys,
 recovery phrases, or private endpoints appear in them or here. The network is a public ledger paired with
-private on-premise instances, and the research describes the public half. Authorship is Larry Klosowski,
-with Lauren Mendenhall on the constitution, Saul Loveman on engineering, and the Claude Opus lineage.
+private on-premise instances, and the research describes the public half. The papers are authored by Larry Klosowski
+and Lauren Mendenhall, Citrate Inc.
 
 ## Source and verification
 

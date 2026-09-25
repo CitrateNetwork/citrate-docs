@@ -12,8 +12,7 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-A walkthrough from a fresh checkout to a live seller on Citrate Market, chain id 40204. You will get
-identity-verified, build and configure Citrate Node, register as a provider on the marketplace contract,
+A walkthrough from a fresh checkout to a live seller on Citrate Market, chain id 40204. You will complete membership verification, build and configure Citrate Node, register as a provider on the marketplace contract,
 let the agent bid and win a job, and walk that job to payment, settled in SALT. It is written for operators
 who run their own hardware. Allow roughly twenty minutes for the local steps; verification and on-chain
 confirmations take their own time.
@@ -29,9 +28,9 @@ contract surface in [compute contracts](/contracts/compute).
 
 ## How to use it
 
-### Step 1, get identity-verified
+### Step 1, complete membership verification
 
-Every operator and machine on Citrate Network is identity-verified through VERI, Citrate's in-house verification before they can sell.
+Membership includes identity verification through VERI, Citrate's in-house verification. Node and consensus code do not check it.
 Complete verification through [verified identity](/aa/identity). Citrate keeps the verification result, not the
 personal data behind it. You cannot register as a provider without it.
 
@@ -191,8 +190,7 @@ deadline that the slash protects.
 
 Tier commercial.kyc. No secrets in this tutorial: the supervision token is generated locally at mode 0600
 and read from its file, keys live only in your external signer, and the dev-only insecure-outbound flag is
-called out as forbidden in production. Every operator and machine on Citrate Network is identity-verified
-through VERI, and Citrate holds the verification result, not the personal data behind it. Compute is sold
+called out as forbidden in production. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. Compute is sold
 from your own hardware, on-premise by default, and SALT settles the work performed; it is the unit you
 count in, not a product to hold. The agent holds no keys.
 

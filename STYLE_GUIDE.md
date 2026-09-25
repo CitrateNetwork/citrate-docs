@@ -1,7 +1,7 @@
 ---
 created: 2026-06-17T00:00:00Z
 branch: main
-author: Saul Loveman + Claude Opus 4.8 (1M context)
+author: Larry Klosowski
 status: active
 sprint: ATLAS-S0
 ---
@@ -80,7 +80,7 @@ AI-first, supercharge, intelligent (as a product claim).
 - The chain is a BlockDAG written in Rust, GhostDAG consensus: k = 18, finality depth 100, a 100-validator
   BFT committee at a 67% threshold, a checkpoint every 50 blocks. Chain id 40204 is testnet.
 - Mainnet is targeted for Q2 2027; school pilots run the prior summer.
-- Every node operator and machine on the public network is identity-verified through Citrate's in-house verification (VERI). Citrate holds no sensitive
+- Identity verification (VERI, Citrate's in-house verification) is part of membership. Do not write that every operator or machine is verified: node and consensus code do not check it. Citrate holds no sensitive
   personal data from that check.
 - SALT settles work performed. It is not the product and not a speculative instrument. Avoid naming it
   unless a page genuinely requires it.

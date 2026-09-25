@@ -27,7 +27,7 @@ Three properties hold across the whole network, and the rest of Almanac assumes 
 
 - **On-premise by default.** Your data and your models stay on your hardware. Publishing anything to the
   public ledger is a deliberate step, taken inside the compliance envelope you set.
-- **Verified participation.** Every node operator on the public network is identity-verified through VERI, Citrate's in-house verification.
+- **Verified participation.** Membership includes identity verification through VERI, Citrate's in-house verification; node and consensus code do not check it.
   Citrate keeps the verification result, not the personal data behind it.
 - **Work, not speculation.** SALT settles the work the network performs. It pays for compute and rewards
   contribution. It is the unit you count in, not a product to hold, and Almanac does not treat it as one.

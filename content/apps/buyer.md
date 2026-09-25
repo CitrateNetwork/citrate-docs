@@ -97,9 +97,14 @@ The x402 client enforces two limits, defined in `lib/submitJob.ts`.
 ```ts
 export const DEFAULT_MAX_PAY_WEI = 1_000_000_000_000_000_000n; // 1 SALT
 export const ALLOWED_PAY_TOKENS: Address[] = [
-  '0x1f73bb479f397a34b5e3145e51d25bc5007273bf', // wSALT
+  WRAPPED_SALT, // contracts.WrappedSALT from the address book
 ];
 ```
+
+The allow-list must hold the live wSALT address from the [address book](/chain/addresses)
+(`contracts.WrappedSALT`). An older build hard-coded a pre-re-roll wSALT address that has no code on chain
+40204; if your copy of `lib/submitJob.ts` still contains a literal address, replace it with the book value
+and confirm it with `cast code`.
 
 The per-round ceiling defaults to one SALT and the UI may set it lower. The allowed token is wSALT
 and the chain is 40204. Any other token or chain is refused.
@@ -134,8 +139,7 @@ This surface moves real funds, so it is built to fail closed.
 Commercial. This is paid marketplace operation: job posting, provider economics, and payment,
 intended for contracted buyers, and gated through the Codex chokepoint (`PLANSET/02_ARCHITECTURE.md`
 section 4). Market participation settles in SALT, which pays for work and is not treated here as
-anything to hold. The wider network is on-premise by default and every node operator on the public
-network is identity-verified through VERI, Citrate's in-house verification; that envelope is described in
+anything to hold. The wider network is on-premise by default and identity verification through VERI is part of membership; that envelope is described in
 [what Citrate is](/start/what-is-citrate).
 
 ## Source and verification

@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # Behavioral Issues
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Behavior-Driven Development as Engineering Methodology for Agentic Systems
 #### Red-Green-Refactor as Mentorship Loop, Gherkin as Specification Language, and a Methodology That Became a Framework
 

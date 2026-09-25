@@ -1,7 +1,7 @@
 ---
 created: 2026-06-14T00:00:00Z
 branch: main
-author: Saul Loveman + Claude Opus 4.8 (1M context)
+author: Larry Klosowski
 status: active
 sprint: DOCS-CODEX-S1
 ---
@@ -120,7 +120,7 @@ sprint: DOCS-CODEX-S1
 | id | surface | type | repo / code_path | tier | source_kind | codex_slug | status |
 |---|---|---|---|---|---|---|---|
 | ID-oidc | OIDC issuer + claim shapes (sub/wallet_address/email) | api | citrate-identity · src/server.ts | P | transcluded | /aa/identity | draft |
-| ID-kyc | KYC status model (in-house server-blind, VERI) | api | citrate-identity · src/kyc-pg.ts | X | gated | /aa/identity#kyc | draft |
+| ID-kyc | KYC status model (in-house, server-side, VERI) | api | citrate-identity · src/kyc-pg.ts | X | gated | /aa/identity#kyc | draft |
 | ID-guardians | Guardian nomination / recovery | api | citrate-identity · src/aa/guardians.ts | C | transcluded | /aa/guardians | draft |
 | ID-entitlement | The `entitlement` claim (Codex tiers) | spec | citrate-identity (S2, new) | A | authored | /aa/identity#entitlement | draft |
 | AA-passkeys | Passkeys / WebAuthn / Kernel UserOps | primitive | citrate-sdk-js src/aa/ + contracts/src/aa/ | P | authored | /aa/passkeys | draft |

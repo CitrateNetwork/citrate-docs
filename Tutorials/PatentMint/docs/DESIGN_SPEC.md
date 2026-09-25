@@ -291,7 +291,7 @@ WHAT IS STORED ON-CHAIN              WHAT IS NEVER ON-CHAIN OR IPFS
 
 | Provider | Coverage | Liveness | Business KYC | API Quality | Notes |
 |----------|----------|----------|--------------|-------------|-------|
-| **Citrate (in-house)** | US-focused | Yes | Yes | Strong | Server-blind, recommended for Citrate apps |
+| **Citrate (in-house)** | US-focused | Yes | Yes | Strong | In-house, server-side; recommended for Citrate apps |
 | **Persona** | Global | Yes | Yes | Strong | Flexible workflows |
 | **Jumio** | 200+ countries | Yes | Yes | Strong | Enterprise-grade, pricier |
 | **Onfido** | 195+ countries | Yes | Limited | Good | Strong AI fraud detection |

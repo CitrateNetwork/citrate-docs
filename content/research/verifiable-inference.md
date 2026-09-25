@@ -95,9 +95,7 @@ fixed-point determinism, Halo2-KZG proof verification, and hardware attestation.
 internals - circuit construction, prover and verifier internals, any structured reference string or setup
 material, and the exact proof wire formats - are public in the `citrate-chain` repository (Apache-2.0);
 this page summarizes and links to them rather than reproducing them. No setup seed, ceremony material,
-keys, or credentials appear on this page. Every node operator on the public network is identity-verified
-through VERI, Citrate's in-house verification, and Citrate keeps the verification result, not the personal
-data behind it. For the full internals, read the `verify.rs`, `inference.rs`, and `attestation/` precompile
+keys, or credentials appear on this page. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. For the full internals, read the `verify.rs`, `inference.rs`, and `attestation/` precompile
 sources in `citrate-chain`.
 
 ## Source and verification

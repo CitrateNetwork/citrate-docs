@@ -7,7 +7,7 @@ inference-backed agent. Report vulnerabilities per the org policy, not via publi
 ## Reporting
 
 - Federation policy: <https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md>
-- Direct: **security@citrate.ai** (PGP on request). Please include repro + impact; do not open a public issue.
+- Direct: **security@citrate.ai** (no PGP key is published yet; prefer GitHub private vulnerability reporting for sensitive detail). Please include repro + impact; do not open a public issue.
 
 ## Security surface (what to look at first)
 

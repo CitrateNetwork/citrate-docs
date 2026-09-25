@@ -1,7 +1,7 @@
 ---
 created: 2026-06-17T00:00:00Z
 branch: main
-author: Saul Loveman + Claude Opus 4.8 (1M context)
+author: Larry Klosowski
 status: active
 sprint: ATLAS-S0
 ---
