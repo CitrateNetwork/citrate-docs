@@ -55,7 +55,9 @@ function keyStore(env: NodeJS.ProcessEnv): Record<string, RawEntry> {
   return {};
 }
 
-const publicCap = (): McpKeyCap => ({ tier: "public", sub: "mcp:anon", expiresAt: null });
+/** The subject of the fail-closed public cap (no, unknown or expired key). Never a verified principal. */
+export const ANON_MCP_SUB = "mcp:anon";
+const publicCap = (): McpKeyCap => ({ tier: "public", sub: ANON_MCP_SUB, expiresAt: null });
 
 /** Resolve a presented MCP API key to an entitlement cap. Fail-closed to "public" on anything unexpected. */
 export function resolveMcpKeyCap(

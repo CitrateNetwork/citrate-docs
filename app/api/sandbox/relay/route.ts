@@ -4,14 +4,14 @@
  *  configured relayer answers a keyless request with "missing request or
  *  signature" (it validates before it would ever sponsor), which is exactly the
  *  signal we surface. Fail-closed when no relayer is configured. */
-import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { enforceRateLimitShared } from "@/lib/security/rate-limit";
 
 const PATTERN =
   "user signs an EIP-712 ForwardRequest -> POST it to the relayer -> " +
   "CitrateForwarder.verify checks the signature on-chain -> the relayer submits execute() and pays the gas";
 
 export async function POST(req: Request) {
-  const limited = enforceRateLimit(req, "sandbox:relay", { limit: 10 }); // DOC-B-007
+  const limited = await enforceRateLimitShared(req, "sandbox:relay", { limit: 10 }); // DOC-B-007
   if (limited) return limited;
 
   const relay = process.env.CITRATE_RELAY_URL;

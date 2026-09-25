@@ -1,9 +1,9 @@
 import { rpcCall } from "@/lib/sandbox/rpc";
-import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { enforceRateLimitShared } from "@/lib/security/rate-limit";
 
 /** S5 — GhostDAG blue-score visualizer: live DAG state from chain 40204 (citrate_getDagStats + tips). */
 export async function GET(req: Request) {
-  const limited = enforceRateLimit(req, "sandbox:dag", { limit: 30 }); // DOC-B-007
+  const limited = await enforceRateLimitShared(req, "sandbox:dag", { limit: 30 }); // DOC-B-007
   if (limited) return limited;
 
   const stats = await rpcCall("citrate_getDagStats", []);
