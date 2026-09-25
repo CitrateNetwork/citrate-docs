@@ -7,10 +7,12 @@ source_kind: authored
 source: citrate-sdk-js/src/aa/ + citrate-chain/contracts/src/aa/
 surfaces: [AA-passkeys, SDK-JS-aa, SC-aa-validators, SC-aa-factory]
 audited_against_sha: 9d5959e
-status: Implemented
+status: Specified
 created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
+
+> **Status: passkey-only accounts are not yet available on chain 40204.** Use these pages to build and test against a local chain.
 
 How a Citrate user signs in with a passkey and sends transactions with no seed phrase, end to end, plus the
 EOA path for users who already hold a signer. This is the builder reference for Citrate Keyring: the
@@ -55,11 +57,11 @@ Install the SDK. The account-abstraction helpers are re-exported from the packag
 namespace.
 
 ```bash
-npm install citrate-js
+npm install @citratelabs/sdk
 ```
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 const {
   uuidToUserId,
   predictWalletAddress,
@@ -191,7 +193,7 @@ paymaster policy, caps, and the bundler authentication topology are commercial t
   SDK pins the address and operation-hash helpers against the live factory and EntryPoint v0.7 on chain
   40204 in `citrate-sdk-js/tests/unit/`.
 
-Status: Implemented, pre-audit. The validators, factory, paymaster, recovery module, bundler, and the SDK
+Status: Specified on chain 40204, where passkey-only accounts are not yet available. The validators, factory, paymaster, recovery module, bundler, and the SDK
 encoders shipped in the EW-S1 sprint and have not had a final external audit. Treat the surface as
 experimental and do not custody material value on it until the audit closes. Re-verify symbols against the
 source SHAs before relying on this page.

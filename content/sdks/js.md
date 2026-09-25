@@ -19,7 +19,7 @@ app can talk to Citrate without hand-rolling calldata. This page is for the deve
 ## What it is
 
 The SDK is the typed front door to Citrate Network from JavaScript and TypeScript. The package is named
-`@citratelabs/sdk` (formerly `citrate-js`, retained as a deprecated alias) and the version of record is
+`@citratelabs/sdk` (formerly `@citratelabs/citrate-js`, retained as a deprecated alias) and the version of record is
 `0.2.0` in `package.json`. It is the canonical SDK; the other language SDKs follow it and stay non-canonical
 until a pilot integrator needs parity.
 
@@ -162,7 +162,8 @@ UserOperation. The market side of this is covered in [the marketplace SDK](/sdks
 - `CryptoManager` (`src/crypto/CryptoManager.ts`): SHA-256 hashing, AES-256-GCM, and PBKDF2 over the Web
   Crypto API. The default work factor is `PBKDF2_DEFAULT_ITERATIONS`, 600,000 iterations.
 - `KeyManager` (`src/crypto/KeyManager.ts`): key handling and model encryption, returning
-  `EncryptedModelResult`. Encryption ECDH-wraps the symmetric key to the recipient and never ships it raw.
+  `EncryptedModelResult`. Encryption ECDH-wraps the symmetric key to the recipient. Options include
+  `accessControl` (default `true`) and threshold key sharing (`thresholdShares`, `totalShares`).
 - Shamir secret sharing (`src/crypto/FiniteField.ts`): `splitSecretBytes`, `reconstructSecretBytes`, `GF256`,
   and `ShamirSecretSharing`. Share coefficients are drawn from a cryptographic RNG and fail closed if none is
   available.
@@ -180,7 +181,7 @@ The hooks are `useCitrateClient`, `useModelDeployment`, `useInference`, `useMode
 
 ### Constants and errors
 
-- `src/utils/constants.ts`: `CHAIN_IDS` (`MAINNET: 1`, `TESTNET: 40204`), `DEFAULT_RPC_URLS`,
+- `src/utils/constants.ts`: `CHAIN_IDS` (`TESTNET: 40204`; releases up to 0.2.x also carry `MAINNET: 1`, which is Ethereum mainnet's chain id, not Citrate's, so do not use it: Citrate's network is 40204 and mainnet keeps that id), `DEFAULT_RPC_URLS`,
   `DEFAULT_WS_URLS`, `PRECOMPILE_ADDRESSES`, `GAS_LIMITS`, `TIMEOUTS`, `MODEL_LIMITS`, `ENCRYPTION`, `EVENTS`,
   and `API_ENDPOINTS`.
 - `src/errors/CitrateError.ts`: `CitrateError`, `ModelNotFoundError`, `InsufficientFundsError`, and
@@ -203,7 +204,7 @@ This is the surface where a mistake costs money or leaks data, so several method
 - A write method called without a configured key throws rather than silently doing nothing. `deployModel`,
   `inference`, and `batchInference` all require `privateKey` in the config.
 - When a model deployment or inference asks for encryption but no key manager is configured, the call throws
-  rather than uploading in plaintext. There is no silent downgrade onto public calldata.
+  rather than uploading in plaintext.
 - `purchaseModelAccess` is disabled and throws. The canonical precompile table has no access-purchase
   operation; the earlier implementation routed buyer funds to the verification precompile, where access was
   never granted and value was never credited. It stays closed until a node-confirmed precompile exists.
@@ -218,12 +219,11 @@ Public. This is open SDK reference a developer needs to build on Citrate Network
 Private keys, mnemonics, and bundler API keys are never inline; they come from the caller's environment
 (`config.privateKey`, `BundlerClientOptions.apiKey`). The hostnames named here, `rpc.citrate.ai`,
 `bundler.citrate.ai`, and `auth.citrate.ai`, are public production endpoints already shipped as defaults in
-the source, not credentials. The chain on testnet is identity-verified through VERI, Citrate's in-house verification for node operators; the
-SDK itself holds no such data.
+the source, not credentials. The SDK holds no identity data.
 
 ## Source and verification
 
-- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`package.json`; `citrate-js` retained as a deprecated alias).
+- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`package.json`; `@citratelabs/citrate-js` retained as a deprecated alias).
 - Audited against SHA: `2f8da46`.
 - Audited paths: `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
   `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler,types}.ts`,

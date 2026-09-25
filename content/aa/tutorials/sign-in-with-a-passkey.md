@@ -9,11 +9,13 @@ surfaces: [AA-passkeys, SDK-JS-aa]
 audited_against_sha: bc5a830
 created: 2026-06-17T00:00:00Z
 author: Citrate team
-status: Implemented
+status: Specified
 ---
 
+> **Status: passkey-only accounts are not yet available on chain 40204.** Use these pages to build and test against a local chain.
+
 Create a passkey-backed Citrate Keyring account and send your first sponsored transaction, with no seed
-phrase, using `citrate-js`. You will derive the account address before it exists, then deploy and use it in
+phrase, using `@citratelabs/sdk`. You will derive the account address before it exists, then deploy and use it in
 a single operation. For the concepts behind each step see [passkeys](/aa/passkeys); for the contracts see
 [account-abstraction contracts](/aa/contracts).
 
@@ -27,15 +29,15 @@ app, a Vite or Next page, not a plain Node script.
 
 ## How to use it
 
-You will need Node 18 or newer with `npm install citrate-js`; a secure context (HTTPS or `localhost`); chain
+You will need Node 18 or newer with `npm install @citratelabs/sdk`; a secure context (HTTPS or `localhost`); chain
 40204 access to the Citrate identity authority and the Citrate bundler; and the deployed addresses for the
 stack (factory, account implementation, EntryPoint, paymaster, validators), read from the chain's deployed
-addresses file. The account-abstraction helpers are the `aa` namespace: `import { aa } from 'citrate-js'`.
+addresses file. The account-abstraction helpers are the `aa` namespace: `import { aa } from '@citratelabs/sdk'`.
 
 ### Step 1, derive the account address
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 const { uuidToUserId, predictWalletAddress } = aa;
 
 const userId = uuidToUserId(citrateUserId);             // keccak256(utf8(lowercase uuid))
@@ -53,7 +55,7 @@ Fetch the deploy permit from the identity authority, then assemble the `initCode
 operation carries the deploy, so the account creates itself on first use.
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 const {
   encodeDeployFor, packInitCode, encodeExecuteSingle,
   buildPackedUserOp, packCitratePaymasterAndData, PaymasterCategory,
@@ -98,7 +100,7 @@ permit fetch is described generically here.
 ### Step 3, hash and sign with the passkey
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 const { getUserOpHash, signUserOpWithPasskey } = aa;
 
 const hash = getUserOpHash(op, ENTRYPOINT, 40204n);
@@ -116,7 +118,7 @@ throws `WebAuthnSigningError` outside a secure context.
 ### Step 4, submit to the bundler and wait
 
 ```typescript
-import { aa } from 'citrate-js';
+import { aa } from '@citratelabs/sdk';
 const { BundlerClient } = aa;
 
 const bundler = new BundlerClient();    // defaults to https://bundler.citrate.ai/rpc
@@ -180,5 +182,5 @@ runtime, and passkey private material never leaves the authenticator. Use testne
 - `citrate-sdk-js/src/aa/{address,userop,kernel,webauthn,bundler}.ts` at SHA `bc5a830`.
 - Validators and factory: `citrate-chain/contracts/src/aa/` at SHA `9d5959e`.
 
-Status: Implemented, pre-audit. Use testnet; do not custody material value. Re-verify the exports against
+Status: Specified on chain 40204 (passkey-only accounts are not yet available there); the SDK helpers are implemented, pre-audit. Build against a local chain; do not custody material value. Re-verify the exports against
 the SHAs before relying on this tutorial.

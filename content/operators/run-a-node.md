@@ -21,8 +21,7 @@ A Citrate Node is built from the `citrate-node` binary in the `citrate-chain` wo
 execution, a mempool, peer management, and the RPC service into one process: a RocksDB-backed state store,
 an EVM-compatible executor, the GhostDAG consensus engine, and a JSON-RPC, WebSocket, and REST surface with
 Prometheus metrics. You run it on your own machine, on-premise by default, and it talks to other nodes over
-libp2p. Operators on the public network are identity-verified through VERI, Citrate's in-house verification; the node software itself is the
-same whether you run a local instance or join testnet.
+libp2p. The node software is the same whether you run a local instance or join testnet, and it does not check operator identity.
 
 The node binds its RPC surface to loopback by default, so the read and write surface is something you expose
 deliberately behind your own reverse proxy, not by accident. The settlement and reward side of operating,
@@ -36,8 +35,8 @@ Network parameters, verified against the chain README at SHA `9d5959e`:
 | Chain id | 40204 (testnet beta) |
 | Token | SALT, one trillion supply, 18 decimals |
 | Consensus | GhostDAG, k = 18, max-parents 10 |
-| Proposer election | ECVRF-P256-SHA256 (RFC 9381) |
-| Finality | committee BFT checkpoints, 100 validators, 67 quorum, 50-block interval (~90–100s at ~2s blocks); ~1–2s block confirmation |
+| Block production | a single block producer operated by Citrate today; ECVRF-P256-SHA256 (RFC 9381) proofs are checked; stake-gated eligibility is staged and off by default |
+| Finality | probabilistic confirmation, about 2 s per block; checkpoint finality is specified, not running (target design: a 100-member committee, 67 quorum, 50-block interval) |
 | Default JSON-RPC | `127.0.0.1:8545` |
 | Default WebSocket | `127.0.0.1:8546` |
 | Default REST | `127.0.0.1:3000` |
@@ -197,9 +196,7 @@ This is where running a node is security relevant, so the defaults fail closed.
 
 ## Access and canon
 
-Public. Running a node is public-good operator material, and the front door of the network. On the public
-network, operators are identity-verified through VERI, Citrate's in-house verification, and the node runs on hardware you control; Citrate
-keeps the verification result, not the personal data behind it. No secrets, operator tokens, or private node
+Public. Running a node is public-good operator material, and the front door of the network. The node runs on hardware you control. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. No secrets, operator tokens, or private node
 addresses appear here. The public RPC hostname `https://rpc.citrate.ai` is the only network endpoint named.
 For genesis and the network layout, see [the network](/chain/network) and [genesis](/chain/genesis).
 

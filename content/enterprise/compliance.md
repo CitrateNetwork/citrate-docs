@@ -32,7 +32,7 @@ customer's own controls govern the regulated workload.
 Because of those two facts, most frameworks apply to the customer's deployment rather than to a hosted
 service. The compliance floor therefore depends on where Citrate runs:
 
-- Public Citrate Network. Every node operator is identity-verified through VERI, Citrate's in-house verification; SOC 2 is the general floor
+- Public Citrate Network. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. SOC 2 is the general floor
   for the surrounding services.
 - Citrate Ground, on-premise. The customer's deployment carries the floor for its own context: HIPAA for
   health, NIST 800-171 and 800-53 with ITAR considerations for federal and regulated work, SOC 2 generally.

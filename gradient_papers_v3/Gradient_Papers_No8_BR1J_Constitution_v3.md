@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # The BR1J Constitution
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### DAO Governance Declaration, Code of Ethics, and Human-AI Symbiosis Framework
 #### A Living Document for the Governance of the Citrate Network
 

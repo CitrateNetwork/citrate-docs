@@ -16,6 +16,11 @@ you configure it, and how a paid request settles. If you are an application deve
 gateway rather than run one, read the [client reference](/sdks/inference-gateway) instead; this page does
 not repeat the request and response shapes that live there.
 
+> **Status: paid routes are not deployed.** The released gateway binary starts with `build_router`, which
+> serves only the free read routes. The x402-paid and API-key routes below are mounted by
+> `build_router_with_auth`, which today is used only by tests, so no public gateway settles paid calls yet.
+> This page documents the design and the code so operators can review it; it is not a live service.
+
 ## What it is
 
 The gateway is an OpenAI-compatible HTTP service that fronts Citrate Market on the Citrate Network, chain
@@ -53,8 +58,10 @@ and front it with your own TLS terminator. The difference is which variables you
    reference, never from a value in your config; see the signer family below.
 4. Start the gateway and confirm liveness with `GET /health`, then point Prometheus at `GET /metrics`.
 5. Confirm the read path. `GET /v1/models` is free and reads the on-chain `ModelRegistry`; if it returns
-   your expected models, the chain reads are wired. A paid `POST /v1/chat/completions` without a payment
-   header should return an HTTP `402` challenge, which is the gateway working as intended.
+   your expected models, the chain reads are wired. Once the paid router is wired, a paid `POST /v1/chat/completions`
+   without a payment header returns an HTTP `402` challenge. With the current binary the paid routes are not
+   mounted: expect a `404`, unless you enabled the development-only open chat mode below, which serves chat
+   and batch without any payment gate.
 
 ## Reference
 
@@ -76,18 +83,19 @@ Handlers live under `gateway/src/`. The request and response bodies are document
 route is gated.
 
 The paid routes and `/v1/usage` are mounted by the router that receives the operator signer and the x402
-settlement configuration, `build_router_with_auth` in `gateway/src/lib.rs`, which is the production
-marketplace path. The default `build_router` without that configuration serves only the free read routes,
-`/health`, `/v1/models`, and `/metrics`; it exposes an unauthenticated chat path only when both
-`CITRATE_GATEWAY_OPEN_CHAT` and `CITRATE_GATEWAY_DEV_MODE` are set, and that path carries no x402 gate.
+settlement configuration, `build_router_with_auth` in `gateway/src/lib.rs`, which is the intended
+marketplace path. The gateway binary (`gateway/src/main.rs`) does not call it yet; it calls `build_router`. The default `build_router` without that configuration serves only the free read routes,
+`/health`, `/v1/models`, and `/metrics`. Only when both `CITRATE_GATEWAY_OPEN_CHAT` and
+`CITRATE_GATEWAY_DEV_MODE` are set does it also mount `/v1/chat/completions`, `/v1/batch`, `/v1/batch/{id}` and
+`/v1/batch/{id}/output`, with no x402 gate. That mode is for development only.
 
 | Route | Method | Handler | Gating |
 |---|---|---|---|
-| `/v1/chat/completions` | POST | `gateway/src/chat.rs` | x402, paid |
-| `/v1/batch` | POST | `gateway/src/batch.rs` | x402, paid |
-| `/v1/batch/{id}`, `/v1/batch/{id}/output` | GET | `gateway/src/batch.rs` | free, submitter-bound reads |
+| `/v1/chat/completions` | POST | `gateway/src/chat.rs` | x402, paid (not mounted by the released binary) |
+| `/v1/batch` | POST | `gateway/src/batch.rs` | x402, paid (not mounted by the released binary) |
+| `/v1/batch/{id}`, `/v1/batch/{id}/output` | GET | `gateway/src/batch.rs` | submitter-bound reads; mounted only with the paid router or in development open chat mode |
 | `/v1/models` | GET | `gateway/src/models.rs` | free |
-| `/v1/usage` | GET | `gateway/src/usage.rs` | API-key bearer |
+| `/v1/usage` | GET | `gateway/src/usage.rs` | API-key bearer (not mounted by the released binary) |
 | `/health` | GET | `gateway/src/health.rs` | free liveness |
 | `/metrics` | GET | `gateway/src/metrics.rs` | bearer token, disabled when unset |
 
@@ -204,8 +212,7 @@ Commercial tier. This is operator and deployment depth, the configuration and se
 needs to stand up a gateway. The client-facing REST surface that calls it is public and lives on the
 [client page](/sdks/inference-gateway).
 
-Operators are identity-verified through VERI, Citrate's in-house verification on the public network, and the gateway runs on hardware you
-control. No API keys, treasury addresses, or operator account material appear here; that material is loaded
+The gateway runs on hardware you control. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. No API keys, treasury addresses, or operator account material appear here; that material is loaded
 from a keystore or a KMS reference and is never documented. The repository contains no hardcoded credentials
 at the audited SHA.
 
@@ -217,6 +224,7 @@ at the audited SHA.
   `gateway/src/queries.rs` (the `ChainQueries` trait, not an HTTP route); x402 middleware in
   `crates/x402-axum/src/layer.rs`; operator reference in `gateway/RUNBOOK.md`.
 - Audited against SHA: `603fe92`.
-- Status: Implemented (pre-audit). The run modes, on-chain reads, per-provider dispatch with failover, and
-  the full x402 settlement path exist and run; this slice has not had an external audit. Specified: pool
+- Status: Implemented (pre-audit) for the free routes: the run modes, on-chain reads and per-provider
+  dispatch with failover exist and run. The x402 settlement path and the API-key routes are built and tested
+  but not mounted by the released binary, so paid calls are not live. This slice has not had an external audit. Specified: pool
   dispatch (returns `503` today), durable usage accounting, and a name-to-hash model view.

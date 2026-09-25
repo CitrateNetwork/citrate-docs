@@ -15,8 +15,7 @@ author: Citrate team
 Citrate Node is the daemon an operator runs to sell compute on Citrate Market from their own hardware.
 It reads a small settings file, watches the market over JSON-RPC, decides which jobs to bid on, proves
 liveness with a heartbeat, and drives a won job to payout. It holds no keys: every write it wants made is
-handed, unsigned, to a separate signing surface. This page is for identity-verified operators on Citrate
-Network, chain id 40204.
+handed, unsigned, to a separate signing surface. This page is for operators on Citrate Network, chain id 40204.
 
 ## What it is
 
@@ -199,8 +198,7 @@ headroom so the daemon does not take on work it cannot safely finish.
 Tier commercial.kyc. The agent is operator-depth implementation, the bid-pricing logic, the lifecycle, and
 the capacity gates, that any contracted operator should have but whose anonymous theft would materially help
 a competitor clone the selling side of the market. Access is gated on identity verification through Citrate's in-house verification (VERI),
-not on a seat. Every operator and machine on Citrate Network is identity-verified through VERI, and Citrate
-holds the verification result, not the personal data behind it. Compute is sold from your own hardware, and
+not on a seat. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. Compute is sold from your own hardware, and
 SALT settles the work; it is the unit you count in, not a product to hold. No secrets appear on this page:
 the supervision token is generated locally and never transcribed, and the agent holds no keys by design.
 

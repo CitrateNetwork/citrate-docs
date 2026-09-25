@@ -1,7 +1,7 @@
 ---
 created: 2026-05-19T00:00:00Z
 branch: main
-author: Saul Loveman + Claude Opus 4.7 (1M context)
+author: Larry Klosowski
 status: active
 repo: citrate-docs
 tier: T1

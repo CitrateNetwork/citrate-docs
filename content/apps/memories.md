@@ -64,7 +64,7 @@ Defined in `PLANSET/06_WEBAPP_FRONTEND_SPEC.md`.
 | Constellation | A 2.5D DAG explorer with layout modes, an `as_of` time-scrubber, and blast-radius focus. |
 | Ask | Conversational recall with a model picker; citations light up the nodes they draw from. |
 | Node inspector | Identity, plane and trust badges, a source pointer that links rather than copies, the verify verdict, and neighbors. |
-| Review Center | A human-in-the-loop inbox of edge proposals, contradictions, supersessions, and self-critic findings. |
+| Review Center | An HIC (Human In Control) inbox of edge proposals, contradictions, supersessions, and self-critic findings. |
 | Org and Audit | A federation overview and the integrity-verified, hash-chained audit log. |
 | Connect | Mints your personal MCP endpoint and a short-lived token, with copy-paste client config. |
 

@@ -30,9 +30,9 @@ The default parameters are network constants.
 | `max_parents` | 10 | the most parents a block may name |
 | `max_blue_score_diff` | 1000 | the blue-score gap a reorg may span |
 | `pruning_window` | 100000 | how far back the DAG retains full detail |
-| `finality_depth` | 100 | the depth at which depth-based finality applies |
+| `finality_depth` | 100 | the depth parameter for depth-based finality tracking (see [current status](#current-status)) |
 
-Block target time is about one second on the active testnet and is set per network configuration; see [chain parameters and genesis](/chain/genesis) for the cadence of each. For where these blocks come from, see [the sequencer](/chain/sequencer); for the broader picture, see [the primer](/start/primer).
+The testnet node configuration (`node/config/testnet.toml`) sets a one-second target, but the measured block interval on the active testnet is about two seconds; see [chain parameters and genesis](/chain/genesis) for the cadence of each. For where these blocks come from, see [the sequencer](/chain/sequencer); for the broader picture, see [the primer](/start/primer).
 
 ## How to use it
 
@@ -41,9 +41,17 @@ You do not run GhostDAG directly; you read its output. To follow the live order 
 1. Ask the node for its current tips, the heads it is building on.
 2. Read a block and note its blue score; the higher the blue score, the closer to the selected tip.
 3. Walk the selected-parent chain back from the tip to see the order the network agreed on.
-4. Check a block's depth behind the selected tip. At one hundred blocks of depth it is final under depth-based finality, and a committee checkpoint may have finalized it sooner.
+4. Check a block's depth behind the selected tip. The deeper it is, the more work a competing branch would need to displace it. There is no protocol finality point today: see [current status](#current-status).
 
 The runnable steps, with the exact JSON-RPC calls, are in [read the DAG](/chain/tutorials/read-the-dag). To construct the engine in Rust, see the example at the end of this page.
+
+## Current status
+
+Confirmation on the testnet is probabilistic: a block gains weight as later blocks build on it. Checkpoint finality is specified, not running. The node constructs `CheckpointManager`, but no production code path calls `propose()` yet. `FinalityTracker` and `ChainSelector::with_finality` are exercised by tests only. The RPC does not serve the `finalized` block tag.
+
+The public testnet runs a single block producer operated by Citrate. Stake-gated proposer eligibility is staged: it is off by default and turns on when a validator registry is configured (`CITRATE_VALIDATOR_REGISTRY`). The one-hundred-member committee with a quorum of sixty-seven, described below, is the target design, not the current state.
+
+If you credit deposits or settle payments against Citrate testnet blocks, choose your own confirmation depth and treat it as a risk decision, not a protocol guarantee. The machine-readable record of these facts is `verification/claims.json` in citrate-chain (`deterministic_checkpoint_finality`, `consensus_ghostdag`).
 
 ## Reference
 
@@ -69,19 +77,19 @@ Proposer eligibility uses an elliptic-curve verifiable random function over NIST
 
 - `ecvrf::prove(secret, alpha)`, RFC 9381 section 5.1.
 - `ecvrf::verify(...)`, RFC 9381 section 5.3.
-- `VrfProposerSelector` (`src/vrf.rs`) applies stake-weighted eligibility on top of the VRF output.
+- `VrfProposerSelector` (`src/vrf.rs`) can apply stake-weighted eligibility on top of the VRF output. The node leaves stake gating off by default; without a configured validator registry the fallback selector checks the VRF proof and key binding, not stake.
 
 ### Depth-based finality, `src/finality.rs`
 
-`FinalityTracker` marks a block final once it sits under enough confirmations, `confirmation_depth = 100` by default (`FinalityConfig`, `src/finality.rs:42`). `FinalityStatus` is `Finalized`, `PendingFinalization`, or `Unfinalized`. A finalized block is protected from reorg: a reorganization that would rewrite it is refused at admission by `ChainSelector` (`src/chain_selection.rs:25`).
+`FinalityTracker` marks a block final once it sits under enough confirmations, `confirmation_depth = 100` by default (`FinalityConfig`, `src/finality.rs:42`). `FinalityStatus` is `Finalized`, `PendingFinalization`, or `Unfinalized`. When a `ChainSelector` is built `with_finality`, it refuses a reorganization that would rewrite a block the tracker marked final (`src/chain_selection.rs:25`). The node does not build it that way today, so this protection is specified, not running.
 
-### Committee checkpoint finality, `src/checkpoint.rs`
+### Committee checkpoint finality, `src/checkpoint.rs` (specified, not running)
 
-Depth-based finality is the everyday mechanism. The checkpoint layer adds deterministic finality on top of it. `CheckpointManager` coordinates a deterministically selected committee that signs over `(height || block_hash)` with ed25519, and the signatures are aggregated. A checkpoint finalizes once a quorum signs (`CheckpointState::has_quorum`). The chain id is bound into the signed message so a vote on one chain cannot replay onto another (`src/checkpoint.rs:90`).
+The checkpoint layer is designed to add deterministic finality on top of depth tracking. It is implemented and tested as a library, but no production code path proposes checkpoints yet. `CheckpointManager` coordinates a deterministically selected committee that signs over `(height || block_hash)` with ed25519, and the signatures are aggregated. A checkpoint finalizes once a quorum signs (`CheckpointState::has_quorum`). The chain id is bound into the signed message so a vote on one chain cannot replay onto another (`src/checkpoint.rs:90`).
 
 `CheckpointConfig::default()` sets `interval = 50` blocks, `committee_size = 100`, and `quorum_threshold = 67`, which is two-thirds of one hundred plus one (`src/checkpoint.rs:98`).
 
-In wall-clock terms under current testnet parameters (measured block time ~1.9–2s), a block confirms in ~1–2s, and deterministic BFT checkpoint finality lands roughly every 50 blocks, so ~90–100s. These are checkpoint-cadence and block-time figures, not a single fixed finality latency; there is no ~12s finality guarantee.
+In wall-clock terms under current testnet parameters (measured block time about 2 s), a block is included in about 2 s. Once checkpoints run, one would be due every 50 blocks, about 100 s at the measured block time. Until then there is no finality latency to quote.
 
 ### Example
 
@@ -111,13 +119,13 @@ let finalized = tracker.update_finality(&tip_hash, tip_height).await?;
 
 A graph orders work better than a line under load. When two proposers produce blocks at nearly the same moment, a single-parent chain has to discard one; a BlockDAG keeps both as parents and lets GhostDAG decide their order later. That is why blocks may name up to ten parents and why the target time can sit near one second without the orphan waste a line would suffer.
 
-Two choices guard the ledger. Blue score is recomputed rather than trusted, so a block cannot lie its way to the front by claiming a large score. And finality is layered: depth-based finality settles in over one hundred blocks for every block automatically, while committee checkpoints give a faster, signed, deterministic guarantee every fifty blocks. The cost is a checkpoint committee that must be selected and must sign; the benefit is that a settled block is settled by both depth and signature.
+Two choices guard the ledger. Blue score is recomputed rather than trusted, so a block cannot lie its way to the front by claiming a large score. And finality is designed in layers: depth tracking over one hundred blocks for every block, and committee checkpoints designed to add a signed, deterministic guarantee every fifty blocks. The cost is a checkpoint committee that must be selected and must sign; the benefit, once it runs, is that a settled block is settled by both depth and signature. Today checkpoint finality is specified, not running (see [current status](#current-status)).
 
 ## Failure modes
 
 - A block arriving with a forged `blue_score` is rejected at admission; ordering ignores the header value and uses the recomputed one.
-- A reorganization that would rewrite a finalized block is refused by `ChainSelector`, which returns a finality error rather than reverting history. The system fails closed: it keeps the finalized history rather than accepting the longer-but-conflicting branch.
-- A checkpoint cannot finalize without a quorum of sixty-seven of one hundred committee signatures, so a minority of the committee cannot force a checkpoint. Chain-id binding stops a valid vote from one network being replayed onto another.
+- As designed, a reorganization that would rewrite a finalized block is refused by a finality-aware `ChainSelector`, which returns a finality error rather than reverting history. That path is specified, not running, on the testnet.
+- In the checkpoint design, a checkpoint cannot finalize without a quorum of sixty-seven of one hundred committee signatures, so a minority of the committee cannot force a checkpoint. Chain-id binding stops a valid vote from one network being replayed onto another. Neither applies on the live testnet until checkpoints run.
 
 ## Access and canon
 
@@ -127,4 +135,4 @@ Public. The GhostDAG model, the parameters, and the audited surface are protocol
 
 - Source files: `core/consensus/src/types.rs`, `src/ghostdag.rs`, `src/ecvrf.rs`, `src/vrf.rs`, `src/finality.rs`, `src/chain_selection.rs`, `src/checkpoint.rs`.
 - Audited against SHA `9d5959e`.
-- Status: Implemented, pre external audit. The crate is internally tested and TLA+-checked in several areas; it has not completed a third-party audit, so read "tested" as tested, not certified.
+- Status: GhostDAG ordering and VRF checks are implemented; checkpoint finality is specified, not running. Pre external audit. The crate is internally tested and TLA+-checked in several areas; it has not completed a third-party audit, so read "tested" as tested, not certified.

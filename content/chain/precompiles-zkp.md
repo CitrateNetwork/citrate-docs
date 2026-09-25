@@ -110,9 +110,7 @@ This page is a summary. It carries the address map, the input and output shapes,
 
 The implementation detail of all three families - circuit construction, prover and verifier internals, the
 inference runtime, the attestation-verification logic, and the exact ABIs - is public in the `citrate-chain`
-repository (Apache-2.0). This page summarizes and links to that source rather than reproducing it. Every
-node operator on the public network is identity-verified through VERI, Citrate's in-house verification, and
-Citrate keeps the verification result, not the personal data behind it. No keys, ceremony secrets, or
+repository (Apache-2.0). This page summarizes and links to that source rather than reproducing it. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. No keys, ceremony secrets, or
 credentials appear on this page.
 
 For the full internals - the circuit specs, verifier code, or attestation-verification design - read the

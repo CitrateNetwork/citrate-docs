@@ -21,9 +21,9 @@ your eyes, ask it in plain English, or drive it from an agent.
 CitrateScan is a DAG-native, agentic block explorer for [Citrate Network](/chain/rpc), live on chain id
 40204. Most explorers assume a single line of blocks and count confirmations. Citrate is a BlockDAG under
 GhostDAG, so a block carries a blue score rather than a plain height, has one selected parent and up to ten
-merge parents, and reaches finality by depth: a block is final once the current blue score minus the
-block's blue score is at least 100. CitrateScan reads the DAG in those terms, with no confirmation counter
-to wait on. The consensus model behind this is covered under [Citrate Network consensus](/chain/consensus).
+merge parents, and gains confirmation by depth. CitrateScan shows a depth≥100 flag once the current blue
+score minus the block's blue score is at least 100. That flag is a display heuristic, not protocol
+finality: confirmation on the testnet is probabilistic and checkpoint finality is specified, not running. The consensus model behind this is covered under [Citrate Network consensus](/chain/consensus).
 
 It is agentic in two senses. Every entity page leads with a plain-English summary of what you are looking
 at, and a built-in "Ask CitrateScan" capability answers questions using read-only on-chain tool calls,
@@ -61,7 +61,7 @@ The app is a single page whose hash router swaps between these screens. Code liv
 |---|---|---|
 | Home and search | Search bar that accepts an address, transaction hash, block, contract, or a question; live chain status; recent activity. `⌘K` opens a command palette. | `screens/home.tsx`, `src/scan/app.tsx` |
 | Transaction | One transaction with a plain-English explanation, status, value in dual units (SALT and raw grains), and decoded detail. | `screens/tx.tsx` |
-| Block | A DAG block: blue score, selected parent and merge parents, finality by depth, included transactions. | `screens/entity.tsx` |
+| Block | A DAG block: blue score, selected parent and merge parents, depth (the depth≥100 flag), included transactions. | `screens/entity.tsx` |
 | Address | Balance, transaction history, and activity for an account. | `screens/entity.tsx` |
 | Token | Credit overview and transfers. | `screens/entity.tsx` |
 | Contract | Contract code, ABI, and a read surface; an address is treated as a contract only after `eth_getCode` confirms it carries code. | `screens/contract.tsx` |
@@ -84,7 +84,7 @@ Dedicated read endpoints sit under `/api/`:
 
 | Endpoint | Returns | Source |
 |---|---|---|
-| `/api/tx/[hash]` | A transaction and receipt, enriched with the block timestamp, blue score, and a `finalized` flag, in one fetch. | `src/app/api/tx/[hash]/route.ts` |
+| `/api/tx/[hash]` | A transaction and receipt, enriched with the block timestamp, blue score, and the depth≥100 flag (JSON field `finalized`, a display heuristic, not protocol finality), in one fetch. | `src/app/api/tx/[hash]/route.ts` |
 | `/api/blocks`, `/api/blocks/[id]` | Recent blocks and a single block. | `src/app/api/blocks/` |
 | `/api/address/[addr]` | Account balance and activity. | `src/app/api/address/[addr]/route.ts` |
 | `/api/contract/[addr]` | Contract code, ABI, and read surface. | `src/app/api/contract/[addr]/route.ts` |
@@ -121,8 +121,8 @@ some history that only the index can serve.
   refused rather than passed along.
 - Write and relay paths, including the gasless relayer, are out of scope for the read surfaces documented
   here.
-- `getblockcountdown` on the Etherscan-shaped surface returns an error on purpose, because finality on
-  Citrate is depth-based. Read the DAG stats and the depth rule instead of waiting for a countdown.
+- `getblockcountdown` on the Etherscan-shaped surface returns an error on purpose, because confirmation on
+  Citrate is measured by depth. Read the DAG stats and the depth rule instead of waiting for a countdown.
 - Index-dependent reads return an explicit "pending" or "no data" message when the indexer is not
   provisioned. They do not fabricate a result, so a degraded deployment is visible rather than silent.
 

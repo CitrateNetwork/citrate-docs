@@ -68,7 +68,7 @@ are shared across networks; see [Citrate Network consensus](/chain/consensus).
 
 | Network | `block_time` |
 |---|---|
-| Testnet | 1 s |
+| Testnet | 1 s configured (about 2 s measured) |
 | Team testnet | 2 s |
 | Devnet | 2 s |
 | Mainnet (pre-launch) | 5 s |

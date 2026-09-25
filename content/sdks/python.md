@@ -190,8 +190,7 @@ and we say so rather than paper over it.
 
 Public. This is open SDK reference a developer needs to build on Citrate, so no tier gate applies. No keys,
 mnemonics, or private endpoints appear here; private keys are supplied at runtime through `private_key=` or
-`CITRATE_PRIVATE_KEY` and must never be committed. Every node and machine on the public network is
-identity-verified through VERI, Citrate's in-house verification before it can take part; the SDK itself holds no such data.
+`CITRATE_PRIVATE_KEY` and must never be committed. The SDK holds no identity data.
 
 ## Source and verification
 

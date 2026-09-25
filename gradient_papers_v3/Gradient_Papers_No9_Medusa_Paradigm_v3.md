@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # The Medusa Paradigm
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Cnidarian Biological Architectures as Design Principles for Distributed AI
 #### A Cross-Disciplinary Analysis Bridging Marine Biology, Distributed Systems, and Autonomous Agents
 

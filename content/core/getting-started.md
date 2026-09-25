@@ -42,7 +42,7 @@ a returning one signs back in.
 
 ## Step 2: Verify identity
 
-Membership on the public network is identity-verified through VERI, Citrate's in-house verification. You
+The app asks you to verify your identity through VERI, Citrate's in-house verification, as part of membership. You
 complete a short check here. The result gates the steps that follow; the verification itself is handled by
 the identity service, and Citrate Core only carries the outcome.
 

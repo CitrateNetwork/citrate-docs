@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # The Mentorship Protocol
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Organizational Learning Theory for Decentralized Agent Swarm Orchestration
 #### Central Oracle Design, SECI Knowledge Mapping, and Double-Loop Learning at BFT Checkpoints
 
@@ -165,8 +167,8 @@ aggregating observations from all agents, a performance profile tracking each ag
 across input classes, and a mentorship registry mapping mentor-mentee pairs by complementary
 strengths.
 
-**[Implemented]** In the Citrate Network the Oracle is not a server process; it is the BFT finality
-checkpoint itself, and its three structures now have concrete homes. The knowledge base is the
+**[Specified]** In the Citrate Network the Oracle is not a server process; it is the BFT finality
+checkpoint itself (specified in Paper I §2.3, not yet running on the testnet), and its three structures now have concrete homes. The knowledge base is the
 committed set of embeddings; the performance profile and macro-phase are fields of the
 `LearningCheckpoint` (`core/learning/src/checkpoint.rs:14`, with the per-node metrics root at
 `:45`); and the mentorship registry is the on-chain adapter registry in **`LoRAFactory.sol`**

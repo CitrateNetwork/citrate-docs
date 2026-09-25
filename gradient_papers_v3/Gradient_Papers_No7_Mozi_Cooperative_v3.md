@@ -13,6 +13,8 @@ supersedes: "v2 (February 2026), v3-April draft"
 ---
 
 # The Mozi Cooperative
+
+> **Addresses.** Contract addresses cited in this paper are from an earlier address book and several have moved or have no code on chain 40204. Use the canonical, generated list at https://docs.citrate.ai/chain/addresses, which marks each contract as deployed or not deployed.
 ### Cooperative Capitalism and Shared Ownership of AI Infrastructure
 #### The Value Should Flow to the People Who Train, Support, and Believe in the Models
 

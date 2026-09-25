@@ -20,7 +20,7 @@
     "check:mcp-keys": "node --experimental-strip-types scripts/check-mcp-keys.mjs",
     "check:bundle-gate": "node scripts/check-bundle-gate-selftest.mjs",
     "verify:bundle": "node scripts/check-no-confidential.mjs && npm run check:bundle-gate && npm run check:auth-mode && npm run check:access-clock && npm run check:mcp-keys",
-    "content-lint": "node scripts/content-lint.mjs",
+    "content-lint": "node scripts/truth-lint.mjs && node scripts/content-lint.mjs",
     "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json",
     "docs:api": "node scripts/gen-api-refs.mjs",
     "docs:addresses": "node scripts/gen-addresses.mjs",
