@@ -44,8 +44,41 @@ interface RawEntry {
  */
 export const MCP_KEY_RE = /^cdk_[A-Za-z0-9_-]{43}$/;
 
-/** Minimum length of the server-side pepper (`MCP_KEY_PEPPER`). Shorter or unset: no key resolves. */
+/** Minimum length of the server-side pepper (`MCP_KEY_PEPPER`), after trimming. */
 export const MIN_MCP_KEY_PEPPER_LENGTH = 32;
+/** Minimum distinct characters in the pepper (rejects "aaaa…" / whitespace padding). */
+export const MIN_MCP_KEY_PEPPER_DISTINCT = 8;
+
+export type McpPepperStatus = "ok" | "missing" | "weak";
+
+/** Whether `MCP_KEY_PEPPER` is usable: set, >= 32 chars after trimming, >= 8 distinct characters. */
+export function mcpPepperStatus(env: NodeJS.ProcessEnv = process.env): McpPepperStatus {
+  const raw = env.MCP_KEY_PEPPER ?? "";
+  if (!raw.trim()) return "missing";
+  const p = raw.trim();
+  if (p !== raw || p.length < MIN_MCP_KEY_PEPPER_LENGTH || new Set(p).size < MIN_MCP_KEY_PEPPER_DISTINCT) return "weak";
+  return "ok";
+}
+
+/** True when MCP_API_KEYS holds at least one entry. */
+export function mcpStoreConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Object.keys(keyStore(env)).length > 0;
+}
+
+let warnedPepper = false;
+/**
+ * A key store without a usable pepper silently resolves every partner key to "public" (fail closed).
+ * Say so once in the server log so the misconfiguration is diagnosable; the build check
+ * (check:mcp-keys) fails the deploy for the same condition.
+ */
+function warnPepperOnce(status: McpPepperStatus): void {
+  if (warnedPepper) return;
+  warnedPepper = true;
+  console.error(
+    `[mcp-keys] MCP_API_KEYS is configured but MCP_KEY_PEPPER is ${status}: every MCP key resolves to public. ` +
+      "Set a random MCP_KEY_PEPPER (>= 32 chars) and re-mint keys with scripts/mint-mcp-key.mjs.",
+  );
+}
 
 /**
  * The store index for a presented key: HMAC-SHA256(key) under the server-only `MCP_KEY_PEPPER`.
@@ -86,8 +119,12 @@ export function resolveMcpKeyCap(
 ): McpKeyCap {
   const key = (presentedKey ?? "").trim();
   if (key.length < MIN_MCP_KEY_LENGTH || !MCP_KEY_RE.test(key)) return publicCap();
-  const pepper = env.MCP_KEY_PEPPER ?? "";
-  if (pepper.length < MIN_MCP_KEY_PEPPER_LENGTH) return publicCap(); // no pepper → nothing resolves (fail closed)
+  const status = mcpPepperStatus(env);
+  if (status !== "ok") {
+    if (mcpStoreConfigured(env)) warnPepperOnce(status);
+    return publicCap(); // no usable pepper → nothing resolves (fail closed)
+  }
+  const pepper = env.MCP_KEY_PEPPER as string;
 
   const entry = keyStore(env)[mcpKeyDigest(key, pepper)];
   if (!entry) return publicCap();

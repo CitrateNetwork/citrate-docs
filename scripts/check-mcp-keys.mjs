@@ -81,7 +81,7 @@ console.log('[check:mcp-keys] ✓ with no MCP_API_KEYS store, every key (incl. t
 // ── Guard 2b: an HMAC-keyed store entry grants its tier; expiry is honoured; unknown tier never escalates;
 //    unminted formats, a missing pepper and a bare-SHA-256 (pre-R2) store never resolve. ──
 const { mintMcpKey } = await import(path.join(ROOT, "scripts/mint-mcp-key.mjs"));
-const pepper = "p".repeat(40); // test-only
+const pepper = "test-only-pepper-0123456789-abcdefghij"; // test-only, >= 8 distinct chars
 const good = mintMcpKey({ pepper, tier: "academic", sub: "org:academic_partner", expiresAt: now + 30 * 86_400_000 });
 const expired = mintMcpKey({ pepper, tier: "academic", sub: "org:stale", expiresAt: now - 1 });
 const badTier = { key: "cdk_" + "b".repeat(43) };
@@ -101,7 +101,21 @@ assert.equal(resolveMcpKeyCap(badTier.key, now, env).tier, "public", "unknown ti
 assert.equal(resolveMcpKeyCap("cdk_" + "u".repeat(43), now, env).tier, "public", "unknown key must resolve to public");
 assert.equal(resolveMcpKeyCap(humanKey, now, env).tier, "public", "a non-minted key format must never resolve, even if stored");
 assert.equal(resolveMcpKeyCap(good.key, now, { MCP_API_KEYS: env.MCP_API_KEYS }).tier, "public", "no pepper: nothing resolves");
-assert.equal(resolveMcpKeyCap(good.key, now, { ...env, MCP_KEY_PEPPER: "short" }).tier, "public", "short pepper: nothing resolves");
+// Weak peppers: the store is keyed UNDER the weak pepper, so only the pepper rule can refuse it.
+for (const [weak, why] of [["short-pepper-0123", "short"], [" ".repeat(40), "whitespace-only"], ["a".repeat(40), "low-variety"], [` ${pepper}`, "padded"]]) {
+  const k = mintMcpKey({ pepper: "x".repeat(8) + "0123456789abcdefghijklmnop", tier: "academic", sub: "org:w" }).key;
+  const weakEnv = { MCP_KEY_PEPPER: weak, MCP_API_KEYS: JSON.stringify({ [createHmac("sha256", weak).update(k).digest("hex")]: { tier: "academic", sub: "org:w" } }) };
+  assert.equal(resolveMcpKeyCap(k, now, weakEnv).tier, "public", `${why} pepper: nothing resolves`);
+}
 assert.equal(resolveMcpKeyCap(good.key, now, { MCP_API_KEYS: JSON.stringify({ [sha256Hex(good.key)]: { tier: "academic" } }), MCP_KEY_PEPPER: pepper }).tier, "public", "a bare-SHA-256 (pre-R2) store entry must not resolve");
 assert.equal(resolveMcpKeyCap(good.key, now, { ...env, MCP_API_KEYS: "{ not json" }).tier, "public", "malformed store must fail closed");
+// ── Guard 3: THIS build's deployment env. A configured store without a usable pepper would silently
+//    downgrade every partner key to public; fail the build instead. ──
+{
+  const { mcpPepperStatus, mcpStoreConfigured } = await loadResolver();
+  if (mcpStoreConfigured(process.env) && mcpPepperStatus(process.env) !== "ok") {
+    console.error(`[check:mcp-keys] ✗ MCP_API_KEYS is set but MCP_KEY_PEPPER is ${mcpPepperStatus(process.env)} (need >= 32 chars, >= 8 distinct, no padding).`);
+    process.exit(1);
+  }
+}
 console.log("[check:mcp-keys] ✓ shipped resolver: HMAC-keyed minted grant honoured, format/pepper enforced, expiry honoured, unknown tier/key/malformed-store all fail closed to public (DOC-B-003).");

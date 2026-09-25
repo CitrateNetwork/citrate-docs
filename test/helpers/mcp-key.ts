@@ -1,7 +1,7 @@
 /** Test-only MCP key store builder matching lib/auth/mcp-keys.ts (HMAC under MCP_KEY_PEPPER). */
 import { createHmac } from "node:crypto";
 
-export const TEST_PEPPER = "t".repeat(40); // test-only, not a secret
+export const TEST_PEPPER = "test-pepper-0123456789-abcdefghijklmn"; // test-only, not a secret
 /** A syntactically valid minted-format key (not random: tests only). */
 export const testKey = (c: string) => `cdk_${c.repeat(43).slice(0, 43)}`;
 export const digest = (key: string, pepper = TEST_PEPPER) => createHmac("sha256", pepper).update(key).digest("hex");
