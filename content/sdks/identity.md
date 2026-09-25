@@ -119,7 +119,7 @@ Each name below is exported from `@citratelabs/sdk` (`identity` namespace) and m
 `exchangeCode` and `refresh`. It accepts only `RS256`, verifies the signature before reading any claim, and
 rejects `alg:none`, algorithm confusion, a wrong audience or issuer, an expired or not-yet-valid token, a
 tampered payload, and a token whose `kid` matches no key. It also requires numeric `exp` and `iat` claims
-(an `iat` in the future is refused) and a `typ` of `JWT` or none.
+(an `iat` more than the clock tolerance in the future is refused) and a `typ` of `JWT` or none.
 
 ### The embedded account
 

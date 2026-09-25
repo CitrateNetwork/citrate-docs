@@ -127,15 +127,17 @@ Most take a `contract_addresses` dict; `StakingManager` and `ClassroomManager` i
 `staking_address` or `classroom_address`. Writes raise `ConfigurationError` when `default_account` is unset;
 read methods are `eth_call`-only and need no account. Every write first checks `eth_chainId` against the pinned
 chain (40204 by default; pass `chain_id=` to target another Citrate network) and refuses to send on a mismatch.
-Unknown `access`, `tier` or `mode` strings raise `ValueError`. `ClassroomManager.create` generates a random invite
-code when you don't pass one, and exposes it as `last_invite_code`. `enroll` sends the raw code, and the contract
-hashes it.
+Unknown `access`, `tier` or `mode` strings raise `ValueError`. A classroom invite is a key pair:
+`ClassroomManager.create` (and `rotate_invite_code`) registers the invite key's commitment and returns the invite
+secret in `last_invite_code`. Share that secret with students out of band. A student calls
+`enroll_with_invite(secret)`, which signs an enrolment proof bound to the student's account, and only the invite
+key and that proof go on-chain. `enroll` is deprecated.
 
 | Manager | Source | Selected methods |
 |---|---|---|
 | `LearningManager` | `learning.py:176` | `list_pools`, `join_pool`, `leave_pool`, `create_pool`, `get_cycle_status`, `register_for_cycle`, `claim_cycle_reward`, `get_contributions`, `claim_contribution_rewards` |
 | `StakingManager` | `learning.py:461` | `deposit`, `withdraw`, `claim_withdrawal`, `get_info`, `preview_deposit`, `preview_withdraw`, `get_withdrawal` |
-| `ClassroomManager` | `learning.py:629` | `create`, `enroll`, `unenroll`, `deploy_model`, `remove_model`, `rotate_invite_code`, `get_classroom`, `can_student_access_model`, `get_student_teacher` |
+| `ClassroomManager` | `learning.py:629` | `create`, `enroll_with_invite`, `unenroll`, `deploy_model`, `remove_model`, `rotate_invite_code`, `get_classroom`, `can_student_access_model`, `get_student_teacher` |
 | `ComputeManager` | `compute.py:72` | `post_job`, `bid_on_job`, `get_job`, `list_jobs`, `submit_result`, `register_provider`, `get_provider_info`, `heartbeat`, `create_pool`, `join_pool`, `leave_pool`, `get_pools`, `dispute_result`, `get_dispute` |
 | `TreasuryManager` | `treasury.py:60` | `deposit_stablecoin`, `purchase_compute_credits`, `get_credit_balance`, `estimate_calls_remaining`, `get_treasury_value`, `get_epoch_revenue`, `get_current_epoch`, `get_stablecoin_balance`, `get_total_distributed`, `get_credit_price_usd` |
 | `FarmingManager` | `farming.py:56` | `get_my_score`, `get_my_share`, `get_leaderboard`, `claim`, `has_claimed`, `get_distribution_info`, `is_in_snapshot`, `get_claimed_amount` |
