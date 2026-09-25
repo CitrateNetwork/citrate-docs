@@ -65,8 +65,7 @@ async function loadResolver() {
   // mcp-keys.ts's only runtime import from the barrel is normalizeTier (Tier is type-only).
   m = m.replace(/^import\s+\{[^}]*\}\s+from\s+["']@\/prototype\/fixtures["'];?\s*$/m,
     'import { normalizeTier } from "./types.ts";');
-  m = m.replace(/from\s+["']\.\/mcp-pepper["']/g, 'from "./mcp-pepper.ts"');
-  fs.copyFileSync(path.join(ROOT, "lib/auth/mcp-pepper.ts"), path.join(tmp, "mcp-pepper.ts"));
+  fs.copyFileSync(path.join(ROOT, "lib/auth/mcp-pepper.mjs"), path.join(tmp, "mcp-pepper.mjs"));
   fs.writeFileSync(path.join(tmp, "mcp-keys.ts"), m);
   return import(path.join(tmp, "mcp-keys.ts"));
 }

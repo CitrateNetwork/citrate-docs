@@ -8,7 +8,7 @@
 // keyed by HMAC-SHA256(key, MCP_KEY_PEPPER), matching lib/auth/mcp-keys.ts.
 import { createHmac, randomBytes } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import { pepperStatus } from "../lib/auth/mcp-pepper.ts";
+import { pepperStatus } from "../lib/auth/mcp-pepper.mjs";
 
 export const MCP_KEY_PREFIX = "cdk_";
 const TIERS = new Set(["public", "commercial", "academic", "confidential"]);
