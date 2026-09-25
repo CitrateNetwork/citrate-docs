@@ -1,6 +1,6 @@
 import "server-only";
 import { createHmac } from "node:crypto";
-import { mcpPepperStatus, type McpPepperStatus } from "./mcp-pepper";
+import { mcpPepperStatus, type McpPepperStatus } from "./mcp-pepper.mjs";
 import { Tier, normalizeTier } from "@/prototype/fixtures";
 
 /**
@@ -45,10 +45,10 @@ interface RawEntry {
  */
 export const MCP_KEY_RE = /^cdk_[A-Za-z0-9_-]{43}$/;
 
-// The pepper rule lives in ./mcp-pepper (plain TS, no server-only / alias imports) so the mint
+// The pepper rule lives in ./mcp-pepper (plain JS, no imports; node 20 can load it) so the mint
 // script applies exactly the same check.
-export { MIN_MCP_KEY_PEPPER_LENGTH, MIN_MCP_KEY_PEPPER_DISTINCT, mcpPepperStatus, pepperStatus } from "./mcp-pepper";
-export type { McpPepperStatus } from "./mcp-pepper";
+export { MIN_MCP_KEY_PEPPER_LENGTH, MIN_MCP_KEY_PEPPER_DISTINCT, mcpPepperStatus, pepperStatus } from "./mcp-pepper.mjs";
+export type { McpPepperStatus } from "./mcp-pepper.mjs";
 
 /** True when MCP_API_KEYS holds at least one entry. */
 export function mcpStoreConfigured(env: NodeJS.ProcessEnv = process.env): boolean {

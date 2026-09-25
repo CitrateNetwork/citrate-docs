@@ -135,3 +135,16 @@ describe("mint script applies the resolver's pepper rule", () => {
     }
   });
 });
+
+describe("mint script runs on node 20 (no TypeScript imports)", () => {
+  it("scripts/mint-mcp-key.mjs and lib/auth/mcp-pepper.mjs import no .ts file", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const root = join(__dirname, "..");
+    const mint = readFileSync(join(root, "scripts", "mint-mcp-key.mjs"), "utf8");
+    expect(mint).not.toMatch(/from\s+["'][^"']+\.(c|m)?ts["']/);
+    expect(mint).toMatch(/from "\.\.\/lib\/auth\/mcp-pepper\.mjs"/);
+    const rule = readFileSync(join(root, "lib", "auth", "mcp-pepper.mjs"), "utf8");
+    expect(rule).not.toMatch(/^\s*import\s/m);
+  });
+});
