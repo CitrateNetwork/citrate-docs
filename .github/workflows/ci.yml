@@ -21,6 +21,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # PBA-L3c-014: blocking dependency audit (same bar as citrate-explorer).
+      # docs shipped next 16.2.9 with critical advisories while siblings were on
+      # 16.3.x; this fails the build on any HIGH/CRITICAL advisory in the tree.
+      - name: Dependency audit (block HIGH)
+        run: npm audit --audit-level=high
       - name: Typecheck
         run: npm run typecheck
       - name: Unit tests (access-control chokepoint — vitest)
