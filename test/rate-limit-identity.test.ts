@@ -5,7 +5,7 @@
  * controlled) and was process-local only.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createHash } from "node:crypto";
+import { storeEnv, testKey } from "./helpers/mcp-key";
 import { clientIp, enforceRateLimit, resetRateLimits } from "@/lib/security/rate-limit";
 
 beforeEach(() => resetRateLimits());
@@ -34,8 +34,8 @@ describe("MCP limiter identity (PBA-L3c-028)", () => {
   });
 
   it("a VALID key is limited per verified subject, independent of IP", async () => {
-    const KEY = "valid-partner-" + "k".repeat(24); // test-only, not a credential
-    vi.stubEnv("MCP_API_KEYS", JSON.stringify({ [createHash("sha256").update(KEY).digest("hex")]: { tier: "commercial", sub: "org:acme" } }));
+    const KEY = testKey("k");
+    for (const [k, v] of Object.entries(storeEnv({ [KEY]: { tier: "commercial", sub: "org:acme" } }))) vi.stubEnv(k, v);
     const { POST } = await import("@/app/api/mcp/route");
     let limited = 0;
     for (let i = 0; i < 31; i++) {
@@ -51,12 +51,25 @@ describe("client IP (PBA-L3c-030)", () => {
   it("ignores client-prepended left hops: uses the right-most (proxy-appended) hop", () => {
     expect(clientIp(r({ "x-forwarded-for": "6.6.6.6, 9.9.9.9" }))).toBe("9.9.9.9");
   });
-  it("prefers x-vercel-forwarded-for (set by the platform)", () => {
-    expect(clientIp(r({ "x-vercel-forwarded-for": "8.8.8.8", "x-forwarded-for": "6.6.6.6, 9.9.9.9" }))).toBe("8.8.8.8");
+  it("prefers x-vercel-forwarded-for only when DOCS_TRUST_VERCEL_FORWARDED=1", () => {
+    const h = { "x-vercel-forwarded-for": "8.8.8.8", "x-forwarded-for": "6.6.6.6, 9.9.9.9" };
+    expect(clientIp(r(h))).toBe("9.9.9.9"); // default: not trusted (safe off Vercel)
+    vi.stubEnv("DOCS_TRUST_VERCEL_FORWARDED", "true");
+    expect(clientIp(r(h))).toBe("9.9.9.9"); // only the exact "1" opts in
+    vi.stubEnv("DOCS_TRUST_VERCEL_FORWARDED", "1");
+    expect(clientIp(r(h))).toBe("8.8.8.8");
   });
   it("does not trust x-real-ip by default", () => {
     expect(clientIp(r({ "x-real-ip": "7.7.7.7" }))).toBe("unknown");
   });
+  it("verifier residual: rotating x-vercel-forwarded-for off Vercel does not mint new buckets", () => {
+    let blocked = 0;
+    for (let i = 0; i < 25; i++) {
+      if (enforceRateLimit(r({ "x-vercel-forwarded-for": `10.1.0.${i}`, "x-forwarded-for": "9.9.9.8" }), "t030v", { limit: 20 })) blocked++;
+    }
+    expect(blocked).toBe(5);
+  });
+
   it("rotating the spoofable left hop does not mint new buckets", () => {
     let blocked = 0;
     for (let i = 0; i < 25; i++) {

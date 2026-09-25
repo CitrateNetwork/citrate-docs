@@ -18,7 +18,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const sha256Hex = (s) => createHash("sha256").update(s).digest("hex");
@@ -78,25 +78,30 @@ for (const k of ["codex_academic", "codex_commercial", "codex_public", "anything
 }
 console.log('[check:mcp-keys] ✓ with no MCP_API_KEYS store, every key (incl. the old "codex_academic") resolves to public.');
 
-// ── Guard 2b: a hashed store entry grants its tier; expiry is honoured; unknown tier never escalates. ──
-// Test-only keys: long enough for MIN_MCP_KEY_LENGTH, built at runtime (not credentials).
-const goodKey = "prov-academic-" + "g".repeat(24);
-const expiredKey = "prov-expired-" + "e".repeat(24);
-const shortKey = "short-human-key";
-const badTierKey = "prov-superadmin-" + "b".repeat(24);
+// ── Guard 2b: an HMAC-keyed store entry grants its tier; expiry is honoured; unknown tier never escalates;
+//    unminted formats, a missing pepper and a bare-SHA-256 (pre-R2) store never resolve. ──
+const { mintMcpKey } = await import(path.join(ROOT, "scripts/mint-mcp-key.mjs"));
+const pepper = "p".repeat(40); // test-only
+const good = mintMcpKey({ pepper, tier: "academic", sub: "org:academic_partner", expiresAt: now + 30 * 86_400_000 });
+const expired = mintMcpKey({ pepper, tier: "academic", sub: "org:stale", expiresAt: now - 1 });
+const badTier = { key: "cdk_" + "b".repeat(43) };
+badTier.entry = { [createHmac("sha256", pepper).update(badTier.key).digest("hex")]: { tier: "superadmin", sub: "org:evil", expiresAt: null } };
+const humanKey = "prov-academic-" + "g".repeat(24);
 const store = {
-  [sha256Hex(goodKey)]: { tier: "academic", sub: "org:academic_partner", expiresAt: now + 30 * 86_400_000 },
-  [sha256Hex(expiredKey)]: { tier: "academic", sub: "org:stale", expiresAt: now - 1 },
-  [sha256Hex(badTierKey)]: { tier: "superadmin", sub: "org:evil", expiresAt: null },
-  [sha256Hex(shortKey)]: { tier: "academic", sub: "org:short", expiresAt: null },
+  ...good.entry, ...expired.entry, ...badTier.entry,
+  [createHmac("sha256", pepper).update(humanKey).digest("hex")]: { tier: "academic", sub: "org:human", expiresAt: null },
+  [sha256Hex(good.key)]: { tier: "confidential", sub: "org:legacy", expiresAt: null },
 };
-const env = { MCP_API_KEYS: JSON.stringify(store) };
+const env = { MCP_API_KEYS: JSON.stringify(store), MCP_KEY_PEPPER: pepper };
 
-assert.equal(resolveMcpKeyCap(goodKey, now, env).tier, "academic", "provisioned key must grant its configured tier");
-assert.equal(resolveMcpKeyCap(goodKey, now, env).sub, "org:academic_partner", "cap must carry the key owner's sub");
-assert.equal(resolveMcpKeyCap(expiredKey, now, env).tier, "public", "expired key must collapse to public");
-assert.equal(resolveMcpKeyCap(badTierKey, now, env).tier, "public", "unknown tier in store must normalize to public (never escalate)");
-assert.equal(resolveMcpKeyCap("unlisted-key", now, env).tier, "public", "unknown key must resolve to public");
-assert.equal(resolveMcpKeyCap(shortKey, now, env).tier, "public", "a key shorter than MIN_MCP_KEY_LENGTH must never resolve, even if stored");
-assert.equal(resolveMcpKeyCap(goodKey, now, { MCP_API_KEYS: "{ not json" }).tier, "public", "malformed store must fail closed");
-console.log("[check:mcp-keys] ✓ shipped resolver: hashed grant honoured, expiry honoured, unknown tier/key/malformed-store all fail closed to public (DOC-B-003).");
+assert.equal(resolveMcpKeyCap(good.key, now, env).tier, "academic", "minted key must grant its configured tier");
+assert.equal(resolveMcpKeyCap(good.key, now, env).sub, "org:academic_partner", "cap must carry the key owner's sub");
+assert.equal(resolveMcpKeyCap(expired.key, now, env).tier, "public", "expired key must collapse to public");
+assert.equal(resolveMcpKeyCap(badTier.key, now, env).tier, "public", "unknown tier in store must normalize to public (never escalate)");
+assert.equal(resolveMcpKeyCap("cdk_" + "u".repeat(43), now, env).tier, "public", "unknown key must resolve to public");
+assert.equal(resolveMcpKeyCap(humanKey, now, env).tier, "public", "a non-minted key format must never resolve, even if stored");
+assert.equal(resolveMcpKeyCap(good.key, now, { MCP_API_KEYS: env.MCP_API_KEYS }).tier, "public", "no pepper: nothing resolves");
+assert.equal(resolveMcpKeyCap(good.key, now, { ...env, MCP_KEY_PEPPER: "short" }).tier, "public", "short pepper: nothing resolves");
+assert.equal(resolveMcpKeyCap(good.key, now, { MCP_API_KEYS: JSON.stringify({ [sha256Hex(good.key)]: { tier: "academic" } }), MCP_KEY_PEPPER: pepper }).tier, "public", "a bare-SHA-256 (pre-R2) store entry must not resolve");
+assert.equal(resolveMcpKeyCap(good.key, now, { ...env, MCP_API_KEYS: "{ not json" }).tier, "public", "malformed store must fail closed");
+console.log("[check:mcp-keys] ✓ shipped resolver: HMAC-keyed minted grant honoured, format/pepper enforced, expiry honoured, unknown tier/key/malformed-store all fail closed to public (DOC-B-003).");

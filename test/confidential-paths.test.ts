@@ -8,7 +8,7 @@
  * simulated here with an overlay-faithful gate (role must be in allowedRoles).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createHash } from "node:crypto";
+import { storeEnv, testKey } from "./helpers/mcp-key";
 
 const store = vi.hoisted(() => {
   const base = { tier: "confidential", orgId: null } as const;
@@ -17,6 +17,7 @@ const store = vi.hoisted(() => {
     "/confidential/embargoed": { ...base, slug: "/confidential/embargoed", title: "Embargoed funding", body: "EMBARGOED-BODY funding", embargoUntil: 9_999_999_999_999 },
     "/confidential/nda": { ...base, slug: "/confidential/nda", title: "NDA funding", body: "NDA-BODY funding", disclosureRequired: true, disclosureId: "nda-1" },
     "/confidential/open": { ...base, slug: "/confidential/open", title: "Open funding memo", body: "OPEN-CONFIDENTIAL-BODY funding" },
+    "/confidential/noid": { ...base, slug: "/confidential/noid", title: "No-id memo", body: "NOID-BODY", disclosureRequired: true },
     "/confidential/past": { ...base, slug: "/confidential/past", title: "Quarterly past", body: "PAST-EMBARGO-BODY quarterly", embargoUntil: 1_000 },
     "/confidential/edge": { ...base, slug: "/confidential/edge", title: "Quarterly edge", body: "EDGE-EMBARGO-BODY quarterly", embargoUntil: 5_000_000 },
   };
@@ -37,10 +38,8 @@ vi.mock("@/lib/content/access-log", () => ({
   },
 }));
 
-const KEY = "partner-key-confidential-no-role";
-process.env.MCP_API_KEYS = JSON.stringify({
-  [createHash("sha256").update(KEY).digest("hex")]: { tier: "confidential", sub: "org:partner" },
-});
+const KEY = testKey("p");
+Object.assign(process.env, storeEnv({ [KEY]: { tier: "confidential", sub: "org:partner" } }));
 
 const NOW = Date.now();
 const confNoRole = { required: true, authenticated: true, sub: "u:partner", kycStatus: "verified", entitlement: { tier: "confidential", orgId: null, expiresAt: null } } as never;
@@ -152,6 +151,19 @@ describe("chokepoint details (mutation kills)", () => {
     expect(store.logged).toEqual([]);
     const commercial = { slug: "/x", title: "x", tier: "commercial", orgId: null, text: "x" } as never;
     expect(authorizeChunk(anon, commercial, NOW, null)).toBe("denied");
+  });
+
+  it("KD3: a disclosure-gated doc with no disclosure id is never served (fail closed)", async () => {
+    const none = await mcpCall("getSurface", { slug: "/confidential/noid" });
+    expect(JSON.stringify(none)).not.toContain("NOID-BODY");
+    expect(none.error).toBe("disclosure_required");
+    const { authorizeChunk } = await import("@/lib/ai/corpus");
+    const c = { slug: "/x", title: "x", tier: "confidential", orgId: null, text: "x", disclosureRequired: true } as never;
+    expect(authorizeChunk(confAdmin, { ...(c as object), confidential: {} } as never, NOW, undefined as never)).not.toBe("ok");
+  });
+
+  it("KD3 variant: a non-string ack is treated as absent", async () => {
+    expect((await mcpCall("getSurface", { slug: "/confidential/nda", ack: ["nda-1"] })).error).toBe("disclosure_required");
   });
 
   it("an unknown slug and a non-string ack", async () => {

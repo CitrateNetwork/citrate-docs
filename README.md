@@ -97,7 +97,9 @@ Copy `.env.example` → `.env.local`. Key variables (full annotated list in `.en
 | `CITRATE_GATEWAY_URL` | `https://infer.citrate.ai/v1` | Ask Atlas inference backend (append `/v1`) |
 | `CITRATE_GATEWAY_API_KEY` | — | `cgk_` bearer key (server-only) |
 | `CITRATE_RPC_URL` | `https://rpc.citrate.ai` | chain 40204 RPC for the read-only sandboxes |
-| `MCP_API_KEYS` | `{}` (fail-closed → `public`) | SHA-256-hashed key→tier map for the MCP toolbox; keys must be random, ≥ 32 chars (`openssl rand -base64 32`) |
+| `MCP_API_KEYS` | `{}` (fail-closed → `public`) | HMAC-keyed key→tier map for the MCP toolbox; entries come from `node scripts/mint-mcp-key.mjs` |
+| `MCP_KEY_PEPPER` | unset (no key resolves) | server-only HMAC pepper for MCP keys, ≥ 32 chars |
+| `DOCS_TRUST_VERCEL_FORWARDED` | unset | `1` on Vercel only: key the rate limiter on `x-vercel-forwarded-for` |
 
 `.env.example` documents the fail-closed defaults for auth, the MCP key hashing, and the
 optional live knowledge-graph (`MEM_*`) wiring.

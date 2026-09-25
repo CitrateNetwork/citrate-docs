@@ -67,15 +67,20 @@ export function resetRateLimits(): void {
  *
  * The LEFT side of `x-forwarded-for` is whatever the client sent, so keying on it let a caller
  * mint a fresh bucket per request. Trusted sources only, in order:
- *  1. `x-vercel-forwarded-for`: set by the Vercel edge (the docs deployment), not by the client.
+ *  1. `x-vercel-forwarded-for`, only when `DOCS_TRUST_VERCEL_FORWARDED=1` (set it on the Vercel
+ *     deployment, where the edge overwrites it; off Vercel it is client-controlled).
  *  2. The hop the outermost trusted proxy appended: counting `DOCS_TRUSTED_PROXY_HOPS` (default 1)
  *     in from the RIGHT of `x-forwarded-for`.
  *  3. `x-real-ip` only when `DOCS_TRUST_X_REAL_IP=1` (a platform known to overwrite it).
  * Otherwise a single shared "unknown" bucket (fail closed for the limiter, never client-chosen).
  */
 export function clientIp(req: Request): string {
-  const vercel = req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
-  if (vercel) return vercel;
+  // Only on Vercel does the edge set (overwrite) this header; anywhere else it is client-supplied
+  // and would let a caller mint a bucket per request. Opt-in: DOCS_TRUST_VERCEL_FORWARDED=1.
+  if (process.env.DOCS_TRUST_VERCEL_FORWARDED === "1") {
+    const vercel = req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+    if (vercel) return vercel;
+  }
   const hops = (req.headers.get("x-forwarded-for") ?? "").split(",").map((h) => h.trim()).filter(Boolean);
   const n = Number(process.env.DOCS_TRUSTED_PROXY_HOPS);
   const trusted = Number.isInteger(n) && n >= 1 ? n : 1;

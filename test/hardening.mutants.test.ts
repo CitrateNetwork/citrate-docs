@@ -138,7 +138,8 @@ describe("CSP directives (PBA-L8-017)", () => {
 describe("clientIp / shared limiter (PBA-L3c-030)", () => {
   const r = (h: Record<string, string>) => new Request("http://x", { headers: h });
   beforeEach(() => resetRateLimits());
-  it("x-vercel-forwarded-for: first entry, trimmed", () => {
+  it("x-vercel-forwarded-for (when trusted): first entry, trimmed", () => {
+    vi.stubEnv("DOCS_TRUST_VERCEL_FORWARDED", "1");
     expect(clientIp(r({ "x-vercel-forwarded-for": " 8.8.8.8 , 1.1.1.1" }))).toBe("8.8.8.8");
   });
   it("x-forwarded-for: trims hops and honours DOCS_TRUSTED_PROXY_HOPS", () => {
@@ -247,5 +248,22 @@ describe("changelog repo policy (PBA-L3c-037)", () => {
   });
   it("an override cannot mark a repo public past a non-public default when it names another tier", () => {
     expect(changelogRepos({ MEMORY_REPO_TIERS: JSON.stringify({ "citrate-docs": "commercial" }), MEM_DEFAULT_TIER: "public", CHANGELOG_REPOS: "citrate-docs" })).toEqual([]);
+  });
+});
+
+describe("verifier killers (KD4 + topic copy)", () => {
+  it("KD4: array-wrapped fromBlock/toBlock refused by the sandbox guard", () => {
+    expect(checkSandboxGetLogs([{ address: ADDR, fromBlock: ["0x0"], toBlock: ["0x1"] }]).ok).toBe(false);
+  });
+  it("topics are rebuilt, not forwarded by reference", () => {
+    const alt = [W];
+    const topics = [W, alt];
+    const r = checkSandboxGetLogs([{ ...base, topics }]);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.params[0].topics).toEqual(topics);
+      expect(r.params[0].topics).not.toBe(topics);
+      expect((r.params[0].topics as unknown[])[1]).not.toBe(alt);
+    }
   });
 });
