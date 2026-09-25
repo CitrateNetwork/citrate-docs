@@ -95,20 +95,30 @@ Source: `citrate_sdk/client.py` (class `CitrateClient`), exported from `citrate_
 
 | Method | Signature | Notes |
 |---|---|---|
-| `__init__` | `(rpc_url="http://localhost:8545", private_key=None, allow_insecure_http=False)` | `client.py:31`. Read-only without a key. |
-| `get_chain_id()` | `-> int` | `eth_chainId`, `client.py:103`. |
-| `get_balance(address)` | `-> int` | wei, `eth_getBalance`, `client.py:107`. |
-| `get_nonce(address)` | `-> int` | pending nonce, `eth_getTransactionCount`, `client.py:112`. |
-| `deploy_model(model_path, config)` | `-> ModelDeployment` | needs a key; hashes, optionally encrypts, uploads to IPFS, deploys via precompile `0x...0100`, `client.py:117`. |
-| `inference(model_id, input_data, encrypted=False, max_gas=1000000, recipient_public_key=None)` | `-> InferenceResult` | precompile `0x...0101`; the encrypted path fails closed without `recipient_public_key`, `client.py:192`. |
-| `get_model_info(model_id)` | `-> Dict` | `citrate_getModel`, raises `ModelNotFoundError`, `client.py:267`. |
-| `list_models(owner=None, limit=100)` | `-> List[Dict]` | `citrate_listModels`, `client.py:277`. |
-| `purchase_model_access(model_id, payment_amount)` | `-> str` | needs a key; access-control precompile `0x...0104`, `client.py:282`. |
+| `__init__` | `(rpc_url="http://localhost:8545", private_key=None, allow_insecure_http=False)` | `client.py`. Read-only without a key. |
+| `get_chain_id()` | `-> int` | `eth_chainId`, `client.py`. |
+| `get_balance(address)` | `-> int` | wei, `eth_getBalance`, `client.py`. |
+| `get_nonce(address)` | `-> int` | pending nonce, `eth_getTransactionCount`, `client.py`. |
+| `deploy_model(model_path, config)` | `-> ModelDeployment` | needs a key; hashes, optionally encrypts, uploads to IPFS, deploys via precompile `0x...0100`, `client.py`. |
+| `inference(model_id, input_data, encrypted=False, max_gas=1000000, recipient_public_key=None)` | `-> InferenceResult` | precompile `0x...0101`; the encrypted path fails closed without `recipient_public_key`, `client.py`. |
+| `get_model_info(model_id)` | `-> Dict` | `citrate_getModel`, raises `ModelNotFoundError`, `client.py`. |
+| `list_models(owner=None, limit=100)` | `-> List[Dict]` | `citrate_listModels`, `client.py`. |
+| `purchase_model_access(model_id, payment_amount)` | `-> str` | needs a key; access-control precompile `0x...0104`, `client.py`. |
 
-Signing binds `chainId` under EIP-155 (`_eip155_chain_id`, `client.py:312`) so a signature cannot be replayed
-on another network. IPFS upload fails closed rather than fabricating a fallback CID (`client.py:298`). A
+Signing binds `chainId` under EIP-155 (`_eip155_chain_id` in `client.py`) so a signature cannot be replayed
+on another network. IPFS upload fails closed rather than fabricating a fallback CID (`_upload_to_ipfs` in `client.py`). A
 private key creates a `KeyManager` on `client.key_manager` (`citrate_sdk/crypto.py`), which exposes
 `get_address()`, `get_private_key()`, and the ECDH helpers used by encrypted inference.
+
+Model-key threshold sharing uses `KeyManager.encrypt_model_with_key_shares(data, config)`, where `config` is an
+`EncryptionConfig` with `threshold_shares`, `total_shares` and one distinct `share_holder_public_keys` entry per
+share. Each share is wrapped to its holder and returned for off-chain delivery; `deploy_model` returns them as
+`deployment.key_share_envelopes`, and nothing share-related is written on-chain. Holders open their share with
+`unwrap_key_share(share_record, owner_public_key)` (the first argument is the whole record from
+`key_share_envelopes`, with its `x`, `threshold`, `holder_public_key` and `envelope` fields) and rebuild the key with
+`reconstruct_key_from_shares(shares, threshold)`. `threshold_shares=1` requires
+`allow_single_holder_recovery=True`. IPFS downloads require `expected_sha256` for content addresses that cannot
+verify themselves, unless you pass `verify=False` explicitly.
 
 ### Economic and education managers
 
@@ -116,16 +126,22 @@ These are separate classes, not attributes of `CitrateClient`. Each takes the `_
 optional `default_account` (required for writes), `gas_limit`, `gas_price`, and the addresses it acts on.
 Most take a `contract_addresses` dict; `StakingManager` and `ClassroomManager` instead take a single
 `staking_address` or `classroom_address`. Writes raise `ConfigurationError` when `default_account` is unset;
-read methods are `eth_call`-only and need no account.
+read methods are `eth_call`-only and need no account. Every write first checks `eth_chainId` against the pinned
+chain (40204 by default; pass `chain_id=` to target another Citrate network) and refuses to send on a mismatch.
+Unknown `access`, `tier` or `mode` strings raise `ValueError`. A classroom invite is a key pair:
+`ClassroomManager.create` (and `rotate_invite_code`) registers the invite key's commitment and returns the invite
+secret in `last_invite_code`. Share that secret with students out of band. A student calls
+`enroll_with_invite(secret)`, which signs an enrolment proof bound to the student's account, and only the invite
+key and that proof go on-chain. `enroll` is deprecated.
 
 | Manager | Source | Selected methods |
 |---|---|---|
-| `LearningManager` | `learning.py:176` | `list_pools`, `join_pool`, `leave_pool`, `create_pool`, `get_cycle_status`, `register_for_cycle`, `claim_cycle_reward`, `get_contributions`, `claim_contribution_rewards` |
-| `StakingManager` | `learning.py:461` | `deposit`, `withdraw`, `claim_withdrawal`, `get_info`, `preview_deposit`, `preview_withdraw`, `get_withdrawal` |
-| `ClassroomManager` | `learning.py:629` | `create`, `enroll`, `unenroll`, `deploy_model`, `remove_model`, `rotate_invite_code`, `get_classroom`, `can_student_access_model`, `get_student_teacher` |
-| `ComputeManager` | `compute.py:72` | `post_job`, `bid_on_job`, `get_job`, `list_jobs`, `submit_result`, `register_provider`, `get_provider_info`, `heartbeat`, `create_pool`, `join_pool`, `leave_pool`, `get_pools`, `dispute_result`, `get_dispute` |
-| `TreasuryManager` | `treasury.py:60` | `deposit_stablecoin`, `purchase_compute_credits`, `get_credit_balance`, `estimate_calls_remaining`, `get_treasury_value`, `get_epoch_revenue`, `get_current_epoch`, `get_stablecoin_balance`, `get_total_distributed`, `get_credit_price_usd` |
-| `FarmingManager` | `farming.py:56` | `get_my_score`, `get_my_share`, `get_leaderboard`, `claim`, `has_claimed`, `get_distribution_info`, `is_in_snapshot`, `get_claimed_amount` |
+| `LearningManager` | `learning.py` | `list_pools`, `join_pool`, `leave_pool`, `create_pool`, `get_cycle_status`, `register_for_cycle`, `claim_cycle_reward`, `get_contributions`, `claim_contribution_rewards` |
+| `StakingManager` | `learning.py` | `deposit`, `withdraw`, `claim_withdrawal`, `get_info`, `preview_deposit`, `preview_withdraw`, `get_withdrawal` |
+| `ClassroomManager` | `learning.py` | `create`, `enroll_with_invite`, `unenroll`, `deploy_model`, `remove_model`, `rotate_invite_code`, `get_classroom`, `can_student_access_model`, `get_student_teacher` |
+| `ComputeManager` | `compute.py` | `post_job`, `bid_on_job`, `get_job`, `list_jobs`, `submit_result`, `register_provider`, `get_provider_info`, `heartbeat`, `create_pool`, `join_pool`, `leave_pool`, `get_pools`, `dispute_result`, `get_dispute` |
+| `TreasuryManager` | `treasury.py` | `deposit_stablecoin`, `purchase_compute_credits`, `get_credit_balance`, `estimate_calls_remaining`, `get_treasury_value`, `get_epoch_revenue`, `get_current_epoch`, `get_stablecoin_balance`, `get_total_distributed`, `get_credit_price_usd` |
+| `FarmingManager` | `farming.py` | `get_my_score`, `get_my_share`, `get_leaderboard`, `claim`, `has_claimed`, `get_distribution_info`, `is_in_snapshot`, `get_claimed_amount` |
 
 All six classes are re-exported from `citrate_sdk/__init__.py`. Shared data types (`LearningPool`,
 `CycleStatus`, `ComputeJob`, `ProviderInfo`, `StakingInfo`, and the rest) live in `citrate_sdk/types.py`;
@@ -175,10 +191,10 @@ and we say so rather than paper over it.
 
 ## Failure modes
 
-- Encrypted inference without `recipient_public_key` fails closed (`client.py:208`). The symmetric key is
+- Encrypted inference without `recipient_public_key` fails closed (`inference` in `client.py`). The symmetric key is
   ECDH-wrapped to the recipient and is never shipped in cleartext on public calldata.
 - A signed transaction binds `chainId` via EIP-155, so it cannot be replayed on a different network.
-- IPFS upload failures propagate; `deploy_model` never invents a fallback CID (`client.py:298`).
+- IPFS upload failures propagate; `deploy_model` never invents a fallback CID (`_upload_to_ipfs` in `client.py`).
 - A manager write without `default_account` raises `ConfigurationError`. Reads are `eth_call`-only and need
   no account.
 - A remote `http://` RPC endpoint raises a cleartext-transport warning. Use `https://`, or set

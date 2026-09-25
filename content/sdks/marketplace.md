@@ -183,7 +183,9 @@ at 2.0×). Error type: `MarketplaceError`.
 | `parseJobEvents`, `parseCreditsEvents`, `parseTrainingEvents` | `(logs: Log[]) => Event[]` | Decode receipt logs into typed events. |
 | `grainsToSalt`, `grainsToSaltDisplay` | `(grains: bigint) => string` | Display formatters; SALT has 18 decimals, and "grains" are its wei. |
 
-`PostJobArgs` carries `modelHash`, `input` (bytes or a CID; keccak256-hashed if bytes), `maxPriceGrains`,
+`PostJobArgs` carries `modelHash`, `input` (the raw input bytes, which are keccak256-hashed, or a `Hex` that is
+already the 32-byte keccak256 of the input; providers only bid when `inputHash` is `keccak256(input)`, so a CID
+or other pre-hash is refused), `maxPriceGrains`,
 `tier`, `bidWindowBlocks`, `execWindowBlocks`, and an optional `paymentMethod`.
 
 ## Design rationale

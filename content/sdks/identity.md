@@ -108,8 +108,8 @@ Each name below is exported from `@citratelabs/sdk` (`identity` namespace) and m
 | `discover()` | Fetch and cache the OIDC discovery document; the issuer is pinned to the artifact. |
 | `authorizeUrl({state, nonce, pkce?})` | Build the PKCE S256 authorize URL; returns the URL and the PKCE pair. |
 | `exchangeCode({code, codeVerifier, nonce?})` | Exchange a code for tokens; the ID token is verified before return. |
-| `refresh(refreshToken)` | Rotate tokens with a refresh token. |
-| `siweChallenge(address)` / `siweVerify({message, signature})` | EIP-4361 sign-in with a single-use nonce. |
+| `refresh(refreshToken, expectedSub)` | Rotate tokens with a refresh token. The refreshed ID token must name the same `sub` (Python: `refresh(refresh_token, expected_sub)`). |
+| `siweChallenge()` / `buildSiweMessage({address, nonce})` / `siweVerify({message, signature})` | EIP-4361 sign-in. `siweChallenge` GETs a single-use nonce, `buildSiweMessage` builds the message the authority accepts (chain 40204, expiry of at most 24 h), and `siweVerify` returns `{kind: 'redirect', redirectTo}` inside an OIDC login or `{kind: 'token', idToken, claims}` for the headless grant. Python: `siwe_challenge()`, `build_siwe_message(...)`, `siwe_verify(...)`. |
 | `userInfo(accessToken)` | Fresh claims plus a normalized tier and capability set. |
 | `logout(accessToken)` | End the session; fires the cross-instance revocation cascade. |
 
@@ -118,7 +118,8 @@ Each name below is exported from `@citratelabs/sdk` (`identity` namespace) and m
 `verifyIdToken(token, { issuer, audience, jwks })` is the trust boundary and is called for you by
 `exchangeCode` and `refresh`. It accepts only `RS256`, verifies the signature before reading any claim, and
 rejects `alg:none`, algorithm confusion, a wrong audience or issuer, an expired or not-yet-valid token, a
-tampered payload, and a token whose `kid` matches no key.
+tampered payload, and a token whose `kid` matches no key. It also requires numeric `exp` and `iat` claims
+(an `iat` more than the clock tolerance in the future is refused) and a `typ` of `JWT` or none.
 
 ### The embedded account
 
