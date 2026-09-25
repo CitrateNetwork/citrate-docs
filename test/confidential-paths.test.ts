@@ -17,6 +17,8 @@ const store = vi.hoisted(() => {
     "/confidential/embargoed": { ...base, slug: "/confidential/embargoed", title: "Embargoed funding", body: "EMBARGOED-BODY funding", embargoUntil: 9_999_999_999_999 },
     "/confidential/nda": { ...base, slug: "/confidential/nda", title: "NDA funding", body: "NDA-BODY funding", disclosureRequired: true, disclosureId: "nda-1" },
     "/confidential/open": { ...base, slug: "/confidential/open", title: "Open funding memo", body: "OPEN-CONFIDENTIAL-BODY funding" },
+    "/confidential/past": { ...base, slug: "/confidential/past", title: "Quarterly past", body: "PAST-EMBARGO-BODY quarterly", embargoUntil: 1_000 },
+    "/confidential/edge": { ...base, slug: "/confidential/edge", title: "Quarterly edge", body: "EDGE-EMBARGO-BODY quarterly", embargoUntil: 5_000_000 },
   };
   return { docs, logged: [] as unknown[], logOk: true };
 });
@@ -122,6 +124,7 @@ describe("retrieve() — chat + MCP searchDocs (PBA-L3c-004)", () => {
     const { retrieve } = await import("@/lib/ai/corpus");
     retrieve(confAdmin, "funding", 20, NOW);
     expect(store.logged.map((e) => (e as { docSlug: string }).docSlug).sort()).toEqual(["/confidential/funding", "/confidential/open"]);
+    expect(store.logged.every((e) => (e as { disclosureAck: boolean }).disclosureAck === false)).toBe(true);
     store.logOk = false;
     expect(retrieve(confAdmin, "funding", 20, NOW).filter((c) => c.tier === "confidential")).toEqual([]);
   });
@@ -130,6 +133,64 @@ describe("retrieve() — chat + MCP searchDocs (PBA-L3c-004)", () => {
     const r = await mcpCall("searchDocs", { query: "funding" });
     const slugs = r.results.map((x: { slug: string }) => x.slug);
     expect(slugs).not.toContain("/confidential/funding");
+  });
+});
+
+describe("chokepoint details (mutation kills)", () => {
+  it("embargo: on until embargoUntil, lifted at embargoUntil (same rule as /api/content)", async () => {
+    const { retrieve } = await import("@/lib/ai/corpus");
+    expect(retrieve(confAdmin, "quarterly", 20, 4_999_999).map((c) => c.slug)).toEqual(["/confidential/past"]);
+    expect(retrieve(confAdmin, "quarterly", 20, 5_000_000).map((c) => c.slug).sort()).toEqual(["/confidential/edge", "/confidential/past"]);
+  });
+
+  it("public content still flows to an anonymous reader (canRead on the chunk's tier/org), unlogged", async () => {
+    const { retrieve, authorizeChunk } = await import("@/lib/ai/corpus");
+    const anon = { required: false, authenticated: false, kycStatus: "none" } as never;
+    const hits = retrieve(anon, "rpc", 5, NOW);
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((c) => c.tier === "public" && !c.confidential)).toBe(true);
+    expect(store.logged).toEqual([]);
+    const commercial = { slug: "/x", title: "x", tier: "commercial", orgId: null, text: "x" } as never;
+    expect(authorizeChunk(anon, commercial, NOW, null)).toBe("denied");
+  });
+
+  it("an unknown slug and a non-string ack", async () => {
+    expect((await mcpCall("getSurface", { slug: "/nope" })).error).toBe("not_found_or_above_tier");
+    expect((await mcpCall("getSurface", { slug: "/confidential/nda", ack: 1 })).error).toBe("disclosure_required");
+  });
+
+  it("the served confidential read is logged with the caller, slug, tier and the ack flag", async () => {
+    await mcpCall("getSurface", { slug: "/confidential/nda", ack: "nda-1" });
+    expect(store.logged).toEqual([
+      expect.objectContaining({ sub: "org:partner", docSlug: "/confidential/nda", tier: "confidential", orgId: null, disclosureAck: true }),
+    ]);
+  });
+
+  it("anonymous MCP callers are limited per IP, not in one shared anon bucket", async () => {
+    const { POST } = await import("@/app/api/mcp/route");
+    const list = (ip: string) =>
+      POST(new Request("http://x/api/mcp", { method: "POST", headers: { "x-forwarded-for": ip }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) }));
+    for (let i = 0; i < 30; i++) await list("10.6.6.1");
+    expect((await list("10.6.6.1")).status).toBe(429);
+    expect((await list("10.6.6.2")).status).toBe(200);
+  });
+
+  it("MCP transport: tools/list, unknown tool, unknown method, parse error", async () => {
+    const { POST } = await import("@/app/api/mcp/route");
+    const call = async (body: string) =>
+      (await POST(new Request("http://x/api/mcp", { method: "POST", headers: { "x-forwarded-for": "10.5.5.5" }, body }))).json();
+    const list = await call(JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/list" }));
+    expect(list.result.tools.map((t: { name: string }) => t.name)).toEqual(["searchDocs", "getSurface"]);
+    expect(list.id).toBe(7);
+    expect((await call(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "x" } }))).error).toEqual({ code: -32601, message: "unknown tool: x" });
+    expect((await call(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "nope" }))).error).toEqual({ code: -32601, message: "unknown method: nope" });
+    expect((await call("{")).error).toEqual({ code: -32700, message: "parse error" });
+  });
+
+  it("searchDocs returns slug/title/tier only (no bodies) and the key's tier cap", async () => {
+    const r = await mcpCall("searchDocs", { query: "funding" });
+    expect(r.tierCap).toBe("confidential");
+    for (const x of r.results) expect(Object.keys(x).sort()).toEqual(["slug", "tier", "title"]);
   });
 });
 

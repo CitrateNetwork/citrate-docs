@@ -38,6 +38,11 @@ describe("sandbox eth_getLogs bounds", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("other allowlisted methods are not put through the getLogs rules", async () => {
+    const { rpcCall } = await import("@/lib/sandbox/rpc");
+    expect((await rpcCall("eth_chainId", [])).ok).toBe(true);
+  });
+
   it("forwards a bounded filter (and a blockHash filter)", async () => {
     const { rpcCall } = await import("@/lib/sandbox/rpc");
     expect((await rpcCall("eth_getLogs", [{ address: ADDR, fromBlock: "0x0", toBlock: "0x3e7", topics: [W] }])).ok).toBe(true);
@@ -56,5 +61,7 @@ describe("sandbox relay is a fixed liveness probe, not a pass-through", () => {
     expect(res.status).toBe(200);
     const sent = fetchMock.mock.calls[0][1] as RequestInit;
     expect(sent.body).toBe("{}");
+    expect(sent.method).toBe("POST");
+    expect((sent.headers as Record<string, string>)["content-type"]).toBe("application/json");
   });
 });
