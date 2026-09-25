@@ -181,7 +181,7 @@ The hooks are `useCitrateClient`, `useModelDeployment`, `useInference`, `useMode
 
 ### Constants and errors
 
-- `src/utils/constants.ts`: `CHAIN_IDS` (`TESTNET: 40204`; releases up to 0.2.x also carry `MAINNET: 1`, which is Ethereum mainnet's chain id, not Citrate's, so do not use it: Citrate's network is 40204 and mainnet keeps that id), `DEFAULT_RPC_URLS`,
+- `src/utils/constants.ts`: `CHAIN_IDS` (`TESTNET: 40204`; releases before 0.2.3 also carried `MAINNET: 1`, which is Ethereum mainnet's chain id, not Citrate's. It was removed in 0.2.3. Citrate's network is 40204, and mainnet keeps that id), `DEFAULT_RPC_URLS`,
   `DEFAULT_WS_URLS`, `PRECOMPILE_ADDRESSES`, `GAS_LIMITS`, `TIMEOUTS`, `MODEL_LIMITS`, `ENCRYPTION`, `EVENTS`,
   and `API_ENDPOINTS`.
 - `src/errors/CitrateError.ts`: `CitrateError`, `ModelNotFoundError`, `InsufficientFundsError`, and

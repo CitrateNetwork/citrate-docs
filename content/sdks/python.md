@@ -110,13 +110,26 @@ on another network. IPFS upload fails closed rather than fabricating a fallback 
 private key creates a `KeyManager` on `client.key_manager` (`citrate_sdk/crypto.py`), which exposes
 `get_address()`, `get_private_key()`, and the ECDH helpers used by encrypted inference.
 
+Model-key threshold sharing uses `KeyManager.encrypt_model_with_key_shares(data, config)`, where `config` is an
+`EncryptionConfig` with `threshold_shares`, `total_shares` and one distinct `share_holder_public_keys` entry per
+share. Each share is wrapped to its holder and returned for off-chain delivery; `deploy_model` returns them as
+`deployment.key_share_envelopes`, and nothing share-related is written on-chain. Holders open their share with
+`unwrap_key_share(envelope, owner_public_key)` and rebuild the key with
+`reconstruct_key_from_shares(shares, threshold)`. `threshold_shares=1` requires
+`allow_single_holder_recovery=True`. IPFS downloads require `expected_sha256` for content addresses that cannot
+verify themselves, unless you pass `verify=False` explicitly.
+
 ### Economic and education managers
 
 These are separate classes, not attributes of `CitrateClient`. Each takes the `_rpc_call` callable, an
 optional `default_account` (required for writes), `gas_limit`, `gas_price`, and the addresses it acts on.
 Most take a `contract_addresses` dict; `StakingManager` and `ClassroomManager` instead take a single
 `staking_address` or `classroom_address`. Writes raise `ConfigurationError` when `default_account` is unset;
-read methods are `eth_call`-only and need no account.
+read methods are `eth_call`-only and need no account. Every write first checks `eth_chainId` against the pinned
+chain (40204 by default; pass `chain_id=` to target another Citrate network) and refuses to send on a mismatch.
+Unknown `access`, `tier` or `mode` strings raise `ValueError`. `ClassroomManager.create` generates a random invite
+code when you don't pass one, and exposes it as `last_invite_code`. `enroll` sends the raw code, and the contract
+hashes it.
 
 | Manager | Source | Selected methods |
 |---|---|---|
