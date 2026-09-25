@@ -15,4 +15,4 @@ permissions:
 
 jobs:
   guardrail:
-    uses: CitrateNetwork/.github/.github/workflows/reusable-canon-guardrail.yml@main
+    uses: CitrateNetwork/.github/.github/workflows/reusable-canon-guardrail.yml@db5f1a6ddaec28275708265b56762eb1dfc3571b # main
