@@ -29,7 +29,9 @@ export async function POST(req: Request) {
   }
 
   try {
-    const forwarded = (await req.text()) || "{}";
+    // PBA-L3c-036: a FIXED keyless probe. The caller's body is never forwarded, so this route is not an
+    // open pass-through to the relayer (which would also hide the caller's IP from the relayer's limiter).
+    const forwarded = "{}";
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 12000);
     const res = await fetch(relay, {
@@ -39,12 +41,7 @@ export async function POST(req: Request) {
       signal: ctrl.signal,
     });
     clearTimeout(t);
-    const data = (await res.json().catch(() => ({}))) as { receipt?: unknown; error?: string };
-
-    // A real signed meta-transaction was forwarded and sponsored.
-    if (res.ok && data?.receipt) {
-      return Response.json({ ok: true, receipt: data.receipt }, { headers: { "cache-control": "no-store" } });
-    }
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
 
     // Keyless liveness probe: the relayer rejecting an unsigned body with
     // "missing request or signature" proves it is up and validating.
