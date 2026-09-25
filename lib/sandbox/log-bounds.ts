@@ -48,6 +48,6 @@ export function checkSandboxGetLogs(params: unknown[]): LogParamsCheck {
     out.fromBlock = f.fromBlock;
     out.toBlock = f.toBlock;
   }
-  if (f.topics !== undefined) out.topics = f.topics;
+  if (f.topics !== undefined) out.topics = (f.topics as Topic[]).map((t) => (Array.isArray(t) ? [...t] : t));
   return { ok: true, params: [out] };
 }

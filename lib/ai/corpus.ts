@@ -72,7 +72,9 @@ export function authorizeChunk(session: AuthSession, c: Chunk, now: number, ack:
     : canRead(session, { tier: c.tier, orgId: c.orgId }, now);
   if (!allowed) return "denied";
   if (c.embargoUntil && now < c.embargoUntil) return "embargo";
-  if (c.disclosureRequired && (ack === null || ack !== c.disclosureId)) return "disclosure_required";
+  // Fail closed: a disclosure-gated doc with no disclosure id can never be acknowledged
+  // (otherwise an undefined ack would "match" an undefined id).
+  if (c.disclosureRequired && (!c.disclosureId || ack === null || ack !== c.disclosureId)) return "disclosure_required";
   return "ok";
 }
 
