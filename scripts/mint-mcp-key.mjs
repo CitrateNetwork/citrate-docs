@@ -8,12 +8,17 @@
 // keyed by HMAC-SHA256(key, MCP_KEY_PEPPER), matching lib/auth/mcp-keys.ts.
 import { createHmac, randomBytes } from "node:crypto";
 import { pathToFileURL } from "node:url";
+import { pepperStatus } from "../lib/auth/mcp-pepper.ts";
 
 export const MCP_KEY_PREFIX = "cdk_";
 const TIERS = new Set(["public", "commercial", "academic", "confidential"]);
 
 export function mintMcpKey({ pepper, tier, sub, expiresAt = null }) {
-  if (typeof pepper !== "string" || pepper.length < 32) throw new Error("MCP_KEY_PEPPER must be set (>= 32 chars)");
+  // Same rule as the resolver: a key minted under an unusable pepper could never resolve.
+  const status = pepperStatus(pepper);
+  if (status !== "ok") {
+    throw new Error(`MCP_KEY_PEPPER is ${status}: need >= 32 chars, >= 8 distinct, no surrounding whitespace`);
+  }
   if (!TIERS.has(tier)) throw new Error(`tier must be one of ${[...TIERS].join(", ")}`);
   if (typeof sub !== "string" || !sub.trim()) throw new Error("sub is required (e.g. org:acme)");
   const key = MCP_KEY_PREFIX + randomBytes(32).toString("base64url");

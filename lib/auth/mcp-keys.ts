@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac } from "node:crypto";
+import { mcpPepperStatus, type McpPepperStatus } from "./mcp-pepper";
 import { Tier, normalizeTier } from "@/prototype/fixtures";
 
 /**
@@ -44,21 +45,10 @@ interface RawEntry {
  */
 export const MCP_KEY_RE = /^cdk_[A-Za-z0-9_-]{43}$/;
 
-/** Minimum length of the server-side pepper (`MCP_KEY_PEPPER`), after trimming. */
-export const MIN_MCP_KEY_PEPPER_LENGTH = 32;
-/** Minimum distinct characters in the pepper (rejects "aaaa…" / whitespace padding). */
-export const MIN_MCP_KEY_PEPPER_DISTINCT = 8;
-
-export type McpPepperStatus = "ok" | "missing" | "weak";
-
-/** Whether `MCP_KEY_PEPPER` is usable: set, >= 32 chars after trimming, >= 8 distinct characters. */
-export function mcpPepperStatus(env: NodeJS.ProcessEnv = process.env): McpPepperStatus {
-  const raw = env.MCP_KEY_PEPPER ?? "";
-  if (!raw.trim()) return "missing";
-  const p = raw.trim();
-  if (p !== raw || p.length < MIN_MCP_KEY_PEPPER_LENGTH || new Set(p).size < MIN_MCP_KEY_PEPPER_DISTINCT) return "weak";
-  return "ok";
-}
+// The pepper rule lives in ./mcp-pepper (plain TS, no server-only / alias imports) so the mint
+// script applies exactly the same check.
+export { MIN_MCP_KEY_PEPPER_LENGTH, MIN_MCP_KEY_PEPPER_DISTINCT, mcpPepperStatus, pepperStatus } from "./mcp-pepper";
+export type { McpPepperStatus } from "./mcp-pepper";
 
 /** True when MCP_API_KEYS holds at least one entry. */
 export function mcpStoreConfigured(env: NodeJS.ProcessEnv = process.env): boolean {

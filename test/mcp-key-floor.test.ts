@@ -111,3 +111,27 @@ describe("pepper quality and diagnosability (verify2)", () => {
     }
   });
 });
+
+describe("mint script applies the resolver's pepper rule", () => {
+  const peppers = [
+    "a".repeat(40),
+    " ".repeat(40),
+    ` ${TEST_PEPPER}`,
+    `${TEST_PEPPER}\n`,
+    TEST_PEPPER.slice(0, 31),
+    "abcdefg".repeat(6),
+    "abcdefgh".repeat(4),
+    TEST_PEPPER,
+  ];
+  it.each(peppers)("mint accepts %j iff mcpPepperStatus says ok", (p) => {
+    const ok = mcpPepperStatus({ MCP_KEY_PEPPER: p } as never) === "ok";
+    const mint = () => mintMcpKey({ pepper: p, tier: "academic", sub: "org:p" });
+    if (ok) {
+      const { key, entry } = mint();
+      // ...and a key it mints resolves under that pepper.
+      expect(resolveMcpKeyCap(key, NOW, { MCP_KEY_PEPPER: p, MCP_API_KEYS: JSON.stringify(entry) } as never).tier).toBe("academic");
+    } else {
+      expect(mint).toThrow(/MCP_KEY_PEPPER is (weak|missing)/);
+    }
+  });
+});
