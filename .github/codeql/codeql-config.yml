@@ -1,0 +1,13 @@
+# CodeQL configuration (PBA-L7-007).
+#
+# Tutorials/CrossChainDataBridge/solana/vendor/ is `cargo vendor` output for the
+# tutorial's offline build: ~26.8k files of upstream crates (Solana SDK, TLS,
+# crypto) that this repo does not author or ship. It produced 462 of the 464
+# open high/critical CodeQL alerts here, burying the real ones.
+#
+# Only that vendored tree is excluded. The tutorial's own src/ and tests/ stay
+# scanned, as does everything else in the repo.
+name: citrate-docs CodeQL config
+
+paths-ignore:
+  - Tutorials/CrossChainDataBridge/solana/vendor
