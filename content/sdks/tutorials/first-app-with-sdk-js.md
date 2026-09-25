@@ -209,7 +209,7 @@ passkey or an environment-held signer, never inline, and the hostnames named (`r
 
 ## Source and verification
 
-- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`citrate-js` retained as a deprecated alias).
+- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`@citratelabs/citrate-js` retained as a deprecated alias).
 - Audited against SHA: `2f8da46`.
 - Symbols verified in `src/client/CitrateClient.ts`, `src/utils/constants.ts`, and `src/aa/{address, kernel,
   userop, webauthn, eoa, bundler, types}.ts`.

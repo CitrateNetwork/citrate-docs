@@ -93,7 +93,7 @@ specified but not yet running (Paper I §2.3; `core/consensus/src/ghostdag.rs:54
 selected plus up to nine merge; `types.rs:179`), are classified into blue and red sets via the
 k-cluster rule (k=18; `types.rs:178`), and are designed to reach finality through committee
 signatures at checkpoints; until checkpoints run, confirmation is probabilistic. The chain-40204 testnet block time is **approximately 2 seconds**
-(`testnet-config.toml:4`), and BFT checkpoints occur every **50 blocks** by default
+(`testnet-config.toml:4`), and BFT checkpoints are specified at every **50 blocks** by default (not yet running)
 (`core/consensus/src/checkpoint.rs:101`). The February 2026 draft quoted 0.5-second blocks and
 10-block checkpoints; both are corrected here against the running configuration. These
 parameters are the infrastructure on which this paper's extensions ride.

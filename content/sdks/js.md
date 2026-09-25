@@ -19,7 +19,7 @@ app can talk to Citrate without hand-rolling calldata. This page is for the deve
 ## What it is
 
 The SDK is the typed front door to Citrate Network from JavaScript and TypeScript. The package is named
-`@citratelabs/sdk` (formerly `citrate-js`, retained as a deprecated alias) and the version of record is
+`@citratelabs/sdk` (formerly `@citratelabs/citrate-js`, retained as a deprecated alias) and the version of record is
 `0.2.0` in `package.json`. It is the canonical SDK; the other language SDKs follow it and stay non-canonical
 until a pilot integrator needs parity.
 
@@ -162,9 +162,8 @@ UserOperation. The market side of this is covered in [the marketplace SDK](/sdks
 - `CryptoManager` (`src/crypto/CryptoManager.ts`): SHA-256 hashing, AES-256-GCM, and PBKDF2 over the Web
   Crypto API. The default work factor is `PBKDF2_DEFAULT_ITERATIONS`, 600,000 iterations.
 - `KeyManager` (`src/crypto/KeyManager.ts`): key handling and model encryption, returning
-  `EncryptedModelResult`. Encryption ECDH-wraps the symmetric key to the recipient. Threshold key sharing
-  (`thresholdShares`) is under security hardening; see
-  [SECURITY.md](https://github.com/CitrateNetwork/.github/blob/main/SECURITY.md) before relying on it.
+  `EncryptedModelResult`. Encryption ECDH-wraps the symmetric key to the recipient. Options include
+  `accessControl` (default `true`) and threshold key sharing (`thresholdShares`, `totalShares`).
 - Shamir secret sharing (`src/crypto/FiniteField.ts`): `splitSecretBytes`, `reconstructSecretBytes`, `GF256`,
   and `ShamirSecretSharing`. Share coefficients are drawn from a cryptographic RNG and fail closed if none is
   available.
@@ -224,7 +223,7 @@ the source, not credentials. The SDK holds no identity data.
 
 ## Source and verification
 
-- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`package.json`; `citrate-js` retained as a deprecated alias).
+- Source repo: `citrate-sdk-js`, package `@citratelabs/sdk@0.2.0` (`package.json`; `@citratelabs/citrate-js` retained as a deprecated alias).
 - Audited against SHA: `2f8da46`.
 - Audited paths: `src/index.ts`, `src/client/CitrateClient.ts`, `src/client/WebSocketClient.ts`,
   `src/aa/{index,address,kernel,userop,webauthn,eoa,recovery,bundler,types}.ts`,

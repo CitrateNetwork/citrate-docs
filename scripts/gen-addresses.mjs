@@ -23,7 +23,7 @@ if (!fs.existsSync(BOOK)) {
 
 const book = JSON.parse(fs.readFileSync(BOOK, "utf8"));
 
-// PBA-L8-006: mark every entry that has no code on chain. The snapshot is written by
+// Mark every entry that has no code on chain. The snapshot is written by
 // citrate-chain/verification/check_address_code.py --probe (read-only eth_getCode) and is
 // validated against claims.json in citrate-chain CI. Refuse to publish a stale snapshot.
 const SNAP = path.resolve(ROOT, "..", "citrate-chain", "verification", "address-code.snapshot.json");
