@@ -2,6 +2,7 @@ import "server-only";
 import { createHmac } from "node:crypto";
 import { canRead, type AuthSession, type Tier } from "@/prototype/fixtures";
 import type { Chunk } from "./corpus";
+import REPO_TIERS from "./repo-tiers.json";
 
 /**
  * Live knowledge-graph retrieval for Ask Almanac (S4 extension).
@@ -64,12 +65,10 @@ const DEFAULT_REPOS = [
  * genuinely-public repo, add it here with tier "public" (e.g. docs/SDKs), or set
  * `MEM_DEFAULT_TIER`. Override the map with `MEMORY_REPO_TIERS` (JSON: {"repo":"tier"}).
  */
-export const DEFAULT_REPO_TIERS: Record<string, Tier> = {
-  "citrate-security": "confidential", // audit findings, vulnerability reports
-  "citrate-commercial": "confidential", // deal packages
-  "citrate-compliance": "confidential", // compliance corpus
-  "citrate-federation": "confidential", // internal ops / sprint control-plane
-};
+export const DEFAULT_REPO_TIERS: Record<string, Tier> = REPO_TIERS as Record<string, Tier>;
+// PBA-L3c-037: the declared tiers live in repo-tiers.json so scripts/gen-changelog.mjs (the public
+// changelog) applies exactly this policy: security (audit findings), commercial (deal packages),
+// compliance (corpus), federation (internal ops) are confidential.
 
 function repos(): string[] {
   const raw = process.env.MEMORY_REPOS;

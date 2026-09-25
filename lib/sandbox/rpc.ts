@@ -1,4 +1,5 @@
 import "server-only";
+import { checkSandboxGetLogs } from "./log-bounds";
 
 /**
  * S5 — read-only RPC harness for the live sandboxes (chain 40204). Deny-by-default allowlist, fixed host
@@ -38,6 +39,12 @@ export async function rpcCall(method: string, params: unknown[] = []): Promise<R
 
   if (FORBID.has(method) || !ALLOW.has(method)) {
     return { ok: false, request, error: `method not allowed (read-only sandbox): ${method}`, curl };
+  }
+  // PBA-L3c-036: an allowlisted read can still be an amplification vector; bound eth_getLogs.
+  if (method === "eth_getLogs") {
+    const checked = checkSandboxGetLogs(params);
+    if (!checked.ok) return { ok: false, request, error: checked.error, curl };
+    params = checked.params;
   }
   try {
     const ctrl = new AbortController();

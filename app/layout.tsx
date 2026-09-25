@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -95,11 +96,15 @@ const JSON_LD = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // PBA-L8-017: the per-request CSP nonce from proxy.ts. Reading headers() makes every route dynamic,
+  // which a nonce'd CSP requires (prerendered HTML would carry no nonce on Next's inline scripts).
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" data-theme="dark" className={spaceGrotesk.variable} suppressHydrationWarning>
       <body>
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />

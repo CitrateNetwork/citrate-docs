@@ -4,7 +4,9 @@
  * federation gateway on the server's own credential, so without a limiter they are an open,
  * cost-amplifying proxy. The limiter is keyed on the caller's IP for anonymous callers (and can be
  * keyed on `sub` for authenticated ones), returns a `429` with `Retry-After`, and is process-local
- * (best-effort in serverless; a shared store — Upstash/Vercel KV — is the production upgrade).
+ * (best-effort in serverless). PBA-L3c-030: routes call {@link enforceRateLimitShared}, which keeps the
+ * window counter in Upstash Redis when `UPSTASH_REDIS_REST_URL`/`_TOKEN` are set (one budget across
+ * every instance) and falls back to this in-process window otherwise or on a store error.
  */
 
 export interface RateLimitOptions {
@@ -60,11 +62,82 @@ export function resetRateLimits(): void {
   BUCKETS.clear();
 }
 
-/** Best-effort client IP from the standard proxy headers (Vercel sets `x-forwarded-for`). */
+/**
+ * The caller's IP for limiter bucketing (PBA-L3c-030).
+ *
+ * The LEFT side of `x-forwarded-for` is whatever the client sent, so keying on it let a caller
+ * mint a fresh bucket per request. Trusted sources only, in order:
+ *  1. `x-vercel-forwarded-for`: set by the Vercel edge (the docs deployment), not by the client.
+ *  2. The hop the outermost trusted proxy appended: counting `DOCS_TRUSTED_PROXY_HOPS` (default 1)
+ *     in from the RIGHT of `x-forwarded-for`.
+ *  3. `x-real-ip` only when `DOCS_TRUST_X_REAL_IP=1` (a platform known to overwrite it).
+ * Otherwise a single shared "unknown" bucket (fail closed for the limiter, never client-chosen).
+ */
 export function clientIp(req: Request): string {
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return req.headers.get("x-real-ip")?.trim() || "unknown";
+  const vercel = req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+  if (vercel) return vercel;
+  const hops = (req.headers.get("x-forwarded-for") ?? "").split(",").map((h) => h.trim()).filter(Boolean);
+  const n = Number(process.env.DOCS_TRUSTED_PROXY_HOPS);
+  const trusted = Number.isInteger(n) && n >= 1 ? n : 1;
+  const idx = hops.length - trusted;
+  if (idx >= 0 && hops[idx]) return hops[idx];
+  if (process.env.DOCS_TRUST_X_REAL_IP === "1") {
+    const real = req.headers.get("x-real-ip")?.trim();
+    if (real) return real;
+  }
+  return "unknown";
+}
+
+function tooMany(limit: number, retryAfter: number): Response {
+  return new Response(JSON.stringify({ ok: false, error: "rate_limited", retryAfter, limit }), {
+    status: 429,
+    headers: { "content-type": "application/json", "cache-control": "no-store", "retry-after": String(retryAfter) },
+  });
+}
+
+/** Fixed window in Upstash (INCR + EXPIRE NX). Throws on any store error. */
+async function sharedWindow(key: string, limit: number, windowMs: number, now: number): Promise<RateLimitResult> {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const windowSec = Math.max(1, Math.ceil(windowMs / 1000));
+  const idx = Math.floor(now / 1000 / windowSec);
+  const k = `docs-rl:${key}:${idx}`;
+  const res = await fetch(`${url}/pipeline`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify([["INCR", k], ["EXPIRE", k, windowSec, "NX"]]),
+    signal: AbortSignal.timeout(1500),
+  });
+  if (!res.ok) throw new Error(`upstash ${res.status}`);
+  const body = (await res.json()) as Array<{ result?: number }>;
+  const count = body?.[0]?.result;
+  if (typeof count !== "number") throw new Error("upstash malformed response");
+  const resetAt = (idx + 1) * windowSec * 1000;
+  return { allowed: count <= limit, limit, remaining: Math.max(0, limit - count), retryAfter: Math.max(1, Math.ceil((resetAt - now) / 1000)), resetAt };
+}
+
+/**
+ * The route entry point (PBA-L3c-030): like {@link enforceRateLimit}, but the counter is shared across
+ * instances through Upstash when configured. A store error degrades to the in-process window.
+ */
+export async function enforceRateLimitShared(
+  req: Request,
+  scope: string,
+  opts: RateLimitOptions = {},
+  subject?: string | null
+): Promise<Response | null> {
+  const id = subject ? `sub:${subject}` : `ip:${clientIp(req)}`;
+  const limit = Math.max(1, opts.limit ?? DEFAULT_LIMIT);
+  const windowMs = Math.max(1, opts.windowMs ?? DEFAULT_WINDOW_MS);
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    try {
+      const r = await sharedWindow(`${scope}:${id}`, limit, windowMs, Date.now());
+      return r.allowed ? null : tooMany(r.limit, r.retryAfter);
+    } catch {
+      /* store unavailable: fall through to the in-process window */
+    }
+  }
+  return enforceRateLimit(req, scope, opts, subject);
 }
 
 /**
@@ -81,15 +154,5 @@ export function enforceRateLimit(
   const id = subject ? `sub:${subject}` : `ip:${clientIp(req)}`;
   const res = checkRateLimit(`${scope}:${id}`, opts);
   if (res.allowed) return null;
-  return new Response(
-    JSON.stringify({ ok: false, error: "rate_limited", retryAfter: res.retryAfter, limit: res.limit }),
-    {
-      status: 429,
-      headers: {
-        "content-type": "application/json",
-        "cache-control": "no-store",
-        "retry-after": String(res.retryAfter),
-      },
-    }
-  );
+  return tooMany(res.limit, res.retryAfter);
 }
