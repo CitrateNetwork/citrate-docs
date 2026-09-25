@@ -98,7 +98,7 @@ Copy `.env.example` → `.env.local`. Key variables (full annotated list in `.en
 | `CITRATE_GATEWAY_API_KEY` | — | `cgk_` bearer key (server-only) |
 | `CITRATE_RPC_URL` | `https://rpc.citrate.ai` | chain 40204 RPC for the read-only sandboxes |
 | `MCP_API_KEYS` | `{}` (fail-closed → `public`) | HMAC-keyed key→tier map for the MCP toolbox; entries come from `node scripts/mint-mcp-key.mjs` |
-| `MCP_KEY_PEPPER` | unset (no key resolves) | server-only HMAC pepper for MCP keys, ≥ 32 chars |
+| `MCP_KEY_PEPPER` | unset (no key resolves) | server-only HMAC pepper for MCP keys: ≥ 32 chars, ≥ 8 distinct, no padding. A store without a usable pepper fails the build. Mint keys only with `scripts/mint-mcp-key.mjs` |
 | `DOCS_TRUST_VERCEL_FORWARDED` | unset | `1` on Vercel only: key the rate limiter on `x-vercel-forwarded-for` |
 
 `.env.example` documents the fail-closed defaults for auth, the MCP key hashing, and the
