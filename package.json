@@ -28,8 +28,8 @@
     "docs:freshness": "node scripts/gen-freshness.mjs"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^2.0.48",
-    "ai": "^6.0.193",
+    "@ai-sdk/openai-compatible": "^2.0.78",
+    "ai": "^6.0.291",
     "jose": "^6.2.3",
     "mermaid": "^11.15.0",
     "next": "^16.3.3",
