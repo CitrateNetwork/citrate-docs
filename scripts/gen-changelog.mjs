@@ -11,6 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHmac } from "node:crypto";
+import { changelogRepos } from "./lib/changelog-repos.mjs";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const OUT_DIR = path.join(ROOT, "content", "start", "_generated");
@@ -19,26 +20,12 @@ const OUT = path.join(OUT_DIR, "changelog.md");
 const MEM_URL = process.env.MEM_GATEWAY_URL;
 const SECRET = process.env.MEM_CONNECT_SECRET;
 const SUB = process.env.MEM_SERVICE_SUB || "svc:atlas";
-// PUBLIC-tier repos only. This page is tier: public, so it must never draw from
-// confidential-tier repos (citrate-security / -commercial / -compliance /
-// -federation per DEFAULT_REPO_TIERS in lib/ai/memory.ts). Keep this list to
-// repos whose memory is safe to surface openly.
-const REPOS = (
-  process.env.CHANGELOG_REPOS ||
-  "citrate-chain,citrate-core,citrate-inference-gateway,citrate-identity,citrate-docs,citrate-sdk-js"
-)
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-// Defense in depth: never recall a confidential-tier repo onto this public page,
-// even if CHANGELOG_REPOS is overridden to include one.
-const CONFIDENTIAL = new Set([
-  "citrate-security",
-  "citrate-commercial",
-  "citrate-compliance",
-  "citrate-federation",
-]);
-const SAFE_REPOS = REPOS.filter((r) => !CONFIDENTIAL.has(r));
+// PBA-L3c-037: recall ONLY repos the Ask chat treats as public, using the same tier policy
+// (lib/ai/repo-tiers.json + MEMORY_REPO_TIERS + MEM_DEFAULT_TIER, unlisted = confidential). With the
+// default config that is none, and the page is the placeholder; open a repo to the public (chat AND
+// changelog together) by listing it as "public" in MEMORY_REPO_TIERS. CHANGELOG_REPOS narrows the
+// candidate set; it cannot widen the policy.
+const SAFE_REPOS = changelogRepos(process.env);
 const BUDGET = Number(process.env.CHANGELOG_BUDGET || 10);
 
 const REPO_LABEL = {
