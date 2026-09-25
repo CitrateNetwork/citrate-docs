@@ -34,7 +34,7 @@ describe("MCP limiter identity (PBA-L3c-028)", () => {
   });
 
   it("a VALID key is limited per verified subject, independent of IP", async () => {
-    const KEY = "valid-partner-key";
+    const KEY = "valid-partner-" + "k".repeat(24); // test-only, not a credential
     vi.stubEnv("MCP_API_KEYS", JSON.stringify({ [createHash("sha256").update(KEY).digest("hex")]: { tier: "commercial", sub: "org:acme" } }));
     const { POST } = await import("@/app/api/mcp/route");
     let limited = 0;

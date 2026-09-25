@@ -97,7 +97,7 @@ Copy `.env.example` → `.env.local`. Key variables (full annotated list in `.en
 | `CITRATE_GATEWAY_URL` | `https://infer.citrate.ai/v1` | Ask Atlas inference backend (append `/v1`) |
 | `CITRATE_GATEWAY_API_KEY` | — | `cgk_` bearer key (server-only) |
 | `CITRATE_RPC_URL` | `https://rpc.citrate.ai` | chain 40204 RPC for the read-only sandboxes |
-| `MCP_API_KEYS` | `{}` (fail-closed → `public`) | SHA-256-hashed key→tier map for the MCP toolbox |
+| `MCP_API_KEYS` | `{}` (fail-closed → `public`) | SHA-256-hashed key→tier map for the MCP toolbox; keys must be random, ≥ 32 chars (`openssl rand -base64 32`) |
 
 `.env.example` documents the fail-closed defaults for auth, the MCP key hashing, and the
 optional live knowledge-graph (`MEM_*`) wiring.

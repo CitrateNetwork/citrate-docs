@@ -19,6 +19,8 @@ import { Tier, normalizeTier } from "@/prototype/fixtures";
  *   - `expiresAt` (epoch-ms) is honoured — an expired key resolves to "public";
  *   - unset/malformed env, no key, an unknown key, or an expired key all resolve to "public".
  *
+ * Keys shorter than MIN_MCP_KEY_LENGTH never resolve (generate with `openssl rand -base64 32`).
+ *
  * There is deliberately no in-repo default that grants anything above public. Until a real seat/contracts
  * key table is wired (PLANSET/07 §2), an operator provisions caps by adding `sha256(key) → {tier,sub}`
  * entries to `MCP_API_KEYS`.
@@ -55,6 +57,16 @@ function keyStore(env: NodeJS.ProcessEnv): Record<string, RawEntry> {
   return {};
 }
 
+/**
+ * The shortest presented key that can resolve to a grant. MCP keys are looked up by a FAST hash
+ * (SHA-256), which is only sound for high-entropy random tokens; a short, human-chosen key would be
+ * brute-forceable from a leaked `MCP_API_KEYS`. Anything shorter than this resolves to "public", so the
+ * store can only ever be matched by keys of at least 192 bits when generated as documented
+ * (`openssl rand -base64 32`, 44 characters). Closes the precondition behind CodeQL
+ * js/insufficient-password-hash on this module.
+ */
+export const MIN_MCP_KEY_LENGTH = 32;
+
 /** The subject of the fail-closed public cap (no, unknown or expired key). Never a verified principal. */
 export const ANON_MCP_SUB = "mcp:anon";
 const publicCap = (): McpKeyCap => ({ tier: "public", sub: ANON_MCP_SUB, expiresAt: null });
@@ -66,7 +78,7 @@ export function resolveMcpKeyCap(
   env: NodeJS.ProcessEnv = process.env
 ): McpKeyCap {
   const key = (presentedKey ?? "").trim();
-  if (!key) return publicCap();
+  if (key.length < MIN_MCP_KEY_LENGTH) return publicCap();
 
   const entry = keyStore(env)[sha256Hex(key)];
   if (!entry) return publicCap();

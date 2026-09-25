@@ -79,13 +79,16 @@ for (const k of ["codex_academic", "codex_commercial", "codex_public", "anything
 console.log('[check:mcp-keys] ✓ with no MCP_API_KEYS store, every key (incl. the old "codex_academic") resolves to public.');
 
 // ── Guard 2b: a hashed store entry grants its tier; expiry is honoured; unknown tier never escalates. ──
-const goodKey = "prov-academic-key-x7";
-const expiredKey = "prov-expired-key-x8";
-const badTierKey = "prov-superadmin-key-x9";
+// Test-only keys: long enough for MIN_MCP_KEY_LENGTH, built at runtime (not credentials).
+const goodKey = "prov-academic-" + "g".repeat(24);
+const expiredKey = "prov-expired-" + "e".repeat(24);
+const shortKey = "short-human-key";
+const badTierKey = "prov-superadmin-" + "b".repeat(24);
 const store = {
   [sha256Hex(goodKey)]: { tier: "academic", sub: "org:academic_partner", expiresAt: now + 30 * 86_400_000 },
   [sha256Hex(expiredKey)]: { tier: "academic", sub: "org:stale", expiresAt: now - 1 },
   [sha256Hex(badTierKey)]: { tier: "superadmin", sub: "org:evil", expiresAt: null },
+  [sha256Hex(shortKey)]: { tier: "academic", sub: "org:short", expiresAt: null },
 };
 const env = { MCP_API_KEYS: JSON.stringify(store) };
 
@@ -94,5 +97,6 @@ assert.equal(resolveMcpKeyCap(goodKey, now, env).sub, "org:academic_partner", "c
 assert.equal(resolveMcpKeyCap(expiredKey, now, env).tier, "public", "expired key must collapse to public");
 assert.equal(resolveMcpKeyCap(badTierKey, now, env).tier, "public", "unknown tier in store must normalize to public (never escalate)");
 assert.equal(resolveMcpKeyCap("unlisted-key", now, env).tier, "public", "unknown key must resolve to public");
+assert.equal(resolveMcpKeyCap(shortKey, now, env).tier, "public", "a key shorter than MIN_MCP_KEY_LENGTH must never resolve, even if stored");
 assert.equal(resolveMcpKeyCap(goodKey, now, { MCP_API_KEYS: "{ not json" }).tier, "public", "malformed store must fail closed");
 console.log("[check:mcp-keys] ✓ shipped resolver: hashed grant honoured, expiry honoured, unknown tier/key/malformed-store all fail closed to public (DOC-B-003).");
