@@ -1,11 +1,3 @@
----
-created: 2026-06-14T00:00:00Z
-branch: main
-author: Saul Loveman + Claude Opus 4.8 (1M context)
-status: active
-sprint: DOCS-CODEX-S0
----
-
 # Citrate Codex — Prototype Fixtures (drop-in mock data)
 
 Typed, deterministic mock data + a `mockApi` resolver for building the **Citrate Codex** prototype
