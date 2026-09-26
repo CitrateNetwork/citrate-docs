@@ -95,7 +95,7 @@ Source: `citrate_sdk/client.py` (class `CitrateClient`), exported from `citrate_
 
 | Method | Signature | Notes |
 |---|---|---|
-| `__init__` | `(rpc_url="http://localhost:8545", private_key=None, allow_insecure_http=False)` | `client.py`. Read-only without a key. |
+| `__init__` | `(rpc_url="http://localhost:8545", private_key=None, allow_insecure_http=False, timeout=30.0, chain_id=None)` | `client.py`. Read-only without a key. `timeout` is the per-request timeout in seconds; `chain_id` pins the chain every signature is bound to (default 40204). |
 | `get_chain_id()` | `-> int` | `eth_chainId`, `client.py`. |
 | `get_balance(address)` | `-> int` | wei, `eth_getBalance`, `client.py`. |
 | `get_nonce(address)` | `-> int` | pending nonce, `eth_getTransactionCount`, `client.py`. |
@@ -103,7 +103,7 @@ Source: `citrate_sdk/client.py` (class `CitrateClient`), exported from `citrate_
 | `inference(model_id, input_data, encrypted=False, max_gas=1000000, recipient_public_key=None)` | `-> InferenceResult` | precompile `0x...0101`; the encrypted path fails closed without `recipient_public_key`, `client.py`. |
 | `get_model_info(model_id)` | `-> Dict` | `citrate_getModel`, raises `ModelNotFoundError`, `client.py`. |
 | `list_models(owner=None, limit=100)` | `-> List[Dict]` | `citrate_listModels`, `client.py`. |
-| `purchase_model_access(model_id, payment_amount)` | `-> str` | needs a key; access-control precompile `0x...0104`, `client.py`. |
+| `purchase_model_access(model_id, payment_amount)` | `-> str` | Fails closed: always raises `CitrateError` and moves no funds, because no on-chain access-purchase route exists yet. `client.py`. |
 
 Signing binds `chainId` under EIP-155 (`_eip155_chain_id` in `client.py`) so a signature cannot be replayed
 on another network. IPFS upload fails closed rather than fabricating a fallback CID (`_upload_to_ipfs` in `client.py`). A
