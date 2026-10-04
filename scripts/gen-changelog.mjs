@@ -8,12 +8,13 @@
 // fail-soft: with no MEM_GATEWAY_URL / MEM_CONNECT_SECRET (e.g. a local build)
 // or an unreachable gateway, it writes a graceful placeholder rather than
 // failing the build. Protocol mirrors lib/ai/memory.ts.
+import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { createHmac } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import { changelogRepos } from "./lib/changelog-repos.mjs";
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "content", "start", "_generated");
 const OUT = path.join(OUT_DIR, "changelog.md");
 
