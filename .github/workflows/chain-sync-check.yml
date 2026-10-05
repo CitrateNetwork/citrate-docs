@@ -26,7 +26,11 @@ permissions:
   contents: read
 
 jobs:
-  check:
+  # Named `chain-sync`, not `check`: merge-gate's `ci` aggregate groups check runs by name and judges
+  # only the latest run per name, so sharing `check` with the content-lint job let a pass there mask
+  # a drift failure here (or the reverse), depending on which finished last.
+  chain-sync:
+    name: chain-sync
     runs-on: ubuntu-latest
     env:
       CHAIN_REF: ${{ inputs.chain_ref || vars.CITRATE_CHAIN_REF || 'main' }}
