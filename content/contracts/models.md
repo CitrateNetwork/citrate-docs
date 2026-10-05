@@ -234,10 +234,10 @@ result and pay for it.
 | `0x0101` | MODEL_INFERENCE | ModelRegistry, LoRAFactory, ModelAccessControl | not served to contract code; the call reverts |
 | `0x0106` | MODEL_ENCRYPTION | ModelAccessControl | not served to contract code; the call reverts |
 | `0x0108` | INFERENCE_PROOF_VERIFY | LoRAFactory adapter verification | live where the node build carries the verifier |
-| `0x0112` | LORA_APPLY | library helper `loraApply` | not active: the agent precompile fork is not scheduled |
-| `0x0113` | LORA_MERGE | library helper `loraMerge` | not active, as above |
-| `0x0121` | MEMORY_ANCHOR_VERIFY | library helpers `memoryAnchorCommitment`, `AnchorProofs.isRecordAnchored` | not active, as above |
-| `0x0122` | AGENT_OPS | library helpers `deviceLinkValid`, `deviceRevocationValid` | not active, as above |
+| `0x0112` | LORA_APPLY | library helper `loraApply` | active from genesis (2026-10-05 re-roll) |
+| `0x0113` | LORA_MERGE | library helper `loraMerge` | active from genesis, as above |
+| `0x0121` | MEMORY_ANCHOR_VERIFY | library helpers `memoryAnchorCommitment`, `AnchorProofs.isRecordAnchored` | active from genesis, as above |
+| `0x0122` | AGENT_OPS | library helpers `deviceLinkValid`, `deviceRevocationValid` | active from genesis, as above |
 
 `0x0112` applies one LoRA adapter to one tile of weights (`W + (alpha / r) (B . A)` in Q16.16 fixed
 point) and `0x0113` merges up to 16 adapters on one tile, which is what lets a challenger recompute one
@@ -245,12 +245,12 @@ disputed tile of an aggregate instead of the whole tensor. `0x0121` checks a nig
 inclusion proof and returns the day commitment to look up in `AnchorRegistry`. `0x0122` checks device link
 and revocation signatures. All four are pure byte functions that every node computes identically.
 
-**Before the activation height.** The four agent precompiles go live only from a fork height H that is set
-per network and has not been scheduled on 40204. Below H the addresses behave exactly as they do today:
-every library call to them reverts with `PrecompileUnavailable`, so no contract can mistake a missing
-precompile for a "valid" or "invalid" verdict. An upgraded node binary changes nothing until H. Choosing H
-and the gas schedule is pending owner sign-off; the fork is exercised on devnets first (a script runs the
-check on both sides of H).
+**Activation.** The four agent precompiles go live from a fork height H that a release pin sets per
+network. On 40204 the pin is 0, so from the 2026-10-05 re-roll they are active from genesis. On a network
+whose H is later, below H the addresses behave as they did before the fork: every library call to them
+reverts with `PrecompileUnavailable`, so no contract can mistake a missing precompile for a "valid" or
+"invalid" verdict. The [precompile addresses](/chain/precompile-addresses) page is generated from the chain
+source and reports the activation it pins.
 
 The byte layouts, gas formulas, activation rules and test evidence are specified once, in the chain
 repository's
