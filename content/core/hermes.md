@@ -55,7 +55,7 @@ an MCP client can all look at the same Hermes session.
 | Sign-in to sites you chose, a bounded number of times | no budget granted | [WEB_SIGNING_BUDGETS](https://github.com/CitrateNetwork/citrate-core/blob/main/docs/WEB_SIGNING_BUDGETS.md) |
 | Tools from MCP servers you add | none added | [MCP_USER_SERVERS](https://github.com/CitrateNetwork/citrate-core/blob/main/docs/MCP_USER_SERVERS.md) |
 | Skills, and learning a new one from verified work | reviewed set installed | [Skills](/core/skills) |
-| Deploying a contract through the deploy gate | deploy waits for a READY verdict and your approval | [FAUCET_IN_APP](https://github.com/CitrateNetwork/citrate-core/blob/main/docs/FAUCET_IN_APP.md) and the deploy gate notes in the core repo |
+| Deploying a contract through the deploy gate | deploy waits for a READY verdict and your approval | the DeployGate section of [formal/README](https://github.com/CitrateNetwork/citrate-core/blob/main/src-tauri/formal/README.md); deploy gas from the faucet (off by default): [FAUCET_IN_APP](https://github.com/CitrateNetwork/citrate-core/blob/main/docs/FAUCET_IN_APP.md) |
 | Connecting your other machines | off | [Fleet wizard](/core/fleet-wizard) |
 
 ## Design rationale
