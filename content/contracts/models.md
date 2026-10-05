@@ -6,10 +6,12 @@ org_scope: ~
 source_kind: authored
 source: citrate-chain/contracts/src (ModelRegistry.sol, ModelMarketplace.sol, LoRAFactory.sol, ModelAccessControl.sol, InferenceRouter.sol, interfaces/IModelRegistry.sol, interfaces/IModelMarketplace.sol)
 surfaces: [SC-model-registry, SC-model-marketplace, SC-model-lora, SC-model-access, SC-model-router]
-audited_against_sha: e68af83
+audited_against_sha: fa7c913
 status: Implemented
 created: 2026-06-17T00:00:00Z
-author: Citrate team
+author: Citrate team; precompile section Larry Klosowski + Claude Opus 5.5
+branch: hup/n7-chain-precompile-followups
+updated: 2026-10-04
 ---
 
 These are the contracts that register a model on the public ledger, sell access to it, route inference
@@ -21,13 +23,15 @@ and integrators.
 
 A model on Citrate is a record, not a file. The weights stay where the owner put them, usually behind an
 IPFS CID; the public ledger keeps the model's identity, its owner, its price, and a count of the work it
-has done. Inference itself runs through the runtime [precompiles](/chain/precompiles); the contracts
-here charge for it, route it, and gate it.
+has done. Inference itself runs off chain on the operators that serve the model; the contracts here
+charge for it, route it, and gate it. Where a contract asks a [precompile](/chain/precompiles) for an
+answer, it does so through one library that refuses to treat "no answer" as an answer (see
+[Precompile calls](#precompile-calls) below).
 
 Five contracts cover the model economy:
 
-- **ModelRegistry** is the root record. Registering a model yields a `modelHash` and proxies inference
-  through the model precompile.
+- **ModelRegistry** is the root record. Registering a model yields a `modelHash`; `requestInference`
+  asks the model inference precompile at `0x0101`, which contract code cannot reach on 40204 today.
 - **InferenceRouter** load-balances inference across staked operators, with a cache and a refund path.
 - **ModelMarketplace** lets owners list a model and sell access, with bulk discounts and a treasury fee.
 - **LoRAFactory** builds, trains, merges, and cryptographically verifies low-rank adapters on top of a
@@ -63,8 +67,8 @@ The shortest path from nothing to a paid inference call.
    hit returns the stored output with a partial refund; otherwise the assigned operator returns the
    result with `completeInference` and is paid, with any excess refunded.
 5. Adapt it, optionally. Build a LoRA adapter on the base model with `createLoRA(...)` on
-   **LoRAFactory**, have an operator finish training, and verify the adapter against the inference proof
-   precompile before anyone relies on it.
+   **LoRAFactory**, have an operator train it off chain and record the weights, and verify the adapter
+   against the inference proof precompile before anyone relies on it.
 
 ## Reference
 
@@ -76,9 +80,10 @@ hand-copied from here.
 
 `contracts/src/ModelRegistry.sol`, `contract ModelRegistry is IModelRegistry, AccessControl,
 ReentrancyGuard` (the project-local `AccessControl` and `ReentrancyGuard`, not OpenZeppelin; interface at
-`contracts/src/interfaces/IModelRegistry.sol`). Stores model metadata, manages owner permissions,
-charges a fixed registration fee, and proxies registration and inference to the model precompile at
-`0x1000`. The constructor grants the deployer the admin and operator roles.
+`contracts/src/interfaces/IModelRegistry.sol`). Stores model metadata, manages owner permissions, and
+charges a fixed registration fee. Registration and updates are records only: no precompile is called, and
+the weights stay at the IPFS CID. `requestInference` calls `0x0101` MODEL_INFERENCE through the
+`CitratePrecompiles` library. The constructor grants the deployer the admin and operator roles.
 
 | Function | Notes |
 |---|---|
@@ -87,13 +92,14 @@ charges a fixed registration fee, and proxies registration and inference to the 
 | `setInferencePrice(bytes32 modelHash, uint256 newPrice)` | Owner only. |
 | `deactivateModel(bytes32 modelHash)` / `activateModel(bytes32 modelHash)` | Owner or operator role. |
 | `grantPermission(bytes32 modelHash, address user)` / `revokePermission(bytes32 modelHash, address user)` | Owner only. |
-| `requestInference(bytes32 modelHash, bytes inputData) payable returns (bytes)` | Forwards the full `msg.value` to the model owner; no marketplace fee is retained. |
+| `requestInference(bytes32 modelHash, bytes inputData) payable returns (bytes)` | Forwards the full `msg.value` to the model owner; no marketplace fee is retained. Calls `0x0101` with `modelHash || msg.sender || inputData`; reverts with `PrecompileUnavailable(0x0101)` on every 40204 node today, payment included. |
 | `withdrawFees()` | `onlyRole(DEFAULT_ADMIN_ROLE)`. |
 
 Views include `getModel` (an 8-tuple of owner, name, framework, version, IPFS CID, inference price, total
 inferences, and active flag), `getModelsByOwner`, `getModelRevenue`, `hasPermission`,
-`getAllModelHashes`, and `getModelsInfo`. Constants: `REGISTRATION_FEE = 0.1 ether` and
-`MODEL_PRECOMPILE = 0x1000`. Note that `setRegistrationFee` is intentionally inert: it is a `view` that
+`getAllModelHashes`, and `getModelsInfo`. Constant: `REGISTRATION_FEE = 0.1 ether` (the old
+`MODEL_PRECOMPILE = 0x1000` and `ARTIFACT_PRECOMPILE = 0x1002` constants are gone; nothing served those
+addresses). Note that `setRegistrationFee` is intentionally inert: it is a `view` that
 always reverts with "Registration fee is immutable", so the fee cannot be changed.
 
 ### InferenceRouter
@@ -148,26 +154,32 @@ rating.
 
 `contracts/src/LoRAFactory.sol`, `contract LoRAFactory is AccessControl` (project-local; it does not
 inherit `ReentrancyGuard`). A factory for creating, training, merging, and cryptographically verifying
-low-rank adapters against base models in the registry, through the LoRA precompile at `0x1001` and the
-Halo2-KZG inference-proof verifier at `0x0108`. The constructor takes the registry address and grants the
-deployer admin and operator roles.
+low-rank adapters against base models in the registry. Training and merges run off chain (the compute
+pool or an operator) and are recorded here: `createLoRA` emits `TrainingStarted`, `mergeLoRAs` emits
+`MergeRequested`, and the operator records the results with `completeTraining` and `completeMerge`.
+Verification goes through the Halo2-KZG inference-proof verifier at `0x0108`; adapter inference goes to
+`0x0101` with the adapter's id. The constructor takes the registry address and grants the deployer admin
+and operator roles.
 
 | Function | Notes |
 |---|---|
-| `createLoRA(bytes32 baseModelHash, string name, string description, uint256 rank, uint256 alpha, uint256 dropout, TrainingConfig config) payable returns (bytes32)` | Requires permission on the base model; fee is `trainingFeePerEpoch` times the epoch count. |
+| `createLoRA(bytes32 baseModelHash, string name, string description, uint256 rank, uint256 alpha, uint256 dropout, TrainingConfig config) payable returns (bytes32)` | Requires permission on the base model; fee is `trainingFeePerEpoch` times the epoch count. Emits `TrainingStarted`; no precompile call. |
 | `completeTraining(bytes32 loraHash, string ipfsCID)` | `onlyRole(OPERATOR_ROLE)`; records the trained-weights CID. |
 | `setAdapterModelCommitment(bytes32 loraHash, bytes32 commitment)` | `onlyRole(OPERATOR_ROLE)`; one-shot. |
 | `verifyAdapterAt(bytes32 loraHash, bytes32 inputCommitment, bytes32 outputCommitment, bytes proofBytes)` | Proof-backed verification through `0x0108`. |
 | `isAdapterVerified(bytes32 loraHash) view returns (bool)` | Whether the adapter has a verified proof. |
-| `mergeLoRAs(bytes32[] loraHashes, uint256[] weights, uint256 mergeType) payable returns (bytes32)` | Weights must sum to `1e18`. |
+| `mergeLoRAs(bytes32[] loraHashes, uint256[] weights, uint256 mergeType) payable returns (bytes32)` | Weights must sum to `1e18`. Emits `MergeRequested`; the merge itself runs off chain. |
 | `completeMerge(bytes32 requestHash, string resultCID)` | `onlyRole(OPERATOR_ROLE)`. |
-| `inferWithLoRA(bytes32 baseModelHash, bytes32 loraHash, bytes inputData) payable returns (bytes)` | Splits 20% to the adapter creator, 80% through `modelRegistry.requestInference`. |
+| `inferWithLoRA(bytes32 baseModelHash, bytes32 loraHash, bytes inputData) payable returns (bytes)` | Calls `0x0101` with `loraHash || msg.sender || inputData`, then splits 20% to the adapter creator and 80% through `modelRegistry.requestInference`. Reverts with `PrecompileUnavailable(0x0101)` on 40204 today, so nobody is paid. |
 | `setPublicStatus` / `grantPermission` / `revokePermission` | Creator only. |
 | `setTrainingFee` / `setMergeFee` / `withdrawFees` | `onlyRole(DEFAULT_ADMIN_ROLE)`. |
 
 Views include `getLoRA`, `getUserLoRAs`, `getModelLoRAs`, and `getMergeRequest`. Constants:
-`trainingFeePerEpoch = 0.01 ether`, `mergeFee = 0.05 ether`, `LORA_PRECOMPILE = 0x1001`,
-`INFERENCE_PROOF_VERIFY = 0x0108`, and `INFERENCE_CIRCUIT_V1 = 1`.
+`trainingFeePerEpoch = 0.01 ether`, `mergeFee = 0.05 ether`, `INFERENCE_PROOF_VERIFY = 0x0108`, and
+`INFERENCE_CIRCUIT_V1 = 1`. The old `LORA_PRECOMPILE = 0x1001` constant is gone: nothing served that
+address, and its `startTraining`, `mergeLoras` and `applyAndInfer` calls never ran. On-chain LoRA
+arithmetic is now the pair of precompiles at `0x0112` and `0x0113` described under
+[Precompile calls](#precompile-calls).
 
 Adapter provenance, as this contract implements it, ties to three things and no more: the base model
 hash, which must exist in the registry; the IPFS CIDs for the trained weights and for the dataset, the
@@ -186,7 +198,8 @@ separate [Citrate Orchard](/research/learning) surface.
 OpenZeppelin versions, the one contract on this page that does). A standalone tiered access registry,
 distinct from ModelRegistry: paid or approval-based grants, per-model staking, revenue sharing, and an
 encrypted-inference path through the runtime precompiles for model inference at `0x0101` and model
-encryption at `0x0106`. The constructor makes the deployer the owner.
+encryption at `0x0106`, both called through the `CitratePrecompiles` library, so both fail closed on 40204
+today. The constructor makes the deployer the owner.
 
 | Function | Notes |
 |---|---|
@@ -205,6 +218,44 @@ Views include `getModelStats`, `hasAccessToModel`, `getUserAccessLevel`, and `ge
 are `ACCESS_NONE = 0`, `ACCESS_INFERENCE = 1`, `ACCESS_FULL = 2`, and `ACCESS_ADMIN = 3`. Note that
 `getModelStats` returns `uniqueUsers` as a placeholder zero, and `updatePrecompileAddress` is a
 non-functional placeholder.
+
+## Precompile calls
+
+Every precompile call in these contracts goes through one library, `CitratePrecompiles`
+(`contracts/src/lib/CitratePrecompiles.sol`). It encodes each precompile's native input (the node does not
+decode Solidity ABI selectors) and fails closed: a call that fails or returns nothing reverts with
+`PrecompileUnavailable(address)`, and a wrong-shaped answer reverts with
+`PrecompileBadOutput(address, length)`. This matters because a call to an address with no code succeeds
+with empty data, so a contract that checks only the success flag would read "no precompile here" as a
+result and pay for it.
+
+| Address | Name | Used by | On 40204 today |
+|---|---|---|---|
+| `0x0101` | MODEL_INFERENCE | ModelRegistry, LoRAFactory, ModelAccessControl | not served to contract code; the call reverts |
+| `0x0106` | MODEL_ENCRYPTION | ModelAccessControl | not served to contract code; the call reverts |
+| `0x0108` | INFERENCE_PROOF_VERIFY | LoRAFactory adapter verification | live where the node build carries the verifier |
+| `0x0112` | LORA_APPLY | library helper `loraApply` | not active: the agent precompile fork is not scheduled |
+| `0x0113` | LORA_MERGE | library helper `loraMerge` | not active, as above |
+| `0x0121` | MEMORY_ANCHOR_VERIFY | library helpers `memoryAnchorCommitment`, `AnchorProofs.isRecordAnchored` | not active, as above |
+| `0x0122` | AGENT_OPS | library helpers `deviceLinkValid`, `deviceRevocationValid` | not active, as above |
+
+`0x0112` applies one LoRA adapter to one tile of weights (`W + (alpha / r) (B . A)` in Q16.16 fixed
+point) and `0x0113` merges up to 16 adapters on one tile, which is what lets a challenger recompute one
+disputed tile of an aggregate instead of the whole tensor. `0x0121` checks a nightly decision-anchor
+inclusion proof and returns the day commitment to look up in `AnchorRegistry`. `0x0122` checks device link
+and revocation signatures. All four are pure byte functions that every node computes identically.
+
+**Before the activation height.** The four agent precompiles go live only from a fork height H that is set
+per network and has not been scheduled on 40204. Below H the addresses behave exactly as they do today:
+every library call to them reverts with `PrecompileUnavailable`, so no contract can mistake a missing
+precompile for a "valid" or "invalid" verdict. An upgraded node binary changes nothing until H. Choosing H
+and the gas schedule is pending owner sign-off; the fork is exercised on devnets first (a script runs the
+check on both sides of H).
+
+The byte layouts, gas formulas, activation rules and test evidence are specified once, in the chain
+repository's
+[agent precompile specification](https://github.com/CitrateNetwork/citrate-chain/blob/main/docs/precompiles/AGENT_PRECOMPILES.md)
+(`docs/precompiles/AGENT_PRECOMPILES.md`). This page does not repeat them.
 
 ## Design rationale
 
@@ -238,6 +289,13 @@ These contracts move value and gate access, so the sharp edges are worth naming.
 - **Unverified reviews.** A marketplace review does not require a verified purchase, so the average
   rating can be moved by addresses that never bought the model; the `verified` flag distinguishes them
   but does not exclude them from the average.
+- **Inference calls revert on 40204.** `requestInference` on the registry, `inferWithLoRA`, and both
+  inference paths of ModelAccessControl revert with `PrecompileUnavailable(0x0101)` (or `0x0106`) on every
+  40204 node today, and any payment sent with them is returned by the revert. Earlier builds called
+  addresses (`0x1000`, `0x1001`) that nothing served; those calls are gone.
+- **Agent precompiles before H.** Code that uses `0x0112`, `0x0113`, `0x0121` or `0x0122` through the
+  library reverts until the fork height is reached on that network. Handle the revert; do not catch it and
+  treat it as a negative answer.
 - **Inert and placeholder surfaces.** `setRegistrationFee` on the registry always reverts by design.
   On ModelAccessControl, `getModelStats` reports a placeholder zero for unique users and
   `updatePrecompileAddress` does nothing.
@@ -250,15 +308,18 @@ commercial, the paid-seat depth covering marketplace economics, the adapter pipe
 staking design.
 
 No secrets appear on this page. There are no private keys, mnemonics, internal hostnames, or
-credentials. The only hardcoded addresses are public protocol precompiles: `0x1000`, `0x1001`, `0x0101`,
-`0x0106`, and `0x0108`. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity.
+credentials. The only hardcoded addresses are public protocol precompiles: `0x0101`, `0x0106`, `0x0108`,
+`0x0112`, `0x0113`, `0x0121`, and `0x0122` (and the retired `0x1000`, `0x1001` and `0x1002`, named only to
+say they are gone). Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity.
 
 ## Source and verification
 
 - Source: `citrate-chain/contracts/src/`, in `ModelRegistry.sol`, `InferenceRouter.sol`,
   `ModelMarketplace.sol`, `LoRAFactory.sol`, and `ModelAccessControl.sol`, with interfaces
   `interfaces/IModelRegistry.sol` and `interfaces/IModelMarketplace.sol`.
-- Audited against `citrate-chain` SHA `9d5959e`.
+- Audited against `citrate-chain` SHA `fa7c913`, the head of the agent precompile fork stack (pull
+  request 273 and the stack above it). Until that stack reaches `main`, the deployed contracts and `main`
+  still carry the old constants; this page describes the code that ships with the fork.
 - Status: Implemented, pre-audit, on testnet 40204. The LoRAFactory reentrancy gap, the InferenceRouter
   guard mismatch, the unverified-review weighting, and the ModelAccessControl placeholders are open items
   noted above and not yet externally audited. Re-verify deployed bytecode with `eth_getCode` if the chain
