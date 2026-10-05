@@ -140,6 +140,7 @@ describe("--check drift detection", () => {
     const r = spawnSync(process.execPath, ["scripts/gen-precompiles.mjs", "--chain", chain, "--check"], { cwd: ROOT, encoding: "utf8" });
     expect(r.status).toBe(1);
     expect(r.stderr).toMatch(/has no entry in the description map|in neither the chain arrays nor the book/);
+    expect(r.stderr).toMatch(/chain-sync drift against citrate-chain @ /);
     expect(fs.readFileSync(path.join(ROOT, "content/chain/_generated/precompiles.md"), "utf8")).toBe(committed);
   });
 

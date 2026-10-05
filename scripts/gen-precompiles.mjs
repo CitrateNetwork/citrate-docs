@@ -67,6 +67,12 @@ try {
   });
 } catch (e) {
   console.error(`[${TAG}] ${e.message}`);
+  // Label the failure for CI readers: this is chain-sync drift between citrate-chain and the docs inputs,
+  // a reported mismatch rather than a generator crash.
+  console.error(
+    `[${TAG}] chain-sync drift against citrate-chain @ ${sha}: the chain, its address book and the docs description map disagree. ` +
+      `Run the sync in README.md ("Chain-generated pages") once the chain side has landed.`,
+  );
   process.exit(1);
 }
 
