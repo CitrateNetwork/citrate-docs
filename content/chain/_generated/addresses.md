@@ -153,7 +153,9 @@ together.
 
 ## Precompiles
 
-Precompiles are fixed genesis addresses and do not move across re-rolls.
+Precompiles are fixed genesis addresses and do not move across re-rolls. This table is the book's own
+`precompiles` block; the full set, including the agent precompiles and which addresses contract code can
+reach, is generated from the chain source on [precompile addresses](/chain/precompile-addresses).
 
 | Contract | Address | Status |
 |---|---|---|
