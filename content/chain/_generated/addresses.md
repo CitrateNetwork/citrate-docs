@@ -6,8 +6,8 @@ org_scope: ~
 source_kind: transcluded
 source: citrate-chain/contracts/addresses/40204.json
 surfaces: [CHAIN-addresses]
-audited_against_sha: 0aab474b
-book_deployed_at: 2026-09-30T00:21:18Z
+audited_against_sha: 2979a157
+book_deployed_at: 2026-10-06T05:43:04Z
 status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
@@ -17,113 +17,112 @@ nav_order: 5
 This is the canonical list of contract addresses on chain 40204 (Citrate Network). It is generated
 from the federation address book (`citrate-chain/contracts/addresses/40204.json`), the single source of truth
 every application reads from, and is regenerated after each re-roll or address fan-out. As of the book at
-commit `0aab474b`, deployed 2026-09-30 00:21:18UTC.
+commit `2979a157`, deployed 2026-10-06 05:43:04UTC.
 
-Not every entry in the book is deployed. At block 6929 (2026-09-30T02:15:56Z), 99 of the 99
+Not every entry in the book is deployed. At block 750 (2026-10-06T05:45:23Z), 98 of the 98
 application and account-abstraction entries have code on chain; rows marked **not deployed** have none. A call to a
 not-deployed address returns empty data, and a value transfer to one succeeds and strands the value, so check the
 status column before you send anything. Re-check any address yourself with
 `cast code <address> --rpc-url https://rpc.citrate.ai`.
 
 The core and account-abstraction addresses are deterministic (CREATE2 through the genesis factory), so a
-re-roll moves them together and this page moves with them. The membership contracts are the exception (see below). The RPC endpoint is `https://rpc.citrate.ai` and the deployer is `0xa3512bE80ABe86439525a3e5a185884aB0ccb87a`.
+re-roll moves them together and this page moves with them. The membership contracts are the exception (see below). The RPC endpoint is `https://rpc.citrate.ai` and the deployer is `0x7DAbC319867fCcA7dE8A20809EfBd39BbF17Acdf`.
 
 ## Core contracts
 
 | Contract | Address | Status |
 |---|---|---|
-| `ValidatorRegistry` | `0xBa4aBd4f3fcA5365b2451b4E9662e4Cfd22b3ad5` | deployed |
-| `ModelRegistry` | `0x807cB7eE477Ae58C321cAEd980CEB11D78048e84` | deployed |
+| `ValidatorRegistry` | `0xde4F679632be7810D915F637Cc6a72bf076A3BD9` | deployed |
+| `ModelRegistry` | `0x086F13745C53b460512eA2A0367EcdB62A2875eF` | deployed |
 | `WrappedSALT` | `0xAa918302B94a4B0E75E01e019cc6b819B4F7c906` | deployed |
-| `AgentDecisionRegistry` | `0x94A204DaC83C99F5ce2C8ac19fc101C07D8b9A41` | deployed |
-| `SpecRegistry` | `0xf38D10dFb550EE3Bce1332A887adC0D2C75EB642` | deployed |
-| `IPFSIncentives` | `0xc37aB44b145a31E8c458996437080326Fd19e129` | deployed |
-| `X402Facilitator` | `0x7F7b6e8D9Ad0A8b4e6152Df6167E49E48AFB3463` | deployed |
-| `X402Paywall` | `0x13e50000FFFc95D910D42Cd8D679c28F6265a970` | deployed |
-| `LiquidStakingPool` | `0x68Aa320Be609A073fC8ebB7dBCD237270A5DEEb0` | deployed |
-| `ContributionAccounting` | `0x52a47cAF8902D8214d1e246E74aA3Ad099DA47D1` | deployed |
-| `NematocystSlashing` | `0xee9501285F7b3c8Bb99B8aF70F95b402F4D2468b` | deployed |
-| `MarketMakerAllocation` | `0xb5dDD7c5146c240D53Ce6c7e87E5aCB59E4f7351` | deployed |
-| `ModelMarketplace` | `0x5517A9fDD70d503a57898c86eFeaaeEF8FE06413` | deployed |
-| `InferenceRouter` | `0xe1A717f0656b000e33A78B97507Cd0440Ad62570` | deployed |
-| `LoRAFactory` | `0x985036F3441258B8Ff6DDa8a43EA40EEEb1D02A6` | deployed |
+| `AgentDecisionRegistry` | `0x40A34010347C75c85F1EC990B1607a51FFDBE79d` | deployed |
+| `SpecRegistry` | `0xA7d848e4104B5dCac0dE081e92Eb1E93e43D6a1a` | deployed |
+| `IPFSIncentives` | `0x003563c0EE71FA2C69c6EB6440EE3c0fC8e1a467` | deployed |
+| `X402Facilitator` | `0x0D36F6e2a186436f4E4Cc78Bbc7DA2a1aC37aadb` | deployed |
+| `X402Paywall` | `0x5e833f530Dc09CaA0631AB2A50532025C0c0C0F0` | deployed |
+| `LiquidStakingPool` | `0x73270e9818530d9C141596411Ef58730C1eB9f0D` | deployed |
+| `ContributionAccounting` | `0x97Affbd04813Ea9a63DA0Cb659EE9b06E6BE6CdF` | deployed |
+| `NematocystSlashing` | `0x594C4110F0B23752cad0B1622193132d223c3595` | deployed |
+| `MarketMakerAllocation` | `0x6E01671D2D3dbF719EE1C5d6929111027aEc316A` | deployed |
+| `ModelMarketplace` | `0x6A93B6e99BfaBfb4e655c6fC15DB4d98192D040f` | deployed |
+| `InferenceRouter` | `0x42Ae16Dae5D7Bf535b5cce9d5b6521c504500896` | deployed |
+| `LoRAFactory` | `0x9BF27858C9Ece2eC13fAEa3e6BD356A20E9C5185` | deployed |
 | `LearningPool` | `0xBA5C9c886d65a969d02e40d7FBbADe316AD81E66` | deployed |
-| `LearningCycleManager` | `0x4254d5aeb3Fb90A5038e1bC5E10b30d0021990Bd` | deployed |
+| `LearningCycleManager` | `0x594b6EDD65EE13262cEddE14f3DeA5d62527615b` | deployed |
 | `ClassroomRegistry` | `0xe2b56b2BFcaeB3c8d14400184eAb01BBC980cC05` | deployed |
-| `MentorMatcher` | `0x05d6a67279972273F23124EF95237956Ef923C05` | deployed |
-| `ComputeVerifier` | `0xA483021adE196D642e6500B2D92c5E077186Ee00` | deployed |
-| `ComputeMarketplace` | `0xE4fD2413d19946E7a8e78733E62C1531139430Bb` | deployed |
-| `ComputePool` | `0x47FFB16216a5431dcF852f70Fe534c556cE807eF` | deployed |
-| `HeartbeatMonitor` | `0x85c1A278ed86169C5087616d879013e9337a7013` | deployed |
-| `DisputeResolution` | `0xea0E6716A8A0bA39DF1d30552CFeC0bBab36D602` | deployed |
-| `ComputePricingOracle` | `0xDfaF0b02846Ac33f1fC753ACC2c1D7D0B2F1aE4e` | deployed |
-| `StablecoinTreasury` | `0x6867F82401F2773bf625887cC5b1FA1d6EAfa352` | deployed |
-| `BulkComputeGateway` | `0x9CF7DdBFbba683a14ceF4Eb0e7934f79ec10C586` | deployed |
-| `TestnetFarmingAccounting` | `0xE19aef1A41b883021222aC7596c7ca96A62C6156` | deployed |
-| `TreasuryGovernor` | `0xe0537e5f14C087EC865E152B9D3356d721E5a24F` | deployed |
-| `ModelAccessControl` | `0x66f78C103D6EE077CD2875C71D676540708d5356` | deployed |
-| `TEEAttestationRegistry` | `0x6693b6FcBc5bf3935bEEB7a21654bDfBd90e84b6` | deployed |
-| `ComputePoolTraining` | `0x1D71814BbC78ae994CA5B6eE9c4b9378178b2B36` | deployed |
-| `InstitutionalVault` | `0x7eAb0072153FB71E292A5e272e6Ac66E3f86D094` | deployed |
-| `ClassroomClusterV1` | `0xF2D989FFA09719aa9ee2020Fbf09aD0924ccb486` | deployed |
-| `EduForwarder` | `0x1531224eECc9dFe1CdcCd80Be1BD35804005F181` | deployed |
-| `BudgetAllocation` | `0x365e98100B879a7A54Dc3FED969C977D21be59A0` | deployed |
-| `CashoutRequest` | `0x6E357EDCfc392bAc92b55e1f39f0FA8FC4e8E03A` | deployed |
+| `MentorMatcher` | `0x19fc5C7f005c8416C5b6bddbBA634b20d9Dd56c7` | deployed |
+| `ComputeVerifier` | `0x55C3febF3c57e7f679CC773b1Cd87A5eE8a2c679` | deployed |
+| `ComputeMarketplace` | `0xA96a891b9a060788FBc93997D61A8a98D02e621d` | deployed |
+| `ComputePool` | `0x3e5969bDb10dD62ce48E84ad5FBe9CFE6F7D8AD4` | deployed |
+| `HeartbeatMonitor` | `0xBEaC9b2955D17fe14b5514CCb61aB58ac9089F65` | deployed |
+| `DisputeResolution` | `0xac5004C3282A6715712061bE7A1037362E9171f8` | deployed |
+| `ComputePricingOracle` | `0xdE15b71a7bD85499CAe26DF82407ee0bd0c3445D` | deployed |
+| `StablecoinTreasury` | `0x131fc17A9Df7c9e7B08c51B122D320018356A232` | deployed |
+| `BulkComputeGateway` | `0x244474F2E5fA35592ef60A873D356F9FEB4cb8Fa` | deployed |
+| `TestnetFarmingAccounting` | `0x19AaDBb6EDC2B9a2AF4B7f437c4E4bBD3778e487` | deployed |
+| `TreasuryGovernor` | `0x3848b933691d6dcd535D1a704E50657Fdb8C4604` | deployed |
+| `ModelAccessControl` | `0xaE0fC1a3E21afC38e781d9fB12F194dD71F53AA0` | deployed |
+| `TEEAttestationRegistry` | `0xDAC8b840A2e98A4cBEAfC413fad7DCd447D79Fb1` | deployed |
+| `ComputePoolTraining` | `0x17F0b25b8d8893f77bc5b55375BCdBd66F4cB8f3` | deployed |
+| `InstitutionalVault` | `0x3ec6473CF73bd8d4f8bC8Fb22aC923C5e0A09771` | deployed |
+| `ClassroomClusterV1` | `0x6b94b96485f789c8dDc4102A171bDafab41CE0b0` | deployed |
+| `EduForwarder` | `0x840e011A30e9082998e2094E83BeC7dC0E019bE3` | deployed |
+| `BudgetAllocation` | `0x8dC786BE442FF0A36794DDD201e7D220A97F733f` | deployed |
+| `CashoutRequest` | `0xBd8b17E21132B2bEaFdCf6FC2CbA998B33430517` | deployed |
 | `AIModelRegistryPortable` | `0xdA30A0408b1690AfA739fB63901a6608547F4dA6` | deployed |
-| `AIInferenceRouterPortable` | `0xb8603904aEBeFefa317D9DeDF60B19A120366715` | deployed |
-| `AILearningCycleCorePortable` | `0x42196F4257E5AfAa9fF92735f88aa0c23fBe8b91` | deployed |
-| `CitrateMemberSBT` | `0xA24aa35fbA269f8755C2173779cc3DBC9690c4C9` | deployed |
+| `AIInferenceRouterPortable` | `0x5375785324843e8eAF024A6D2cf8CEE63496f0f1` | deployed |
+| `AILearningCycleCorePortable` | `0x197A32842aFA3775055f6F04da0c5aCaa09E0E72` | deployed |
+| `CitrateMemberSBT` | `0xf8aD11f6d3AeFA605e2EBF7C81ED08A2b38B3A3c` | deployed |
 | `MemberBond` | `0x7D6B92757e928ab4207Be3B54166Ecd2C491Aa92` | deployed |
 | `MembershipStakeVaultImpl` | `0x72035977F3Ec295C70e2A734AcbDFfB0C98E6F0b` | deployed |
-| `MembershipStakeVault` | `0x4C0f8b27c509cBA4A32E1Cd2BC5709bBD2699024` | deployed |
-| `SkillRegistry` | `0x2B687899EF4aF05A18F4f36cE1fE9d51c017A97c` | deployed |
-| `InstitutionTreeV1` | `0x028f98faeFeE5FF58cb494E493eD8f636aa3042B` | deployed |
-| `ComplianceRegistry` | `0xa301FA601702B0fb850201182cEF381E312c63ee` | deployed |
-| `AnchorRegistry` | `0x41e0f9A4dCD29C650dc58Ee569BF267fD9ba4817` | deployed |
+| `MembershipStakeVault` | `0xA93F7f688A8F212E0caD59eDBd1F7D3592151751` | deployed |
+| `InstitutionTreeV1` | `0xac4694986FE8E593A48D3f427E08Ac12Cc463c8F` | deployed |
+| `ComplianceRegistry` | `0xe3635aAE0B03e3c751b9E6375226E35995aD9154` | deployed |
 | `FacilitySBTImpl` | `0x58ac5816c42a3d293552Fe368C4db53b89edB02c` | deployed |
-| `FacilitySBT` | `0xb266e583A30cb47cFF54d9d7429aD55DC68C5e57` | deployed |
+| `FacilitySBT` | `0x47a65E700fdFBb5ccBCd64e0592D2EE58f1a8808` | deployed |
 | `NetworkSBTImpl` | `0x01D34046343a171ec7cd4DB8978adbaB095EF955` | deployed |
-| `NetworkSBT` | `0x823c5031A273a304C5a087a3F414F228907Ad7DB` | deployed |
-| `CitAgentTimelock` | `0xBaC05BC639af6eF107F40fe606f1c4A22b7836A2` | deployed |
-| `OrganizationSBT` | `0xB1Bb65Fc3F2188Ff1209845cBe64eba985461689` | deployed |
-| `AgentSBT` | `0xd16b1ad6e744F3E92223C65F492c35D36ae07c7b` | deployed |
-| `CapsuleRegistry` | `0xb2b1DF947d8064797083CE6024DCe0C64999C79C` | deployed |
-| `CitAgentAnchorRegistry` | `0xB38b0e8b264d828A4e55276033B54800C223De45` | deployed |
-| `BenchmarkRegistry` | `0x84247a5f65370947c792181A3afeD5AC0F452EC8` | deployed |
-| `TenantHierarchy` | `0x7e92a5CbD49659fe594B503b50B26F5BD7060e90` | deployed |
-| `ClassificationRegistry` | `0x37844e433f6E1Df3eBdaa9FdF2cFC44c222f251d` | deployed |
-| `RoleEscalation` | `0xAab258228E85A22C99Cb298915277521eb7049D9` | deployed |
-| `MultiSigEnvelope` | `0x3052Ef8C8d6B71f1fF12703C65b33f29F6627Bbf` | deployed |
-| `AgentDecisionRegistryV2` | `0x678D03b31A77F146b8977E1128c2f57D3e3583F7` | deployed |
-| `ContradictionLedger` | `0xdeB5D07716a20838b1b7287c51bCA00e8d12D20d` | deployed |
-| `QuorumAnchorRegistry` | `0x94Aca73127c7A34d5872A861D0A7C9393030Fa2E` | deployed |
-| `MeetingRegistry` | `0x4B0C7Cf5feF3B6f5A8b042E2E71788450Ec70De4` | deployed |
-| `GovernanceTemplateRegistry` | `0xFF6481c1F532E52aA1EFaaEEF117A29e1F84bC82` | deployed |
-| `GovernanceProtocolFactory` | `0x17c2e4e24e8E041302cBbe8C51A7996949719Df6` | deployed |
-| `PolicyBinding` | `0x2e54Ea789a4EeC4A4e360b9436B04085419a29e9` | deployed |
-| `CapabilityGrant` | `0x1670F43B5eC0cd18088147d4fd7543E51A679d30` | deployed |
-| `VoteAllowance` | `0x2271042A2f4F4783949ee74733A2AbfE0c50018C` | deployed |
-| `Sortition` | `0xB934aE6B6836ad17F2525b6428CcE7A5F7D6F0ec` | deployed |
-| `PartProvenanceRegistry` | `0x60FF23F311E5Cbec702E62aFC99F96F36180347d` | deployed |
-| `SupplierRegistry` | `0x3A40A13EEa4a28Fc3A86E6cc9ab3F4CDF4C85f26` | deployed |
-| `MoqRegistry` | `0x577Fb91D26569820A64bB752d78Da008EF04666d` | deployed |
-| `DefensePrimeFLScopeIndex` | `0x100d4e9Eb591f20Cc39D9A0080F2811ea12CA28E` | deployed |
-| `AppRegistry` | `0xA0C18325Ee5426A26Feff56b3d2F7C6EF8264ad0` | deployed |
-| `CrossOrgIndex` | `0xD62f4A63054e53B1cbE10a1956AA607D65CD2FDd` | deployed |
-| `AuditBundleRegistry` | `0xAc20e8F340c15D990270832650bB76d0805fe473` | deployed |
-| `DefensePrimeComplianceRegistry` | `0xd99dF90C0385ba89be36Bf5FBc42d6bc950920E6` | deployed |
-| `RoleGrantTenantIndex` | `0xC8127F90D5b7B7e88B48Ec7312c2cB5884a3f1D6` | deployed |
-| `EntityRegistry` | `0xE97f4529A0C9e8c81FB32ad72D3a578F92dE4b79` | deployed |
-| `TinaWorkpaperRegistry` | `0xA9E05E9Bd0DDB62CabDcBBe263429a093B21aeC9` | deployed |
-| `CrossOrgEnvelope` | `0x3b2913E078fa859dc10Aa9EA90A6FCF3E1D47480` | deployed |
-| `TripwireRegistry` | `0xaC5e1E599788540a5E97B1258d6bd99c417Ce9eA` | deployed |
-| `SponsorEvidenceRegistry` | `0xc5CA4ae343367995b49570d97759643A289F298D` | deployed |
-| `ReleaseManifestRegistry` | `0x7B955B307c4EbBeA469C40FfeD41AD08a8ECe075` | deployed |
-| `KYCRegistry` | `0x2a45692244dE4A87172061F604b1167D2c7f6C3b` | deployed |
-| `IPFSIncentivesV2` | `0x7747745AA3d78c93993DD1eF6aCD8CC8AFED8aEC` | deployed |
-| `IPFSIncentivesV3` | `0xe016f7655172dCc8039863484F1A8C306553867D` | deployed |
-| `AggregationChallenge` | `0xB5D143dC15dD9C570D198c7156Fe427ccEFc7377` | deployed |
-| `ComputePoolPipeline` | `0xbE60946E62697e99697bdF90b59700D4D76f5E60` | deployed |
+| `NetworkSBT` | `0x82A14fA278055BFf7A50A82Acd00486a091E2C17` | deployed |
+| `TenantHierarchy` | `0xdf841E8C5F57fB18DE127c0223E98cE179C02c0d` | deployed |
+| `ClassificationRegistry` | `0x0084e573Bb22c3D72dc018A4d7bAC669828Ffa53` | deployed |
+| `RoleEscalation` | `0xCCbC5B7E8E3fe9a7C4cD3fe657800c58C42a4D4d` | deployed |
+| `MultiSigEnvelope` | `0xA32d82817c38Cf9baA052a9670050fece06Ddea2` | deployed |
+| `AgentDecisionRegistryV2` | `0x5F82681f959C9F1417bf59A18052CD2FEE9787eD` | deployed |
+| `ContradictionLedger` | `0x026BFbd2b9c7040BA40FD61Bdf893a72Ae8edCDb` | deployed |
+| `QuorumAnchorRegistry` | `0x9b743B49b1f7FEE8896C7BD0D1A8cE49652fe1e3` | deployed |
+| `MeetingRegistry` | `0x9A6Cdc2482730593b9E08D386157E0d41f129d4f` | deployed |
+| `GovernanceTemplateRegistry` | `0xd83eEa8e9C82a5E0ADdDd5b1aF5f646a8fa1489D` | deployed |
+| `GovernanceProtocolFactory` | `0xF6D1bf22317a7C986338d393243A33855eF28fB8` | deployed |
+| `PolicyBinding` | `0xCfCc444e54Ea3C855bDE630f0063D736d8E0ff90` | deployed |
+| `CapabilityGrant` | `0x250Ec3D18D9F0a7d99541A0B9C7Ae51469D7150a` | deployed |
+| `VoteAllowance` | `0x9E47dC72F831E6eb7304C77B3a6b26e41671F6fc` | deployed |
+| `Sortition` | `0xcdef59da0f6364959a79134b9c7421d98bB59bdC` | deployed |
+| `PartProvenanceRegistry` | `0x418D258AC8725C2048Ef3707aD22292387E5a072` | deployed |
+| `SupplierRegistry` | `0x391F6909Bc3DDc5dE73D4aFcaA7eb8800ACd7F0C` | deployed |
+| `MoqRegistry` | `0x58353A3b463Fc7aA1fAD167D793cD1A00126c252` | deployed |
+| `DefensePrimeFLScopeIndex` | `0xdcDf39d46E42BEB0C83f8847733E57Eda472b6F0` | deployed |
+| `AppRegistry` | `0x520AfE4F405B7501FBCCa8d2F13fb29a0946f963` | deployed |
+| `CrossOrgIndex` | `0x899DDb0663477A3Cd2b5D863d1334e73BA82913c` | deployed |
+| `AuditBundleRegistry` | `0xd21f20C8616D173704d0eF50967d1C3e7Ae04542` | deployed |
+| `DefensePrimeComplianceRegistry` | `0x0a320720cB00CEC119260058d1DBAFF3c6AFdE37` | deployed |
+| `RoleGrantTenantIndex` | `0x399193F404EA49a1bFeeB420Ec35A5bE9A2c9955` | deployed |
+| `EntityRegistry` | `0x34098cF54a3a3EB5324B079f83D424F178402f77` | deployed |
+| `TinaWorkpaperRegistry` | `0xfe13A08593fc91EADdeDbD26b4f381fEA0386a9A` | deployed |
+| `CrossOrgEnvelope` | `0x641E2F1AD7a30DeeF51c9596B3c32177d603ab7B` | deployed |
+| `TripwireRegistry` | `0x1aC7a2e53758ECB5eCaA2584eBF0428dC3b57Ba8` | deployed |
+| `SponsorEvidenceRegistry` | `0xE77e584c91196B7f3DE1090FA57ff9cAAe56098E` | deployed |
+| `ReleaseManifestRegistry` | `0x2C36d78F30207431EC641Fcc4D32e01F29c573E3` | deployed |
+| `KYCRegistry` | `0xCBd3e3DF59Ac1A710d1637A5A718ba42d4d63125` | deployed |
+| `IPFSIncentivesV2` | `0xF753903DAB5f891D9593c9c713374A923E80f930` | deployed |
+| `IPFSIncentivesV3` | `0xF5c115E6d88A960CC4f48129524C01004f067135` | deployed |
+| `AggregationChallenge` | `0x115a144495bE3fB4f426352BfB784BAea274603A` | deployed |
+| `ComputePoolPipeline` | `0x9A1A558AaA4a392FA1809F2767A2F5E6cb099551` | deployed |
+| `OrganizationSBT` | `0x423E4552E918A0bBCAe907A4109cc2E497C0FB1e` | deployed |
+| `AgentSBT` | `0x7c95195cfDF1F5D9444E7Cfb8B9C9869d9Fdc559` | deployed |
+| `CapsuleRegistry` | `0x88010Cc0778b9F48FeE167C86918aec8d9Ab46B2` | deployed |
+| `AnchorRegistry` | `0xAB87534EF027B52bb6233E889F758767127Bf47A` | deployed |
+| `BenchmarkRegistry` | `0x1231B7629D7FEBD3Bf24B0ce8788B944B10242c5` | deployed |
+| `SkillRegistry` | `0xbeDaD7a474785eCB27fc0Aa02ca583bdb3761A49` | deployed |
+| `CitAgentTimelock` | `0xC93d648F9D01D6c4D63F20F75E4d3e6910AeeFA4` | deployed |
 
 ## Membership
 
@@ -133,8 +132,8 @@ from the book.
 
 | Contract | Address | Status |
 |---|---|---|
-| `CitrateMemberSBT` | `0xA24aa35fbA269f8755C2173779cc3DBC9690c4C9` | deployed |
-| `MembershipStakeVault` | `0x4C0f8b27c509cBA4A32E1Cd2BC5709bBD2699024` | deployed |
+| `CitrateMemberSBT` | `0xf8aD11f6d3AeFA605e2EBF7C81ED08A2b38B3A3c` | deployed |
+| `MembershipStakeVault` | `0xA93F7f688A8F212E0caD59eDBd1F7D3592151751` | deployed |
 
 ## Account abstraction
 
@@ -148,8 +147,8 @@ together.
 | `CitrateECDSAValidator` | `0xD2d35421379Ae5b461e216BFcdD1B7e6a64BBC40` | deployed |
 | `GuardianRecoveryModule` | `0x0A909769160C1945401b8f37a9310d37DbB6a891` | deployed |
 | `CitrateWallet` | `0x2D742B98D867Fc7363F530DD6d756622e4Eb768D` | deployed |
-| `CitrateWalletFactory` | `0x24e2a41E48Fb3d5A054528bF017ebAeC0aC94EFf` | deployed |
-| `CitratePaymaster` | `0x8E65bff91E4c53556E1Cee8b0135ffb09D427E58` | deployed |
+| `CitrateWalletFactory` | `0x9Ac05AD65C9E8E48Fbb41dDE029512afA5346C85` | deployed |
+| `CitratePaymaster` | `0x804a8021cc1212798180bC9330f6467f883C392c` | deployed |
 
 ## Precompiles
 

@@ -234,7 +234,7 @@ result and pay for it.
 | `0x0101` | MODEL_INFERENCE | ModelRegistry, LoRAFactory, ModelAccessControl | not served to contract code; the call reverts |
 | `0x0106` | MODEL_ENCRYPTION | ModelAccessControl | not served to contract code; the call reverts |
 | `0x0108` | INFERENCE_PROOF_VERIFY | LoRAFactory adapter verification | live where the node build carries the verifier |
-| `0x0112` | LORA_APPLY | library helper `loraApply` | active from genesis (2026-10-05 re-roll) |
+| `0x0112` | LORA_APPLY | library helper `loraApply` | active from genesis of the 2026-10-05 reroll |
 | `0x0113` | LORA_MERGE | library helper `loraMerge` | active from genesis, as above |
 | `0x0121` | MEMORY_ANCHOR_VERIFY | library helpers `memoryAnchorCommitment`, `AnchorProofs.isRecordAnchored` | active from genesis, as above |
 | `0x0122` | AGENT_OPS | library helpers `deviceLinkValid`, `deviceRevocationValid` | active from genesis, as above |
@@ -245,12 +245,15 @@ disputed tile of an aggregate instead of the whole tensor. `0x0121` checks a nig
 inclusion proof and returns the day commitment to look up in `AnchorRegistry`. `0x0122` checks device link
 and revocation signatures. All four are pure byte functions that every node computes identically.
 
-**Activation.** The four agent precompiles go live from a fork height H that a release pin sets per
-network. On 40204 the pin is 0, so from the 2026-10-05 re-roll they are active from genesis. On a network
-whose H is later, below H the addresses behave as they did before the fork: every library call to them
-reverts with `PrecompileUnavailable`, so no contract can mistake a missing precompile for a "valid" or
-"invalid" verdict. The [precompile addresses](/chain/precompile-addresses) page is generated from the chain
-source and reports the activation it pins.
+**Activation.** The four agent precompiles sit behind a per-network activation height. On 40204 that
+height is genesis: the release pins `(40204, Some(0))`, so after the 2026-10-05 reroll they are live from
+the first block and no mid-chain activation is scheduled. The gas schedule is the owner-signed genesis
+schedule. On a network whose height is not reached (or not set) the addresses behave as if absent: every
+library call to them reverts with `PrecompileUnavailable`, so no contract can mistake a missing precompile
+for a "valid" or "invalid" verdict. Nodes on the rerolled 40204 must be built from the release commit that
+carries this pin. The
+[precompile addresses](/chain/precompile-addresses) page is generated from the chain source and reports
+the activation it pins.
 
 The byte layouts, gas formulas, activation rules and test evidence are specified once, in the chain
 repository's
@@ -293,9 +296,10 @@ These contracts move value and gate access, so the sharp edges are worth naming.
   inference paths of ModelAccessControl revert with `PrecompileUnavailable(0x0101)` (or `0x0106`) on every
   40204 node today, and any payment sent with them is returned by the revert. Earlier builds called
   addresses (`0x1000`, `0x1001`) that nothing served; those calls are gone.
-- **Agent precompiles before H.** Code that uses `0x0112`, `0x0113`, `0x0121` or `0x0122` through the
-  library reverts until the fork height is reached on that network. Handle the revert; do not catch it and
-  treat it as a negative answer.
+- **Agent precompiles where they are not active.** On 40204 after the 2026-10-05 reroll these are live
+  from genesis. On any other network, code that uses `0x0112`, `0x0113`, `0x0121` or `0x0122` through the
+  library reverts until that network's activation height is reached. Handle the revert; do not catch it
+  and treat it as a negative answer.
 - **Inert and placeholder surfaces.** `setRegistrationFee` on the registry always reverts by design.
   On ModelAccessControl, `getModelStats` reports a placeholder zero for unique users and
   `updatePrecompileAddress` does nothing.
