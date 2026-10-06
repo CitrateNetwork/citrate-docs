@@ -3,9 +3,9 @@ Note: The endpoints below are historical testnet references (the public RPC is h
 Citrate v0.3.0-rc.1 — Testnet Live
 Live Infrastructure
 Service	URL
-RPC (POST)	https://spark-2e01.tailcbe2ba.ts.net
-Block Explorer (GET)	https://spark-2e01.tailcbe2ba.ts.net
-Web Faucet	https://spark-2e01.tailcbe2ba.ts.net/faucet
+RPC (POST)	https://rpc.citrate.ai
+Block Explorer (GET)	https://explorer.citrate.ai
+Web Faucet	https://faucet.citrate.ai
 Chain ID: 40204 | Token: SALT | Block Time: ~2s
 
 What's New (since v0.3.0-beta)
@@ -50,16 +50,16 @@ tar xzf citrate-linux-aarch64.tar.gz && chmod +x citrate
 sudo dpkg -i Citrate_0.1.0_arm64.deb
 
 # Connect to testnet RPC
-curl -X POST https://spark-2e01.tailcbe2ba.ts.net \
+curl -X POST https://rpc.citrate.ai \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 
 # Get test SALT from faucet
-# Visit: https://spark-2e01.tailcbe2ba.ts.net/faucet
+# Visit: https://faucet.citrate.ai
 MetaMask Configuration
 Network Name: Citrate Testnet
-RPC URL: https://spark-2e01.tailcbe2ba.ts.net
+RPC URL: https://rpc.citrate.ai
 Chain ID: 40204
 Currency Symbol: SALT
-Explorer: https://spark-2e01.tailcbe2ba.ts.net
+Explorer: https://explorer.citrate.ai
 Test Suite: 3,146+ tests passing (2,484 Rust + 596 GUI + 66 Forge)
