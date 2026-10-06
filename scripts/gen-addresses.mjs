@@ -7,16 +7,31 @@
 // used and this script keeps it rather than blanking it.
 //
 // Regenerate after every re-roll / address fan-out:  npm run docs:addresses
+//   --chain <dir>  read another citrate-chain checkout (default ../citrate-chain)
+//   --check        regenerate in memory and fail on drift from the committed page (CI tripwire)
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
+import { parseGenArgs, writeOrCheck } from "./lib/gen-cli.mjs";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
-const BOOK = path.resolve(ROOT, "..", "citrate-chain", "contracts", "addresses", "40204.json");
+let args;
+try {
+  args = parseGenArgs(process.argv.slice(2), ROOT);
+} catch (e) {
+  console.error(`[gen-addresses] ${e.message}`);
+  process.exit(2);
+}
+const { chainDir, check } = args;
+const BOOK = path.join(chainDir, "contracts", "addresses", "40204.json");
 const OUT_DIR = path.join(ROOT, "content", "chain", "_generated");
 const OUT = path.join(OUT_DIR, "addresses.md");
 
 if (!fs.existsSync(BOOK)) {
+  if (check) {
+    console.error(`[gen-addresses] --check needs a citrate-chain checkout; no address book under ${chainDir}.`);
+    process.exit(1);
+  }
   console.log("[gen-addresses] sibling citrate-chain not present; keeping the committed addresses.md.");
   process.exit(0);
 }
@@ -26,7 +41,7 @@ const book = JSON.parse(fs.readFileSync(BOOK, "utf8"));
 // Mark every entry that has no code on chain. The snapshot is written by
 // citrate-chain/verification/check_address_code.py --probe (read-only eth_getCode) and is
 // validated against claims.json in citrate-chain CI. Refuse to publish a stale snapshot.
-const SNAP = path.resolve(ROOT, "..", "citrate-chain", "verification", "address-code.snapshot.json");
+const SNAP = path.join(chainDir, "verification", "address-code.snapshot.json");
 if (!fs.existsSync(SNAP)) {
   console.error("[gen-addresses] missing citrate-chain/verification/address-code.snapshot.json; run check_address_code.py --probe first.");
   process.exit(1);
@@ -40,9 +55,9 @@ const codeless = new Set(snap.codeless || []);
 
 let sha = "unknown";
 try {
-  sha = execSync("git -C ../citrate-chain log -1 --format=%h -- contracts/addresses/40204.json", {
-    cwd: ROOT,
-  }).toString().trim() || "unknown";
+  // Full hash cut to 8 so the value does not depend on git's auto-abbreviation (local vs CI clone).
+  sha = execFileSync("git", ["-C", chainDir, "log", "-1", "--format=%H", "--", "contracts/addresses/40204.json"], { stdio: ["ignore", "pipe", "ignore"] })
+    .toString().trim().slice(0, 8) || "unknown";
 } catch {
   /* leave unknown */
 }
@@ -113,13 +128,15 @@ together.
 ${table(book.aaStack || {}, "aaStack")}
 ## Precompiles
 
-Precompiles are fixed genesis addresses and do not move across re-rolls.
+Precompiles are fixed genesis addresses and do not move across re-rolls. This table is the book's own
+\`precompiles\` block; the full set, including the agent precompiles and which addresses contract code can
+reach, is generated from the chain source on [precompile addresses](/chain/precompile-addresses).
 
 ${table(book.precompiles || {}, "precompiles", true)}
 `;
 
-fs.mkdirSync(OUT_DIR, { recursive: true });
-fs.writeFileSync(OUT, md);
+const code = writeOrCheck({ outPath: OUT, content: md, check, tag: "gen-addresses", root: ROOT });
+if (check || code !== 0) process.exit(code);
 const n =
   Object.keys(book.contracts || {}).length +
   Object.keys(book.aaStack || {}).length +

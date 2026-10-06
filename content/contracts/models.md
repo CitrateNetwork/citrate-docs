@@ -251,7 +251,9 @@ the first block and no mid-chain activation is scheduled. The gas schedule is th
 schedule. On a network whose height is not reached (or not set) the addresses behave as if absent: every
 library call to them reverts with `PrecompileUnavailable`, so no contract can mistake a missing precompile
 for a "valid" or "invalid" verdict. Nodes on the rerolled 40204 must be built from the release commit that
-carries this pin.
+carries this pin. The
+[precompile addresses](/chain/precompile-addresses) page is generated from the chain source and reports
+the activation it pins.
 
 The byte layouts, gas formulas, activation rules and test evidence are specified once, in the chain
 repository's

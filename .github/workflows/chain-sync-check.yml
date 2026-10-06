@@ -1,0 +1,55 @@
+name: chain-sync-check
+
+# Tripwire: the contract-address page and the precompile address page are generated from citrate-chain
+# (contracts/addresses/40204.json, verification/address-code.snapshot.json,
+# core/execution/src/precompiles/mod.rs, core/execution/src/agent_fork.rs). This job checks out the chain at
+# CHAIN_REF and regenerates both pages in memory; it fails when either committed page has drifted from the
+# chain, or when the chain and the docs-owned precompile description map disagree.
+#
+# CHAIN_REF: the workflow_dispatch input, else the repo variable CITRATE_CHAIN_REF, else `main`. After a
+# re-roll, set CITRATE_CHAIN_REF to the genesis commit until it is on chain main. To fix a failure, run the
+# sync in README.md ("Chain-generated pages").
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      chain_ref:
+        description: "citrate-chain ref to check against (branch, tag or commit)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  # Named `chain-sync`, not `check`: merge-gate's `ci` aggregate groups check runs by name and judges
+  # only the latest run per name, so sharing `check` with the content-lint job let a pass there mask
+  # a drift failure here (or the reverse), depending on which finished last.
+  chain-sync:
+    name: chain-sync
+    runs-on: ubuntu-latest
+    env:
+      CHAIN_REF: ${{ inputs.chain_ref || vars.CITRATE_CHAIN_REF || 'main' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check out citrate-chain
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: CitrateNetwork/citrate-chain
+          ref: ${{ env.CHAIN_REF }}
+          path: .chain-src
+          # Full history: the pages cite the last commit that touched each input.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Contract addresses (gen-addresses --check)
+        run: node scripts/gen-addresses.mjs --chain .chain-src --check
+      - name: Precompile addresses (gen-precompiles --check)
+        if: success() || failure()
+        run: node scripts/gen-precompiles.mjs --chain .chain-src --check

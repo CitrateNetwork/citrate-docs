@@ -13,7 +13,8 @@ author: Citrate team
 ---
 
 The Citrate Network keeps the nine standard Ethereum precompiles and adds its own at higher addresses:
-deterministic tensor primitives, x402 payment verification, and Belnap-q16 lattice aggregation. This page
+deterministic tensor primitives, x402 payment verification, Belnap-q16 lattice aggregation, and the agent
+precompiles for LoRA math, memory anchors and device links. This page
 is the reference for the address pages and for the tensor, x402, and q16 surfaces, with each item cited to its
 code path. It is for contract authors.
 
@@ -27,10 +28,22 @@ to `0x09`, ECRECOVER through BLAKE2F, and adds several address pages above them,
 | Page | Range | Purpose |
 |---|---|---|
 | AI, verification, compute | `0x0100` to `0x010F` | inference runtime, proof verification, deterministic Q16 compute |
-| Learning | `0x0110` to `0x011F` | Belnap-q16 aggregation, routing inference |
-| Signature verification | `0x0120` to `0x012F` | Ed25519 signature verification |
+| Learning | `0x0110` to `0x011F` | Belnap-q16 aggregation, routing inference, LoRA apply and merge (agent) |
+| Signature verification | `0x0120` to `0x012F` | Ed25519 signature verification, memory-anchor and device-link checks (agent) |
 | Recursive-fold verification | `0x0130` to `0x013F` | CommD proof verification (feature-gated) |
 | x402 payments | `0x0200` to `0x0209` | EIP-712 and EIP-3009 payment verification |
+
+The exact address of every Citrate precompile, its padded 20-byte form, whether contract code can reach it,
+and when it activates on 40204 are generated from the chain source on
+[precompile addresses](/chain/precompile-addresses). That page is the address list; this one does not keep
+its own.
+
+The four agent precompiles, `0x0112 LORA_APPLY`, `0x0113 LORA_MERGE`, `0x0121 MEMORY_ANCHOR_VERIFY` and
+`0x0122 AGENT_OPS`, are active from genesis on 40204 from the 2026-10-05 re-roll: the release pin in
+`core/execution/src/agent_fork.rs` sets their fork height to 0. They are pure byte functions like the rest of
+this page; their byte layouts and gas are specified once in the chain repository's
+[agent precompile specification](https://github.com/CitrateNetwork/citrate-chain/blob/main/docs/precompiles/AGENT_PRECOMPILES.md),
+and [model contracts](/contracts/models) covers the library helpers that call them.
 
 `is_precompile()` recognizes an address by matching its leading zero bytes plus the page bytes, and
 `execute()` dispatches by the same prefix. This page documents the tensor, x402, and q16 surfaces. The
@@ -151,11 +164,14 @@ inference, proof-verification, and attestation internals, are not on this page; 
 ## Source and verification
 
 - Source repo: `citrate-chain`
-- Source files: `core/execution/src/precompiles/mod.rs`,
+- Source files: `core/execution/src/precompiles/mod.rs`, `core/execution/src/agent_fork.rs`,
   `core/execution/src/precompiles/{x402.rs,tensor_format.rs}`,
   `core/execution/src/precompiles/q16/{mod.rs,belnap.rs}`, `core/execution/src/precompiles/compute.rs`,
   `core/execution/src/tensor/`, `core/learning/src/belnap.rs`
 - Audited against SHA: `9d5959e`
 - Status: Implemented (pre-audit). The tensor format, the `0x010A` to `0x010F` Q16 compute primitives, and
   the x402 and q16 precompiles run on testnet 40204. `0x0111 ROUTING_INFERENCE` is wired in the dispatcher
-  but is future work (RM-FL-2), and the `0x0130` recursive-fold CommD verifier is feature-gated.
+  but is future work (RM-FL-2), and the `0x0130` recursive-fold CommD verifier is feature-gated. The agent
+  precompiles `0x0112`, `0x0113`, `0x0121` and `0x0122` are active from genesis on 40204 from the 2026-10-05
+  re-roll; the [precompile addresses](/chain/precompile-addresses) page reports the activation the chain
+  source pins.
