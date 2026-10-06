@@ -73,6 +73,9 @@ family verifies claims; the inference family runs and registers models.
 | `0x0109` | `MERKLE_VERIFY_TENSOR` | Merkle inclusion check over a committed tensor; returns a 32-byte boolean |
 | `0x0100` to `0x0106` | hosted inference family | Model deployment, single and batch inference, metadata, benchmarking, model encryption; returns a signed, attestation-gated receipt, not a proof of correctness |
 
+The full address list, with padded addresses and whether contract code can reach each one, is generated
+from the chain source on [precompile addresses](/chain/precompile-addresses).
+
 The verification family at `0x0107` to `0x0109` is deterministic by construction, hash and pairing and
 integer math only, and its byte-level output is frozen: any drift would fork the chain and invalidate every
 prior commitment. The compute family at `0x010A` to `0x010F`, six Q16.16 tensor primitives (matmul, dot,
