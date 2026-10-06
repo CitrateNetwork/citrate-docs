@@ -19,6 +19,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
@@ -31,7 +32,7 @@ async function loadViewers() {
   v = v.replace(/^import\s+\{[^}]*\}\s+from\s+["']\.\/types["'];?\s*$/m,
     'import { TIER_RANK, normalizeTier } from "./types.ts";');
   fs.writeFileSync(path.join(tmp, "viewers.ts"), v);
-  return import(path.join(tmp, "viewers.ts"));
+  return import(pathToFileURL(path.join(tmp, "viewers.ts")).href);
 }
 
 const { canRead, resolveTier, FIXED_NOW } = await loadViewers();
