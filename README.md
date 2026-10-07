@@ -104,6 +104,32 @@ Copy `.env.example` → `.env.local`. Key variables (full annotated list in `.en
 `.env.example` documents the fail-closed defaults for auth, the MCP key hashing, and the
 optional live knowledge-graph (`MEM_*`) wiring.
 
+## Chain-generated pages
+Two pages are generated from a `citrate-chain` checkout and committed (Vercel builds without the chain):
+
+| Page | Generator | Chain inputs |
+|------|-----------|--------------|
+| `content/chain/_generated/addresses.md` (`/chain/addresses`) | `npm run docs:addresses` | `contracts/addresses/40204.json`, `verification/address-code.snapshot.json` |
+| `content/chain/_generated/precompiles.md` (`/chain/precompile-addresses`) | `npm run docs:precompiles` | `core/execution/src/precompiles/mod.rs`, `core/execution/src/agent_fork.rs`, the book's `precompiles` block |
+
+The only hand-written precompile input is the description map in `scripts/lib/precompile-descriptions.mjs`.
+The generator fails if the chain or the book has a precompile the map lacks, or the other way round.
+Both generators take `--chain <dir>` (default `../citrate-chain`) and `--check` (fail on drift, write
+nothing). The `chain-sync-check` workflow runs both checks against `CitrateNetwork/citrate-chain` at the
+repo variable `CITRATE_CHAIN_REF` (default `main`), on every PR and daily.
+
+Post-reroll sync, once the new `40204.json`, its getCode snapshot (chain side:
+`verification/check_address_code.py --probe`) and the genesis commit are in the chain checkout:
+
+```bash
+git -C ../citrate-chain fetch origin && git -C ../citrate-chain checkout <genesis-commit-or-main>
+npm run docs:addresses -- --chain ../citrate-chain
+npm run docs:precompiles -- --chain ../citrate-chain
+npm run content                                   # rebuild content/_generated/content.ts
+npm run docs:chain-check                          # both --check gates, expect green
+git add content/chain/_generated/addresses.md content/chain/_generated/precompiles.md content/_generated/content.ts
+```
+
 ## Links
 - Docs: <https://docs.citrate.ai>
 - Depends on: [citrate-identity](https://github.com/CitrateNetwork/citrate-identity) · [citrate-inference-gateway](https://github.com/CitrateNetwork/citrate-inference-gateway) · [citrate-chain](https://github.com/CitrateNetwork/citrate-chain)

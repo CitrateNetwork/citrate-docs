@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: transcluded
 source: citrate-chain/contracts/addresses/40204.json
 surfaces: [CHAIN-addresses]
-audited_against_sha: fefe81e
+audited_against_sha: 2979a157
 book_deployed_at: 2026-10-06T05:43:04Z
 status: Implemented
 created: 2026-09-07T00:00:00Z
@@ -17,7 +17,7 @@ nav_order: 5
 This is the canonical list of contract addresses on chain 40204 (Citrate Network). It is generated
 from the federation address book (`citrate-chain/contracts/addresses/40204.json`), the single source of truth
 every application reads from, and is regenerated after each re-roll or address fan-out. As of the book at
-commit `fefe81e`, deployed 2026-10-06 05:43:04UTC.
+commit `2979a157`, deployed 2026-10-06 05:43:04UTC.
 
 Not every entry in the book is deployed. At block 750 (2026-10-06T05:45:23Z), 98 of the 98
 application and account-abstraction entries have code on chain; rows marked **not deployed** have none. A call to a
@@ -152,7 +152,9 @@ together.
 
 ## Precompiles
 
-Precompiles are fixed genesis addresses and do not move across re-rolls.
+Precompiles are fixed genesis addresses and do not move across re-rolls. This table is the book's own
+`precompiles` block; the full set, including the agent precompiles and which addresses contract code can
+reach, is generated from the chain source on [precompile addresses](/chain/precompile-addresses).
 
 | Contract | Address | Status |
 |---|---|---|

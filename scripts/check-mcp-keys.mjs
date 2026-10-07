@@ -19,6 +19,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createHash, createHmac } from "node:crypto";
+import { pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const sha256Hex = (s) => createHash("sha256").update(s).digest("hex");
@@ -67,7 +68,7 @@ async function loadResolver() {
     'import { normalizeTier } from "./types.ts";');
   fs.copyFileSync(path.join(ROOT, "lib/auth/mcp-pepper.mjs"), path.join(tmp, "mcp-pepper.mjs"));
   fs.writeFileSync(path.join(tmp, "mcp-keys.ts"), m);
-  return import(path.join(tmp, "mcp-keys.ts"));
+  return import(pathToFileURL(path.join(tmp, "mcp-keys.ts")).href);
 }
 const { resolveMcpKeyCap } = await loadResolver();
 const now = Date.now();
@@ -81,7 +82,7 @@ console.log('[check:mcp-keys] ✓ with no MCP_API_KEYS store, every key (incl. t
 
 // ── Guard 2b: an HMAC-keyed store entry grants its tier; expiry is honoured; unknown tier never escalates;
 //    unminted formats, a missing pepper and a bare-SHA-256 (pre-R2) store never resolve. ──
-const { mintMcpKey } = await import(path.join(ROOT, "scripts/mint-mcp-key.mjs"));
+const { mintMcpKey } = await import(pathToFileURL(path.join(ROOT, "scripts/mint-mcp-key.mjs")).href);
 const pepper = "test-only-pepper-0123456789-abcdefghij"; // test-only, >= 8 distinct chars
 const good = mintMcpKey({ pepper, tier: "academic", sub: "org:academic_partner", expiresAt: now + 30 * 86_400_000 });
 const expired = mintMcpKey({ pepper, tier: "academic", sub: "org:stale", expiresAt: now - 1 });

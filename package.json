@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "private": true,
   "description": "Citrate Atlas, the gated, agentic documentation webapp for the Citrate Network federation.",
+  "//": "Post-reroll sync (README.md, Chain-generated pages): npm run docs:addresses -- --chain ../citrate-chain && npm run docs:precompiles -- --chain ../citrate-chain && npm run content",
   "scripts": {
     "content": "node scripts/build-content.mjs",
     "predev": "node scripts/gen-changelog.mjs && node scripts/build-content.mjs",
@@ -24,6 +25,8 @@
     "sbom": "npm sbom --sbom-format cyclonedx --omit dev > sbom.cyclonedx.json",
     "docs:api": "node scripts/gen-api-refs.mjs",
     "docs:addresses": "node scripts/gen-addresses.mjs",
+    "docs:precompiles": "node scripts/gen-precompiles.mjs",
+    "docs:chain-check": "node scripts/gen-addresses.mjs --check && node scripts/gen-precompiles.mjs --check",
     "docs:changelog": "node scripts/gen-changelog.mjs",
     "docs:freshness": "node scripts/gen-freshness.mjs"
   },
@@ -51,6 +54,7 @@
   },
   "overrides": {
     "source-map-js": ">=1.2.2",
-    "sharp": ">=0.35.5"
+    "sharp": ">=0.35.5",
+    "katex": "^0.18.11"
   }
 }

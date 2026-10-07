@@ -5,6 +5,8 @@
  * changelog now selects repos with the SAME policy: only repos that resolve to
  * "public" for the chat are recalled onto the public page.
  */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, it, expect } from "vitest";
 import { resolveRepoTiers, repoTierFrom } from "@/lib/ai/memory";
 // @ts-expect-error -- plain ESM helper shared with scripts/gen-changelog.mjs
@@ -13,6 +15,22 @@ import { changelogRepos } from "@/scripts/lib/changelog-repos.mjs";
 const CANDIDATES = ["citrate-chain", "citrate-core", "citrate-inference-gateway", "citrate-identity", "citrate-docs", "citrate-sdk-js", "citrate-security"];
 
 describe("changelog repo selection matches the chat tier policy", () => {
+  it("decodes file URLs without losing Windows drive paths", () => {
+    const fileUrl = new URL("file:///C:/repo/Github%20Federated/citrate-docs/scripts/gen-changelog.mjs");
+    const filePath = fileURLToPath(fileUrl);
+
+    expect(filePath).not.toContain("%20");
+    if (process.platform === "win32") {
+      expect(filePath).toBe("C:\\repo\\Github Federated\\citrate-docs\\scripts\\gen-changelog.mjs");
+    } else {
+      expect(filePath).toBe("/C:/repo/Github Federated/citrate-docs/scripts/gen-changelog.mjs");
+    }
+
+    const generator = readFileSync(fileURLToPath(new URL("../scripts/gen-changelog.mjs", import.meta.url)), "utf8");
+    expect(generator).toContain("fileURLToPath(import.meta.url)");
+    expect(generator).not.toContain("new URL(import.meta.url).pathname");
+  });
+
   it("with default config no federation repo is public, so none is recalled", () => {
     expect(changelogRepos({})).toEqual([]);
   });

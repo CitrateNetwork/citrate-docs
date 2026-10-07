@@ -31,6 +31,9 @@ in the `citrate-chain` repository (Apache-2.0); this page summarizes and links t
 | Deterministic Q16.16 compute | `0x010A` to `0x010F` | Fixed-point tensor primitives (matmul, dot, softmax, relu, linear, transpose); bit-identical across nodes. |
 | Attestation gate | consulted by `0x0101` and `0x0102` | Decides whether a non-deterministic inference path may run, based on hardware attestation. |
 
+The exact address of each precompile, with padded addresses and whether contract code can reach each one, is generated
+from the chain source on [precompile addresses](/chain/precompile-addresses).
+
 The cryptography underneath rests on three publicly nameable building blocks: Q16.16 fixed-point math for
 determinism, Halo2-KZG proof verification, and TEE attestation. Poseidon over BN254
 (`zkp/poseidon_bn254.rs`) is the commitment hash. The proving-system internals and circuit design are public
