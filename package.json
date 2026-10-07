@@ -53,6 +53,8 @@
     "vitest": "^4.1.11"
   },
   "overrides": {
+    "source-map-js": ">=1.2.2",
+    "sharp": ">=0.35.5",
     "katex": "^0.18.11"
   }
 }
