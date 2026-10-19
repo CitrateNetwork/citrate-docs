@@ -14,8 +14,8 @@ author: Citrate team
 
 Citrate is open-core, and the code is public today at
 [github.com/CitrateNetwork](https://github.com/CitrateNetwork). The chain and its application layer are
-already open - you can read the source, build against it, and reproduce the results now, ahead of the Q2
-2027 mainnet. There is no waiting list and no gate on reading the code.
+already open - you can read the source, build against it, and reproduce the results now, ahead of mainnet,
+targeted for February 2027. There is no waiting list and no gate on reading the code.
 
 ## How the licensing works
 
