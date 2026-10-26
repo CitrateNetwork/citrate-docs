@@ -88,6 +88,8 @@ error `InvalidFeeAuthorization` reverts a fee transfer whose signature does not 
 
 ### LiquidStakingPool
 
+> Not deployed on the current testnet: LiquidStakingPool was retired at the r1006 reroll. This section describes the source, which stays in citrate-chain.
+
 `contracts/src/LiquidStakingPool.sol`, `is ReentrancyGuard, Governable`. A shares-based staking pool,
 `name="Staked SALT"`, `symbol="stSALT"`, `decimals=18`. You deposit SALT and receive stSALT shares; rewards
 reported to the pool raise the value each share is worth, so the staked SALT stays usable as a share token

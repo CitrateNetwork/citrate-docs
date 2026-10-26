@@ -49,7 +49,7 @@ The runnable steps, with the exact JSON-RPC calls, are in [read the DAG](/chain/
 
 Confirmation on the testnet is probabilistic: a block gains weight as later blocks build on it. Checkpoint finality is specified, not running. The node constructs `CheckpointManager`, but no production code path calls `propose()` yet. `FinalityTracker` and `ChainSelector::with_finality` are exercised by tests only. The RPC does not serve the `finalized` block tag.
 
-The public testnet runs a single block producer operated by Citrate. Stake-gated proposer eligibility is staged: it is off by default and turns on when a validator registry is configured (`CITRATE_VALIDATOR_REGISTRY`). The one-hundred-member committee with a quorum of sixty-seven, described below, is the target design, not the current state.
+The public testnet (r1006) runs seven block producers on separate hosts, all operated by Citrate Inc. That is one operator, not the independent operators the betanet targets. Stake-gated proposer eligibility is staged: it is off by default and turns on when a validator registry is configured (`CITRATE_VALIDATOR_REGISTRY`). The one-hundred-member committee with a quorum of sixty-seven, described below, is the target design, not the current state.
 
 If you credit deposits or settle payments against Citrate testnet blocks, choose your own confirmation depth and treat it as a risk decision, not a protocol guarantee. The machine-readable record of these facts is `verification/claims.json` in citrate-chain (`deterministic_checkpoint_finality`, `consensus_ghostdag`).
 
