@@ -1,4 +1,4 @@
-Note: The endpoints below are historical testnet references (the public RPC is https://rpc.citrate.ai); verify current URLs before use. The contract table was refreshed for the r1005 reroll.
+Note: The endpoints below are historical testnet references (the public RPC is https://rpc.citrate.ai); verify current URLs before use. The contract table moved to /chain/addresses.
 
 Citrate v0.3.0-rc.1 — Testnet Live
 Live Infrastructure
@@ -29,13 +29,7 @@ Complete commit history (277 commits)
 Agentile framework with 217 governance files
 18/18 crate READMEs
 Deployed Contracts (Chain 40204)
-These five addresses are from the r1005 reroll (2026-10-06, genesis block 0x1dcfc4909dd9fdcb…). The canonical, complete table is /chain/addresses (citrate-chain contracts/addresses/40204.json). Addresses change on every reroll.
-Contract	Address
-ModelRegistry	0x086F13745C53b460512eA2A0367EcdB62A2875eF
-WrappedSALT	0xAa918302B94a4B0E75E01e019cc6b819B4F7c906
-X402Facilitator	0x0D36F6e2a186436f4E4Cc78Bbc7DA2a1aC37aadb
-ModelMarketplace	0x6A93B6e99BfaBfb4e655c6fC15DB4d98192D040f
-InferenceRouter	0x42Ae16Dae5D7Bf535b5cce9d5b6521c504500896
+Contract addresses change on every reroll, so this page no longer lists them. Read the current table at /chain/addresses (citrate-chain contracts/addresses/40204.json).
 Downloads
 File	Platform	Size
 citrate-linux-aarch64.tar.gz	CLI node (Linux ARM64)	11 MB

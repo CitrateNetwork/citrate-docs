@@ -67,7 +67,7 @@ cast call <WrappedSALT-address> "decimals()(uint8)"  --rpc-url $RPC   # 18
 
 ### Step 4, read a value that is computed live
 
-`LiquidStakingPool.getSharePrice()` returns SALT per staked-SALT share, scaled by 1e18, and returns exactly 1e18 when the pool is empty. It takes no arguments and reads live state.
+LiquidStakingPool is not deployed on the current testnet (it was retired at the r1006 reroll), so run this step against a local deployment of `contracts/src/LiquidStakingPool.sol`, or skip it. `LiquidStakingPool.getSharePrice()` returns SALT per staked-SALT share, scaled by 1e18, and returns exactly 1e18 when the pool is empty. It takes no arguments and reads live state.
 
 ```bash
 cast call <LiquidStakingPool-address> "getSharePrice()(uint256)" --rpc-url $RPC
