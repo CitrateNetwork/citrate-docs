@@ -10,6 +10,7 @@ audited_against_sha: 0e63363
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Citrate Node is the daemon an operator runs to sell compute on Citrate Market from their own hardware.

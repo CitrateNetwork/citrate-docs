@@ -9,6 +9,7 @@ audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 This is the operator's runbook for running a Citrate Node, the daemon that joins the Citrate Network and
@@ -25,7 +26,8 @@ libp2p. The node software is the same whether you run a local instance or join t
 
 The node binds its RPC surface to loopback by default, so the read and write surface is something you expose
 deliberately behind your own reverse proxy, not by accident. The settlement and reward side of operating,
-how a node earns SALT for the work it performs, is covered in [rewards](/operators/rewards); selling that
+how the current testnet code credits a node SALT for the work it performs, is covered in
+[rewards](/operators/rewards); selling that
 capacity into the marketplace is covered in [sell compute](/operators/sell-compute).
 
 Network parameters, verified against the chain README at SHA `9d5959e`:
@@ -33,7 +35,7 @@ Network parameters, verified against the chain README at SHA `9d5959e`:
 | Parameter | Value |
 |---|---|
 | Chain id | 40204 (testnet beta) |
-| Token | SALT, one trillion supply, 18 decimals |
+| Token | SALT, 18 decimals; one trillion supply cap in the current testnet code ([not yet determined](/start/tokenomics) for mainnet) |
 | Consensus | GhostDAG, k = 18, max-parents 10 |
 | Block production | a single block producer operated by Citrate today; ECVRF-P256-SHA256 (RFC 9381) proofs are checked; stake-gated eligibility is staged and off by default |
 | Finality | probabilistic confirmation, about 2 s per block; checkpoint finality is specified, not running (target design: a 100-member committee, 67 quorum, 50-block interval) |

@@ -11,6 +11,7 @@ status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
 nav_order: 5
+tokenomics_notice: true
 ---
 
 Citrate Core is built so that the sensitive parts, your keys and your signatures, have exactly one path

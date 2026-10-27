@@ -10,6 +10,7 @@ audited_against_sha: 5cc1f39
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The TypeScript client for Citrate Market. It reads marketplace state, pays per inference request over the

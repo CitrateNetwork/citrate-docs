@@ -10,6 +10,7 @@ audited_against_sha: 0e63363
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 A walkthrough from a fresh checkout to a live seller on Citrate Market, chain id 40204. You will complete membership verification, build and configure Citrate Node, register as a provider on the marketplace contract,

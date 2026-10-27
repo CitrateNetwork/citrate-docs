@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Everything you can learn from a Citrate contract without sending a transaction: calling view functions, decoding what they return, and reading the events a contract has emitted. No account, no gas, no signature. About ten minutes.
