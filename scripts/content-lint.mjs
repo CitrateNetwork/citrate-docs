@@ -49,6 +49,7 @@ const ALLOW = [
   /web crypto api/gi, /web crypto/gi,         // the W3C Web Crypto API
   /web3 secret storage(?: v3)?/gi, /web3 v3 keystore/gi, // the geth/MetaMask keystore standard
   /crypto-shred(?:ding|ded)?/gi,              // cryptographic erasure
+  /tokenomics are not yet determined/gi,      // owner-mandated status sentence (2026-10-27), /start/tokenomics
 ];
 
 // Prose = the body with code fences, inline code, YAML frontmatter, markdown link URLs (route slugs live

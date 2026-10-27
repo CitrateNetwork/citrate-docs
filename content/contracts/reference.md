@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The contracts that run on the Citrate Network, where to find their addresses, where to get their ABIs, and how to confirm an address is real before you call it. This page is for anyone integrating against the on-chain surface.

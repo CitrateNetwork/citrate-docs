@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The JSON-RPC interface a Citrate Node serves over HTTP and WebSocket. It speaks the Ethereum-compatible

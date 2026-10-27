@@ -10,6 +10,7 @@ audited_against_sha: 603fe92
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Citrate Inference Gateway is an OpenAI-compatible HTTP service in front of Citrate Market on the

@@ -10,6 +10,7 @@ audited_against_sha: e1aa264
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Citrate Bundler is the ERC-4337 service that accepts UserOperations for Citrate Keyring accounts on

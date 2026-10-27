@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Read a deployed contract's state on the Citrate Network without sending a transaction. You will confirm the contract exists with `eth_getCode`, then call a view function with `eth_call`, first by encoding the selector yourself and then with tooling that does it for you. Read-only, no account, no gas, about ten minutes.

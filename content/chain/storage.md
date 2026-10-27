@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Storage is where Citrate Network keeps what it has agreed on: the BlockDAG, account and AI state, and large model artifacts. This page gives developers and operators the mental model first, then the audited surface. It is the soil under the orchard; everything else grows on it.

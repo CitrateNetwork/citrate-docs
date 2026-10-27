@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The governance surface is four contracts that decide how the network spends its treasury, how it settles a

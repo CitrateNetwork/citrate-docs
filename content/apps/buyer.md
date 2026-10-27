@@ -10,6 +10,7 @@ audited_against_sha: 7d44b29
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The buyer side of Citrate Market, where you find a model provider, post a job, and pay for each

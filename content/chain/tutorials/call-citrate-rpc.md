@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 A short, copy-paste walkthrough of the JSON-RPC surface. You will confirm you are on Citrate, read the
@@ -99,7 +100,9 @@ rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-SALT has 18 decimals and a one-trillion cap. It is the unit fees and rewards are counted in, not a product. For
+SALT has 18 decimals, and the current testnet code caps supply at one trillion; the
+[tokenomics are not yet determined](/start/tokenomics). It is the unit fees and rewards are counted in, not a
+product. For
 the live economic snapshot, blocks height, gas price, staked amount, and treasury, call
 `citrate_getEconomicState`:
 

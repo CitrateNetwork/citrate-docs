@@ -10,6 +10,7 @@ audited_against_sha: cd729ed
 status: Specified
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Gradient Papers are the research corpus the Citrate Network grew from, an eleven-part working
