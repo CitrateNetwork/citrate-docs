@@ -13,6 +13,7 @@ import { Icon } from "./icons";
 import { findNavBySlug } from "@/lib/nav-util";
 import { cn } from "@/lib/cn";
 import { FreshnessBadge } from "./freshness-badge";
+import { TokenomicsNotice } from "./tokenomics-notice";
 
 /** The tier-aware document reader — renders every DocResponse state (DESIGN_BRIEF §7, §15). */
 export function DocView({ slug }: { slug: string }) {
@@ -146,6 +147,7 @@ export function DocView({ slug }: { slug: string }) {
           )}
         </div>
       </header>
+      {doc.tokenomicsNotice && <TokenomicsNotice />}
       {doc.body != null
         ? <Markdown source={doc.body} />
         : doc.sourceKind === "gated" || doc.tier !== "public"
