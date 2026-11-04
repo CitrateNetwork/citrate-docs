@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 This is the standing procedure for selling compute on Citrate Market with Citrate Node, end to end, on
 chain id 40204. It is written for operators who run their own hardware and want idle
 GPU hours to earn while the machine is otherwise unsupervised.

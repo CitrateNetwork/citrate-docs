@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 Citrate Node is the daemon an operator runs to sell compute on Citrate Market from their own hardware.
 It reads a small settings file, watches the market over JSON-RPC, decides which jobs to bid on, proves
 liveness with a heartbeat, and drives a won job to payout. It holds no keys: every write it wants made is

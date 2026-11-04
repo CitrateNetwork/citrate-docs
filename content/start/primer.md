@@ -60,10 +60,7 @@ guardians. The account is a contract, the key is a passkey, and someone else can
 
 ### SALT, the unit you count in
 
-SALT has 18 decimals and a one-trillion supply cap, and it settles fees, block rewards, and staking. Amounts
-in the API are integers in the smallest unit, where 10^18 is one SALT, and supply is minted minus burned,
-held under the cap. SALT measures the work the network does; it is not a product to hold. See
-[economics](/chain/economics).
+SALT is used in experimental testnet interfaces. Launch tokenomics, including supply and rewards, remain [to be determined before launch](/chain/economics). Testnet configurations are not launch terms.
 
 ## How to use it
 
@@ -81,7 +78,7 @@ denominated in SALT. If you can hold that sentence in your head, the rest of Alm
 | Finality | probabilistic confirmation; checkpoint finality is specified, not running | [consensus, current status](/chain/consensus#current-status) |
 | Merge parents | one selected parent, many merge parents | [consensus](/chain/consensus) |
 | Citrate Keyring | smart-contract account, passkey, sponsored fees | [Citrate Keyring](/aa/passkeys) |
-| SALT | 18 decimals, 1T cap, settles work | [economics](/chain/economics) |
+| SALT | Launch terms to be determined | [economics](/chain/economics) |
 
 ## Access and canon
 
@@ -90,7 +87,7 @@ behind GhostDAG and finality are academic-tier and live on the linked Citrate Ne
 
 ## Source and verification
 
-The numbers (k = 18, finality depth 100, SALT 18 decimals and 1T cap, chain id 40204) are verified against
+The numbers (k = 18, finality depth 100, chain id 40204) are verified against
 `citrate-chain` at `9d5959e`: `core/consensus/src/types.rs` and `core/api/src/economics_rpc.rs`, surfaced
 through the [consensus](/chain/consensus) and [economics](/chain/economics) pages. Status: Implemented
 (testnet).

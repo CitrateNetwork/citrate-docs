@@ -99,8 +99,8 @@ rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-SALT has 18 decimals and a one-trillion cap. It is the unit fees and rewards are counted in, not a product. For
-the live economic snapshot, blocks height, gas price, staked amount, and treasury, call
+Launch tokenomics remain [to be determined](/chain/economics). Testnet RPC responses are experimental configuration data, not launch terms. For
+the live testnet snapshot, blocks height, gas price, staked amount, and treasury, call
 `citrate_getEconomicState`:
 
 ```bash

@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 The governance surface is four contracts that decide how the network spends its treasury, how it settles a
 disputed compute result, and how it keeps an accountable record of what its agents do. They sit on the
 public ledger, Citrate Network, and any contracted integrator should expect to read and call them.

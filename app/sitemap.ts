@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((d) => d.tier === "public")
     .map((d) => ({
       url: `${SITE_URL}${d.slug}`,
-      lastModified,
+      lastModified: ["/chain/economics", "/contracts/economics", "/operators/rewards", "/start/primer", "/chain/genesis", "/research/gradient-papers"].includes(d.slug) ? new Date("2026-11-04") : lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     }));

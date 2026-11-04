@@ -14,6 +14,9 @@ branch: hup/n7-chain-precompile-followups
 updated: 2026-10-04
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 These are the contracts that register a model on the public ledger, sell access to it, route inference
 to the operators that serve it, and build adapters on top of it. A model is registered once and from
 there it can be listed, gated, adapted, and called. This page is for model owners, inference consumers,

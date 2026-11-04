@@ -82,8 +82,7 @@ Genesis block, built deterministically from the shared genesis path
 | Base fee per gas | 1 Gwei (1e9 wei) | `core/economics/src/genesis.rs` (`base_fee_per_gas`) |
 | Gas limit | 30,000,000 | `core/economics/src/genesis.rs` (`gas_limit`) |
 
-The genesis allocation categories sum to the one trillion SALT supply cap; the allocation structure is
-covered under [network economics](/chain/economics). No private keys or mnemonics appear in any
+Genesis allocations and launch supply remain [to be determined before launch](/chain/economics). No private keys or mnemonics appear in any
 configuration in the repository, and we do not enumerate specific genesis account addresses in public docs.
 
 ## Design rationale

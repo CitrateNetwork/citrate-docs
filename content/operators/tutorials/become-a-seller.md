@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 A walkthrough from a fresh checkout to a live seller on Citrate Market, chain id 40204. You will complete membership verification, build and configure Citrate Node, register as a provider on the marketplace contract,
 let the agent bid and win a job, and walk that job to payment, settled in SALT. It is written for operators
 who run their own hardware. Allow roughly twenty minutes for the local steps; verification and on-chain
