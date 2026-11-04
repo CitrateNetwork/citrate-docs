@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 These are the contracts that let a machine operator sell compute on Citrate Market and let a buyer pay
 for verified work. Six contracts form one settlement loop: a buyer posts a job, an operator runs it,
 the result is verified by tier, and payment settles on the public ledger. This page is for operators,

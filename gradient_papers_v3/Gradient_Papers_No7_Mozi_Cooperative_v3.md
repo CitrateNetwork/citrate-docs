@@ -209,7 +209,7 @@ no external funding.
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| SALT total supply | 1,000,000,000,000 | Paper I §5 |
+| SALT launch supply | TBD before launch | https://docs.citrate.ai/chain/economics |
 | Contribution accounting | deployed | `0xcdd24773…`; `ContributionAccounting.sol` |
 | Adapter attribution | deployed | `0x6e564d22…`; `LoRAFactory.sol` |
 | Treasury governance | deployed | `0x62e268f2…`; `TreasuryGovernor.sol` |

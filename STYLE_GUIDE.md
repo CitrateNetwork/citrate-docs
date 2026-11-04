@@ -121,3 +121,5 @@ Tutorials keep a numbered-step structure and link the relevant sandbox.
 `npm run content-lint` fails the build on: any em-dash, any forbidden word, any banned vocabulary term. It
 runs in CI next to `verify:bundle`. A page is not done until it is lint-clean, carries a status label and a
 source SHA, and does not repeat its title.
+
+Pre-launch status exception (owner direction, 2026-11-04): the phrases “launch tokenomics,” “current proposed tokenomics,” “current tokenomics status,” and “Tokenomics: to be determined before launch” are permitted for the current status notice. Promotional uses remain subject to the vocabulary gate.

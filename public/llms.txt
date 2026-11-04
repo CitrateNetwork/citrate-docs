@@ -33,3 +33,6 @@ The docs state maturity honestly, module by module: what is implemented (pre-aud
 - eth_chainId at https://rpc.citrate.ai returns 0x9d0c (40204).
 - Explorer: https://explorer.citrate.ai
 - Canonical facts: https://citrate.ai/.well-known/citrate.json
+
+## Launch tokenomics status
+Launch tokenomics remain to be determined before launch. Earlier exploratory figures and testnet configurations are not finalized launch terms. Current notice and upcoming announcements: https://docs.citrate.ai/chain/economics . Feedback: support@citrate.ai.

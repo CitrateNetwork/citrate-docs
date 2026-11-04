@@ -203,7 +203,7 @@ structure are not carried forward; the implemented money-path is infrastructure,
 
 ## 7. Relationship to the Gradient Papers Series
 
-Paper I defines SALT tokenomics (1 trillion supply, distribution, staking minimums); the Memetic Money Portal
+Paper I records that launch tokenomics remain TBD before launch; the Memetic Money Portal
 provides the mechanism by which SALT reaches external markets without being sold in a fundraise.
 Paper VII (Mozi Cooperative) provides the economic philosophy of contribution-proportional
 ownership; the implemented money-path is thinner than the NFT-holder model the draft imagined, and
@@ -246,7 +246,7 @@ received no external funding.
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| SALT total supply | 1,000,000,000,000 | Paper I §5 |
+| SALT launch supply | TBD before launch | https://docs.citrate.ai/chain/economics |
 | BFT threshold | 67/100 (2/3) | Paper I; `checkpoint.rs:88` |
 | WrappedSALT (EIP-3009) | deployed | `0xaa918302…`; `WrappedSALT.sol` |
 | MarketMakerAllocation | deployed | `0xa87fae5c…`; `MarketMakerAllocation.sol` |

@@ -60,7 +60,7 @@ export const THREADS: Thread[] = [
 export const SAMPLE_STREAM = {
   question: "What is SALT and how many decimals?",
   chunks: [
-    "**SALT** ", "is Citrate's ", "native token ", "(1B supply, ", "**18 decimals**), ",
+    "**SALT** ", "is Citrate's ", "native token ", "in experimental testnet interfaces. ", "Launch tokenomics remain to be determined. ",
     "on chain ", "**40204**. ", "Gas is ", "typically ", "sponsored ", "via the ", "EIP-2771 relayer.",
   ],
   citations: [{ slug: "/start/what-is-citrate", title: "What Citrate is", tier: "public" as const }],

@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Historical research.** Earlier economic proposals in these working papers are not finalized launch terms. Please read the [current tokenomics status and notice about earlier materials](/chain/economics).
+
+
 The Gradient Papers are the research corpus the Citrate Network grew from, an eleven-part working
 dissertation plus a series index. This page is for researchers, engineers, and reviewers who want the
 reasoning behind the design. It indexes the papers and points each one at the surface in Almanac that

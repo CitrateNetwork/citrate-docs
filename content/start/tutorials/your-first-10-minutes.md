@@ -75,8 +75,7 @@ rpc citrate_getToken | jq
 # { "name": "Citrate", "symbol": "SALT", "decimals": 18, "totalSupply": "0x...", "totalMinted": "0x..." }
 ```
 
-SALT has 18 decimals and a one-trillion cap (`TOTAL_SUPPLY` in `core/economics/src/lib.rs`). It is the
-unit fees and rewards are counted in. Detail: [economics](/chain/economics).
+Testnet token data is experimental configuration, not finalized launch terms. Launch tokenomics remain [to be determined before launch](/chain/economics).
 
 ### Step 4, run a model call on the chain
 

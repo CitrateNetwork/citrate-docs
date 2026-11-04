@@ -14,12 +14,13 @@
 // Usage: node scripts/truth-lint.mjs [--root DIR] [--no-fetch]
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const argv = process.argv.slice(2);
 const argRoot = argv.indexOf("--root");
 const ROOT = argRoot >= 0
   ? path.resolve(argv[argRoot + 1])
-  : path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+  : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const NO_FETCH = argv.includes("--no-fetch");
 
 const FINALITY_RUNNING_DEFAULT = false;
@@ -206,7 +207,7 @@ export async function lint(root = ROOT) {
   return { errors, notes };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const { errors, notes } = await lint(ROOT);
   for (const n of notes) console.log(`[truth-lint] NOTE: ${n}`);
   if (errors.length) {

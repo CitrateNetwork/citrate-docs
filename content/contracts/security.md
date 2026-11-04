@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 The security surface is where the network enforces who may participate and what happens when a participant
 misbehaves. Three contracts carry it: a verification registry that records whether an account passed
 identity review, an attestation registry that records whether a worker is running in a trusted execution

@@ -12,6 +12,9 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
+> **Pre-launch technical reference.** Any token amounts, fees, collateral, rewards, or economic behavior below describe experimental testnet software, not finalized launch terms or promised benefits. [Launch tokenomics remain to be determined](/chain/economics).
+
+
 Citrate is a substrate for AI compute. It is the ground that models run on, not a model itself. You bring
 the data and the weights; Citrate gives them somewhere verifiable to run, on hardware you control, with a
 public record of the work that anyone you authorize can check.

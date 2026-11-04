@@ -33,7 +33,7 @@ Network parameters, verified against the chain README at SHA `9d5959e`:
 | Parameter | Value |
 |---|---|
 | Chain id | 40204 (testnet beta) |
-| Token | SALT, one trillion supply, 18 decimals |
+| Launch network economics | [To be determined before launch](/chain/economics) |
 | Consensus | GhostDAG, k = 18, max-parents 10 |
 | Block production | a single block producer operated by Citrate today; ECVRF-P256-SHA256 (RFC 9381) proofs are checked; stake-gated eligibility is staged and off by default |
 | Finality | probabilistic confirmation, about 2 s per block; checkpoint finality is specified, not running (target design: a 100-member committee, 67 quorum, 50-block interval) |
