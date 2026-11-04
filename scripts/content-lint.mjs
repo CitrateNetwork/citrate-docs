@@ -10,9 +10,10 @@
 // checked everywhere.
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const STRICT = process.argv.includes("--strict");
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const FORBIDDEN = [
   "revolutionary", "revolutionize", "cutting-edge", "bleeding-edge", "state-of-the-art", "disrupt",
@@ -46,6 +47,9 @@ function listFiles() {
 // names of real things (a browser API, a keystore standard, the cryptographic-erasure technique), not the
 // banned senses, so they are blanked before the word checks.
 const ALLOW = [
+  // Owner-approved pre-launch status language; ordinary promotional usage stays prohibited.
+  /\blaunch tokenomics\b/gi, /\bcurrent proposed tokenomics\b/gi,
+  /\bcurrent tokenomics status\b/gi, /\btokenomics: to be determined before launch\b/gi,
   /web crypto api/gi, /web crypto/gi,         // the W3C Web Crypto API
   /web3 secret storage(?: v3)?/gi, /web3 v3 keystore/gi, // the geth/MetaMask keystore standard
   /crypto-shred(?:ding|ded)?/gi,              // cryptographic erasure
@@ -68,7 +72,10 @@ let emErrors = 0, warns = 0;
 const emFiles = [];
 const wordHits = {};
 
-for (const f of listFiles()) {
+const files = listFiles();
+if (!files.length) throw new Error("Content lint found no source files; refusing an empty scan");
+console.log(`[content-lint] scanned ${files.length} source files`);
+for (const f of files) {
   const rel = path.relative(ROOT, f);
   const raw = fs.readFileSync(f, "utf8");
 
