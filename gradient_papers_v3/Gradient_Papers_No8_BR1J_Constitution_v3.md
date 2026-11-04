@@ -150,9 +150,7 @@ without consent violates the code and may trigger governance action.
 **4.2 Founders' note on accountability.** The authors of this Constitution are also founders of the
 network it governs, an inherent tension: those writing the rules benefit from how they are written. We
 acknowledge it directly. The amendment mechanism exists so the community can change any rule the
-founders established, including rules that benefit the founders, and the team allocation (Paper I §5) is
-subject to cliff and vesting specifically so the community has time to judge whether the founding team
-delivers value. If the founders fail, the community should use governance to redirect resources.
+founders established, including rules that benefit the founders, and launch team allocation and vesting terms remain TBD before launch (Paper I §5). If the founders fail, the community should use governance to redirect resources.
 Learning from failure, and holding oneself accountable for it, mirrors the recursive improvement loop of
 Paraconsistent Consensus (Paper II): the DAO, like the network, learns by iterating on its mistakes.
 

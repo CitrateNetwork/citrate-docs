@@ -6,6 +6,9 @@ status: active
 sprint: DOCS-CODEX-S1
 ---
 
+> **Current launch status (2026-11-04): tokenomics TBD before launch.** Historical engineering parameters below are not finalized launch terms. More announcements coming soon: https://docs.citrate.ai/chain/economics. Feedback: support@citrate.ai.
+
+
 # Codex Surface Registry — the single source of truth
 
 > The master checklist of **every surface in the federation** to be documented, with its access **tier**,

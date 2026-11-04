@@ -40,10 +40,10 @@ paraconsistent learning aggregation; and a **Model Context Protocol (MCP)** laye
 OpenAI- and Anthropic-compatible REST endpoints for model discovery, inference, and
 orchestration. This paper documents the implemented components, the consensus engine, the
 virtual machine with tested AI precompiles, dual ECDSA/Ed25519 identity, and SALT
-tokenomics realized in deployed contracts, and distinguishes them from components that
+experimental economic mechanisms in testnet contracts, and distinguishes them from components that
 remain feature-gated or in design. The consensus layer is integrated with the federated
 learning protocol described in companion Paper II, whose Belnap aggregation precompile is
-live. The native token SALT (1 trillion supply) functions as gas, staking collateral, and
+live. The native token SALT (launch tokenomics TBD) functions as gas, staking collateral, and
 governance weight. As of this revision the testnet carries **39 deployed contracts** on
 chain 40204 and the node's core workspace holds **3,517 tests**.
 
@@ -244,33 +244,11 @@ route inference through a standard interface. A full decentralized routing marke
 which hosts set inference prices and consumers select providers by capability, load, and cost,
 remains **[Specified]** and depends on the marketplace contracts.
 
-## 5. SALT Tokenomics
+## 5. SALT Tokenomics: TBD before launch
 
-**[Implemented in contracts; economic policy Specified]** SALT is Citrate's native token,
-fixed supply 1 trillion, functioning as gas, staking collateral, and governance weight. The
-economic policy below is design; the mechanisms enforcing it are deployed contracts on chain
-40204.
+**Launch tokenomics: TBD before launch.** Supply, allocations, vesting, emissions, staking requirements, fees, and rewards are not finalized. More announcements coming soon. See https://docs.citrate.ai/chain/economics. Feedback: support@citrate.ai.
 
-**Table 2. SALT distribution (design).**
-
-| Allocation | Percentage | Amount | Vesting |
-|-----------|-----------:|-------:|---------|
-| Mining rewards | 50% | 500,000,000 | emitted over network lifetime via block rewards |
-| Ecosystem development | 25% | 250,000,000 | grants, partnerships, developer incentives |
-| Treasury | 10% | 100,000,000 | DAO-governed reserve |
-| Team | 15% | 150,000,000 | 4-year vesting, 1-year cliff |
-
-Validators that host registered models and serve verifiable inference earn bonuses beyond
-the base block reward, aligning validation with AI-infrastructure provision. The enforcing
-contracts are live: **market-maker allocation** (`MarketMakerAllocation.sol`,
-`0xa87fae5c…`), **contribution accounting** (`ContributionAccounting.sol`, `0xcdd24773…`,
-Paper VII), **treasury governance** (`TreasuryGovernor.sol`, `0x62e268f2…`, Paper VIII), and
-**tiered Byzantine slashing** (`NematocystSlashing.sol`, `0xfeb23abd…`, Paper IX), which
-implements stake, unstake, slash, an `isSlashable` gate, and a correlated-failure multiplier.
-Validator membership and staking are enforced by `CitrateMemberSBT.sol` (`0xAD826D04…`) and
-`MembershipStakeVault.sol` (`0x04c32967…`). In keeping with Citrate Inc.'s public-communication
-policy, this paper makes no claim of day-one cash earnings from compute; SALT's availability
-on a licensed exchange is pending.
+Earlier distribution proposals are not current launch terms.
 
 ## 6. Security Analysis
 
@@ -362,7 +340,7 @@ Citrate is a BlockDAG network that adds AI-native execution to GhostDAG consensu
 implemented system provides parallel block production with dual (depth + committee-BFT)
 finality, EVM compatibility via REVM, families of AI precompiles for inference, verifiable
 proof checking, deterministic tensor compute and paraconsistent aggregation, dual
-cryptographic identity, an MCP-compatible REST surface, and SALT tokenomics enforced by 39
+cryptographic identity, an MCP-compatible REST surface, and experimental economic mechanisms implemented by 39
 deployed contracts on chain 40204.
 
 The distinguishing contribution is not any single component but their combination: a
@@ -432,7 +410,7 @@ on chain 40204. This work received no external funding.
 | Core test count | 3,517 | `cargo test --workspace` (grep) |
 | Parallel-execution gate | 8-worker ≥ 2× 1-worker | `execution/benches/tps_parallel.rs:10` |
 | TPS figure (target, not benched) | 5,000 sustained / 10,000 ceiling | `README.md:65` |
-| SALT total supply | 1,000,000,000,000 | design |
+| SALT launch supply | TBD before launch | https://docs.citrate.ai/chain/economics |
 
 ---
 *This paper is part of the Gradient Papers series, published by Citrate Inc.*
