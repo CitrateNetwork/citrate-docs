@@ -10,6 +10,7 @@ audited_against_sha: 930594c
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Citrate Keyring extension is a Manifest V3 browser extension that holds a Citrate Keyring account,

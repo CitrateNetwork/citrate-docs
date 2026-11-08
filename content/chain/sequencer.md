@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The sequencer is the path a transaction takes between arriving at a node and landing in a block. It validates each transaction, holds the valid ones in a priority mempool, and assembles candidate blocks for proposers. This page is for developers who submit transactions and operators who want to understand how a block is put together.

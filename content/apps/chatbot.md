@@ -10,6 +10,7 @@ audited_against_sha: e3827c3
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 A gasless chat app that runs inference on Citrate and signs in with a Citrate Keyring account, so you

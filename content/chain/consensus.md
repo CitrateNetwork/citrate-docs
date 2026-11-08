@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Consensus is how Citrate Network turns many blocks into one agreed history. The ledger is a BlockDAG, so a block may name several parents, and the GhostDAG protocol reads that graph and produces a single order that every honest node computes the same way. This page is for developers and operators who want the mental model first and the audited surface after.

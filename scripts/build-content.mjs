@@ -117,6 +117,9 @@ for (const file of files) {
     sourceKind: fm.source_kind || "authored",
     source: fm.source || "codex",
     ...(fm.audited_against_sha ? { syncedSha: fm.audited_against_sha } : {}),
+    // Owner decision 2026-10-27: pages that discuss network economics render the TokenomicsNotice.
+    // test/tokenomics-notice.test.ts requires this flag on every page whose prose mentions those terms.
+    ...(fm.tokenomics_notice === "true" ? { tokenomicsNotice: true } : {}),
     toc: toc(body),
     body,
   };

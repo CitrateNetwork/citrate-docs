@@ -10,6 +10,7 @@ audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Five ideas make the rest of Almanac click. If your intuition comes from a single-chain world, these are the
@@ -60,7 +61,8 @@ guardians. The account is a contract, the key is a passkey, and someone else can
 
 ### SALT, the unit you count in
 
-SALT has 18 decimals and a one-trillion supply cap, and it settles fees, block rewards, and staking. Amounts
+SALT has 18 decimals, and on the current testnet the code caps supply at one trillion; it settles fees, block
+rewards, and staking. The [tokenomics are not yet determined](/start/tokenomics). Amounts
 in the API are integers in the smallest unit, where 10^18 is one SALT, and supply is minted minus burned,
 held under the cap. SALT measures the work the network does; it is not a product to hold. See
 [economics](/chain/economics).

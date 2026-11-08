@@ -10,6 +10,7 @@ audited_against_sha: 2f8da46
 status: Implemented
 created: 2026-07-29T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Citrate SDKs are published and installable today. They run against testnet chain 40204 and are

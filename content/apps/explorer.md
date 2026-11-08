@@ -10,6 +10,7 @@ audited_against_sha: 6faab8a
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 CitrateScan is the public explorer for the Citrate Network. It reads the BlockDAG, transactions,

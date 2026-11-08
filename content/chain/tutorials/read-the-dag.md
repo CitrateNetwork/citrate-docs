@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 A copy-paste walkthrough that lets you see the BlockDAG instead of reading about it. You will read the whole

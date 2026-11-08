@@ -10,6 +10,7 @@ audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 Citrate is a substrate for AI compute. It is the ground that models run on, not a model itself. You bring
@@ -46,7 +47,7 @@ Pick the path that matches why you are here.
    [JavaScript SDK](/sdks/js). Confirm you are pointed at Citrate, then read the DAG and make your first
    model call in [your first 10 minutes](/start/tutorials/your-first-10-minutes).
 2. **You operate hardware.** Read [run a node](/operators/run-a-node) and [sell compute](/operators/sell-compute).
-   A node is how idle GPUs earn SALT on Citrate Market.
+   A node is how idle GPUs take compute jobs on Citrate Market, settled in testnet SALT.
 3. **You run models on your own data.** Read [Citrate Ground](/enterprise/federal) and
    [federated learning](/research/learning), where models train across nodes without the data leaving them.
 4. **You are evaluating the network.** Read the [roadmap](/start/roadmap) for the path to mainnet, then the

@@ -12,6 +12,7 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team; precompile section Larry Klosowski + Claude Opus 5.5
 branch: hup/n7-chain-precompile-followups
 updated: 2026-10-04
+tokenomics_notice: true
 ---
 
 These are the contracts that register a model on the public ledger, sell access to it, route inference

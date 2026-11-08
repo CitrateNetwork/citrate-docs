@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 These are the on-premise economic primitives that settle work on the Citrate Network: a wrapped form of
@@ -22,8 +23,9 @@ developers and integrators building against those contracts on chain id 40204.
 
 SALT is the unit the Citrate Network counts in. It settles the work the network performs; it is not a
 product to hold. The contracts here are the on-chain machinery that records that work and pays it out, and
-nothing on this page treats SALT as an instrument to speculate on. For the base facts about SALT, supply,
-and gas, read [network economics](/chain/economics).
+nothing on this page treats SALT as an instrument to speculate on. The rates and caps below are the values
+in the current testnet contracts; the [tokenomics are not yet determined](/start/tokenomics). For the base
+facts about SALT, supply, and gas, read [network economics](/chain/economics).
 
 Each contract does one job:
 
@@ -91,7 +93,7 @@ error `InvalidFeeAuthorization` reverts a fee transfer whose signature does not 
 `contracts/src/LiquidStakingPool.sol`, `is ReentrancyGuard, Governable`. A shares-based staking pool,
 `name="Staked SALT"`, `symbol="stSALT"`, `decimals=18`. You deposit SALT and receive stSALT shares; rewards
 reported to the pool raise the value each share is worth, so the staked SALT stays usable as a share token
-while it earns. Withdrawals wait out `WITHDRAWAL_DELAY` blocks before they can be claimed.
+while reported rewards accrue to it. Withdrawals wait out `WITHDRAWAL_DELAY` blocks before they can be claimed.
 
 | Function | Access | Purpose |
 |---|---|---|

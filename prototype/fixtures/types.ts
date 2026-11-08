@@ -127,6 +127,8 @@ export interface Doc {
   /** Version selector support. */
   versions?: string[];
   currentVersion?: string;
+  /** Render the network-economics notice at the top of the page (frontmatter `tokenomics_notice: true`). */
+  tokenomicsNotice?: boolean;
 }
 
 /** What the reader gets when a node is locked (visible-locked) — never the body. */

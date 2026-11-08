@@ -9,6 +9,7 @@ audited_against_sha: 603fe92
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 This is the operator's side of the Citrate Inference Gateway: how you deploy it on your own hardware, how

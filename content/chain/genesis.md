@@ -10,6 +10,7 @@ audited_against_sha: e68af83
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 These are the chain identity and genesis parameters you need to point an account or a node at the Citrate
@@ -82,8 +83,9 @@ Genesis block, built deterministically from the shared genesis path
 | Base fee per gas | 1 Gwei (1e9 wei) | `core/economics/src/genesis.rs` (`base_fee_per_gas`) |
 | Gas limit | 30,000,000 | `core/economics/src/genesis.rs` (`gas_limit`) |
 
-The genesis allocation categories sum to the one trillion SALT supply cap; the allocation structure is
-covered under [network economics](/chain/economics). No private keys or mnemonics appear in any
+In the current testnet code, the genesis allocation categories sum to the one trillion SALT supply cap; the
+allocation structure is covered under [network economics](/chain/economics). The mainnet supply and
+distribution are [not yet determined](/start/tokenomics). No private keys or mnemonics appear in any
 configuration in the repository, and we do not enumerate specific genesis account addresses in public docs.
 
 ## Design rationale

@@ -10,6 +10,7 @@ audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 A paymaster sponsors the gas for an operation so a person can transact with no SALT in hand, which is what

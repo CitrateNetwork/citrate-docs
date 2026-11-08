@@ -11,6 +11,7 @@ status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
 nav_order: 1
+tokenomics_notice: true
 ---
 
 Citrate Core is the desktop home for the whole federation. It is one window that holds a Citrate Keyring

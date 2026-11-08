@@ -11,6 +11,7 @@ status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
 nav_order: 2
+tokenomics_notice: true
 ---
 
 This page walks the first run of Citrate Core from the welcome screen to a live node, one step at a time.

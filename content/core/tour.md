@@ -11,6 +11,7 @@ status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
 nav_order: 3
+tokenomics_notice: true
 ---
 
 This is the screen-by-screen tour of Citrate Core. Each surface is a page in the sidebar; the sidebar groups

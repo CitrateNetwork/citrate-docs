@@ -55,7 +55,7 @@ AI-first, supercharge, intelligent (as a product claim).
 | wallet | account, Citrate Keyring (UI may read "Wallet" where users expect it) |
 | mining / miner | validating / node operator |
 | decentralized | distributed, peer-operated, on-premise |
-| tokenomics | network economics, marketplace economics |
+| tokenomics | network economics, marketplace economics (one exception: the owner-mandated status sentence "Tokenomics are not yet determined", see [/start/tokenomics](/start/tokenomics)) |
 | AI-powered, intelligent | describe what it does |
 | DeFi, NFT | (avoid entirely) |
 

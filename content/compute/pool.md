@@ -10,6 +10,7 @@ audited_against_sha: e5b7280
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The compute pool is how several machines act as one provider on Citrate Market. It is two

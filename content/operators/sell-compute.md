@@ -10,11 +10,12 @@ audited_against_sha: 0e63363
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 This is the standing procedure for selling compute on Citrate Market with Citrate Node, end to end, on
-chain id 40204. It is written for operators who run their own hardware and want idle
-GPU hours to earn while the machine is otherwise unsupervised.
+chain id 40204. It is written for operators who run their own hardware and want to put idle
+GPU hours to work while the machine is otherwise unsupervised.
 
 ## What it is
 
@@ -85,7 +86,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" http://127.0.0.1:19600/resume
 
 `pause` stops new bids but lets in-flight jobs finish; use it for maintenance.
 
-### 6. Understand the bidding so your bids win and stay profitable
+### 6. Understand the bidding so your bids win and stay above cost
 
 The bidder skips a job unless it is enabled, inside the schedule window, under the 10-SALT Commitment cap,
 a Commitment-tier job, under 80% capacity, deadline-feasible, and priced off a fresh oracle. It then bids

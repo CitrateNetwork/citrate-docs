@@ -11,6 +11,7 @@ status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
 nav_order: 4
+tokenomics_notice: true
 ---
 
 Citrate Core runs a full Citrate Network node for you, supervised, inside the app. The `Node` surface is
@@ -47,7 +48,7 @@ takes part in producing blocks. Practical requirements:
 | Local ports | the node binds its RPC to `127.0.0.1:8545` and WebSocket to `127.0.0.1:8546`, loopback only |
 | Disk | a data directory under the app's data folder; plan for the ledger to grow over time |
 | Memory | syncing is memory-heavy; budget several gigabytes of headroom while the node catches up |
-| Uptime | the more your node is online, the more consistently it validates and earns |
+| Uptime | the more your node is online, the more consistently it validates and takes work |
 
 The RPC surface is bound to loopback on purpose. It is a local interface for the app, not something exposed
 to the internet. If you ever need to reach it from another machine, put it behind your own reverse proxy
@@ -72,8 +73,8 @@ run. Two things are true by design and worth knowing:
 - Watch the `Node` surface after an update or a restart: the log tail should advance and the peer count
   should be non-zero within a minute or two.
 - Back up your recovery phrase before you rely on the node for a stake. See [keys and safety](/core/safety).
-- The earning side, how a node is paid in SALT for the work it does, is covered under
-  [rewards](/operators/rewards).
+- The earning side, how the current testnet code credits a node in SALT for the work it does, is covered
+  under [rewards](/operators/rewards). The [tokenomics are not yet determined](/start/tokenomics).
 
 ## Running it headless
 

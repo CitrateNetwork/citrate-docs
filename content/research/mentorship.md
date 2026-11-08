@@ -10,6 +10,7 @@ audited_against_sha: 03d7851
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The mentorship protocol is how a weaker node in the Citrate Orchard finds a stronger one to learn from.

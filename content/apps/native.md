@@ -10,6 +10,7 @@ audited_against_sha: bc0e8ba
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Citrate Keyring desktop app is a native desktop application that holds a Citrate Keyring account and,

@@ -9,36 +9,40 @@ audited_against_sha: 9d5959e
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
-This is how an operator earns on the Citrate Network, how reputation tracks the work performed, and how
-misbehavior is penalized. It is for operators who need to reason about what a node is paid, what raises or
+This is how the current testnet code pays an operator on the Citrate Network, how reputation tracks the work
+performed, and how misbehavior is penalized. The figures are proposed values; the
+[tokenomics are not yet determined](/start/tokenomics). It is for operators who need to reason about what a node is paid, what raises or
 lowers its standing, and what the node-agent does on their behalf to keep an honest operator out of a slash.
 SALT settles the work; rewards, reputation, and slashing all point at contribution, not at holding.
 
 ## What it is
 
-The economics live in one crate, `core/economics/`. A node earns SALT for the work it performs: sealing
-blocks, hosting models, and completing compute jobs. The amounts, the reputation score, and any penalties
+The economics live in one crate, `core/economics/`. In the current testnet code, a node is credited SALT for
+the work it performs: sealing blocks, hosting models, and completing compute jobs. The amounts, the reputation score, and any penalties
 are accounted on chain at chain id 40204, and the [node-agent](/compute/node-agent) keeps a local operator
 inside the safe envelope automatically. This page is consistent with [network economics](/chain/economics);
 where that page describes the supply and the reward schedule, this one describes what reaches the operator.
 
 The reward for a sealed block is a base reward plus four bonus pools, each a percentage of that base reward.
 The pools recognize four kinds of contribution, so a node that does more of the work the network values
-earns a larger share. The base reward halves every 2,100,000 blocks, so early seasons are more generous than
-late ones. We describe the base reward as a configurable default rather than a fixed number, because
-governance can move it; what does not move is the halving cadence and the fixed one trillion supply.
+receives a larger share. In the current code the base reward halves every 2,100,000 blocks, so early seasons
+pay more than late ones. We describe the base reward as a configurable default rather than a fixed number,
+because governance can move it. The halving cadence and the one trillion supply cap are constants in the
+current testnet code; they are proposed values and may change before mainnet.
 
 ## How to use it
 
-You read these values to project earnings and to understand why a score moved; you rarely set them.
+You read these values to understand how the testnet credits work and why a score moved; you rarely set them.
 
 1. **Read your standing.** Call `citrate_getReputationScore` for an address's reputation and
    `citrate_getStakedBalance` for its stake over JSON-RPC. Both are documented in the
    [chain RPC reference](/chain/rpc).
-2. **Project a block reward.** Expect the base reward plus your earned share of the four pools, adjusted for
-   where the chain sits in its halving schedule. See [network economics](/chain/economics) for the supply
+2. **Understand the block reward.** On the current testnet, the code computes it as the base reward plus your
+   share of the four pools, adjusted for where the chain sits in its halving schedule. This is not a promise
+   of future rewards. See [network economics](/chain/economics) for the supply
    side.
 3. **Let the node-agent protect you.** The agent's bidder only accepts jobs it can finish on time and within
    a commitment cap, so it does not over-commit into a penalty. You read its alerts; you do not have to
@@ -69,7 +73,8 @@ score across models deployed, inferences served, compute provided, and community
 ### Institutional operators
 
 School and institutional operators run under their own parameters, verified in
-`config/institutional_rewards.toml` and `core/economics/src/institutional.rs`.
+`config/institutional_rewards.toml` and `core/economics/src/institutional.rs`. These are values in the current
+testnet configuration, not a promise of payment.
 
 | Parameter | Value | Source |
 |---|---|---|
@@ -159,7 +164,8 @@ The honest invariant here is that rewards and penalties settle work, not promise
 ## Access and canon
 
 Commercial tier, operator implementation depth. SALT settles the work the network performs; reputation and
-slashing reward contribution and penalize misbehavior, and none of them is a speculative instrument. A node runs on hardware the operator controls. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. No keys appear here: rewards accrue to the operator's account, and the node-agent holds no keys,
+slashing reward contribution and penalize misbehavior, and none of them is a speculative instrument. Testnet
+SALT has no cash value. A node runs on hardware the operator controls. Identity verification through VERI, Citrate's in-house verification, is part of membership; node and consensus code do not check operator identity. No keys appear here: rewards accrue to the operator's account, and the node-agent holds no keys,
 emitting unsigned requests for a separate signing surface to sign.
 
 ## Source and verification

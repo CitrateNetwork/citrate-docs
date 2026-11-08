@@ -11,6 +11,7 @@ status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
 nav_order: 6
+tokenomics_notice: true
 ---
 
 Citrate Core is designed to be operated by an agent as well as a person. This page is for anyone pointing an

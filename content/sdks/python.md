@@ -10,6 +10,7 @@ audited_against_sha: 869694b
 status: Implemented
 created: 2026-06-17T00:00:00Z
 author: Citrate team
+tokenomics_notice: true
 ---
 
 The Python client for Citrate, for data and ML teams who already live in Python. It reads account state,
