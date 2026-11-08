@@ -27,7 +27,7 @@ longer-lived deployments.
 
 ## Test SALT
 
-To get test SALT, go to https://faucet.citrate.ai and enter your wallet address. The faucet
+To get test SALT, go to https://faucet.citrate.ai and enter your account address. The faucet
 sends 10 test SALT per address every 24 hours. Test SALT is only for testing. After the reset,
 request test SALT again from the same faucet.
 
