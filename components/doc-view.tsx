@@ -13,6 +13,8 @@ import { Icon } from "./icons";
 import { findNavBySlug } from "@/lib/nav-util";
 import { cn } from "@/lib/cn";
 import { FreshnessBadge } from "./freshness-badge";
+import { TestnetResetNotice } from "./testnet-reset-notice";
+import { showsTestnetResetNotice } from "@/lib/testnet-reset";
 
 /** The tier-aware document reader — renders every DocResponse state (DESIGN_BRIEF §7, §15). */
 export function DocView({ slug }: { slug: string }) {
@@ -115,6 +117,7 @@ export function DocView({ slug }: { slug: string }) {
   const confidential = doc.tier === "confidential";
   return (
     <Shell>
+      {showsTestnetResetNotice(slug) && <TestnetResetNotice />}
       {confidential && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_oklab,var(--color-amber)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-amber)_8%,transparent)] px-3 py-2 text-xs text-[var(--color-amber)]">
           <Icon name="lock" size={13} /> Confidential · access-logged · acknowledged · served at request time (never in the build).
