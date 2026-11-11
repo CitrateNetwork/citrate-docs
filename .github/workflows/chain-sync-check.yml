@@ -49,6 +49,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: npm
+      # The address pages are rendered from the @citratelabs/chain-config releases installed under
+      # their npm aliases (content/chain/networks.json), so the job needs the lockfile's packages.
+      - name: Install (lockfile, no scripts)
+        run: npm ci --ignore-scripts
       - name: Contract addresses (gen-addresses --check)
         run: node scripts/gen-addresses.mjs --chain .chain-src --check
       - name: Precompile addresses (gen-precompiles --check)
