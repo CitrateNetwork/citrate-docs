@@ -4,11 +4,11 @@
   "license": "Apache-2.0",
   "private": true,
   "description": "Citrate Atlas, the gated, agentic documentation webapp for the Citrate Network federation.",
-  "//": "Post-reroll sync (README.md, Chain-generated pages): npm run docs:addresses -- --chain ../citrate-chain && npm run docs:precompiles -- --chain ../citrate-chain && npm run content",
+  "//": "Post-reroll sync (README.md, Chain-generated pages): npm run docs:addresses -- --sync --chain ../citrate-chain && npm run docs:precompiles -- --chain ../citrate-chain && npm run content",
   "scripts": {
     "content": "node scripts/build-content.mjs",
-    "predev": "node scripts/gen-changelog.mjs && node scripts/build-content.mjs",
-    "prebuild": "node scripts/gen-changelog.mjs && node scripts/build-content.mjs",
+    "predev": "node scripts/gen-changelog.mjs && node scripts/gen-addresses.mjs && node scripts/build-content.mjs",
+    "prebuild": "node scripts/gen-changelog.mjs && node scripts/gen-addresses.mjs && node scripts/build-content.mjs",
     "postbuild": "node scripts/check-no-confidential.mjs && npm run check:bundle-gate && npm run check:auth-mode && npm run check:access-clock && npm run check:mcp-keys",
     "dev": "NEXT_PUBLIC_AUTH_MODE=mock ALLOW_MOCK_AUTH=1 next dev",
     "build": "next build",
@@ -33,6 +33,7 @@
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",
     "ai": "^6.0.193",
+    "citrate-book-r1006": "npm:@citratelabs/chain-config@0.2.0",
     "jose": "^6.2.3",
     "mermaid": "^11.15.0",
     "next": "^16.4.2",

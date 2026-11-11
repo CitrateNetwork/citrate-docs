@@ -1,10 +1,11 @@
 name: chain-sync-check
 
-# Tripwire: the contract-address page and the precompile address page are generated from citrate-chain
-# (contracts/addresses/40204.json, verification/address-code.snapshot.json,
-# core/execution/src/precompiles/mod.rs, core/execution/src/agent_fork.rs). This job checks out the chain at
-# CHAIN_REF and regenerates both pages in memory; it fails when either committed page has drifted from the
-# chain, or when the chain and the docs-owned precompile description map disagree.
+# Tripwire: the contract-address pages are rendered from the books registered in content/chain/networks.json
+# (the @citratelabs/chain-config releases and the chain's archived books), and the precompile address page is
+# generated from citrate-chain (core/execution/src/precompiles/mod.rs, core/execution/src/agent_fork.rs). This
+# job checks out the chain at CHAIN_REF and regenerates the pages in memory; it fails when a committed page has
+# drifted, when a registered book or getCode snapshot differs from the chain's copy (a new genesis on chain
+# main), or when the chain and the docs-owned precompile description map disagree.
 #
 # CHAIN_REF: the workflow_dispatch input, else the repo variable CITRATE_CHAIN_REF, else `main`. After a
 # re-roll, set CITRATE_CHAIN_REF to the genesis commit until it is on chain main. To fix a failure, run the
@@ -48,6 +49,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: npm
+      # The address pages are rendered from the @citratelabs/chain-config releases installed under
+      # their npm aliases (content/chain/networks.json), so the job needs the lockfile's packages.
+      - name: Install (lockfile, no scripts)
+        run: npm ci --ignore-scripts
       - name: Contract addresses (gen-addresses --check)
         run: node scripts/gen-addresses.mjs --chain .chain-src --check
       - name: Precompile addresses (gen-precompiles --check)

@@ -14,6 +14,7 @@
 // Usage: node scripts/truth-lint.mjs [--root DIR] [--no-fetch]
 import fs from "node:fs";
 import path from "node:path";
+import { retiredAddressIndex, staleAddressHits } from "./lib/addresses.mjs";
 
 const argv = process.argv.slice(2);
 const argRoot = argv.indexOf("--root");
@@ -151,6 +152,10 @@ export async function lint(root = ROOT) {
   walk(path.join(root, "gradient_papers_v3"), files, (p) => p.endsWith(".md"));
 
   const { status, deployedAt } = addressStatus(root);
+  // Addresses of retired networks (content/chain/networks.json) that the current book does not carry.
+  // A hand-written page citing one points readers at a dead address; it must cite the current book.
+  const registry = path.join(root, "content", "chain", "networks.json");
+  const { current: currentAddrs, retired } = fs.existsSync(registry) ? retiredAddressIndex(root) : { current: new Set(), retired: new Map() };
 
   for (const f of files) {
     const rel = path.relative(root, f);
@@ -178,6 +183,9 @@ export async function lint(root = ROOT) {
         errors.push(`${rel}: paper cites hand-copied addresses without the stale-address note`);
       }
       continue;
+    }
+    for (const h of staleAddressHits(raw, currentAddrs, retired)) {
+      errors.push(`${rel}:${h.line}: ${h.address} (${h.name}) is an address of the retired network ${h.net}; cite the current book (/chain/addresses)`);
     }
     raw.split("\n").forEach((line, i) => {
       for (const a of line.match(/0x[0-9a-fA-F]{40}/g) || []) {

@@ -105,29 +105,42 @@ Copy `.env.example` → `.env.local`. Key variables (full annotated list in `.en
 optional live knowledge-graph (`MEM_*`) wiring.
 
 ## Chain-generated pages
-Two pages are generated from a `citrate-chain` checkout and committed (Vercel builds without the chain):
+The contract-address pages are rendered at build time (`prebuild` and `predev` run
+`scripts/gen-addresses.mjs`) from the canonical address book, one page per network. The precompile page
+is generated from a `citrate-chain` checkout and committed (Vercel builds without the chain).
 
-| Page | Generator | Chain inputs |
-|------|-----------|--------------|
-| `content/chain/_generated/addresses.md` (`/chain/addresses`) | `npm run docs:addresses` | `contracts/addresses/40204.json`, `verification/address-code.snapshot.json` |
+| Page | Generator | Inputs |
+|------|-----------|--------|
+| `content/chain/_generated/addresses.md` (`/chain/addresses`, the current network) and `addresses-<network>.md` (`/chain/addresses/<network>`, every network) | `npm run docs:addresses` | `content/chain/networks.json`; each network's book from its `@citratelabs/chain-config` npm alias, or a frozen copy of the chain's archived book in `content/chain/address-books/`; the getCode snapshots in `content/chain/address-books/` |
 | `content/chain/_generated/precompiles.md` (`/chain/precompile-addresses`) | `npm run docs:precompiles` | `core/execution/src/precompiles/mod.rs`, `core/execution/src/agent_fork.rs`, the book's `precompiles` block |
+
+`content/chain/networks.json` names every network, the one that is current, where its book comes from,
+the sha256 of the book's bytes and its block-0 hash. The generator refuses a book whose bytes or genesis
+hash differ from the registry and a getCode snapshot taken for another book. The address pages are
+committed too, and a test fails if they differ from what the generator renders. `truth-lint` fails a
+hand-written page that cites an address of a retired network that the current book does not carry.
 
 The only hand-written precompile input is the description map in `scripts/lib/precompile-descriptions.mjs`.
 The generator fails if the chain or the book has a precompile the map lacks, or the other way round.
 Both generators take `--chain <dir>` (default `../citrate-chain`) and `--check` (fail on drift, write
-nothing). The `chain-sync-check` workflow runs both checks against `CitrateNetwork/citrate-chain` at the
+nothing). Under `--check` with a chain checkout, `gen-addresses` also fails when a registered book or
+snapshot differs from the chain's copy, so a new genesis on chain `main` turns it red until this repo
+follows. The `chain-sync-check` workflow runs both checks against `CitrateNetwork/citrate-chain` at the
 repo variable `CITRATE_CHAIN_REF` (default `main`), on every PR and daily.
 
-Post-reroll sync, once the new `40204.json`, its getCode snapshot (chain side:
-`verification/check_address_code.py --probe`) and the genesis commit are in the chain checkout:
+At a new genesis, once chain-config has published the new book (for example `0.3.0` for r1007), the
+chain has archived the old root book, and the new getCode snapshot is on the chain checkout:
 
 ```bash
+npm install --save-exact 'citrate-book-r1007@npm:@citratelabs/chain-config@0.3.0'
+# content/chain/networks.json: add r1007 as "current" (package citrate-book-r1007, its genesisHash and
+# chainPath contracts/addresses/40204.json); set r1006 to "archived" with retiredAt and the chainPath
+# of the chain's archived r1006 root book; point "current" at r1007
 git -C ../citrate-chain fetch origin && git -C ../citrate-chain checkout <genesis-commit-or-main>
-npm run docs:addresses -- --chain ../citrate-chain
+npm run docs:addresses -- --sync --chain ../citrate-chain   # snapshots, archived books, sha256 pins, pages
 npm run docs:precompiles -- --chain ../citrate-chain
-npm run content                                   # rebuild content/_generated/content.ts
-npm run docs:chain-check                          # both --check gates, expect green
-git add content/chain/_generated/addresses.md content/chain/_generated/precompiles.md content/_generated/content.ts
+npm run content                                             # rebuild content/_generated/content.ts
+npm run docs:chain-check                                    # both --check gates, expect green
 ```
 
 ## Links
