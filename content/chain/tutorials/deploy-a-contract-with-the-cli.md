@@ -12,14 +12,14 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-A copy-paste walkthrough of deploying compiled bytecode with the `citrate` command-line tool. You will
+A copy-paste walkthrough of deploying compiled bytecode with the `citrate-cli` command-line tool. You will
 confirm the chain id, point the tool at your endpoint, deploy a contract, then verify the deployment with a
 read-only `eth_` call. The deploy step writes state, so it needs an account with a little SALT; the verify
 step does not.
 
 ## What it is
 
-`citrate` is the command-line tool built from `citrate-chain`. Its contract operations live under the
+`citrate-cli` is the command-line tool built from `citrate-chain`. Its contract operations live under the
 `contract` subcommand, which submits an `eth_sendTransaction` to your endpoint, waits for the receipt, and
 prints the new address. Under the surface it speaks the same JSON-RPC you met in
 [call the Citrate RPC](/chain/tutorials/call-citrate-rpc), so anything the tool does you could also do by
@@ -42,7 +42,7 @@ export PATH="$PWD/target/release:$PATH"
 ### Step 2, initialize the config
 
 ```bash
-citrate init
+citrate-cli init
 ```
 
 The defaults, from `cli/src/config.rs`, are RPC `http://localhost:8545`, chain id 40204, keystore
@@ -68,28 +68,28 @@ printf '%d\n' 0x9d0c   # 40204
 Create a deployer account and note the address it prints:
 
 ```bash
-citrate account create
+citrate-cli account create
 # Enter a keystore password when prompted.
 # Prints: Address: 0x...
 
-citrate account list
+citrate-cli account list
 ```
 
 The deploy transaction spends gas, so the account needs a little SALT. On a network with a faucet, fund the
 address through that network's faucet, then confirm the balance:
 
 ```bash
-citrate account balance 0xYOUR_ADDRESS
+citrate-cli account balance 0xYOUR_ADDRESS
 ```
 
-The faucet is a network service, not a `citrate` subcommand, so its exact address and request shape vary by
+The faucet is a network service, not a `citrate-cli` subcommand, so its exact address and request shape vary by
 deployment; check the endpoint operator's notes. The artifact itself is the `MyToken.bin` hex file from your
 compiler. A file that does not end in `.wasm` is read as hex bytecode; a `.wasm` file is read as raw bytes.
 
 ### Step 5, deploy the contract
 
 ```bash
-citrate contract deploy ./MyToken.bin \
+citrate-cli contract deploy ./MyToken.bin \
   --account 0xYOUR_ADDRESS \
   --value 0
 ```
@@ -110,7 +110,7 @@ Confirm the code actually landed at the address. `contract code` wraps `eth_getC
 needs no account:
 
 ```bash
-citrate contract code "$CONTRACT"
+citrate-cli contract code "$CONTRACT"
 # Contract code retrieved
 # Size: ... bytes
 ```
@@ -124,16 +124,16 @@ curl -s http://localhost:8545 -H 'content-type: application/json' \
 ```
 
 To inspect the deploy transaction itself, fetch its receipt. The tool polls `eth_getTransactionReceipt`
-internally while it waits; you can read the same receipt with `citrate network transaction 0xTX_HASH`.
+internally while it waits; you can read the same receipt with `citrate-cli network transaction 0xTX_HASH`.
 
 ### Step 7, read and call the contract
 
 `contract read` uses `eth_call`, so it costs nothing and needs no account:
 
 ```bash
-citrate contract read "$CONTRACT" "totalSupply()"
+citrate-cli contract read "$CONTRACT" "totalSupply()"
 
-citrate contract read "$CONTRACT" "balanceOf(address)" \
+citrate-cli contract read "$CONTRACT" "balanceOf(address)" \
   --args '["0xYOUR_ADDRESS"]'
 ```
 
@@ -141,7 +141,7 @@ citrate contract read "$CONTRACT" "balanceOf(address)" \
 emitted event topics:
 
 ```bash
-citrate contract call "$CONTRACT" "transfer(address,uint256)" \
+citrate-cli contract call "$CONTRACT" "transfer(address,uint256)" \
   --args '["0x1111111111111111111111111111111111111111", "1000"]' \
   --account 0xYOUR_ADDRESS
 ```
@@ -161,13 +161,13 @@ The commands used above, with their source in `citrate-chain`:
 
 | Command | What it does | Source |
 |---|---|---|
-| `citrate init` | write the default config and keystore directory | `cli/src/config.rs` |
-| `citrate account create` / `list` / `balance` | manage and read deployer accounts | `cli/src/commands/account.rs` |
-| `citrate contract deploy <file> --account --value --args` | submit `eth_sendTransaction`, await receipt, print address | `cli/src/commands/contract.rs` |
-| `citrate contract code <address>` | read code via `eth_getCode` | `cli/src/commands/contract.rs` |
-| `citrate contract read <address> <sig> --args` | read state via `eth_call` | `cli/src/commands/contract.rs` |
-| `citrate contract call <address> <sig> --account --args` | send a state-changing transaction | `cli/src/commands/contract.rs` |
-| `citrate network transaction <hash>` | read a transaction receipt | `cli/src/commands/network.rs` |
+| `citrate-cli init` | write the default config and keystore directory | `cli/src/config.rs` |
+| `citrate-cli account create` / `list` / `balance` | manage and read deployer accounts | `cli/src/commands/account.rs` |
+| `citrate-cli contract deploy <file> --account --value --args` | submit `eth_sendTransaction`, await receipt, print address | `cli/src/commands/contract.rs` |
+| `citrate-cli contract code <address>` | read code via `eth_getCode` | `cli/src/commands/contract.rs` |
+| `citrate-cli contract read <address> <sig> --args` | read state via `eth_call` | `cli/src/commands/contract.rs` |
+| `citrate-cli contract call <address> <sig> --account --args` | send a state-changing transaction | `cli/src/commands/contract.rs` |
+| `citrate-cli network transaction <hash>` | read a transaction receipt | `cli/src/commands/network.rs` |
 
 The global `--rpc <URL>` flag and the `CITRATE_RPC` environment variable override the endpoint for any
 command (`cli/src/main.rs`). Deploy and call both poll `eth_getTransactionReceipt` while they wait
@@ -198,6 +198,6 @@ Commands verified against `citrate-chain` at `9d5959e`. Contract operations are 
 `cli/src/commands/contract.rs`, with the subcommands `deploy`, `call`, `read`, `code`, `verify`, `verify-get`,
 and `verify-list`. Config defaults are in `cli/src/config.rs`, the global `--rpc` flag and the top-level
 subcommands are in `cli/src/main.rs`, account operations are in `cli/src/commands/account.rs`, and the
-transaction lookup is in `cli/src/commands/network.rs`. The faucet is a network service and has no `citrate`
+transaction lookup is in `cli/src/commands/network.rs`. The faucet is a network service and has no `citrate-cli`
 subcommand, so its address and request shape are described generically above. Status: Implemented (testnet
 40204), pre external audit. The CLI ABI encoder is a static-types subset.

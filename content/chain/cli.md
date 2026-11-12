@@ -1,5 +1,5 @@
 ---
-title: The citrate command-line tool
+title: The citrate-cli command-line tool
 codex_slug: /chain/cli
 tier: public
 org_scope: ~
@@ -12,14 +12,14 @@ created: 2026-06-17T00:00:00Z
 author: Citrate team
 ---
 
-The `citrate` command-line tool that ships with `citrate-chain`. It manages accounts, deploys and calls
+The `citrate-cli` command-line tool that ships with `citrate-chain`. It manages accounts, deploys and calls
 models and contracts, queries the network, and submits governance changes, all against a Citrate Node over
 JSON-RPC. This page is for developers and node operators. If you want to read the chain directly instead,
 see the [JSON-RPC reference](/chain/rpc).
 
 ## What it is
 
-One binary, `citrate`, with a handful of subcommands. Every subcommand talks to a Citrate Node through the
+One binary, `citrate-cli`, with a handful of subcommands. Every subcommand talks to a Citrate Node through the
 same JSON-RPC interface documented under [chain RPC](/chain/rpc), so the tool is a convenience over the
 network, not a separate authority. Defaults come from `cli/src/config.rs`: the RPC endpoint is
 `http://localhost:8545`, the chain id is 40204, and the keystore lives under `~/.citrate/keystore`. A global
@@ -42,30 +42,30 @@ The subcommands, each verified against `cli/src/main.rs`:
 
 The testnet faucet is a separate service, not a subcommand. `citrate-faucet` is an HTTP server, configured
 by environment variables, that drips test SALT to an address; you run it or call its endpoint, you do not
-reach it through `citrate`.
+reach it through `citrate-cli`.
 
 ## How to use it
 
 Build the tool from the workspace root, then confirm it points where you expect:
 
 ```bash
-cargo build --release -p citrate-cli   # produces the `citrate` binary
-citrate init                            # writes a starter config
-citrate network status                  # net_version, eth_blockNumber, eth_syncing
+cargo build --release -p citrate-cli   # produces target/release/citrate-cli
+citrate-cli init                        # writes a starter config
+citrate-cli network status              # net_version, eth_blockNumber, eth_syncing
 ```
 
 A typical first session creates an account, checks its balance, and reads a block:
 
 ```bash
-citrate account create
-citrate account balance 0x00000000000000000000000000000000000000a1
-citrate network block latest
+citrate-cli account create
+citrate-cli account balance 0x00000000000000000000000000000000000000a1
+citrate-cli network block latest
 ```
 
 To point at a node other than the local default, pass `--rpc` on any command:
 
 ```bash
-citrate --rpc https://rpc.example.invalid network status
+citrate-cli --rpc https://rpc.example.invalid network status
 ```
 
 To deploy a contract end to end, follow
@@ -139,7 +139,7 @@ The tool fails closed at the points that touch keys and the network:
 - `account export` refuses to print a secret to the terminal unless you pass `--out <PATH>` or
   `--confirm-stdout`; the file it writes is mode `0600` on Unix.
 - A call against an unreachable node surfaces a connection error rather than a partial result. Confirm the
-  endpoint with `citrate network status` or override it with `--rpc`.
+  endpoint with `citrate-cli network status` or override it with `--rpc`.
 - The underlying RPC errors are standard JSON-RPC: `-32601` method not found, `-32602` invalid params,
   `-32600` invalid request.
 
@@ -155,5 +155,5 @@ flag list above is public, the internals analysis is not.
 Verified against `citrate-chain` at `9d5959e`. The subcommand set is read from `cli/src/main.rs`
 (`enum Commands`); defaults from `cli/src/config.rs` (RPC `http://localhost:8545`, chain id 40204); each
 subcommand group from `cli/src/commands/{account,model,contract,network,governance,advanced,wizard}.rs`. The
-faucet is a separate HTTP service in `faucet/`, not a `citrate` subcommand. Status: Implemented (testnet,
+faucet is a separate HTTP service in `faucet/`, not a `citrate-cli` subcommand. Status: Implemented (testnet,
 pre-audit). The ABI encoder is intentionally a static-types-only subset.
