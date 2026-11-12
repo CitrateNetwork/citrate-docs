@@ -13,23 +13,24 @@ book_deployed_at: 2026-10-06T05:43:04Z
 status: Implemented
 created: 2026-09-07T00:00:00Z
 author: Citrate team
-nav_order: 7
+nav_order: 8
 ---
 
-> **Retired network.** r1005 is no longer the live chain (retired 2026-11-10). These addresses are a record. Do not send to them on the live chain: an address with no code accepts a value transfer and strands it. The live addresses are on [Contract addresses](/chain/addresses) (r1006).
+> **Retired network.** r1005 is no longer the live chain (retired 2026-11-10). These addresses are a record. Do not send to them on the live chain: an address with no code accepts a value transfer and strands it. The live addresses are on [Contract addresses](/chain/addresses) (r1007).
 
 These are the contract addresses of network **r1005** on chain 40204 (Citrate Network).
 The page is rendered at build time from a frozen copy of the chain's archived book (`content/chain/address-books/r1005.json`, sha256 `4194dcc1612b5589`), which is the canonical federation address
 book `citrate-chain/contracts/addresses/r1005/40204.json`. The addresses are not copied by hand.
 
-At block 750 (2026-10-06T05:45:23Z), 100 of the 100 application, membership and account-abstraction entries had code on r1005; rows marked **not deployed** had none. The live RPC now serves r1006, so a `cast code` check against it says nothing about these rows.
+At block 750 (2026-10-06T05:45:23Z), 100 of the 100 application, membership and account-abstraction entries had code on r1005; rows marked **not deployed** had none. The live RPC now serves r1007, so a `cast code` check against it says nothing about these rows.
 
-Programs must not read this record. The live book is the current release of `@citratelabs/chain-config`. The RPC endpoint is `https://rpc.citrate.ai` and the
+Programs must not read this record. The live network is r1007; its book ships in `@citratelabs/chain-config@0.3.0`, which is not published yet, and the release on npm today still carries an older network, so until then read `citrate-chain/contracts/addresses/40204.json` directly and check its `genesisHash`. The RPC endpoint is `https://rpc.citrate.ai` and the
 genesis deployer was `0x7DAbC319867fCcA7dE8A20809EfBd39BbF17Acdf`.
 
 ## Networks
 
-- [r1006](/chain/addresses/r1006): current, block 0 `0xa3651a272fe411948cbb4cf7cca4cee44be4248d32ab4376cea7636821c6cdd4`
+- [r1007](/chain/addresses/r1007): current, block 0 `0xcf68634502b4fca1e977ac8dd35aa006bb40c04208d5cd55f1c2b508bba96631`
+- [r1006](/chain/addresses/r1006): retired 2026-11-12, block 0 `0xa3651a272fe411948cbb4cf7cca4cee44be4248d32ab4376cea7636821c6cdd4`
 - [r1005](/chain/addresses/r1005): retired 2026-11-10
 
 ## Core contracts

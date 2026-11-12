@@ -17,6 +17,7 @@ import { createRequire } from "node:module";
 export const REGISTRY = path.join("content", "chain", "networks.json");
 export const OUT_DIR = path.join("content", "chain", "_generated");
 const ADDR = /^0x[0-9a-fA-F]{40}$/;
+const PENDING = /^@citratelabs\/chain-config@\d+\.\d+\.\d+$/;
 
 export const sha256 = (buf) => crypto.createHash("sha256").update(buf).digest("hex");
 
@@ -35,7 +36,10 @@ export function loadRegistry(root) {
     if (!["current", "archived"].includes(n.status)) throw new Error(`${REGISTRY}: ${n.id}: status must be current or archived`);
     if (!n.book || !/^[0-9a-f]{64}$/.test(n.book.sha256 || "")) throw new Error(`${REGISTRY}: ${n.id}: book.sha256 missing`);
     if (!n.book.chainPath) throw new Error(`${REGISTRY}: ${n.id}: book.chainPath missing`);
-    if (n.status === "current" && !n.book.package) throw new Error(`${REGISTRY}: ${n.id}: the current network must come from the published package`);
+    if (n.status === "current" && !n.book.package && !PENDING.test(n.book.packagePending || "")) {
+      throw new Error(`${REGISTRY}: ${n.id}: the current network must come from the published package, or name the pending release in book.packagePending`);
+    }
+    if (n.book.packagePending && !PENDING.test(n.book.packagePending)) throw new Error(`${REGISTRY}: ${n.id}: book.packagePending must be @citratelabs/chain-config@x.y.z`);
   }
   return reg;
 }
@@ -46,13 +50,19 @@ export function resolveBook(net, root) {
   let source;
   if (net.book.package) {
     const req = createRequire(path.join(root, "package.json"));
-    file = req.resolve(`${net.book.package}/${net.book.file || "40204.json"}`);
+    try {
+      file = req.resolve(`${net.book.package}/${net.book.file || "40204.json"}`);
+    } catch {
+      // The books are npm aliases in package.json; a node_modules installed before an alias was
+      // added does not have it. Say so instead of a bare "Cannot find module".
+      throw new Error(`${net.id}: the address book package ${net.book.package} is not installed: run npm ci`);
+    }
     const pkgJson = path.join(path.dirname(file), "..", "package.json");
     const pkg = JSON.parse(fs.readFileSync(pkgJson, "utf8"));
     source = { kind: "npm", package: net.book.package, name: pkg.name, version: pkg.version };
   } else {
     file = path.join(root, net.book.file);
-    source = { kind: "vendored", file: net.book.file };
+    source = { kind: "vendored", file: net.book.file, ...(net.book.packagePending ? { pending: net.book.packagePending } : {}) };
   }
   const bytes = fs.readFileSync(file);
   const digest = sha256(bytes);
@@ -119,7 +129,9 @@ function table(book, section, codeless, archivedId) {
 const sourceLine = (source, sha) =>
   source.kind === "npm"
     ? `the published package \`${source.name}@${source.version}\` (book sha256 \`${sha.slice(0, 16)}\`)`
-    : `a frozen copy of the chain's archived book (\`${source.file}\`, sha256 \`${sha.slice(0, 16)}\`)`;
+    : source.pending
+      ? `a pinned copy of the chain's root book (\`${source.file}\`, sha256 \`${sha.slice(0, 16)}\`; it gives way to \`${source.pending}\` once that is published)`
+      : `a frozen copy of the chain's archived book (\`${source.file}\`, sha256 \`${sha.slice(0, 16)}\`)`;
 
 export function renderNetworkPage({ registry, net, book, snapshot, source, sha256: sha, slug }) {
   const archived = net.status === "archived";
@@ -168,7 +180,7 @@ ${archived ? `${probe} The live RPC now serves ${current.id}, so a \`cast code\`
 value, so check the status column before you send anything. Re-check any address yourself with
 \`cast code <address> --rpc-url ${book.rpcUrl}\`.`}
 
-${archived ? `Programs must not read this record. The live book is the current release of \`@citratelabs/chain-config\`.` : `Programs should read the book, not this page: \`npm install @citratelabs/chain-config\` and import
+${archived ? (current.book.packagePending ? `Programs must not read this record. The live network is ${current.id}; its book ships in \`${current.book.packagePending}\`, which is not published yet, and the release on npm today still carries an older network, so until then read \`citrate-chain/${current.book.chainPath}\` directly and check its \`genesisHash\`.` : `Programs must not read this record. The live book is the current release of \`@citratelabs/chain-config\`.`) : source.pending ? `Programs should read the book, not this page. \`${source.pending}\` carries this network's book but is not published yet; the release on npm today is still the previous network's, so until then read \`citrate-chain/${net.book.chainPath}\` directly and check its \`genesisHash\`.` : `Programs should read the book, not this page: \`npm install @citratelabs/chain-config\` and import
 \`contracts\`, \`aaStack\`, \`memberSBT\` and \`genesisHash\` from it.`} The RPC endpoint is \`${book.rpcUrl}\` and the
 genesis deployer ${archived ? "was" : "is"} \`${book.deployer}\`.
 

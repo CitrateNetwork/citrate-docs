@@ -114,7 +114,10 @@ is generated from a `citrate-chain` checkout and committed (Vercel builds withou
 | `content/chain/_generated/addresses.md` (`/chain/addresses`, the current network) and `addresses-<network>.md` (`/chain/addresses/<network>`, every network) | `npm run docs:addresses` | `content/chain/networks.json`; each network's book from its `@citratelabs/chain-config` npm alias, or a frozen copy of the chain's archived book in `content/chain/address-books/`; the getCode snapshots in `content/chain/address-books/` |
 | `content/chain/_generated/precompiles.md` (`/chain/precompile-addresses`) | `npm run docs:precompiles` | `core/execution/src/precompiles/mod.rs`, `core/execution/src/agent_fork.rs`, the book's `precompiles` block |
 
-`content/chain/networks.json` names every network, the one that is current, where its book comes from,
+`content/chain/networks.json` names every network, the one that is current, where its book comes from
+(an npm alias, or, for the current network while its chain-config release is not yet published, a pinned
+copy of the chain's root book with `book.packagePending` naming that release; the page then tells readers
+the npm package is still the previous network's),
 the sha256 of the book's bytes and its block-0 hash. The generator refuses a book whose bytes or genesis
 hash differ from the registry and a getCode snapshot taken for another book. The address pages are
 committed too, and a test fails if they differ from what the generator renders. `truth-lint` fails a

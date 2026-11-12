@@ -1,22 +1,38 @@
 {
   "//": "Networks on chain 40204 whose address books docs.citrate.ai publishes. Edit this file at a new genesis (see README.md, Chain-generated pages); the sha256 pins are written by npm run docs:addresses -- --sync --chain <citrate-chain>.",
   "chainId": 40204,
-  "current": "r1006",
+  "current": "r1007",
   "networks": [
     {
-      "id": "r1006",
+      "id": "r1007",
       "status": "current",
+      "genesisHash": "0xcf68634502b4fca1e977ac8dd35aa006bb40c04208d5cd55f1c2b508bba96631",
+      "book": {
+        "file": "content/chain/address-books/r1007.json",
+        "sha256": "1b908e56f99ef14e0fe260d27e0ce837200ee4bb0884771b5a007ec66a93ca96",
+        "chainPath": "contracts/addresses/40204.json",
+        "packagePending": "@citratelabs/chain-config@0.3.0"
+      },
+      "codeSnapshot": {
+        "file": "content/chain/address-books/r1007.code-snapshot.json",
+        "chainPath": "verification/address-code.snapshot.json"
+      }
+    },
+    {
+      "id": "r1006",
+      "status": "archived",
       "genesisHash": "0xa3651a272fe411948cbb4cf7cca4cee44be4248d32ab4376cea7636821c6cdd4",
       "book": {
         "package": "citrate-book-r1006",
         "file": "40204.json",
         "sha256": "2f92030ac33ec59469e654bb797324209f5407311de6c514d81cdaaee27dfed8",
-        "chainPath": "contracts/addresses/40204.json"
+        "chainPath": "contracts/addresses/r1006/40204.root.json"
       },
       "codeSnapshot": {
         "file": "content/chain/address-books/r1006.code-snapshot.json",
-        "chainPath": "verification/address-code.snapshot.json"
-      }
+        "chainPath": "contracts/addresses/r1006/address-code.snapshot.json"
+      },
+      "retiredAt": "2026-11-12"
     },
     {
       "id": "r1005",
