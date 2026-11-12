@@ -6,7 +6,7 @@ org_scope: ~
 source_kind: transcluded
 source: citrate-chain/core/execution/src/precompiles/mod.rs
 surfaces: [CHAIN-precompile-addresses]
-audited_against_sha: 312a0c2f
+audited_against_sha: 02aa3f89
 status: Implemented
 created: 2026-10-04T00:00:00Z
 author: Citrate team
@@ -14,7 +14,7 @@ nav_order: 6
 ---
 
 This is the canonical list of Citrate precompile addresses on chain 40204 (Citrate Network). It is generated
-from the chain source at commit `312a0c2f`: the bridged sets `PURE_PRECOMPILE_ADDRESSES` and
+from the chain source at commit `02aa3f89`: the bridged sets `PURE_PRECOMPILE_ADDRESSES` and
 `AGENT_FORK_PRECOMPILE_ADDRESSES` in `core/execution/src/precompiles/mod.rs`, the release pin in
 `core/execution/src/agent_fork.rs`, and the `precompiles` block of the address book
 (`contracts/addresses/40204.json`). Only the one-line descriptions are written by hand. Precompiles are fixed
