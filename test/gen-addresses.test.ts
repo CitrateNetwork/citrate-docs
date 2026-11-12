@@ -196,6 +196,32 @@ describe("page rendering", () => {
     expect(md).not.toMatch(/retired network/i);
   });
 
+  it("while the current network's release is pending, a retired page points at the chain's root book, not the npm release", () => {
+    const pendingReg = {
+      ...registry,
+      networks: [
+        { id: "rB", status: "current", book: { file: "f", sha256: "a".repeat(64), chainPath: "contracts/addresses/40204.json", packagePending: "@citratelabs/chain-config@9.9.9" } },
+        registry.networks[1],
+      ],
+    };
+    const md = renderNetworkPage({ registry: pendingReg, net: pendingReg.networks[1], book: BOOK, snapshot, source: { kind: "vendored", file: "f" }, sha256: "b".repeat(64), slug: "/chain/addresses/rA" });
+    expect(md).not.toMatch(/The live book is the current release/);
+    expect(md).toContain("@citratelabs/chain-config@9.9.9");
+    expect(md).toMatch(/not published yet/);
+    expect(md).toContain("citrate-chain/contracts/addresses/40204.json");
+  });
+
+  it("the committed retired pages do not send readers to the npm release while it still carries an older network", () => {
+    const reg: Registry = loadRegistry(ROOT);
+    const cur = reg.networks.find((n) => n.status === "current")! as Net & { book: { packagePending?: string } };
+    if (!cur.book.packagePending) return;
+    for (const n of reg.networks.filter((x) => x.status === "archived")) {
+      const page = fs.readFileSync(path.join(ROOT, `content/chain/_generated/addresses-${n.id}.md`), "utf8");
+      expect(page, n.id).not.toMatch(/The live book is the current release/);
+      expect(page, n.id).toContain(`citrate-chain/${cur.book.chainPath}`);
+    }
+  });
+
   it("marks a retired network as retired and warns against sending to it", () => {
     const md = renderNetworkPage({ registry, net: registry.networks[1], book: BOOK, snapshot, source: { kind: "vendored", file: "f" }, sha256: "b".repeat(64), slug: "/chain/addresses/rA" });
     expect(md).toMatch(/retired network/i);
