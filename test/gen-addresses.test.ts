@@ -98,6 +98,15 @@ describe("network registry", () => {
     expect(r6.book.chainPath).toBe("contracts/addresses/r1006/40204.root.json");
   });
 
+  it("r1007 is rendered from the published @citratelabs/chain-config 0.3.0, not a pinned copy", () => {
+    const r7 = reg.networks.find((n) => n.id === "r1007")! as Net & { book: { packagePending?: string } };
+    expect(r7.book.package).toBe("citrate-book-r1007");
+    expect(r7.book.packagePending).toBeUndefined();
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+    expect({ ...pkg.dependencies, ...pkg.devDependencies }["citrate-book-r1007"]).toBe("npm:@citratelabs/chain-config@0.3.0");
+    expect(fs.existsSync(path.join(ROOT, "content/chain/address-books/r1007.json"))).toBe(false);
+  });
+
   it("refuses a current network that has neither a package nor a pending release", () => {
     const root = tmpRoot();
     fs.mkdirSync(path.join(root, "content/chain"), { recursive: true });
