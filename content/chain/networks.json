@@ -8,10 +8,10 @@
       "status": "current",
       "genesisHash": "0xcf68634502b4fca1e977ac8dd35aa006bb40c04208d5cd55f1c2b508bba96631",
       "book": {
-        "file": "content/chain/address-books/r1007.json",
+        "package": "citrate-book-r1007",
+        "file": "40204.json",
         "sha256": "1b908e56f99ef14e0fe260d27e0ce837200ee4bb0884771b5a007ec66a93ca96",
-        "chainPath": "contracts/addresses/40204.json",
-        "packagePending": "@citratelabs/chain-config@0.3.0"
+        "chainPath": "contracts/addresses/40204.json"
       },
       "codeSnapshot": {
         "file": "content/chain/address-books/r1007.code-snapshot.json",

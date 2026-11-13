@@ -17,14 +17,15 @@ nav_order: 6
 ---
 
 These are the contract addresses of network **r1007** on chain 40204 (Citrate Network).
-The page is rendered at build time from a pinned copy of the chain's root book (`content/chain/address-books/r1007.json`, sha256 `1b908e56f99ef14e`; it gives way to `@citratelabs/chain-config@0.3.0` once that is published), which is the canonical federation address
+The page is rendered at build time from the published package `@citratelabs/chain-config@0.3.0` (book sha256 `1b908e56f99ef14e`), which is the canonical federation address
 book `citrate-chain/contracts/addresses/40204.json`. The addresses are not copied by hand. The book is for the chain whose block 0 is `0xcf68634502b4fca1e977ac8dd35aa006bb40c04208d5cd55f1c2b508bba96631`. Before you trust any address, check that `eth_getBlockByNumber("0x0", false)` on your RPC returns that hash.
 
 At block 3801 (2026-11-12T16:10:30Z), 106 of the 106 application, membership and account-abstraction entries had code on r1007; rows marked **not deployed** had none. A call to an address with no code returns empty data, and a value transfer to one succeeds and strands the
 value, so check the status column before you send anything. Re-check any address yourself with
 `cast code <address> --rpc-url https://rpc.citrate.ai`.
 
-Programs should read the book, not this page. `@citratelabs/chain-config@0.3.0` carries this network's book but is not published yet; the release on npm today is still the previous network's, so until then read `citrate-chain/contracts/addresses/40204.json` directly and check its `genesisHash`. The RPC endpoint is `https://rpc.citrate.ai` and the
+Programs should read the book, not this page: `npm install @citratelabs/chain-config` and import
+`contracts`, `aaStack`, `memberSBT` and `genesisHash` from it. The RPC endpoint is `https://rpc.citrate.ai` and the
 genesis deployer is `0xE92A75519e9915E57d88E4e207e4EbcB3664cf23`.
 
 ## Networks
