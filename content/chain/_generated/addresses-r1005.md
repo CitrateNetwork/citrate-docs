@@ -24,7 +24,7 @@ book `citrate-chain/contracts/addresses/r1005/40204.json`. The addresses are not
 
 At block 750 (2026-10-06T05:45:23Z), 100 of the 100 application, membership and account-abstraction entries had code on r1005; rows marked **not deployed** had none. The live RPC now serves r1007, so a `cast code` check against it says nothing about these rows.
 
-Programs must not read this record. The live network is r1007; its book ships in `@citratelabs/chain-config@0.3.0`, which is not published yet, and the release on npm today still carries an older network, so until then read `citrate-chain/contracts/addresses/40204.json` directly and check its `genesisHash`. The RPC endpoint is `https://rpc.citrate.ai` and the
+Programs must not read this record. The live book is the current release of `@citratelabs/chain-config`. The RPC endpoint is `https://rpc.citrate.ai` and the
 genesis deployer was `0x7DAbC319867fCcA7dE8A20809EfBd39BbF17Acdf`.
 
 ## Networks
